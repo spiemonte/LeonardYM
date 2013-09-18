@@ -1,0 +1,25 @@
+nc = 2
+
+CC       = gcc
+CPP      = g++
+OPTIMIZE = -O3 -ffast-math -pipe -march=corei7 -fomit-frame-pointer -fopenmp -I/share/Applic.PALMA/boost/boost-trunk
+INC	= -I./extra_libs/Eigen
+CFLAGS   = $(OPTIMIZE) $(INC)
+CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/MatrixBaseExtension.h\"" -DADJOINT -DNUMCOLORS=$(nc) -DMULTITHREADING
+
+include Makefile.obj.mk
+
+all: leonardQCD
+	$(CPP) $(CPPFLAGS) $(OBJECTS) -o leonardQCD.exe /share/Applic.PALMA/boost/boost-trunk/stage/lib/libboost_program_options.a
+	@echo "Compiled with NUMCOLORS: " $(nc)
+
+leonardQCD: $(OBJECTS)
+	@echo "done!"
+
+include Makefile.list.mk
+
+clean:
+	-rm ./*.exe
+	-rm ./*.o
+
+

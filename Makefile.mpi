@@ -1,0 +1,25 @@
+nc = 2
+
+CC       = mpigcc.mpich2
+CPP      = mpicxx.mpich2
+OPTIMIZE = -O2 -pipe -march=native -fopenmp #-Wall -Wextra
+INC	= -I./extra_libs/Eigen -I./extra_libs/
+CFLAGS   = $(OPTIMIZE) $(INC)
+CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/MatrixBaseExtension.h\"" -DADJOINT -DENABLE_MPI -DNUMCOLORS=$(nc) -DMULTITHREADING
+
+include Makefile.obj.mk
+
+all: leonardQCD
+	$(CPP) $(CPPFLAGS) $(OBJECTS) -o leonardQCD.exe /usr/lib64/libboost_program_options-mt.a
+	@echo "Compiled with NUMCOLORS: " $(nc)
+
+leonardQCD: $(OBJECTS)
+	@echo "done!"
+
+include Makefile.list.mk
+
+clean:
+	-rm ./*.o
+	-rm ./*.exe
+
+

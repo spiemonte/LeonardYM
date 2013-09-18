@@ -1,0 +1,25 @@
+nc = 2
+
+CC       = mpixlc_r
+CPP      = mpixlcxx_r
+OPTIMIZE = -O2 -qarch=qp -qtune=qp -qsmp=omp -qthreaded -qmaxmem=-1
+INC	     = -I./extra_libs/Eigen -I/bgsys/local/boost/1.47.0/
+CFLAGS   = $(OPTIMIZE) $(INC)
+CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/MatrixBaseExtension.h\"" -DADJOINT -DENABLE_MPI -DNUMCOLORS=$(nc) -DMULTITHREADING 
+
+include Makefile.obj.mk
+
+all: leonardQCD
+	$(CPP) $(CPPFLAGS) $(OBJECTS) -o leonardQCD.exe -L/bgsys/local/boost/1.47.0/lib/ -lboost_program_options-mt-d-1_47
+	@echo "Compiled with NUMCOLORS: " $(nc)
+
+leonardQCD: $(OBJECTS)
+	@echo "done!"
+
+include Makefile.list.mk
+
+clean:
+	-rm ./*.o
+	-rm ./*.exe
+
+
