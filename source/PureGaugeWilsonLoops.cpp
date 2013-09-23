@@ -355,7 +355,7 @@ void PureGaugeWilsonLoops::execute(environment_t& environment) {
 					}
 
 					for (int slice = 0; slice < LT::glob_y/sliceSize; ++slice) {
-						twoLinkOperator[slice].normalize();
+						twoLinkOperator[slice].normalize(numberSubSweeps);
 					}
 					
 					TwoLinkOperator twoLinkResults = twoLinkOperator[0];
@@ -385,6 +385,9 @@ void PureGaugeWilsonLoops::execute(environment_t& environment) {
 		output->pop("polyakov_loop_correlator");
 	}
 
+	delete[] wilsonLineT;
+	delete pureGaugeUpdater;
+	delete action;
 
 
 
