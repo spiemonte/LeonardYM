@@ -106,6 +106,9 @@ SixthOrderLeapFrog.o: ./source/SixthOrderLeapFrog.h ./source/SixthOrderLeapFrog.
 OmelyanLeapFrog.o: ./source/OmelyanLeapFrog.h ./source/OmelyanLeapFrog.cpp
 	$(CPP) $(CPPFLAGS) -c -o OmelyanLeapFrog.o ./source/OmelyanLeapFrog.cpp
 
+FourthOmelyanLeapFrog.o: ./source/FourthOmelyanLeapFrog.h ./source/FourthOmelyanLeapFrog.cpp
+	$(CPP) $(CPPFLAGS) -c -o FourthOmelyanLeapFrog.o ./source/FourthOmelyanLeapFrog.cpp
+
 Energy.o: ./source/Energy.h ./source/Energy.cpp
 	$(CPP) $(CPPFLAGS) -c -o Energy.o ./source/Energy.cpp
 

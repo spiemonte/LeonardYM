@@ -3,7 +3,7 @@ OBJECTS  = ReducedStencil.o StandardStencil.o ExtendedStencil.o LocalLayout.o \
 			BiConjugateGradient.o DeflationInverter.o ConjugateGradient.o MultishiftSolver.o ChronologicalMultishiftSolver.o MMMRMultishiftSolver.o MEMultishiftSolver.o \
 			DiracOperator.o BasicDiracWilsonOperator.o BasicSquareDiracWilsonOperator.o DiracWilsonOperator.o SquareDiracWilsonOperator.o BlockDiracWilsonOperator.o BlockDiracOperator.o ComplementBlockDiracWilsonOperator.o SquareComplementBlockDiracWilsonOperator.o SquareBlockDiracWilsonOperator.o ImprovedDiracWilsonOperator.o SquareImprovedDiracWilsonOperator.o \
 			Polynomial.o RationalApproximation.o \
-			Integrate.o LeapFrog.o FourthOrderLeapFrog.o SixthOrderLeapFrog.o OmelyanLeapFrog.o Energy.o Force.o \
+			Integrate.o LeapFrog.o FourthOrderLeapFrog.o SixthOrderLeapFrog.o OmelyanLeapFrog.o FourthOmelyanLeapFrog.o Energy.o Force.o \
 			HMCUpdater.o FermionHMCUpdater.o \
 			BandAction.o BandTwoFlavorUpdater.o \
 			FermionicAction.o \

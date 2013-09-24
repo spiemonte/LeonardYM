@@ -10,6 +10,7 @@
 #include "FourthOrderLeapFrog.h"
 #include "SixthOrderLeapFrog.h"
 #include "OmelyanLeapFrog.h"
+#include "FourthOmelyanLeapFrog.h"
 #ifdef EIGEN
 #include <Eigen/Eigenvalues>
 #endif
@@ -75,7 +76,9 @@ Integrate* Integrate::getInstance(const std::string & nameAlgorithm) {
 		return new SixthOrderLeapFrog();
 	} else if (nameAlgorithm == "omelyan") {
 		return new OmelyanLeapFrog();
-	}else {
+	} else if (nameAlgorithm == "fourth_omelyan") {
+		return new FourthOmelyanLeapFrog();
+	} else {
 		if (isOutputProcess()) std::cout << "Unknown integrate algorithm name " << nameAlgorithm << std::endl;
 		exit(1);
 	}

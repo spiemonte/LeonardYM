@@ -39,10 +39,10 @@ public:
 		std::map<std::string, std::string>::iterator it = output_streams.find(name);
 		if (it != output_streams.end()) {
 			output_status[name] = false;
-			it->second.append("{");
+			it->second.append("\t{");
 		}
 		else {
-			output_streams[name] = "{{";
+			output_streams[name] = "{\n\t{";
 			output_status[name] = false;
 		}
 	}
@@ -51,7 +51,7 @@ public:
 		std::map<std::string, std::string>::iterator it = output_streams.find(name);
 		if (it != output_streams.end()) {
 			output_status[name] = true;
-			it->second.append("},");
+			it->second.append("},\n");
 		}
 		else {
 			std::cout << "Fatal error in output" << std::endl;
