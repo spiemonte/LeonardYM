@@ -18,7 +18,7 @@
 #include <iomanip>
 
 //#define DEBUGFORCE
-//#define REVERSIBILITY_CHECK
+#define REVERSIBILITY_CHECK
 
 #ifdef DEBUGFORCE
 #include "TestForce.h"
