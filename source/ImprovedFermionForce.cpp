@@ -27,15 +27,15 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 				GaugeVector tmp;
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*linkMatrixLeft*Y[site][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*Y[site][beta];
 				}
-				force += tensor(X[site][alpha],tmp);
+				force += tensor(X[site][alpha],linkMatrixLeft*tmp);
 				//Now we exchange x with y
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*linkMatrixLeft*X[site][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*X[site][beta];
 				}
-				force += tensor(Y[site][alpha],tmp);
+				force += tensor(Y[site][alpha],linkMatrixLeft*tmp);
 			}
 		}
 	}
@@ -48,15 +48,15 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 				GaugeVector tmp;
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*linkMatrixLeft*Y[site][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*Y[site][beta];
 				}
-				force += tensor(linkMatrixRigth*X[site][alpha],tmp);
+				force += tensor(linkMatrixRigth*X[site][alpha],linkMatrixLeft*tmp);
 				//Now we exchange x with y
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*linkMatrixLeft*X[site][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*X[site][beta];
 				}
-				force += tensor(linkMatrixRigth*Y[site][alpha],tmp);
+				force += tensor(linkMatrixRigth*Y[site][alpha],linkMatrixLeft*tmp);
 			}
 		}
 	}
@@ -70,15 +70,15 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 				GaugeVector tmp;
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*linkMatrixLeft*Y[site][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*Y[site][beta];
 				}
-				force -= tensor(linkMatrixRigth*X[site][alpha],tmp);
+				force -= tensor(linkMatrixRigth*X[site][alpha],linkMatrixLeft*tmp);
 				//Now we exchange x with y
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*linkMatrixLeft*X[site][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*X[site][beta];
 				}
-				force -= tensor(linkMatrixRigth*Y[site][alpha],tmp);
+				force -= tensor(linkMatrixRigth*Y[site][alpha],linkMatrixLeft*tmp);
 			}
 		}
 	}
@@ -90,15 +90,15 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 				GaugeVector tmp;
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*linkMatrixLeft*Y[site][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*Y[site][beta];
 				}
-				force -= tensor(X[site][alpha],tmp);
+				force -= tensor(X[site][alpha],linkMatrixLeft*tmp);
 				//Now we exchange x with y
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*linkMatrixLeft*X[site][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*X[site][beta];
 				}
-				force -= tensor(Y[site][alpha],tmp);
+				force -= tensor(Y[site][alpha],linkMatrixLeft*tmp);
 			}
 		}
 	}
@@ -111,15 +111,15 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 				GaugeVector tmp;
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*linkMatrixLeft*Y[Vector::sup(site,nu)][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*Y[Vector::sup(site,nu)][beta];
 				}
-				force += tensor(lattice[site][nu]*X[Vector::sup(site,nu)][alpha],tmp);
+				force += tensor(lattice[site][nu]*X[Vector::sup(site,nu)][alpha],linkMatrixLeft*tmp);
 				//Now we exchange x with y
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*linkMatrixLeft*X[Vector::sup(site,nu)][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*X[Vector::sup(site,nu)][beta];
 				}
-				force += tensor(lattice[site][nu]*Y[Vector::sup(site,nu)][alpha],tmp);
+				force += tensor(lattice[site][nu]*Y[Vector::sup(site,nu)][alpha],linkMatrixLeft*tmp);
 			}
 		}
 	}
@@ -132,15 +132,15 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 				GaugeVector tmp;
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*linkMatrixLeft*Y[Vector::sup(site,nu)][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*Y[Vector::sup(site,nu)][beta];
 				}
-				force += tensor(linkMatrixRigth*X[Vector::sup(site,nu)][alpha],tmp);
+				force += tensor(linkMatrixRigth*X[Vector::sup(site,nu)][alpha],linkMatrixLeft*tmp);
 				//Now we exchange x with y
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*linkMatrixLeft*X[Vector::sup(site,nu)][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*X[Vector::sup(site,nu)][beta];
 				}
-				force += tensor(linkMatrixRigth*Y[Vector::sup(site,nu)][alpha],tmp);
+				force += tensor(linkMatrixRigth*Y[Vector::sup(site,nu)][alpha],linkMatrixLeft*tmp);
 			}
 		}
 	}
@@ -154,15 +154,15 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 				GaugeVector tmp;
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*linkMatrixLeft*Y[Vector::sdn(site,nu)][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*Y[Vector::sdn(site,nu)][beta];
 				}
-				force -= tensor(linkMatrixRigth*X[Vector::sdn(site,nu)][alpha],tmp);
+				force -= tensor(linkMatrixRigth*X[Vector::sdn(site,nu)][alpha],linkMatrixLeft*tmp);
 				//Now we exchange x with y
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*linkMatrixLeft*X[Vector::sdn(site,nu)][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*X[Vector::sdn(site,nu)][beta];
 				}
-				force -= tensor(linkMatrixRigth*Y[Vector::sdn(site,nu)][alpha],tmp);
+				force -= tensor(linkMatrixRigth*Y[Vector::sdn(site,nu)][alpha],linkMatrixLeft*tmp);
 			}
 		}
 	}
@@ -175,15 +175,15 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 				GaugeVector tmp;
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*linkMatrixLeft*Y[Vector::sdn(site,nu)][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*Y[Vector::sdn(site,nu)][beta];
 				}
-				force -= tensor(linkMatrixRigth*X[Vector::sdn(site,nu)][alpha],tmp);
+				force -= tensor(linkMatrixRigth*X[Vector::sdn(site,nu)][alpha],linkMatrixLeft*tmp);
 				//Now we exchange x with y
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*linkMatrixLeft*X[Vector::sdn(site,nu)][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*X[Vector::sdn(site,nu)][beta];
 				}
-				force -= tensor(linkMatrixRigth*Y[Vector::sdn(site,nu)][alpha],tmp);
+				force -= tensor(linkMatrixRigth*Y[Vector::sdn(site,nu)][alpha],linkMatrixLeft*tmp);
 			}
 		}
 	}
@@ -196,15 +196,15 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 				GaugeVector tmp;
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += (I*kappa*csw)*Sigma::g5sigma(mu,nu,alpha,beta)*Y[Vector::sup(site,mu)][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*Y[Vector::sup(site,mu)][beta];
 				}
-				force += tensor(linkMatrixRigth*X[Vector::sup(site,mu)][alpha],tmp);
+				force += tensor(linkMatrixRigth*X[Vector::sup(site,mu)][alpha],(I*kappa*csw)*tmp);
 				//Now we exchange x with y
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += (I*kappa*csw)*Sigma::g5sigma(mu,nu,alpha,beta)*X[Vector::sup(site,mu)][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*X[Vector::sup(site,mu)][beta];
 				}
-				force += tensor(linkMatrixRigth*Y[Vector::sup(site,mu)][alpha],tmp);
+				force += tensor(linkMatrixRigth*Y[Vector::sup(site,mu)][alpha],(I*kappa*csw)*tmp);
 			}
 		}
 	}
@@ -216,15 +216,15 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 				GaugeVector tmp;
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*linkMatrixLeft*Y[Vector::sup(site,mu)][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*Y[Vector::sup(site,mu)][beta];
 				}
-				force += tensor(lattice[site][mu]*X[Vector::sup(site,mu)][alpha],tmp);
+				force += tensor(lattice[site][mu]*X[Vector::sup(site,mu)][alpha],linkMatrixLeft*tmp);
 				//Now we exchange x with y
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*linkMatrixLeft*X[Vector::sup(site,mu)][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*X[Vector::sup(site,mu)][beta];
 				}
-				force += tensor(lattice[site][mu]*Y[Vector::sup(site,mu)][alpha],tmp);
+				force += tensor(lattice[site][mu]*Y[Vector::sup(site,mu)][alpha],linkMatrixLeft*tmp);
 			}
 		}
 	}
@@ -237,15 +237,15 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 				GaugeVector tmp;
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*linkMatrixLeft*Y[Vector::sup(site,mu)][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*Y[Vector::sup(site,mu)][beta];
 				}
-				force -= tensor(lattice[site][mu]*X[Vector::sup(site,mu)][alpha],tmp);
+				force -= tensor(lattice[site][mu]*X[Vector::sup(site,mu)][alpha],linkMatrixLeft*tmp);
 				//Now we exchange x with y
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*linkMatrixLeft*X[Vector::sup(site,mu)][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*X[Vector::sup(site,mu)][beta];
 				}
-				force -= tensor(lattice[site][mu]*Y[Vector::sup(site,mu)][alpha],tmp);
+				force -= tensor(lattice[site][mu]*Y[Vector::sup(site,mu)][alpha],linkMatrixLeft*tmp);
 			}
 		}
 	}
@@ -257,15 +257,15 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 				GaugeVector tmp;
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += (I*kappa*csw)*Sigma::g5sigma(mu,nu,alpha,beta)*Y[Vector::sup(site,mu)][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*Y[Vector::sup(site,mu)][beta];
 				}
-				force -= tensor(linkMatrixRigth*X[Vector::sup(site,mu)][alpha],tmp);
+				force -= tensor(linkMatrixRigth*X[Vector::sup(site,mu)][alpha],(I*kappa*csw)*tmp);
 				//Now we exchange x with y
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += (I*kappa*csw)*Sigma::g5sigma(mu,nu,alpha,beta)*X[Vector::sup(site,mu)][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*X[Vector::sup(site,mu)][beta];
 				}
-				force -= tensor(linkMatrixRigth*Y[Vector::sup(site,mu)][alpha],tmp);
+				force -= tensor(linkMatrixRigth*Y[Vector::sup(site,mu)][alpha],(I*kappa*csw)*tmp);
 			}
 		}
 	}
@@ -279,15 +279,15 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 				GaugeVector tmp;
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*linkMatrixLeft*Y[Vector::sup(Vector::sup(site,mu),nu)][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*Y[Vector::sup(Vector::sup(site,mu),nu)][beta];
 				}
-				force += tensor(linkMatrixRigth*X[Vector::sup(Vector::sup(site,mu),nu)][alpha],tmp);
+				force += tensor(linkMatrixRigth*X[Vector::sup(Vector::sup(site,mu),nu)][alpha],linkMatrixLeft*tmp);
 				//Now we exchange x with y
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*linkMatrixLeft*X[Vector::sup(Vector::sup(site,mu),nu)][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*X[Vector::sup(Vector::sup(site,mu),nu)][beta];
 				}
-				force += tensor(linkMatrixRigth*Y[Vector::sup(Vector::sup(site,mu),nu)][alpha],tmp);
+				force += tensor(linkMatrixRigth*Y[Vector::sup(Vector::sup(site,mu),nu)][alpha],linkMatrixLeft*tmp);
 			}
 		}
 	}
@@ -300,15 +300,15 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 				GaugeVector tmp;
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*linkMatrixLeft*Y[Vector::sup(Vector::sup(site,mu),nu)][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*Y[Vector::sup(Vector::sup(site,mu),nu)][beta];
 				}
-				force += tensor(linkMatrixRigth*X[Vector::sup(Vector::sup(site,mu),nu)][alpha],tmp);
+				force += tensor(linkMatrixRigth*X[Vector::sup(Vector::sup(site,mu),nu)][alpha],linkMatrixLeft*tmp);
 				//Now we exchange x with y
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*linkMatrixLeft*X[Vector::sup(Vector::sup(site,mu),nu)][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*X[Vector::sup(Vector::sup(site,mu),nu)][beta];
 				}
-				force += tensor(linkMatrixRigth*Y[Vector::sup(Vector::sup(site,mu),nu)][alpha],tmp);
+				force += tensor(linkMatrixRigth*Y[Vector::sup(Vector::sup(site,mu),nu)][alpha],linkMatrixLeft*tmp);
 			}
 		}
 	}
@@ -322,15 +322,15 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 				GaugeVector tmp;
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*linkMatrixLeft*Y[Vector::sdn(Vector::sup(site,mu),nu)][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*Y[Vector::sdn(Vector::sup(site,mu),nu)][beta];
 				}
-				force -= tensor(linkMatrixRigth*X[Vector::sdn(Vector::sup(site,mu),nu)][alpha],tmp);
+				force -= tensor(linkMatrixRigth*X[Vector::sdn(Vector::sup(site,mu),nu)][alpha],linkMatrixLeft*tmp);
 				//Now we exchange x with y
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*linkMatrixLeft*X[Vector::sdn(Vector::sup(site,mu),nu)][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*X[Vector::sdn(Vector::sup(site,mu),nu)][beta];
 				}
-				force -= tensor(linkMatrixRigth*Y[Vector::sdn(Vector::sup(site,mu),nu)][alpha],tmp);
+				force -= tensor(linkMatrixRigth*Y[Vector::sdn(Vector::sup(site,mu),nu)][alpha],linkMatrixLeft*tmp);
 			}
 		}
 	}
@@ -343,15 +343,15 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 				GaugeVector tmp;
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*linkMatrixLeft*Y[Vector::sdn(Vector::sup(site,mu),nu)][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*Y[Vector::sdn(Vector::sup(site,mu),nu)][beta];
 				}
-				force -= tensor(linkMatrixRigth*X[Vector::sdn(Vector::sup(site,mu),nu)][alpha],tmp);
+				force -= tensor(linkMatrixRigth*X[Vector::sdn(Vector::sup(site,mu),nu)][alpha],linkMatrixLeft*tmp);
 				//Now we exchange x with y
 				set_to_zero(tmp);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*linkMatrixLeft*X[Vector::sdn(Vector::sup(site,mu),nu)][beta];
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) tmp += Sigma::g5sigma(mu,nu,alpha,beta)*X[Vector::sdn(Vector::sup(site,mu),nu)][beta];
 				}
-				force -= tensor(linkMatrixRigth*Y[Vector::sdn(Vector::sup(site,mu),nu)][alpha],tmp);
+				force -= tensor(linkMatrixRigth*Y[Vector::sdn(Vector::sup(site,mu),nu)][alpha],linkMatrixLeft*tmp);
 			}
 		}
 	}

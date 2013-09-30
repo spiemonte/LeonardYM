@@ -243,10 +243,10 @@ void ImprovedDiracWilsonOperator::multiply(reduced_dirac_vector_t & output, cons
 #endif
 
 			for (int n = 0; n < diracVectorLength; ++n) {
-				output[site][0][n] += kappa*csw*clover[0][n];
-				output[site][1][n] += kappa*csw*clover[1][n];
-				output[site][2][n] -= kappa*csw*clover[2][n];
-				output[site][3][n] -= kappa*csw*clover[3][n];
+				output[site][0][n] += (kappa*csw)*clover[0][n];
+				output[site][1][n] += (kappa*csw)*clover[1][n];
+				output[site][2][n] += (kappa*csw)*clover[2][n];
+				output[site][3][n] += (kappa*csw)*clover[3][n];
 			}
 		}
 		if (!gamma5) {
@@ -589,10 +589,10 @@ void ImprovedDiracWilsonOperator::multiplyAdd(reduced_dirac_vector_t & output, c
 #endif
 
 			for (int n = 0; n < diracVectorLength; ++n) {
-				output[site][0][n] += kappa*csw*clover[0][n];
-				output[site][1][n] += kappa*csw*clover[1][n];
-				output[site][2][n] -= kappa*csw*clover[2][n];
-				output[site][3][n] -= kappa*csw*clover[3][n];
+				output[site][0][n] += (kappa*csw)*clover[0][n];
+				output[site][1][n] += (kappa*csw)*clover[1][n];
+				output[site][2][n] += (kappa*csw)*clover[2][n];
+				output[site][3][n] += (kappa*csw)*clover[3][n];
 			}
 		}
 		if (!gamma5) {
