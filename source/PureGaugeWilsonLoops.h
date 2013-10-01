@@ -9,6 +9,9 @@
 #define PUREGAUGEWILSONLOOPS_H_
 
 #include "LatticeSweep.h"
+#include "GaugeAction.h"
+#include "PureGaugeUpdater.h"
+#include "PureGaugeOverrelaxation.h"
 
 namespace Update {
 
@@ -56,15 +59,23 @@ private:
 	int T;
 };
 
-class PureGaugeWilsonLoops: public Update::LatticeSweep {
+class PureGaugeWilsonLoops : public Update::LatticeSweep {
 public:
 	PureGaugeWilsonLoops();
+	PureGaugeWilsonLoops(const PureGaugeWilsonLoops& toCopy);
 	~PureGaugeWilsonLoops();
 
 	virtual void execute(environment_t& environment);
+
+protected:
+	void updateSlices(environment_t& environment, GaugeAction* action, int sliceSize);
+
 private:
 	std::vector<SpatialWilsonLoop>* wilsonLoops;
 	real_t* results;
+
+	PureGaugeUpdater* pureGaugeUpdater;
+	PureGaugeOverrelaxation* pureGaugeOverrelaxation;
 };
 
 } /* namespace Update */

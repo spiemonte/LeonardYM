@@ -87,48 +87,7 @@ void PureGaugeOverrelaxation::execute(environment_t& environment) {
 #ifdef MULTITHREADING
 				if (checkerboard->getColor(site,mu) == color) {
 #endif
-#if NUMCOLORS > 2
-					//take the staple
-					GaugeGroup staple = gaugeAction->staple(environment.gaugeLinkConfiguration, site, mu);
-					GaugeGroup Q, R;
-					qr(Q,R,staple);//Compute the QR decomposition
-					//Now set the det(Q) to 1:
-					std::complex<real_t> determinant = conj(det(Q));
-					// by multiply the first row with the complex conjugate of det:
-					for (unsigned int i = 0; i < numberColors; ++i) {
-						Q(0,i) *= determinant;
-					}
-					GaugeGroup trial = htrans(Q)*htrans(environment.gaugeLinkConfiguration[site][mu])*htrans(Q);
-					real_t delta = gaugeAction->deltaAction(environment.gaugeLinkConfiguration, trial, staple, site, mu);
-					//Do the accept/reject metropolis
-					if (delta < 0.) {
-						++acceptance;
-						environment.gaugeLinkConfiguration[site][mu] = trial;
-					}
-#ifndef MULTITHREADING
-					else if (randomUniform() < exp(-delta)) {
-#endif
-#ifdef MULTITHREADING
-					else if ((*randomUniform[omp_get_thread_num()])() < exp(-delta)) {
-#endif
-						++acceptance;
-						environment.gaugeLinkConfiguration[site][mu] = trial;
-					}
-					++nsteps;
-#endif
-#if NUMCOLORS == 2
-					//take the staple
-					GaugeGroup staple = gaugeAction->staple(environment.gaugeLinkConfiguration, site, mu);
-					real_t detStaple = abs(det(staple));
-					//U_new = S^\dag U^\dag S^\dag
-					environment.gaugeLinkConfiguration[site][mu] = (htrans(staple)*htrans(environment.gaugeLinkConfiguration[site][mu])*htrans(staple));
-					//normalize the determinant
-					for (unsigned int v = 0; v < 2; ++v) {
-						for (unsigned int u = 0; u < 2; ++u) {
-							environment.gaugeLinkConfiguration[site][mu].at(v,u) /= detStaple;
-						}
-					}
-#endif
+					this->updateLink(environment.gaugeLinkConfiguration,site,mu,gaugeAction);
 #ifdef MULTITHREADING
 				}
 #endif
@@ -141,6 +100,51 @@ void PureGaugeOverrelaxation::execute(environment_t& environment) {
 	environment.synchronize();
 	delete gaugeAction;
 
+}
+
+void PureGaugeOverrelaxation::updateLink(extended_gauge_lattice_t& lattice, int site, int mu, GaugeAction* gaugeAction) {
+#if NUMCOLORS > 2
+	//take the staple
+	GaugeGroup staple = gaugeAction->staple(lattice, site, mu);
+	GaugeGroup Q, R;
+	qr(Q,R,staple);//Compute the QR decomposition
+	//Now set the det(Q) to 1:
+	std::complex<real_t> determinant = conj(det(Q));
+	// by multiply the first row with the complex conjugate of det:
+	for (unsigned int i = 0; i < numberColors; ++i) {
+		Q(0,i) *= determinant;
+	}
+	GaugeGroup trial = htrans(Q)*htrans(lattice[site][mu])*htrans(Q);
+	real_t delta = gaugeAction->deltaAction(lattice, trial, staple, site, mu);
+	//Do the accept/reject metropolis
+	if (delta < 0.) {
+		++acceptance;
+		lattice[site][mu] = trial;
+	}
+#ifndef MULTITHREADING
+	else if (randomUniform() < exp(-delta)) {
+#endif
+#ifdef MULTITHREADING
+	else if ((*randomUniform[omp_get_thread_num()])() < exp(-delta)) {
+#endif
+		++acceptance;
+		lattice[site][mu] = trial;
+	}
+	++nsteps;
+#endif
+#if NUMCOLORS == 2
+	//take the staple
+	GaugeGroup staple = gaugeAction->staple(lattice, site, mu);
+	real_t detStaple = abs(det(staple));
+	//U_new = S^\dag U^\dag S^\dag
+	lattice[site][mu] = (htrans(staple)*htrans(lattice[site][mu])*htrans(staple));
+	//normalize the determinant
+	for (unsigned int v = 0; v < 2; ++v) {
+		for (unsigned int u = 0; u < 2; ++u) {
+			lattice[site][mu].at(v,u) /= detStaple;
+		}
+	}
+#endif
 }
 
 } /* namespace Update */

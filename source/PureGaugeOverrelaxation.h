@@ -26,6 +26,8 @@ public:
 	 */
 	void execute(environment_t& environment);
 
+	void updateLink(extended_gauge_lattice_t& lattice, int site, int mu, GaugeAction* action);
+
 private:
 #if NUMCOLORS > 2
 	unsigned long int acceptance;
