@@ -278,7 +278,7 @@ void PureGaugeWilsonLoops::updateSlices(environment_t& environment, GaugeAction*
 	}
 #endif
 
-	//Overrelaxation
+	/*//Overrelaxation
 	for (int i = 0; i < 2; ++i) {
 #ifdef MULTITHREADING
 		for (unsigned int color = 0; color < checkerboard->getNumberLoops(); ++color) {
@@ -306,7 +306,7 @@ void PureGaugeWilsonLoops::updateSlices(environment_t& environment, GaugeAction*
 #ifdef MULTITHREADING
 		}
 #endif
-	}
+	}*/
 }
 
 } /* namespace Update */

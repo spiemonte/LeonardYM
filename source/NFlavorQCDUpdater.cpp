@@ -15,6 +15,7 @@
 #include "GaugeAction.h"
 #include "Integrate.h"
 #include "ToString.h"
+#include "GlobalOutput.h"
 #include <iomanip>
 
 //#define DEBUGFORCE
@@ -241,8 +242,31 @@ void NFlavorQCDUpdater::execute(environment_t& environment) {
 
 	//Global Metropolis Step
 	bool metropolis = this->metropolis(oldMomentaEnergy + oldLatticeEnergy + oldPseudoFermionEnergy, newMomentaEnergy + newLatticeEnergy + newPseudoFermionEnergy);
+
 	if (metropolis) {
 		environment = environmentNew;
+		if (environment.measurement && isOutputProcess()) {
+			GlobalOutput* output = GlobalOutput::getInstance();
+
+			output->push("hmc_history");
+
+			output->write("hmc_history", (oldMomentaEnergy + oldLatticeEnergy + oldPseudoFermionEnergy) - (newMomentaEnergy + newLatticeEnergy + newPseudoFermionEnergy));
+			output->write("hmc_history", 1);
+
+			output->pop("hmc_history");
+		}
+	}
+	else {
+		if (environment.measurement && isOutputProcess()) {
+			GlobalOutput* output = GlobalOutput::getInstance();
+
+			output->push("hmc_history");
+
+			output->write("hmc_history", (oldMomentaEnergy + oldLatticeEnergy + oldPseudoFermionEnergy) - (newMomentaEnergy + newLatticeEnergy + newPseudoFermionEnergy));
+			output->write("hmc_history", 0);
+
+			output->pop("hmc_history");
+		}
 	}
 
 	delete integrate;

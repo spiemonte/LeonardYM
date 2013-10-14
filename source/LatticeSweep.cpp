@@ -26,6 +26,7 @@
 #include "PureGaugeWilsonLoops.h"
 #include "TestCommunication.h"
 #include "GluinoGlue.h"
+#include "WilsonLoop.h"
 
 namespace Update {
 
@@ -72,6 +73,8 @@ LatticeSweep* LatticeSweep::getInstance(const std::string& name) {
 		return new BandTwoFlavorUpdater();
 	} else if (name == "PureGaugeWilsonLoops") {
 		return new PureGaugeWilsonLoops();
+	} else if (name == "WilsonLoop") {
+		return new WilsonLoop();
 	} else if (name == "TestCommunication") {
 		return new TestCommunication();
 	}

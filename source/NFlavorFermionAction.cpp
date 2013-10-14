@@ -58,7 +58,7 @@ NFlavorFermionAction::~NFlavorFermionAction() {
 
 GaugeGroup NFlavorFermionAction::force(const environment_t& env, int site, int mu) const {
 	GaugeGroup force;
-	force.zeros();
+	set_to_zero(force);
 	std::vector<RationalApproximation>::const_iterator i;
 	std::vector< std::vector<extended_dirac_vector_t> >::const_iterator X = Xs.begin();
 	std::vector< std::vector<extended_dirac_vector_t> >::const_iterator Y = Ys.begin();
@@ -112,6 +112,38 @@ void NFlavorFermionAction::updateForce(extended_gauge_lattice_t& forceLattice, c
 			forceLattice[site][mu] = this->force(env, site, mu);
 		}
 	}
+
+/*#pragma omp parallel for
+	for (int site = 0; site < forceLattice.localsize; ++site) {
+		for (unsigned int mu = 0; mu < 4; ++mu) {
+			set_to_zero(forceLattice[site][mu]);
+		}
+	}
+
+	std::vector< std::vector<extended_dirac_vector_t> >::const_iterator X = Xs.begin();
+	std::vector< std::vector<extended_dirac_vector_t> >::const_iterator Y = Ys.begin();
+	for (i = rationalApproximations.begin(); i != rationalApproximations.end(); ++i) {
+		//The vector of the weights (alphas)
+		std::vector< real_t > weights = i->getAlphas();
+		//the pointer to the single weight
+		std::vector< real_t >::const_iterator weight;
+		//Take the list of the solutions for the single fermion action
+		std::vector<extended_dirac_vector_t>::const_iterator x = X->begin();
+		std::vector<extended_dirac_vector_t>::const_iterator y = Y->begin();
+		for (weight = weights.begin(); weight != weights.end(); ++weight) {
+			//Minus sign on the fermion force!
+#pragma omp parallel for
+			for (int site = 0; site < forceLattice.localsize; ++site) {
+				for (unsigned int mu = 0; mu < 4; ++mu) {
+					forceLattice[site][mu] -= (*weight)*fermionForce->force(env, fermionForce->derivative(env.getFermionLattice(), *x, *y, site, mu), site, mu);
+				}
+			}
+			++x;
+			++y;
+		}
+		++X;
+		++Y;
+	}*/
 
 	forceLattice.updateHalo();//TODO is needed?
 }

@@ -2,7 +2,7 @@ nc = 2
 
 CC       = gcc
 CPP      = g++
-OPTIMIZE = -O3 -march=native -Wall -Wextra -pipe -fopenmp
+OPTIMIZE = -O2 -march=native -Wall -Wextra -pipe -fopenmp 
 INC	= -I./extra_libs/Eigen -I./extra_libs/
 CFLAGS   = $(OPTIMIZE) $(INC)
 CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/MatrixBaseExtension.h\"" -DNUMCOLORS=$(nc) -DMULTITHREADING -DADJOINT

@@ -33,6 +33,10 @@ typedef Lattice::Lattice<Update::FermionicGroup[6], Lattice::MpiLayout<Lattice::
 typedef Lattice::Lattice<Update::FermionicGroup[6], Lattice::MpiLayout<Lattice::StandardStencil> > standard_field_strength_lattice_t;
 typedef Lattice::Lattice<Update::FermionicGroup[6], Lattice::MpiLayout<Lattice::ReducedStencil> > reduced_field_strength_lattice_t;
 
+typedef Lattice::Lattice<Update::GaugeGroup, Lattice::MpiLayout<Lattice::ExtendedStencil> > extended_matrix_lattice_t;
+typedef Lattice::Lattice<Update::GaugeGroup, Lattice::MpiLayout<Lattice::StandardStencil> > standard_matrix_lattice_t;
+typedef Lattice::Lattice<Update::GaugeGroup, Lattice::MpiLayout<Lattice::ReducedStencil> > reduced_matrix_lattice_t;
+
 #endif
 #ifndef ENABLE_MPI
 #include "./MPILattice/LocalLayout.h"
@@ -52,6 +56,10 @@ typedef Lattice::Lattice<Update::GaugeVector[4], Lattice::LocalLayout > reduced_
 typedef Lattice::Lattice<Update::FermionicGroup[6], Lattice::LocalLayout > extended_field_strength_lattice_t;
 typedef Lattice::Lattice<Update::FermionicGroup[6], Lattice::LocalLayout > standard_field_strength_lattice_t;
 typedef Lattice::Lattice<Update::FermionicGroup[6], Lattice::LocalLayout > reduced_field_strength_lattice_t;
+
+typedef Lattice::Lattice<Update::GaugeGroup, Lattice::LocalLayout > extended_matrix_lattice_t;
+typedef Lattice::Lattice<Update::GaugeGroup, Lattice::LocalLayout > standard_matrix_lattice_t;
+typedef Lattice::Lattice<Update::GaugeGroup, Lattice::LocalLayout > reduced_matrix_lattice_t;
 
 #endif
 

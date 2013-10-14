@@ -18,7 +18,7 @@ namespace Update {
 
 MesonCorrelator::MesonCorrelator() : diracOperator(0), biConjugateGradient(0) { }
 
-MesonCorrelator::MesonCorrelator(const MesonCorrelator& toCopy) : LatticeSweep(toCopy), diracOperator(0), biConjugateGradient(0) { }
+MesonCorrelator::MesonCorrelator(const MesonCorrelator& toCopy) : LatticeSweep(toCopy), StochasticEstimator(toCopy), diracOperator(0), biConjugateGradient(0) { }
 
 MesonCorrelator::~MesonCorrelator() {
 	if (diracOperator) delete diracOperator;
@@ -195,6 +195,8 @@ void MesonCorrelator::execute(environment_t& environment) {
 	
 	for (int t = 0; t < Layout::glob_t; ++t) {
 		reduceAllSum(pionOperatorZero[t]);
+		reduceAllSum(pionOperatorMomentaAsymmetry1[t]);
+		reduceAllSum(pionOperatorMomentaAsymmetry2[t]);
 		for (int m = 0; m < Layout::glob_t; ++m) {
 			reduceAllSum(pionOperatorMomenta[m][t]);
 		}

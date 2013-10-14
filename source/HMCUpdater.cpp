@@ -108,30 +108,30 @@ bool HMCUpdater::metropolis(long_real_t energyOld, long_real_t energyNew) {
 
 bool HMCUpdater::metropolis(long_real_t value) {
 	int decision = 0;
-        if (isOutputProcess()) {
-                ++counter;
-                std::cout << "Metropolis distribution: min(1," << value << ") ";
-                if (value > 1.) {
-                        ++acceptance;
-                        decision = 1;
-                }
-                else if (randomUniform() < value) {
-                        ++acceptance;
-                        decision = 1;
-                }
-                else decision = 0;
-        }
+	if (isOutputProcess()) {
+		++counter;
+		std::cout << "Metropolis distribution: min(1," << value << ") ";
+		if (value > 1.) {
+			++acceptance;
+			decision = 1;
+		}
+		else if (randomUniform() < value) {
+			++acceptance;
+			decision = 1;
+		}
+		else decision = 0;
+	}
 #ifdef ENABLE_MPI
-        MPI_Bcast(&decision, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&decision, 1, MPI_INT, 0, MPI_COMM_WORLD);
 #endif
-        if (decision == 0) {
-                if (isOutputProcess()) std::cout << " - rejected!" << std::endl;
-                return false;
-        }
-        else {
-                if (isOutputProcess()) std::cout << " - accepted!" << std::endl;
-                return true;
-        }
+	if (decision == 0) {
+		if (isOutputProcess()) std::cout << " - rejected!" << std::endl;
+		return false;
+	}
+	else {
+		if (isOutputProcess()) std::cout << " - accepted!" << std::endl;
+		return true;
+	}
 }
 
 long_real_t HMCUpdater::momentaEnergy(const extended_gauge_lattice_t& momenta) const {
