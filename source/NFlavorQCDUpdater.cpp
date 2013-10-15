@@ -250,7 +250,7 @@ void NFlavorQCDUpdater::execute(environment_t& environment) {
 
 			output->push("hmc_history");
 
-			output->write("hmc_history", (oldMomentaEnergy + oldLatticeEnergy + oldPseudoFermionEnergy) - (newMomentaEnergy + newLatticeEnergy + newPseudoFermionEnergy));
+			output->write("hmc_history", - (oldMomentaEnergy + oldLatticeEnergy + oldPseudoFermionEnergy) + (newMomentaEnergy + newLatticeEnergy + newPseudoFermionEnergy));
 			output->write("hmc_history", 1);
 
 			output->pop("hmc_history");
@@ -262,7 +262,7 @@ void NFlavorQCDUpdater::execute(environment_t& environment) {
 
 			output->push("hmc_history");
 
-			output->write("hmc_history", (oldMomentaEnergy + oldLatticeEnergy + oldPseudoFermionEnergy) - (newMomentaEnergy + newLatticeEnergy + newPseudoFermionEnergy));
+			output->write("hmc_history", - (oldMomentaEnergy + oldLatticeEnergy + oldPseudoFermionEnergy) + (newMomentaEnergy + newLatticeEnergy + newPseudoFermionEnergy));
 			output->write("hmc_history", 0);
 
 			output->pop("hmc_history");
