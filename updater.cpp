@@ -141,6 +141,7 @@ int main(int ac, char* av[]) {
 	    ("level_stout_smearing_meson", po::value<unsigned int>(), "The number of levels for stout smearing in measuring meson masses")
 		("level_stout_smearing_glueball", po::value<unsigned int>(), "The number of levels for stout smearing in measuring glueball masses")
 		("level_stout_smearing_gluinoglue", po::value<unsigned int>(), "The number of levels for stout smearing in measuring gluinoglue masses")
+		("level_stout_smearing_wilson_loop", po::value<unsigned int>(), "The number of levels for stout smearing in measuring the wilson loop")
 	    ("rho_stout_smearing", po::value<double>(), "The rho parameter for stout smearing in measuring masses")
 	    ("calculate_disconnected_contributions", po::value<bool>(), "Should the program calculate disconnected contributions?")
 	    ("number_multiplication_test_speed", po::value<unsigned int>(), "How many multiplications should I use in the tests?")

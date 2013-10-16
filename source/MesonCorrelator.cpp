@@ -43,6 +43,7 @@ void MesonCorrelator::execute(environment_t& environment) {
 		StoutSmearing stoutSmearing;
 		stoutSmearing.spatialSmearing(environment.gaugeLinkConfiguration, smearedConfiguration, numberLevelSmearing, smearingRho);
 		ConvertLattice<extended_fermion_lattice_t,extended_gauge_lattice_t>::convert(lattice, smearedConfiguration);//TODO
+		switchAntiperiodicBc(lattice);
 	} catch (NotFoundOption& ex) {
 		lattice =  environment.getFermionLattice();
 		if (isOutputProcess()) std::cout << "MesonCorrelator::No smearing options found, proceeding without!" << std::endl;

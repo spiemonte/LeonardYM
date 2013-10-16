@@ -1,5 +1,6 @@
 #include "WilsonLoop.h"
 #include "GlobalOutput.h"
+#include "StoutSmearing.h"
 
 namespace Update {
 
@@ -10,6 +11,16 @@ WilsonLoop::~WilsonLoop() { }
 void WilsonLoop::execute(environment_t& environment) {
 	//We work with reduced halos
 	reduced_gauge_lattice_t originalLattice = environment.gaugeLinkConfiguration;
+
+	try {
+		unsigned int numberLevelSmearing = environment.configurations.get<unsigned int>("level_stout_smearing_wilson_loop");
+		double smearingRho = environment.configurations.get<double>("rho_stout_smearing");
+		extended_gauge_lattice_t smearedConfiguration;
+		StoutSmearing stoutSmearing;
+		stoutSmearing.spatialSmearing(environment.gaugeLinkConfiguration, originalLattice, numberLevelSmearing, smearingRho);
+	} catch (NotFoundOption& ex) {
+		if (isOutputProcess()) std::cout << "WilsonLoop::No smearing options found, proceeding without!" << std::endl;
+	}
 
 	int RMax = environment.configurations.get<unsigned int>("max_r_wilsonloop");
 	int TMax = environment.configurations.get<unsigned int>("max_t_wilsonloop");
