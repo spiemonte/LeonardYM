@@ -31,6 +31,8 @@ MPI_Datatype MpiType<Update::FundamentalGroup[6]>::type = MPI_DOUBLE;
 MPI_Datatype MpiType<Update::AdjointGroup[6]>::type = MPI_DOUBLE;
 MPI_Datatype MpiType<Update::FundamentalVector[4]>::type = MPI_DOUBLE;
 MPI_Datatype MpiType<Update::AdjointVector[4]>::type = MPI_DOUBLE;
+MPI_Datatype MpiType<Update::FundamentalGroup>::type = MPI_DOUBLE;
+MPI_Datatype MpiType<Update::AdjointGroup>::type = MPI_DOUBLE;
 #endif
 
 
@@ -158,6 +160,12 @@ int main(int ac, char* av[]) {
 		("correction_approximation_inverse_3", po::value<std::string>(), "Approximation of x^(-nf/(2lb)) used for the correction step (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})")
 		("correction_approximation_direct_4", po::value<std::string>(), "Approximation of x^(nf/(2lb)) used for the correction step (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})")
 		("correction_approximation_inverse_4", po::value<std::string>(), "Approximation of x^(-nf/(2lb)) used for the correction step (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})")
+		("read_start_number", po::value<unsigned int>(), "From which configurations start to read again for the analysis")
+		("read_step", po::value<unsigned int>(), "The step in the reading analysis")
+		("flow_type", po::value<std::string>(), "The type of flow equations (Wilson/Symanzik)")
+		("flow_step", po::value<double>(), "The integration step of the flow")
+		("flow_integration_intervals", po::value<unsigned int>(), "The number of intervals for each flow integration step")
+		("flow_time", po::value<double>(), "The total time of the flow")
 	;
 
 	//Now we can parse the command line

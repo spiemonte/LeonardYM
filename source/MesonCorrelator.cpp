@@ -76,7 +76,11 @@ void MesonCorrelator::execute(environment_t& environment) {
 	real_t momenta_y2 = 2.*PI*(static_cast<real_t>(0))/static_cast<real_t>(Layout::glob_t);
 	
 	long_real_t pionOperatorZero[Layout::glob_t];
-	for (int t = 0; t < Layout::glob_t; ++t) pionOperatorZero[t] = 0.;
+	long_real_t vectorOperatorZero[Layout::glob_t];
+	for (int t = 0; t < Layout::glob_t; ++t) {
+		pionOperatorZero[t] = 0.;
+		vectorOperatorZero[t] = 0.;
+	}
 
 	long_real_t pionOperatorMomentaAsymmetry1[Layout::glob_t];
 	long_real_t pionOperatorMomentaAsymmetry2[Layout::glob_t];
@@ -99,12 +103,14 @@ void MesonCorrelator::execute(environment_t& environment) {
 			
 #ifdef MULTITHREADING
 			long_real_t resultZero[Layout::glob_t][omp_get_max_threads()];
+			long_real_t resultVector[Layout::glob_t][omp_get_max_threads()];
 			long_real_t resultMomentaAsymmetry1[Layout::glob_t][omp_get_max_threads()];
 			long_real_t resultMomentaAsymmetry2[Layout::glob_t][omp_get_max_threads()];
 			long_real_t resultMomenta[Layout::glob_t][Layout::glob_t][omp_get_max_threads()];
 			for (int i = 0; i < Layout::glob_t; ++i) {
 				for (int j = 0; j < omp_get_max_threads(); ++j) {
 					resultZero[i][j] = 0.;
+					resultVector[i][j] = 0.;
 					resultMomentaAsymmetry1[i][j] = 0.;
 					resultMomentaAsymmetry2[i][j] = 0.;
 					for (int m = 0; m < Layout::glob_t; ++m) {
@@ -115,11 +121,13 @@ void MesonCorrelator::execute(environment_t& environment) {
 #endif
 #ifndef MULTITHREADING
 			long_real_t resultZero[Layout::glob_t];
+			long_real_t resultVector[Layout::glob_t];
 			long_real_t resultMomentaAsymmetry1[Layout::glob_t];
 			long_real_t resultMomentaAsymmetry2[Layout::glob_t];
 			long_real_t resultMomenta[Layout::glob_t][Layout::glob_t];
 			for (int i = 0; i < Layout::glob_t; ++i) {
 				resultZero[i] = 0.;
+				resultVector[i] = 0.;
 				resultMomentaAsymmetry1[i] = 0.;
 				resultMomentaAsymmetry2[i] = 0.;
 				for (int m = 0; m < Layout::glob_t; ++m) {
@@ -130,6 +138,7 @@ void MesonCorrelator::execute(environment_t& environment) {
 			
 #pragma omp parallel for
 			for (int site = 0; site < Layout::localsize; ++site) {
+				//Pion correlator first
 				for (unsigned int mu = 0; mu < 4; ++mu) {
 					std::complex<real_t> dottmp = vector_dot(tmp[site][mu],tmp[site][mu]);
 #ifdef MULTITHREADING
@@ -149,12 +158,21 @@ void MesonCorrelator::execute(environment_t& environment) {
 					}
 #endif					
 				}
+				//Vector correlator then
+				std::complex<real_t> dottmp = - vector_dot(tmp[site][0],tmp[site][0]) + vector_dot(tmp[site][1],tmp[site][1]) - vector_dot(tmp[site][2],tmp[site][2]) + vector_dot(tmp[site][3],tmp[site][3]);
+#ifdef MULTITHREADING
+				resultVector[Layout::globalIndexT(site)][omp_get_thread_num()] += real(dottmp);
+#endif
+#ifndef MULTITHREADING
+				resultVector[Layout::globalIndexT(site)] += real(dottmp);
+#endif
 			}
 			
 			for (int t = 0; t < Layout::glob_t; ++t) {
 #ifdef MULTITHREADING
 				for (int thread = 0; thread < omp_get_max_threads(); ++thread) {
 					pionOperatorZero[t] += resultZero[t][thread];
+					vectorOperatorZero[t] += resultVector[t][thread];
 					pionOperatorMomentaAsymmetry1[t] += resultMomentaAsymmetry1[t][thread];
 					pionOperatorMomentaAsymmetry2[t] += resultMomentaAsymmetry2[t][thread];
 					for (int m = 0; m < Layout::glob_t; ++m) {
@@ -164,6 +182,7 @@ void MesonCorrelator::execute(environment_t& environment) {
 #endif
 #ifndef MULTITHREADING
 				pionOperatorZero[t] += resultZero[t];
+				vectorOperatorZero[t] += resultVector[t];
 				pionOperatorMomentaAsymmetry1[t] += resultMomentaAsymmetry1[t];
 				pionOperatorMomentaAsymmetry2[t] += resultMomentaAsymmetry2[t];
 				for (int m = 0; m < Layout::glob_t; ++m) {
@@ -196,6 +215,7 @@ void MesonCorrelator::execute(environment_t& environment) {
 	
 	for (int t = 0; t < Layout::glob_t; ++t) {
 		reduceAllSum(pionOperatorZero[t]);
+		reduceAllSum(vectorOperatorZero[t]);
 		reduceAllSum(pionOperatorMomentaAsymmetry1[t]);
 		reduceAllSum(pionOperatorMomentaAsymmetry2[t]);
 		for (int m = 0; m < Layout::glob_t; ++m) {
@@ -214,6 +234,14 @@ void MesonCorrelator::execute(environment_t& environment) {
 			output->write("pion_exact", pionOperatorZero[t]);
 		}
 		output->pop("pion_exact");
+
+		output->push("vector_exact");
+		for (int t = 0; t < Layout::pgrid_t*Layout::loc_t; ++t) {
+			std::cout << "MesonCorrelator::Vector Exact Correlator at t " << t << " is " << vectorOperatorZero[t] << std::endl;
+
+			output->write("vector_exact", vectorOperatorZero[t]);
+		}
+		output->pop("vector_exact");
 
 		output->push("pion_momenta");
 		for (int m = 0; m < Layout::glob_t; ++m) {

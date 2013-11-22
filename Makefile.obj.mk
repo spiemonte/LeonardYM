@@ -21,6 +21,8 @@ OBJECTS  = ReducedStencil.o StandardStencil.o ExtendedStencil.o LocalLayout.o \
 			DiracEigenSolver.o Eigenvalues.o \
 			TestCommunication.o TestLinearAlgebra.o \
 			StartGaugeConfiguration.o ReadStartGaugeConfiguration.o HotStartGaugeConfiguration.o ColdStartGaugeConfiguration.o \
+			ReadGaugeConfiguration.o \
 			LatticeSweep.o Simulation.o \
 			StorageParameters.o \
+			WilsonFlow.o \
 			updater.o

@@ -113,7 +113,7 @@ void TestLinearAlgebra::execute(environment_t& environment) {
 		if (isOutputProcess()) std::cout << "Gamma5 test on ImprovedDiracWilsonOperator: " << g5test << std::endl;
 	}
 
-	{
+	/*{
 		BiConjugateGradient* biConjugateGradient = new BiConjugateGradient();
 		biConjugateGradient->setPrecision(0.00000000001);
 		reduced_dirac_vector_t source, tmp1, tmp2, tmp3, tmp4, tmp5;
@@ -166,7 +166,7 @@ void TestLinearAlgebra::execute(environment_t& environment) {
 		
 		int stepsComplementDeflated = biConjugateGradient->getLastSteps();
 		std::cout << "Complement Deflated number of steps: " << stepsComplementDeflated << std::endl;
-		/*DeflationInverter* deflationInverter = new DeflationInverter();
+		DeflationInverter* deflationInverter = new DeflationInverter();
 		deflationInverter->setPrecision(0.00000000001);
 		deflationInverter->setBasisDimension(50);
 		deflationInverter->setBlockDivision(4);
@@ -178,15 +178,15 @@ void TestLinearAlgebra::execute(environment_t& environment) {
 		squareDiracWilsonOperator->multiply(tmp4, tmp1);
 		double normError3 = AlgebraUtils::differenceNorm(tmp4,source);
 		if (isOutputProcess()) std::cout << "Ridiamo di gusto: " << normError1 << " " << normError2 << " " << " " << normError3 << " " << deflationInverter->getLastSteps() << std::endl;
-		if (isOutputProcess()) std::cout << "Zum beispiel: " << tmp2[5][3] << std::endl << tmp1[5][3] << std::endl;*/
+		if (isOutputProcess()) std::cout << "Zum beispiel: " << tmp2[5][3] << std::endl << tmp1[5][3] << std::endl;
 		delete biConjugateGradient;
 		delete squareDiracWilsonOperator;
 		//delete deflationInverter;
 		delete squareBlockDiracWilsonOperator;
-	}
+	}*/
 
 	//Determinant test
-	{
+	/*{
 		reduced_dirac_vector_t temp, result;
 		AlgebraUtils::generateRandomGaussianVector(temp);
 
@@ -205,7 +205,7 @@ void TestLinearAlgebra::execute(environment_t& environment) {
 
 			std::cout << "Stima stocastica del determinante: " << saturno << " " << AlgebraUtils::dot(temp, temp) << " " << AlgebraUtils::dot(result,result) << std::endl;
 		}
-	}
+	}*/
 
 	//Hermitian test
 	{

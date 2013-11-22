@@ -17,7 +17,8 @@ void WilsonLoop::execute(environment_t& environment) {
 		double smearingRho = environment.configurations.get<double>("rho_stout_smearing");
 		extended_gauge_lattice_t smearedConfiguration;
 		StoutSmearing stoutSmearing;
-		stoutSmearing.spatialSmearing(environment.gaugeLinkConfiguration, originalLattice, numberLevelSmearing, smearingRho);
+		stoutSmearing.spatialSmearing(environment.gaugeLinkConfiguration, smearedConfiguration, numberLevelSmearing, smearingRho);
+		originalLattice = smearedConfiguration;
 	} catch (NotFoundOption& ex) {
 		if (isOutputProcess()) std::cout << "WilsonLoop::No smearing options found, proceeding without!" << std::endl;
 	}

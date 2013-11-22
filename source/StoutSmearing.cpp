@@ -17,19 +17,21 @@ StoutSmearing::~StoutSmearing() { }
 void StoutSmearing::smearing(const extended_gauge_lattice_t& input, extended_gauge_lattice_t& output, real_t rho) {
 	WilsonGaugeAction wga(0.);
 	
+	GaugeGroup identity;
+	for (int i = 0; i < numberColors; ++i) {
+		for (int j = 0; j < numberColors; ++j) {
+			if (i == j) identity.at(i,j) = 1.;
+			else identity.at(i,j) = 0.;
+		}
+	}
+
 #pragma omp parallel for
 	for (int site = 0; site < input.localsize; ++site) {
 		for (unsigned int mu = 0; mu < 4; ++mu) {
 			GaugeGroup staple = htrans(wga.staple(input,site,mu));
 			GaugeGroup omega = rho*staple*htrans(input[site][mu]);
 			GaugeGroup iStout = 0.5*(htrans(omega) - omega);
-			GaugeGroup identity;
-			for (int i = 0; i < numberColors; ++i) {
-				for (int j = 0; j < numberColors; ++j) {
-					if (i == j) identity.at(i,j) = 1.;
-					else identity.at(i,j) = 0.;
-				}
-			}
+
 			GaugeGroup toExp = iStout - (trace(iStout)/static_cast<real_t>(numberColors))*identity;
 			output[site][mu] = this->exp(-toExp)*input[site][mu];
 		}

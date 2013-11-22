@@ -255,3 +255,9 @@ TestLinearAlgebra.o: ./source/TestLinearAlgebra.h ./source/TestLinearAlgebra.cpp
 
 StorageParameters.o: ./source/StorageParameters.h ./source/StorageParameters.cpp
 	$(CPP) $(CPPFLAGS) -c -o StorageParameters.o ./source/StorageParameters.cpp
+
+ReadGaugeConfiguration.o: ./source/ReadGaugeConfiguration.h ./source/ReadGaugeConfiguration.cpp
+	$(CPP) $(CPPFLAGS) -c -o ReadGaugeConfiguration.o ./source/ReadGaugeConfiguration.cpp
+	
+WilsonFlow.o: ./source/WilsonFlow.h ./source/WilsonFlow.cpp
+	$(CPP) $(CPPFLAGS) -c -o WilsonFlow.o ./source/WilsonFlow.cpp

@@ -61,6 +61,18 @@ template<> class MpiType<Update::AdjointVector[4]> {
 		static MPI_Datatype type;
 };
 
+template<> class MpiType<Update::FundamentalGroup> {
+	public:
+		static const int size = 8;
+		static MPI_Datatype type;
+};
+
+template<> class MpiType<Update::AdjointGroup> {
+	public:
+		static const int size = 8;
+		static MPI_Datatype type;
+};
+
 #endif
 
 #endif

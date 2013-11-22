@@ -10,7 +10,7 @@
 #include "GaugeAction.h"
 #include "TestForce.h"
 #include <string>
-#define REVERSIBILITY_CHECK
+//#define REVERSIBILITY_CHECK
 
 namespace Update {
 

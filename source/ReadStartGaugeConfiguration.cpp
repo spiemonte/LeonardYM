@@ -21,6 +21,11 @@ ReadStartGaugeConfiguration::ReadStartGaugeConfiguration() : StartGaugeConfigura
 ReadStartGaugeConfiguration::~ReadStartGaugeConfiguration() { }
 
 void ReadStartGaugeConfiguration::execute(environment_t& environment) {
+	int numberfile = environment.configurations.get<unsigned int>("input_number");
+	this->readConfiguration(environment,numberfile);
+}
+
+void ReadStartGaugeConfiguration::readConfiguration(environment_t& environment, int numberfile) {
 	std::string format_name = environment.configurations.get<std::string>("format_name");
 	typedef extended_gauge_lattice_t::Layout LT;
 	typedef extended_gauge_lattice_t::Layout Layout;
@@ -29,7 +34,6 @@ void ReadStartGaugeConfiguration::execute(environment_t& environment) {
 	if (format_name == "leonard_format") {
 		std::string directory = environment.configurations.get<std::string>("input_directory_configurations");
 		std::string input_name = environment.configurations.get<std::string>("input_name");
-		int numberfile = environment.configurations.get<unsigned int>("input_number");
 
 		int read_glob_x, read_glob_y, read_glob_z, read_glob_t;
 		int read_pgrid_x, read_pgrid_y, read_pgrid_z, read_pgrid_t;
@@ -105,7 +109,6 @@ void ReadStartGaugeConfiguration::execute(environment_t& environment) {
 #if NUMCOLORS == 2
 		std::string directory = environment.configurations.get<std::string>("input_directory_configurations");
 		std::string input_name = environment.configurations.get<std::string>("input_name");
-		int numberfile = environment.configurations.get<unsigned int>("input_number");
 
 		std::string filename = directory + "0:" + toString(numberfile) + ":" + input_name;
 
@@ -118,7 +121,7 @@ void ReadStartGaugeConfiguration::execute(environment_t& environment) {
 			if (isOutputProcess()) std::cout << "ReadStartGaugeConfiguration::File " << filename << " impossible to read!" << std::endl;
 			exit(13);
 		}
-		
+
 
 		//initialisation of xdr
 		XDR xin;
@@ -244,14 +247,14 @@ void ReadStartGaugeConfiguration::execute(environment_t& environment) {
 			// - compare read parameters to the ones in measureconfig.dat / Stop program if they are not the same (This is first done directly on the master node without communication of all the paramters)
 			// - test for lattice size - new included: reading failure if given incorrect
 			if (static_cast<size_t >(lato[0]) != Layout::glob_x
-			    || static_cast<size_t >(lato[1]) != Layout::glob_y
-			    || static_cast<size_t >(lato[2]) != Layout::glob_z
-			    || static_cast<size_t >(lato[3]) != Layout::glob_t) {
-					if (isOutputProcess()) std::cout << "Lattice size is different:\n" << lato[0] << " " << lato[1] << " "
+					|| static_cast<size_t >(lato[1]) != Layout::glob_y
+					|| static_cast<size_t >(lato[2]) != Layout::glob_z
+					|| static_cast<size_t >(lato[3]) != Layout::glob_t) {
+				if (isOutputProcess()) std::cout << "Lattice size is different:\n" << lato[0] << " " << lato[1] << " "
 						<< lato[2] << " " << lato[3] << "\n" << Layout::glob_x << " "
 						<< Layout::glob_y << " " << Layout::glob_z << " "
 						<< Layout::glob_t;
-				}
+			}
 
 			//Load the beta and kappa
 			double beta = environment.configurations.get<double>("beta");
@@ -259,12 +262,12 @@ void ReadStartGaugeConfiguration::execute(environment_t& environment) {
 
 			// - test for Beta and Kappa - new included: reading failure if given incorrect
 			if (std::fabs(beta - beto) / (std::fabs(beta) + std::fabs(beto)) > 0.0000001
-			    || std::fabs(kappa - kappo) / (std::fabs(kappa) + std::fabs(kappo)) > 0.0000001) {
-					if (isOutputProcess()) std::cout << "Some parameter values are changed on lattice "
+					|| std::fabs(kappa - kappo) / (std::fabs(kappa) + std::fabs(kappo)) > 0.0000001) {
+				if (isOutputProcess()) std::cout << "Some parameter values are changed on lattice "
 						<< ":\n" << " Beta, Kappa:\n" << beto << " " << kappo << "\n"
 						<< beta << " " << kappa;
-				}
-			
+			}
+
 		} // on of Io node only
 
 		xdr_destroy( &xin);
@@ -277,7 +280,8 @@ void ReadStartGaugeConfiguration::execute(environment_t& environment) {
 	double plaquette = Plaquette::temporalPlaquette(environment.gaugeLinkConfiguration);
 
 	if (isOutputProcess()) std::cout << "ReadStartGaugeConfiguration::Plaquette difference: " << (plaquette - read_plaquette) << std::endl;
-	
+
+
 }
 
 } /* namespace Update */

@@ -27,6 +27,8 @@
 #include "TestCommunication.h"
 #include "GluinoGlue.h"
 #include "WilsonLoop.h"
+#include "ReadGaugeConfiguration.h"
+#include "WilsonFlow.h"
 
 namespace Update {
 
@@ -77,6 +79,10 @@ LatticeSweep* LatticeSweep::getInstance(const std::string& name) {
 		return new WilsonLoop();
 	} else if (name == "TestCommunication") {
 		return new TestCommunication();
+	} else if (name == "ReadGaugeConfiguration") {
+		return new ReadGaugeConfiguration();
+	} else if (name == "WilsonFlow") {
+		return new WilsonFlow();
 	}
 	else {
 		if (isOutputProcess()) std::cout << "Unknown name sweep: " << name << std::endl;
@@ -173,6 +179,7 @@ void LatticeSweep::printSweepsName() {
 		<< " ReUnit" << std::endl
 		<< " BandTwoFlavorHMCUpdater" << std::endl
 		<< " PureGaugeWilsonLoops" << std::endl
+		<< " WilsonLoop" << std::endl
 		<< " TestCommunication" << std::endl;
 	}
 
