@@ -4,9 +4,24 @@
 
 namespace Update {
 
-WilsonLoop::WilsonLoop() { }
+WilsonLoop::WilsonLoop() : tWilsonLine(0), xWilsonLine(0) { }
 
-WilsonLoop::~WilsonLoop() { }
+WilsonLoop::WilsonLoop(const WilsonLoop& toCopy) : LatticeSweep(toCopy), tWilsonLine(0), xWilsonLine(0) { }
+
+WilsonLoop::~WilsonLoop() {
+	if (tWilsonLine != 0) {
+		for (int i = 0; i < TMax; ++i) {
+			delete[] tWilsonLine[i];
+		}
+		delete[] tWilsonLine;
+	}
+	if (xWilsonLine != 0) {
+		for (int i = 0; i < RMax; ++i) {
+			delete[] xWilsonLine[i];
+		}
+		delete[] xWilsonLine;
+	}
+}
 
 void WilsonLoop::execute(environment_t& environment) {
 	//We work with reduced halos
@@ -23,18 +38,22 @@ void WilsonLoop::execute(environment_t& environment) {
 		if (isOutputProcess()) std::cout << "WilsonLoop::No smearing options found, proceeding without!" << std::endl;
 	}
 
-	int RMax = environment.configurations.get<unsigned int>("max_r_wilsonloop");
-	int TMax = environment.configurations.get<unsigned int>("max_t_wilsonloop");
+	RMax = environment.configurations.get<unsigned int>("max_r_wilsonloop");
+	TMax = environment.configurations.get<unsigned int>("max_t_wilsonloop");
 
 	//tWilsonLine[T][R] contains the wilson line in the t-direction long T and shifted of R sites in the x-direction
-	reduced_matrix_lattice_t** tWilsonLine = new reduced_matrix_lattice_t*[TMax];
-	for (int i = 0; i < TMax; ++i) {
-		tWilsonLine[i] = new reduced_matrix_lattice_t[RMax+1];
+	if (tWilsonLine == 0) {
+		tWilsonLine = new reduced_matrix_lattice_t*[TMax];
+		for (int i = 0; i < TMax; ++i) {
+			tWilsonLine[i] = new reduced_matrix_lattice_t[RMax+1];
+		}
 	}
 	//xWilsonLine[R][T] contains the wilson line in the x-direction long R and shifted of T sites in the t-direction
-	reduced_matrix_lattice_t** xWilsonLine = new reduced_matrix_lattice_t*[RMax];
-	for (int i = 0; i < RMax; ++i) {
-		xWilsonLine[i] = new reduced_matrix_lattice_t[TMax+1];
+	if (xWilsonLine == 0){
+		xWilsonLine = new reduced_matrix_lattice_t*[RMax];
+		for (int i = 0; i < RMax; ++i) {
+			xWilsonLine[i] = new reduced_matrix_lattice_t[TMax+1];
+		}
 	}
 
 	typedef reduced_matrix_lattice_t LT;
@@ -123,7 +142,6 @@ void WilsonLoop::execute(environment_t& environment) {
 		GlobalOutput* output = GlobalOutput::getInstance();
 		output->pop("wilson_loops");
 	}
-
 }
 
 } /* namespace Update */
