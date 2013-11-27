@@ -27,9 +27,15 @@ void WilsonLoop::execute(environment_t& environment) {
 	int TMax = environment.configurations.get<unsigned int>("max_t_wilsonloop");
 
 	//tWilsonLine[T][R] contains the wilson line in the t-direction long T and shifted of R sites in the x-direction
-	reduced_matrix_lattice_t tWilsonLine[TMax][RMax+1];
+	reduced_matrix_lattice_t** tWilsonLine = new reduced_matrix_lattice_t*[TMax];
+	for (int i = 0; i < TMax; ++i) {
+		tWilsonLine[i] = new reduced_matrix_lattice_t[RMax+1];
+	}
 	//xWilsonLine[R][T] contains the wilson line in the x-direction long R and shifted of T sites in the t-direction
-	reduced_matrix_lattice_t xWilsonLine[RMax][TMax+1];
+	reduced_matrix_lattice_t** xWilsonLine = new reduced_matrix_lattice_t*[RMax];
+	for (int i = 0; i < RMax; ++i) {
+		xWilsonLine[i] = new reduced_matrix_lattice_t[TMax+1];
+	}
 
 	typedef reduced_matrix_lattice_t LT;
 
