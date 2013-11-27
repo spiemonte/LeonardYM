@@ -11,7 +11,7 @@
 #include "ToString.h"
 
 namespace Update {
-
+/*
 //Projectors as defined in hep_lat:0706.2298
 class Projector : public DiracOperator {
 public:
@@ -216,17 +216,6 @@ public:
 			}
 		}
 		dirac->multiply(tmp,input);
-		/*for (unsigned int l = 0; l < vectorspace.size(); ++l) {
-			std::complex<real_t> scalar_product = AlgebraUtils::dot(*vectorspace[l], tmp);
-			for (unsigned int k = 0; k < vectorspace.size(); ++k) {
-#pragma omp parallel for
-				for (int site = 0; site < output.localsize; ++site) {
-					for (unsigned int mu = 0; mu < 4; ++mu) {
-						output[site][mu] -= scalar_product*invertedLittleOperator(k,l)*(*vectorspace[k])[site][mu];
-					}
-				}
-			}
-		}*/
 		std::complex<real_t>* scalar_products = new std::complex<real_t>[vectorspace.size()];
 		for (unsigned int l = 0; l < vectorspace.size(); ++l) scalar_products[l] = AlgebraUtils::dot(*vectorspace[l], tmp);
 		for (unsigned int k = 0; k < vectorspace.size(); ++k) {
@@ -432,36 +421,7 @@ bool DeflationInverter::solve(DiracOperator* dirac, const extended_dirac_vector_
 
 
 
-	/*for (unsigned int i = 0; i < 3; ++i) {
-		dirac->multiply(tmp,localBasis[i]);
-		for (unsigned int j = 0; j < 3; ++j) {
-			mat(i,j) = AlgebraUtils::dot(localBasis[j],tmp);
-		}
-	}
 
-	Eigen::Matrix< std::complex<real_t>, Eigen::Dynamic, Eigen::Dynamic> deflatedInverse = inverse(mat);
-
-	std::cout << toString(mat) << " " << std::endl <<toString(deflatedInverse) << std::endl;
-
-	AlgebraUtils::setToZero(solution);
-
-	for (unsigned int i = 0; i < 3; ++i) {
-		for (unsigned int j = 0; j < 3; ++j) {
-			dirac->multiply(localBasis[j],source);
-			mat(i,j) = AlgebraUtils::dot(localBasis[j],tmp);
-
-			std::complex<real_t> projection = AlgebraUtils::dot(localBasis[j],source);
-
-#pragma omp parallel for
-			for (int site = 0; site < solution.localsize; ++site) {
-				for (unsigned int mu = 0; mu < 4; ++mu) {
-					solution[site][mu] += deflatedInverse(i,j)*projection*localBasis[j][site][mu];
-				}
-			}
-
-		}
-	}
-*/
 	original_solution = solution;
 
 	if (localBasis != 0) delete[] localBasis;
@@ -485,8 +445,6 @@ unsigned int DeflationInverter::getLastSteps() const {
 
 void DeflationInverter::setBasisDimension(int _basisDimension) {
 	basisDimension = _basisDimension;
-	/*delete[] localBasis;
-	localBasis = new reduced_dirac_vector_t[basisDimension];*/
 }
 
 int DeflationInverter::getBasisDimension() const {
@@ -502,43 +460,6 @@ int DeflationInverter::getBlockDivision() const {
 }
 
 void DeflationInverter::generateBasis(DiracOperator* dirac) {
-	/*totalNumberOfVectors = blockDivision*blockDivision*blockDivision*blockDivision*basisDimension;
-	totalBlocks = blockDivision*blockDivision*blockDivision*blockDivision;
-	if (localBasis != 0) delete[] localBasis;
-	localBasis = new reduced_dirac_vector_t[totalNumberOfVectors];
-	reduced_dirac_vector_t tmp;
-
-	for (int i = 0; i < totalNumberOfVectors; ++i) {
-		AlgebraUtils::setToZero(localBasis[i]);
-	}
-
-	typedef reduced_dirac_vector_t::Layout LT;
-
-	int lblock_x = LT::glob_x/blockDivision;
-	int lblock_y = LT::glob_y/blockDivision;
-	int lblock_z = LT::glob_z/blockDivision;
-	int lblock_t = LT::glob_t/blockDivision;
-
-	for (int i = 0; i < basisDimension; ++i) {
-		extended_dirac_vector_t randomVector;
-		AlgebraUtils::generateRandomVector(randomVector);
-		biConjugateGradient->setPrecision(0.01);
-		extended_dirac_vector_t inverseRandomVector;
-		biConjugateGradient->solve(dirac,randomVector,inverseRandomVector);//TODO
-		lastStep += biConjugateGradient->getLastSteps();
-		tmp = inverseRandomVector;
-		for (int site = 0; site < LT::localsize; ++site) {
-			int blockNumber = LT::globalIndexX(site)/lblock_x;
-			blockNumber = blockDivision*blockNumber + LT::globalIndexY(site)/lblock_y;
-			blockNumber = blockDivision*blockNumber + LT::globalIndexZ(site)/lblock_z;
-			blockNumber = blockDivision*blockNumber + LT::globalIndexT(site)/lblock_t;
-
-			for (unsigned int mu = 0; mu < 4; ++mu) {
-				localBasis[totalBlocks*i + blockNumber][site][mu] = tmp[site][mu];
-			}
-		}
-
-	}*/
 
 	typedef reduced_dirac_vector_t::Layout LT;
 	
@@ -579,10 +500,6 @@ void DeflationInverter::generateBasis(DiracOperator* dirac) {
 			localBasis[i+3][site][3] = tmp[site][3];
 			localBasis[i+3].updateHalo();
 		}
-		/*for (int j = 1; j < 10; ++j) {
-			biConjugateGradient->solve(dirac,localBasis[i+j-1],localBasis[i+j]);//TODO
-			lastStep += biConjugateGradient->getLastSteps();
-		}*/
 	}
 		
 
@@ -603,5 +520,5 @@ void DeflationInverter::generateBasis(DiracOperator* dirac) {
 	std::cout << "DeflationInverter::Deflation basis generated in " << lastStep << " inversion steps" << std::endl;
 
 }
-
+*/
 } /* namespace Update */
