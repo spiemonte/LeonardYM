@@ -1,11 +1,17 @@
 nc = 2
 
+ifeq ($(adjoint),false)
+	adj = 
+else
+	adj = -DADJOINT
+endif
+
 CC       = $(MPICC)
 CPP      = $(MPICXX)
 OPTIMIZE = -O2 -pipe -openmp  
 INC	= -I./extra_libs/Eigen
 CFLAGS   = $(OPTIMIZE) $(INC)
-CPPFLAGS = $(OPTIMIZE) $(INC) -DADJOINT -DENABLE_MPI -DNUMCOLORS=$(nc) -DMULTITHREADING -DMBE="\"$(PWD)/source/MatrixBaseExtension.h\"" -I/share/Applic.PALMA/boost/boost-trunk/
+CPPFLAGS = $(OPTIMIZE) $(INC) $(adj) -DENABLE_MPI -DNUMCOLORS=$(nc) -DMULTITHREADING -DMBE="\"$(PWD)/source/MatrixBaseExtension.h\"" -I/share/Applic.PALMA/boost/boost-trunk/
 
 include Makefile.obj.mk
 

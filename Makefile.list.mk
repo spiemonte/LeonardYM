@@ -261,3 +261,6 @@ ReadGaugeConfiguration.o: ./source/ReadGaugeConfiguration.h ./source/ReadGaugeCo
 	
 WilsonFlow.o: ./source/WilsonFlow.h ./source/WilsonFlow.cpp
 	$(CPP) $(CPPFLAGS) -c -o WilsonFlow.o ./source/WilsonFlow.cpp
+
+GaugeEnergy.o: ./source/GaugeEnergy.h ./source/GaugeEnergy.cpp
+	$(CPP) $(CPPFLAGS) -c -o GaugeEnergy.o ./source/GaugeEnergy.cpp

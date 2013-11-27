@@ -29,6 +29,7 @@
 #include "WilsonLoop.h"
 #include "ReadGaugeConfiguration.h"
 #include "WilsonFlow.h"
+#include "GaugeEnergy.h"
 
 namespace Update {
 
@@ -83,6 +84,8 @@ LatticeSweep* LatticeSweep::getInstance(const std::string& name) {
 		return new ReadGaugeConfiguration();
 	} else if (name == "WilsonFlow") {
 		return new WilsonFlow();
+	} else if (name == "GaugeEnergy") {
+		return new GaugeEnergy();
 	}
 	else {
 		if (isOutputProcess()) std::cout << "Unknown name sweep: " << name << std::endl;

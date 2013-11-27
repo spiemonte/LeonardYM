@@ -31,7 +31,7 @@ void ChiralCondensate::execute(environment_t& environment) {
 	diracOperator->setLattice(environment.getFermionLattice());
 	diracOperator->setGamma5(false);
 	
-	long_real_t volume = environment.gaugeLinkConfiguration.localsize;//TODO
+	long_real_t volume = environment.gaugeLinkConfiguration.getLayout().globalVolume;
 
 	if (biConjugateGradient == 0) {
 		biConjugateGradient = new BiConjugateGradient();

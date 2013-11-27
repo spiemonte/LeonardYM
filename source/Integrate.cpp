@@ -33,7 +33,7 @@ void Integrate::updateLinkConfiguration(extended_gauge_lattice_t& linkConfigurat
 			Eigen::ComplexEigenSolver<GaugeGroup> es(momenta[site][mu]);
 			GaugeGroup update;
 			update.zeros();
-			for (unsigned int i = 0; i < numberColors; ++i) {
+			for (int i = 0; i < numberColors; ++i) {
 				update.at(i,i) = exp(epsilon*es.eigenvalues()[i]);
 			}
 			GaugeGroup m = es.eigenvectors();

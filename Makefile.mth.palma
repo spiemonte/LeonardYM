@@ -1,11 +1,17 @@
 nc = 2
 
+ifeq ($(adjoint),false)
+	adj = 
+else
+	adj = -DADJOINT
+endif
+
 CC       = gcc
 CPP      = g++
 OPTIMIZE = -O3 -ffast-math -pipe -march=corei7 -fomit-frame-pointer -fopenmp -I/share/Applic.PALMA/boost/boost-trunk
 INC	= -I./extra_libs/Eigen
 CFLAGS   = $(OPTIMIZE) $(INC)
-CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/MatrixBaseExtension.h\"" -DADJOINT -DNUMCOLORS=$(nc) -DMULTITHREADING
+CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/MatrixBaseExtension.h\"" $(adj) -DNUMCOLORS=$(nc) -DMULTITHREADING
 
 include Makefile.obj.mk
 
