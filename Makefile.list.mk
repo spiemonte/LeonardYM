@@ -166,6 +166,9 @@ Plaquette.o: ./source/Plaquette.h ./source/Plaquette.cpp
 PolyakovLoop.o: ./source/PolyakovLoop.h ./source/PolyakovLoop.cpp
 	$(CPP) $(CPPFLAGS) -c -o PolyakovLoop.o ./source/PolyakovLoop.cpp
 
+AdjointPolyakovLoop.o: ./source/AdjointPolyakovLoop.h ./source/AdjointPolyakovLoop.cpp
+	$(CPP) $(CPPFLAGS) -c -o AdjointPolyakovLoop.o ./source/AdjointPolyakovLoop.cpp
+
 WilsonLoop.o: ./source/WilsonLoop.h ./source/WilsonLoop.cpp
 	$(CPP) $(CPPFLAGS) -c -o WilsonLoop.o ./source/WilsonLoop.cpp
 

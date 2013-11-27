@@ -30,6 +30,7 @@
 #include "ReadGaugeConfiguration.h"
 #include "WilsonFlow.h"
 #include "GaugeEnergy.h"
+#include "AdjointPolyakovLoop.h"
 
 namespace Update {
 
@@ -66,6 +67,8 @@ LatticeSweep* LatticeSweep::getInstance(const std::string& name) {
 		return new ChiralCondensate();
 	} else if (name == "PolyakovLoop") {
 		return new PolyakovLoop();
+	} else if (name == "AdjointPolyakovLoop") {
+		return new AdjointPolyakovLoop();
 	} else if (name == "Glueball") {
 		return new Glueball();
 	} else if (name == "GluinoGlue") {

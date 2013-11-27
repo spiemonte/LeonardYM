@@ -11,7 +11,7 @@ OBJECTS  = ReducedStencil.o StandardStencil.o ExtendedStencil.o LocalLayout.o \
 			ReUnit.o StoutSmearing.o Gamma.o \
 			RandomSeed.o \
 			Glueball.o \
-			Plaquette.o PureGaugeWilsonLoops.o PolyakovLoop.o WilsonLoop.o GaugeEnergy.o \
+			Plaquette.o PureGaugeWilsonLoops.o PolyakovLoop.o AdjointPolyakovLoop.o  WilsonLoop.o GaugeEnergy.o \
 			GlobalOutput.o OutputSweep.o \
 			FermionForce.o DiracWilsonFermionForce.o BlockDiracWilsonFermionForce.o ImprovedFermionForce.o TestForce.o \
 			StochasticEstimator.o MesonCorrelator.o ChiralCondensate.o GluinoGlue.o \
