@@ -31,10 +31,15 @@ void GluinoGlue::execute(environment_t& environment) {
 	try {
 		unsigned int numberLevelSmearing = environment.configurations.get<unsigned int>("level_stout_smearing_gluinoglue");
 		double smearingRho = environment.configurations.get<double>("rho_stout_smearing");
-		extended_gauge_lattice_t smearedConfiguration;
 		StoutSmearing stoutSmearing;
+#ifdef ADJOINT
+		extended_gauge_lattice_t smearedConfiguration;
 		stoutSmearing.spatialSmearing(environment.gaugeLinkConfiguration, smearedConfiguration, numberLevelSmearing, smearingRho);
 		ConvertLattice<extended_fermion_lattice_t,extended_gauge_lattice_t>::convert(lattice, smearedConfiguration);//TODO
+#endif
+#ifndef ADJOINT
+		stoutSmearing.spatialSmearing(environment.gaugeLinkConfiguration, lattice, numberLevelSmearing, smearingRho);
+#endif
 		switchAntiperiodicBc(lattice);
 	} catch (NotFoundOption& ex) {
 		lattice = environment.getFermionLattice();
