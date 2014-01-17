@@ -35,7 +35,7 @@ void ChiralCondensate::execute(environment_t& environment) {
 
 	if (biConjugateGradient == 0) {
 		biConjugateGradient = new BiConjugateGradient();
-		biConjugateGradient->setMaximumSteps(environment.configurations.get<unsigned int>("inverter_max_steps"));
+		biConjugateGradient->setMaximumSteps(environment.configurations.get<unsigned int>("generic_inverter_max_steps"));
 	}
 
 	std::vector< long_real_t > chiralCondensateRe;

@@ -116,7 +116,7 @@ void TwoFlavorHMCUpdater::execute(environment_t& environment) {
 	//Get the final energy of the pseudofermions
 	diracOperator->setLattice(environmentNew.getFermionLattice());
 	solver->setPrecision(environment.configurations.get<double>("metropolis_inverter_precision"));
-	solver->setMaximumSteps(environment.configurations.get<unsigned int>("inverter_max_steps"));
+	solver->setMaximumSteps(environment.configurations.get<unsigned int>("metropolis_inverter_max_steps"));
 	solver->solve(diracOperator,pseudofermion,tmp_pseudofermion);
 	long_real_t newPseudoFermionEnergy = AlgebraUtils::squaredNorm(tmp_pseudofermion);
 

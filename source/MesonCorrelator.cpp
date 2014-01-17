@@ -59,7 +59,7 @@ void MesonCorrelator::execute(environment_t& environment) {
 	
 	if (biConjugateGradient == 0) biConjugateGradient = new BiConjugateGradient();
 	biConjugateGradient->setPrecision(environment.configurations.get<double>("generic_inverter_precision"));
-	biConjugateGradient->setMaximumSteps(environment.configurations.get<unsigned int>("inverter_max_steps"));
+	biConjugateGradient->setMaximumSteps(environment.configurations.get<unsigned int>("generic_inverter_max_steps"));
 
 	std::vector< long_real_t > pionNorm;
 	//std::vector< long_real_t >* pionOperator = new std::vector< long_real_t >[Layout::pgrid_t*Layout::loc_t];

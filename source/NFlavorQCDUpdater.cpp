@@ -45,7 +45,7 @@ void NFlavorQCDUpdater::initializeApproximations(environment_t& environment) {
 			rational.setAlphas(std::vector<real_t>(rat.begin(), rat.begin() + rat.size()/2));
 			rational.setBetas(std::vector<real_t>(rat.begin() + rat.size()/2, rat.end()));
 			rational.setPrecision(environment.configurations.get<double>("metropolis_inverter_precision"));
-			rational.setMaximumRecursion(environment.configurations.get<unsigned int>("inverter_max_steps"));
+			rational.setMaximumRecursion(environment.configurations.get<unsigned int>("metropolis_inverter_max_steps"));
 			rationalApproximationsHeatBath.push_back(rational);
 		}
 		pseudofermions.resize(numberPseudofermions);
@@ -60,7 +60,7 @@ void NFlavorQCDUpdater::initializeApproximations(environment_t& environment) {
 			rational.setAlphas(std::vector<real_t>(rat.begin(), rat.begin() + rat.size()/2));
 			rational.setBetas(std::vector<real_t>(rat.begin() + rat.size()/2, rat.end()));
 			rational.setPrecision(environment.configurations.get<double>("metropolis_inverter_precision"));
-			rational.setMaximumRecursion(environment.configurations.get<unsigned int>("inverter_max_steps"));
+			rational.setMaximumRecursion(environment.configurations.get<unsigned int>("metropolis_inverter_max_steps"));
 			rationalApproximationsMetropolis.push_back(rational);
 		}
 	}
@@ -74,7 +74,7 @@ void NFlavorQCDUpdater::initializeApproximations(environment_t& environment) {
 			rational.setAlphas(std::vector<real_t>(rat.begin(), rat.begin() + rat.size()/2));
 			rational.setBetas(std::vector<real_t>(rat.begin() + rat.size()/2, rat.end()));
 			rational.setPrecision(environment.configurations.get<double>("force_inverter_precision"));
-			rational.setMaximumRecursion(environment.configurations.get<unsigned int>("inverter_max_steps"));
+			rational.setMaximumRecursion(environment.configurations.get<unsigned int>("force_inverter_max_steps"));
 			rationalApproximationsForce.push_back(rational);
 		}
 	}
@@ -185,6 +185,7 @@ void NFlavorQCDUpdater::execute(environment_t& environment) {
 	}
 	//Set the precision of the inverter
 	fermionAction->setForcePrecision(environment.configurations.get<double>("force_inverter_precision"));
+	fermionAction->setForceMaxIterations(environment.configurations.get<double>("force_inverter_max_steps"));
 
 	//Take the global action
 	if (nFlavorQCDAction == 0) nFlavorQCDAction = new NFlavorAction(gaugeAction, fermionAction);

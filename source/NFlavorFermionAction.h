@@ -33,6 +33,9 @@ public:
 
 	double getForcePrecision() const;
 	void setForcePrecision(double precision);
+
+	int getForceMaxIterations() const;
+	void setForceMaxIterations(int iterations);
 private:
 	NFlavorFermionAction(const NFlavorFermionAction& ) : FermionicAction(NULL) { }
 
@@ -41,6 +44,8 @@ private:
 	FermionForce* fermionForce;
 	//The precision used in the force inversion
 	double forcePrecision;
+	//The maximum number of iterations used by the cg solver
+	int maxIterations;
 	//The pseudofermions field
 	std::vector<extended_dirac_vector_t*> pseudofermions;
 	//The rational function approximation

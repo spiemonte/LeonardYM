@@ -51,7 +51,7 @@ void GluinoGlue::execute(environment_t& environment) {
 
 	if (biConjugateGradient == 0) biConjugateGradient = new BiConjugateGradient();
 	biConjugateGradient->setPrecision(environment.configurations.get<double>("generic_inverter_precision"));
-	biConjugateGradient->setMaximumSteps(environment.configurations.get<unsigned int>("inverter_max_steps"));
+	biConjugateGradient->setMaximumSteps(environment.configurations.get<unsigned int>("generic_inverter_max_steps"));
 	
 	long_real_t gluinoGlueCorrelator[Layout::glob_t];
 	for (int t = 0; t < Layout::glob_t; ++t) {

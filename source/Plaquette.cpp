@@ -22,7 +22,7 @@ void Plaquette::execute(environment_t& environment) {
 	long_real_t plaquette = 0.;
 
 #pragma omp parallel for reduction(+:plaquette)
-	for (unsigned int site = 0; site < environment.gaugeLinkConfiguration.localsize; ++site) {
+	for (int site = 0; site < environment.gaugeLinkConfiguration.localsize; ++site) {
 		for (unsigned int mu = 0; mu < 4; ++mu) {
 			for (unsigned int nu = mu + 1; nu < 4; ++nu) {
 				plaquette += real(trace(environment.gaugeLinkConfiguration[site][mu]*environment.gaugeLinkConfiguration[LT::sup(site,mu)][nu]*htrans(environment.gaugeLinkConfiguration[LT::sup(site,nu)][mu])*htrans(environment.gaugeLinkConfiguration[site][nu])));
@@ -52,7 +52,7 @@ long_real_t Plaquette::temporalPlaquette(const extended_gauge_lattice_t& gaugeLi
 	typedef extended_gauge_lattice_t LT;
 	long_real_t plaquette = 0.;
 #pragma omp parallel for reduction(+:plaquette)
-	for (unsigned int site = 0; site < gaugeLinkConfiguration.localsize; ++site) {
+	for (int site = 0; site < gaugeLinkConfiguration.localsize; ++site) {
 		for (unsigned int mu = 0; mu < 3; ++mu) {
 			unsigned int nu = 3;
 			plaquette += real(trace(gaugeLinkConfiguration[site][mu]*gaugeLinkConfiguration[LT::sup(site,mu)][nu]*htrans(gaugeLinkConfiguration[LT::sup(site,nu)][mu])*htrans(gaugeLinkConfiguration[site][nu])));

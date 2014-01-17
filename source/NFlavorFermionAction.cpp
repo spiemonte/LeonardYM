@@ -18,7 +18,7 @@ std::vector< std::vector<extended_dirac_vector_t> > NFlavorFermionAction::Xs;
 std::vector< std::vector<extended_dirac_vector_t> > NFlavorFermionAction::Ys;
 extended_dirac_vector_t* NFlavorFermionAction::tmp_pseudofermion = 0;
 
-NFlavorFermionAction::NFlavorFermionAction(DiracOperator* _squareDiracOperator, DiracOperator* _diracOperator, const std::vector<RationalApproximation>& _rationalApproximations) : FermionicAction(_diracOperator), squareDiracOperator(_squareDiracOperator), forcePrecision(0.00000000001), rationalApproximations(_rationalApproximations) {
+NFlavorFermionAction::NFlavorFermionAction(DiracOperator* _squareDiracOperator, DiracOperator* _diracOperator, const std::vector<RationalApproximation>& _rationalApproximations) : FermionicAction(_diracOperator), squareDiracOperator(_squareDiracOperator), forcePrecision(0.00000000001), maxIterations(5000), rationalApproximations(_rationalApproximations) {
 	fermionForce = diracOperator->getForce();
 	//Allocate the memory for all the pseudofermions needed for the calculation of the force ( # of vectors = 2*sum(order(rationalApproximations[i]) )
 	if (Xs.size() != rationalApproximations.size() || Ys.size() != rationalApproximations.size()) {
@@ -87,6 +87,7 @@ void NFlavorFermionAction::updateForce(extended_gauge_lattice_t& forceLattice, c
 	squareDiracOperator->setLattice(env.getFermionLattice());
 	//Take the multi-shift solver
 	multishiftSolver->setPrecision(forcePrecision);
+	multishiftSolver->setMaxSteps(maxIterations);
 	//Solve the dirac equation for all the pseudofermions
 	std::vector< std::vector<extended_dirac_vector_t> >::iterator x = Xs.begin();
 	std::vector< std::vector<extended_dirac_vector_t> >::iterator y = Ys.begin();
@@ -182,6 +183,14 @@ double NFlavorFermionAction::getForcePrecision() const {
 
 void NFlavorFermionAction::setForcePrecision(double precision) {
 	forcePrecision = precision;
+}
+
+int NFlavorFermionAction::getForceMaxIterations() const {
+	return maxIterations;
+}
+
+void NFlavorFermionAction::setForceMaxIterations(int _maxIterations) {
+	maxIterations = _maxIterations;
 }
 
 } /* namespace Update */
