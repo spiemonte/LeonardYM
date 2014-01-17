@@ -185,7 +185,7 @@ void NFlavorQCDUpdater::execute(environment_t& environment) {
 	}
 	//Set the precision of the inverter
 	fermionAction->setForcePrecision(environment.configurations.get<double>("force_inverter_precision"));
-	fermionAction->setForceMaxIterations(environment.configurations.get<double>("force_inverter_max_steps"));
+	fermionAction->setForceMaxIterations(environment.configurations.get<unsigned int>("force_inverter_max_steps"));
 
 	//Take the global action
 	if (nFlavorQCDAction == 0) nFlavorQCDAction = new NFlavorAction(gaugeAction, fermionAction);
