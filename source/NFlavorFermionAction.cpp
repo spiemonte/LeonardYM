@@ -85,6 +85,7 @@ GaugeGroup NFlavorFermionAction::force(const environment_t& env, int site, int m
 void NFlavorFermionAction::updateForce(extended_gauge_lattice_t& forceLattice, const environment_t& env) {
 	diracOperator->setLattice(env.getFermionLattice());
 	squareDiracOperator->setLattice(env.getFermionLattice());
+	fermionForce->setLattice(env.getFermionLattice());
 	//Take the multi-shift solver
 	multishiftSolver->setPrecision(forcePrecision);
 	multishiftSolver->setMaxSteps(maxIterations);

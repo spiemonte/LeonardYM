@@ -21,6 +21,8 @@ public:
 
 	GaugeGroup force(const environment_t& env, const FermionicForceMatrix& derivative, int site, unsigned int mu);
 
+	virtual void setLattice(const extended_fermion_lattice_t& ) { }
+
 protected:
 	real_t kappa;
 

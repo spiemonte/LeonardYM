@@ -27,6 +27,7 @@ GaugeGroup TwoFlavorFermionAction::force(const environment_t& env, int site, int
 
 void TwoFlavorFermionAction::updateForce(extended_gauge_lattice_t& forceLattice, const environment_t& env) {
 	diracOperator->setLattice(env.getFermionLattice());
+	fermionForce->setLattice(env.getFermionLattice());
 	BiConjugateGradient* biConjugateGradient = new BiConjugateGradient();//TODO TODO TODO
 	biConjugateGradient->setPrecision(forcePrecision);
 	biConjugateGradient->solve(diracOperator,*pseudofermion,Y);

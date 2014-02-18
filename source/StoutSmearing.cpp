@@ -40,13 +40,20 @@ void StoutSmearing::smearing(const extended_gauge_lattice_t& input, extended_gau
 }
 
 void StoutSmearing::spatialSmearing(const extended_gauge_lattice_t& initialInput, extended_gauge_lattice_t& output, unsigned int numberLevels, real_t rho) {
-	WilsonGaugeAction wga(0.);
 	extended_gauge_lattice_t input = initialInput;
+	typedef extended_gauge_lattice_t LT;
 	for (unsigned int level = 0; level < numberLevels; ++level) {
 #pragma omp parallel for
 		for (int site = 0; site < input.localsize; ++site) {
 			for (unsigned int mu = 0; mu < 3; ++mu) {
-				GaugeGroup staple = htrans(wga.staple(input,site,mu));
+				GaugeGroup staple;
+				set_to_zero(staple);
+				for (int nu = 0; nu < 3; ++nu) {
+					if (nu != mu) {
+						staple += input[LT::sup(site,mu)][nu]*htrans(input[LT::sup(site,nu)][mu])*htrans(input[site][nu]);
+						staple += htrans(input[LT::sup(LT::sdn(site,nu),mu)][nu])*htrans(input[LT::sdn(site,nu)][mu])*input[LT::sdn(site,nu)][nu];
+					}
+				}
 				GaugeGroup omega = rho*staple*htrans(input[site][mu]);
 				GaugeGroup iStout = 0.5*(htrans(omega) - omega);
 				GaugeGroup identity;
