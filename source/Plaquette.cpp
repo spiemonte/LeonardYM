@@ -19,17 +19,26 @@ Plaquette::~Plaquette() { }
 
 void Plaquette::execute(environment_t& environment) {
 	typedef extended_gauge_lattice_t LT;
-	long_real_t plaquette = 0.;
+	long_real_t plaquette = 0., plaquette_t = 0., plaquette_s = 0.;
 
-#pragma omp parallel for reduction(+:plaquette)
+#pragma omp parallel for reduction(+:plaquette, plaquette_t, plaquette_s)
 	for (int site = 0; site < environment.gaugeLinkConfiguration.localsize; ++site) {
 		for (unsigned int mu = 0; mu < 4; ++mu) {
 			for (unsigned int nu = mu + 1; nu < 4; ++nu) {
-				plaquette += real(trace(environment.gaugeLinkConfiguration[site][mu]*environment.gaugeLinkConfiguration[LT::sup(site,mu)][nu]*htrans(environment.gaugeLinkConfiguration[LT::sup(site,nu)][mu])*htrans(environment.gaugeLinkConfiguration[site][nu])));
+				real_t tmp = real(trace(environment.gaugeLinkConfiguration[site][mu]*environment.gaugeLinkConfiguration[LT::sup(site,mu)][nu]*htrans(environment.gaugeLinkConfiguration[LT::sup(site,nu)][mu])*htrans(environment.gaugeLinkConfiguration[site][nu])));
+				plaquette += tmp;
+				if (mu == 3 || nu == 3) {
+					plaquette_t += tmp;
+				}
+				else {
+					plaquette_s += tmp;
+				}
 			}
 		}
 	}
 	reduceAllSum(plaquette);
+	reduceAllSum(plaquette_s);
+	reduceAllSum(plaquette_t);
 
 	if (environment.measurement && isOutputProcess()) {
 		GlobalOutput* output = GlobalOutput::getInstance();
@@ -38,6 +47,8 @@ void Plaquette::execute(environment_t& environment) {
 		typedef extended_gauge_lattice_t::Layout Layout;
 		std::cout << "Plaquette expectation value: " << plaquette/(6.*numberColors*Layout::globalVolume) << std::endl; //TODO
 		output->write("plaquette", plaquette/(6.*numberColors*Layout::globalVolume));
+		output->write("plaquette", plaquette_s/(3.*numberColors*Layout::globalVolume));
+		output->write("plaquette", plaquette_t/(3.*numberColors*Layout::globalVolume));
 
 		output->pop("plaquette");
 	}

@@ -10,6 +10,7 @@
 #include "WilsonGaugeAction.h"
 #include "GlobalOutput.h"
 #include "Plaquette.h"
+#define PI 3.14159265358979323846264338328
 
 namespace Update {
 
@@ -35,6 +36,7 @@ void WilsonFlow::execute(environment_t& environment) {
 	if (environment.measurement && isOutputProcess()) {
 		GlobalOutput* output = GlobalOutput::getInstance();
 		output->push("wilson_flow");
+		output->push("topological_charge");
 	}
 
 	real_t step = environment.configurations.get<real_t>("flow_step");
@@ -42,23 +44,31 @@ void WilsonFlow::execute(environment_t& environment) {
 	unsigned int integration_intervals = environment.configurations.get<unsigned int>("flow_integration_intervals");
 
 	for (real_t t = 0; t < flow_time; t += step) {
-		real_t energy = this->measureEnergy(initialLattice);
-		std::cout << "WilsonFlow::t*t*Energy at t " << t << ": " << t*t*energy << std::endl;
+		this->measureEnergy(initialLattice);
+		if (isOutputProcess()) std::cout << "WilsonFlow::t*t*Energy at t " << t << ": " << t*t*gaugeEnergy << std::endl;
+		if (isOutputProcess()) std::cout << "WilsonFlow::Topological charge at t " << t << ": " << topologicalCharge << std::endl;
 		this->integrate(initialLattice, finalLattice, action, step, integration_intervals);
 		initialLattice = finalLattice;
 
 		if (environment.measurement && isOutputProcess()) {
 			GlobalOutput* output = GlobalOutput::getInstance();
+
 			output->push("wilson_flow");
 			output->write("wilson_flow", t);
-			output->write("wilson_flow", t*t*energy);
+			output->write("wilson_flow", t*t*gaugeEnergy);
 			output->pop("wilson_flow");
+
+			output->push("topological_charge");
+			output->write("topological_charge", t);
+			output->write("topological_charge", topologicalCharge);
+			output->pop("topological_charge");
 		}
 	}
 
 	if (environment.measurement && isOutputProcess()) {
 		GlobalOutput* output = GlobalOutput::getInstance();
 		output->pop("wilson_flow");
+		output->pop("topological_charge");
 	}
 
 	delete action;
@@ -149,11 +159,12 @@ GaugeGroup WilsonFlow::exponential(const GaugeGroup& link, const GaugeGroup& for
 	return updatenew*link;
 }
 
-real_t WilsonFlow::measureEnergy(const extended_gauge_lattice_t& _lattice) {
+void WilsonFlow::measureEnergy(const extended_gauge_lattice_t& _lattice) {
 	typedef extended_fermion_lattice_t LT;
 	typedef extended_fermion_lattice_t::Layout Layout;
 	long_real_t energy = 0.;
-#pragma omp parallel for reduction(+:energy)
+	long_real_t topological = 0.;
+#pragma omp parallel for reduction(+:energy,topological)
 	for (int site = 0; site < _lattice.localsize; ++site) {
 		GaugeGroup *tmpF = new GaugeGroup[6];
 		tmpF[0] = htrans(_lattice[LT::sdn(site, 0)][0])*htrans(_lattice[LT::sdn(LT::sdn(site, 0), 1)][1])*(_lattice[LT::sdn(LT::sdn(site, 0), 1)][0])*(_lattice[LT::sdn(site, 1)][1]) + htrans(_lattice[LT::sdn(site, 1)][1])*(_lattice[LT::sdn(site, 1)][0])*(_lattice[LT::sup(LT::sdn(site, 1), 0)][1])*htrans(_lattice[site][0]) + (_lattice[site][0])*(_lattice[LT::sup(site, 0)][1])*htrans(_lattice[LT::sup(site, 1)][0])*htrans(_lattice[site][1]) + (_lattice[site][1])*htrans(_lattice[LT::sup(LT::sdn(site, 0), 1)][0])*htrans(_lattice[LT::sdn(site, 0)][1])*(_lattice[LT::sdn(site, 0)][0]);
@@ -166,12 +177,16 @@ real_t WilsonFlow::measureEnergy(const extended_gauge_lattice_t& _lattice) {
 			//Manual antialiasing, error of eigen!
 			GaugeGroup antialias = tmpF[i];
 			tmpF[i] = (1./8.)*(antialias - htrans(antialias));
-			energy += 4.*(1/4.)*real(trace(tmpF[i]*tmpF[i]));
+			energy += real(trace(tmpF[i]*tmpF[i]));
 		}
+		topological += real(trace(tmpF[2]*tmpF[3]) - trace(tmpF[1]*tmpF[4]) + trace(tmpF[0]*tmpF[5]))/(4.*PI*PI);
 		delete[] tmpF;
 	}
 	reduceAllSum(energy);
-	return -energy/Layout::globalVolume;
+	reduceAllSum(topological);
+
+	topologicalCharge = topological;
+	gaugeEnergy = -energy/Layout::globalVolume;
 	/*
 	std::cout << "Primo: " << -energy/Layout::globalVolume << std::endl;
 

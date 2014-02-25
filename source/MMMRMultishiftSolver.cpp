@@ -7,6 +7,35 @@
 
 #include "MMMRMultishiftSolver.h"
 #include "AlgebraUtils.h"
+#ifdef TEST_PAPI_SPEED
+#include <papi.h>
+
+
+static void test_fail(char *file, int line, char *call, int retval) {
+	printf("%s\tFAILED\nLine # %d\n", file, line);
+
+    if ( retval == PAPI_ESYS ) {
+        char buf[128];
+        memset( buf, '\0', sizeof(buf) );
+        sprintf(buf, "System error in %s:", call );
+        perror(buf);
+    }
+
+    else if ( retval > 0 ) {
+        printf("Error calculating: %s\n", call );
+    }
+
+    else {
+        char errstring[PAPI_MAX_STR_LEN];
+        //PAPI_perror(retval, errstring, PAPI_MAX_STR_LEN );
+        std::cout << "Papi fatal error! " << std::endl;
+        //printf("Error in %s: %s\n", call, errstring );
+    }
+    printf("\n");
+    exit(1);
+}
+
+#endif
 
 namespace Update {
 
@@ -19,6 +48,12 @@ bool MMMRMultishiftSolver::solve(DiracOperator* dirac, const extended_dirac_vect
 	reduced_dirac_vector_t source = original_source;
 	std::vector<reduced_dirac_vector_t> solutions(original_solutions.size());
 
+#ifdef TEST_PAPI_SPEED
+	float real_time, proc_time, mflops;
+	long long flpins;
+	int retval;
+	if((retval=PAPI_flops( &real_time, &proc_time, &flpins, &mflops)) < PAPI_OK) test_fail(__FILE__, __LINE__, "PAPI_flops", retval);
+#endif
 	
 	//The index of the first solution
 	unsigned int firstSolution = 0;
@@ -141,6 +176,10 @@ bool MMMRMultishiftSolver::solve(DiracOperator* dirac, const extended_dirac_vect
 			for (unsigned int index = 0; index < shifts.size(); ++index) {
 				original_solutions[index] = solutions[index];
 			}
+#ifdef TEST_PAPI_SPEED
+			if((retval=PAPI_flops( &real_time, &proc_time, &flpins, &mflops)) < PAPI_OK) test_fail(__FILE__, __LINE__, "PAPI_flops", retval);
+			if (isOutputProcess()) std::cout << "MFLOPS for Single Krilov Space Solver: " << mflops << " MFLOPS. " << std::endl;
+#endif
 			if (isOutputProcess()) std::cout << "MMMRMultishiftSolver::Convergence in " << i << " steps" << std::endl;
 			delete[] f;
 			return flag;

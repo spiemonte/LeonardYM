@@ -24,7 +24,11 @@ protected:
 	void getForce(const extended_gauge_lattice_t& lattice, extended_gauge_lattice_t& force, GaugeAction* action);
 	GaugeGroup exponential(const GaugeGroup& link, const GaugeGroup& force, real_t epsilon);
 
-	real_t measureEnergy(const extended_gauge_lattice_t& lattice);
+	void measureEnergy(const extended_gauge_lattice_t& lattice);
+
+private:
+	real_t gaugeEnergy;
+	real_t topologicalCharge;
 };
 
 } /* namespace Update */
