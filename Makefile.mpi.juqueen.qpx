@@ -11,7 +11,7 @@ CPP      = mpigcc
 OPTIMIZE = -O2 -fopenmp
 INC	     = -I./extra_libs/Eigen  -I/bgsys/local/boost/1.47.0/
 CFLAGS   = $(OPTIMIZE) $(INC)
-CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/MatrixBaseExtension.h\"" $(adj) -DENABLE_MPI -DNUMCOLORS=$(nc) -DMULTITHREADING -DQPX
+CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/MatrixBaseExtension.h\"" $(adj) -DENABLE_MPI -DNUMCOLORS=$(nc) -DMULTITHREADING -DQPX -DEIGEN
 
 include Makefile.obj.mk
 

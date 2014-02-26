@@ -11,7 +11,7 @@ CPP      = mpiicpc
 OPTIMIZE = -O3 -Wall -Wextra -pipe -openmp -axCORE-AVX2 -ipo -no-prec-div
 INC     = -I./extra_libs/Eigen -I./extra_libs/
 CFLAGS   = $(OPTIMIZE) $(INC)
-CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/MatrixBaseExtension.h\"" -DNUMCOLORS=$(nc) -DMULTITHREADING -I/lrz/sys/libraries/boost/1.45_icc/include/ $(adj) -DENABLE_MPI
+CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/MatrixBaseExtension.h\"" -DNUMCOLORS=$(nc) -DMULTITHREADING -I/lrz/sys/libraries/boost/1.45_icc/include/ $(adj) -DENABLE_MPI -DEIGEN
 
 include Makefile.obj.mk
 

@@ -42,6 +42,26 @@ public:
 		gen[1] = gen[1]/2.;
 		gen[2] = gen[2]/2.;
 #endif
+#ifdef MATRIXTOOLKIT
+		gen[0][0][0] = 0.;
+		gen[0][0][1] = 1.;
+		gen[0][1][0] = 1.;
+		gen[0][1][1] = 0.;
+
+		gen[1][0][0] = 0.;
+		gen[1][0][1] = -I;
+		gen[1][1][0] = I;
+		gen[1][1][1] = 0.;
+
+		gen[2][0][0] = 1.;
+		gen[2][0][1] = 0.;
+		gen[2][1][0] = 0.;
+		gen[2][1][1] = -1.;
+
+		gen[0] = gen[0]/2.;
+		gen[1] = gen[1]/2.;
+		gen[2] = gen[2]/2.;
+#endif
 	}
 
 	const GaugeGroup& get(unsigned int c) const {
@@ -73,6 +93,20 @@ public:
 		gen[2] << 0 << -I << 0 << arma::endr
 			   << I <<  0 << 0 << arma::endr
 			   << 0 <<  0 << 0;
+#endif
+#ifdef MATRIXTOOLKIT
+		set_to_zero(gen[0]);
+		set_to_zero(gen[1]);
+		set_to_zero(gen[2]);
+
+		gen[0][1][2] = -I;
+		gen[0][2][1] = I;
+
+		gen[1][0][2] = I;
+		gen[1][2][0] = -I;
+
+		gen[2][0][1] = -I;
+		gen[2][1][0] = I;
 #endif
 	}
 

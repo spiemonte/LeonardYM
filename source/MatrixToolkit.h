@@ -1,8 +1,42 @@
 #ifndef MATRIXTOOLKIT_H
 #define MATRIXTOOLKIT_H
 #include <complex>
+#include <iostream>
 
 namespace matrix_toolkit {
+
+template<typename T> class complex_container { };
+
+template<typename T> class complex_container< std::complex<T> > {
+public:
+	static std::complex<T> conj(const std::complex<T>& c) {
+		return std::complex<T>(real(c),-imag(c));
+	}
+};
+
+template<> class complex_container< double > {
+public:
+	static double conj(const double& c) {
+		return c;
+	}
+};
+
+template<typename T, typename U> class tr { };
+
+template<typename T> class tr<T,T> {
+	public:
+		typedef T type;
+};
+
+template<typename T> class tr< std::complex<T> , T> {
+	public:
+		typedef std::complex<T> type;
+};
+
+template<typename T> class tr< T, std::complex<T> > {
+	public:
+		typedef std::complex<T> type;
+};
 
 template<typename T, int NN> 
 class Vector {
@@ -16,6 +50,13 @@ public:
 	Vector& operator=(const Vector& snd) {
 		for (int i = 0; i < NN; ++i) {
 			data[i] = snd.data[i];
+		}
+		return *this;
+	}
+
+	Vector& operator-() {
+		for (int i = 0; i < NN; ++i) {
+			data[i] = -data[i];
 		}
 		return *this;
 	}
@@ -89,7 +130,7 @@ private:
 template<typename T, int NN> T vector_dot(const Vector<T, NN>& a, const Vector<T, NN>& b) {
 	T result = 0;
 	for (int i = 0; i < NN; ++i) {
-		result += a[i]*b[i];
+		result += complex_container<T>::conj(a[i])*b[i];
 	}
 	return result;
 }
@@ -156,13 +197,13 @@ public:
 		return result;
 	}
 
-	Matrix operator*(const Matrix& snd) const {
-		Matrix result;
+	template<typename U> Matrix< typename tr<U,T>::type , NN> operator*(const Matrix<U,NN>& snd) const {
+		Matrix< typename tr<U,T>::type , NN> result;
 		for (int i = 0; i < NN; ++i) {
 			for (int j = 0; j< NN; ++j) {
 				result.data[i][j] = 0.;
 				for (int k = 0; k < NN; ++k) {
-					result.data[i][j] += data[i][k]*snd.data[k][j];
+					result.data[i][j] += data[i][k]*snd[k][j];
 				}
 			}
 		}
@@ -299,13 +340,13 @@ template<typename T, int NN> Matrix<T, NN> htrans(const Matrix<T, NN>& matrix) {
 	Matrix<T, NN> result;
 	for (int i = 0; i < NN; ++i) {
 		for (int j = 0; j< NN; ++j) {
-			result.at(i,j) = matrix.at(j,i);
+			result.at(i,j) = complex_container<T>::conj(matrix.at(j,i));
 		}
 	}
 	return result;
 }
 
-template<typename T, int NN> Matrix<std::complex<T>, NN> htrans(const Matrix<std::complex<T>, NN>& matrix) {
+/*template<typename T, int NN> Matrix<std::complex<T>, NN> htrans(const Matrix<std::complex<T>, NN>& matrix) {
 	Matrix<std::complex<T>, NN> result;
 	for (int i = 0; i < NN; ++i) {
 		for (int j = 0; j< NN; ++j) {
@@ -313,19 +354,19 @@ template<typename T, int NN> Matrix<std::complex<T>, NN> htrans(const Matrix<std
 		}
 	}
 	return result;
-}
+}*/
 
 template<typename T, int NN> Matrix<T, NN> adj(const Matrix<T, NN>& matrix) {
 	Matrix<T, NN> result;
 	for (int i = 0; i < NN; ++i) {
 		for (int j = 0; j< NN; ++j) {
-			result.at(i,j) = matrix.at(j,i);
+			result.at(i,j) = complex_container<T>::conj(matrix.at(j,i));
 		}
 	}
 	return result;
 }
 
-template<typename T, int NN> Matrix<std::complex<T>, NN> adj(const Matrix<std::complex<T>, NN>& matrix) {
+/*template<typename T, int NN> Matrix<std::complex<T>, NN> adj(const Matrix<std::complex<T>, NN>& matrix) {
 	Matrix<std::complex<T>, NN> result;
 	for (int i = 0; i < NN; ++i) {
 		for (int j = 0; j< NN; ++j) {
@@ -333,7 +374,7 @@ template<typename T, int NN> Matrix<std::complex<T>, NN> adj(const Matrix<std::c
 		}
 	}
 	return result;
-}
+}*/
 
 template<typename T, int NN> T trace(const Matrix<T, NN>& matrix) {
 	T result = 0.;
@@ -343,8 +384,8 @@ template<typename T, int NN> T trace(const Matrix<T, NN>& matrix) {
 	return result;
 }
 
-template<typename T, int NN> Matrix<T, NN> operator*(const T& a, const Matrix<T, NN>& b) {
-	Matrix<T, NN> result;
+template<typename U, typename T, int NN> Matrix< typename tr<U,T>::type, NN> operator*(const U& a, const Matrix<T, NN>& b) {
+	Matrix<typename tr<U,T>::type, NN> result;
 	for (int i = 0; i < NN; ++i) {
 		for (int j = 0; j < NN; ++j) {
 			result[i][j] = a*b[i][j];
@@ -353,11 +394,21 @@ template<typename T, int NN> Matrix<T, NN> operator*(const T& a, const Matrix<T,
 	return result;
 }
 
-template<typename T, int NN> Matrix<T, NN> operator*(const Matrix<T, NN>& a, const T& b) {
-	Matrix<T, NN> result;
+template<typename U, typename T, int NN> Matrix< typename tr<U,T>::type, NN> operator*(const Matrix<U, NN>& a, const T& b) {
+	Matrix<typename tr<U,T>::type, NN> result;
 	for (int i = 0; i < NN; ++i) {
 		for (int j = 0; j < NN; ++j) {
 			result[i][j] = a[i][j]*b;
+		}
+	}
+	return result;
+}
+
+template<typename U, typename T, int NN> Matrix< typename tr<U,T>::type, NN> operator/(const Matrix<U, NN>& a, const T& b) {
+	Matrix<typename tr<U,T>::type, NN> result;
+	for (int i = 0; i < NN; ++i) {
+		for (int j = 0; j < NN; ++j) {
+			result[i][j] = a[i][j]/b;
 		}
 	}
 	return result;
@@ -369,6 +420,14 @@ template<typename T, int NN> void set_to_zero(Matrix<T, NN>& a) {
 			a[i][j] = 0.;
 		}
 	}
+}
+
+template<typename T, int NN> T trace(Matrix<T, NN>& a) {
+	T result(0.);
+	for (int i = 0; i < NN; ++i) {
+		result += a[i][i];
+	}
+	return result;
 }
 
 template<typename T, int NN> void set_to_identity(Matrix<T, NN>& a) {
@@ -393,6 +452,27 @@ template<typename T> void eigensystem(Vector<T, 2>& eigenvalues, Matrix<T, 2>& e
 	eigenvectors.at(0,1) /= norm0;
 	eigenvectors.at(1,0) /= norm1;
 	eigenvectors.at(1,1) /= norm1;
+}
+
+template<typename T> Matrix< std::complex<T>, 2> matrix_exp(const Matrix< std::complex<T>, 2>& matrix) {
+	Matrix< std::complex<T>, 2> result;
+	T n1(imag(matrix(0,0)));
+	T n2(imag(matrix(0,1)));
+	T n3(real(matrix(0,1)));
+	T norm(sqrt(n1*n1 + n2*n2 + n3*n3));
+	if (norm < 0.0000001) {
+		result(0,0) = std::complex<T>(1-norm*norm/2.,n1*(1-norm*norm/6.));
+		result(0,1) = std::complex<T>(n3*(1-norm*norm/6.),n2*(1-norm*norm/6.));
+		result(1,0) = std::complex<T>(-n3*(1-norm*norm/6.),n2*(1-norm*norm/6.));
+		result(1,1) = std::complex<T>(1-norm*norm/2.,-n1*(1-norm*norm/6.));
+	}
+	else {
+		result(0,0) = std::complex<T>(cos(norm),n1*sin(norm)/norm);
+		result(0,1) = std::complex<T>(n3*sin(norm)/norm,n2*sin(norm)/norm);
+		result(1,0) = std::complex<T>(-n3*sin(norm)/norm,n2*sin(norm)/norm);
+		result(1,1) = std::complex<T>(cos(norm),-n1*sin(norm)/norm);
+	}
+	return result;
 }
 
 template<typename T> 
@@ -534,6 +614,14 @@ private:
 	int n;
 };
 
+template<typename T> void set_to_zero(Matrix<T, -1>& a) {
+	for (int  i = 0; i < a.nRows(); ++i) {
+		for (int  j = 0; j < a.nCols(); ++j) {
+			a[i][j] = 0.;
+		}
+	}
+}
+
 template<typename T> Matrix<T, -1> inverse(const Matrix<T, -1>& ptr) {
 	int n = ptr.nRows();
     Matrix<T, -1> temp(n,n);
@@ -603,6 +691,23 @@ template<typename T> Matrix<T, -1> inverse(const Matrix<T, -1>& ptr) {
         }
     }
     return temp;
+}
+
+template<typename T, int NN> std::ostream& operator<<(std::ostream& os, const Matrix<T, NN>& m) {
+	os << std::endl;
+	for (int i = 0; i < NN; ++i) {
+		for (int j = 0; j < NN; ++j) os << m[i][j]<< " ";
+		os << std::endl;
+	}
+	os << std::endl;
+	return os;
+}
+
+template<typename T, int NN> std::ostream& operator<<(std::ostream& os, const Vector<T, NN>& v) {
+	os << std::endl;
+	for (int j = 0; j < NN; ++j) os << v[j]<< " ";
+	os << std::endl;
+	return os;
 }
 
 }

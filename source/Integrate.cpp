@@ -45,21 +45,14 @@ void Integrate::updateLinkConfiguration(extended_gauge_lattice_t& linkConfigurat
 			arma::eig_gen(eigval, eigvec, momenta[site][mu]);
 			GaugeGroup update;
 			set_to_zero(update);
-			for (unsigned int i = 0; i < numberColors; ++i) {
+			for (int i = 0; i < numberColors; ++i) {
 				update.at(i,i) = exp(epsilon*eigval[i]);
 			}
 			GaugeGroup updatenew = eigvec * update * htrans(eigvec);
+			//std::cout << updatenew << std::endl << std::endl;
 #endif
 #ifdef MATRIXTOOLKIT
-			FundamentalVector eigval;
-			GaugeGroup eigvec;
-			matrix_toolkit::eigensystem(eigval, eigvec, momenta[site][mu]);
-			GaugeGroup update;
-			set_to_zero(update);
-			for (unsigned int i = 0; i < numberColors; ++i) {
-				update.at(i,i) = exp(epsilon*eigval[i]);
-			}
-			GaugeGroup updatenew = eigvec * update * htrans(eigvec);
+			GaugeGroup updatenew = matrix_exp(epsilon*momenta[site][mu]);
 #endif
 			linkConfiguration[site][mu] = updatenew*linkConfiguration[site][mu];
 		}

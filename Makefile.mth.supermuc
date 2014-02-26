@@ -11,7 +11,7 @@ CPP      = g++
 OPTIMIZE = -O3 -march=native -Wall -Wextra -pipe -fopenmp
 INC     = -I./extra_libs/Eigen -I./extra_libs/
 CFLAGS   = $(OPTIMIZE) $(INC)
-CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/MatrixBaseExtension.h\"" -DNUMCOLORS=$(nc) -DMULTITHREADING -I/lrz/sys/libraries/boost/1.45_gcc/include $(adj)
+CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/MatrixBaseExtension.h\"" -DNUMCOLORS=$(nc) -DMULTITHREADING -I/lrz/sys/libraries/boost/1.45_gcc/include $(adj) -DEIGEN
 
 include Makefile.obj.mk
 

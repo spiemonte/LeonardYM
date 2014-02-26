@@ -48,7 +48,7 @@ void DiracEigenSolver::maximumEigenvalues(DiracOperator* diracOperator, std::vec
 	diracOperator->multiply(w,V[0]);
 	std::complex<real_t> alpha = static_cast< std::complex<real_t> >(AlgebraUtils::dot(V[0], w));
 	matrix_t H(steps,steps);
-	H.zeros();
+	set_to_zero(H);
 	//f = w - alpha*V[0]
 #pragma omp parallel for
 	for (int site = 0; site < w.localsize; ++site) {

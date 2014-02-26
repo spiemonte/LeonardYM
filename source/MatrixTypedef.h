@@ -16,8 +16,6 @@
 #include <omp.h>
 #endif
 
-#define EIGEN
-
 #ifdef EIGEN
 
 #define EIGEN_MATRIXBASE_PLUGIN MBE

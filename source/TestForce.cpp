@@ -143,7 +143,7 @@ void TestForce::genericTestForce(const environment_t& env, Energy* energy, const
 	while (epsilon > 0.00001) {
 		//First component
 		GaugeGroup expm;
-		expm.zeros();
+		set_to_zero(expm);
 
 		//Third component
 		for (unsigned int i = 0; i < numberColors - 1; ++i) {
