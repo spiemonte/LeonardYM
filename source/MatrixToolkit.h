@@ -224,17 +224,6 @@ public:
 		return *this;
 	}
 
-	template<typename U> Vector<U, NN> operator*(const Vector<U, NN>& snd) const {
-		Vector<U, NN> result;
-		for (int i = 0; i < NN; ++i) {
-			result[i] = 0.;
-			for (int j = 0; j < NN; ++j) {
-				result[i] += data[i][j]*snd[j];
-			}
-		}
-		return result;
-	}
-
 	Matrix& operator+=(const Matrix& snd) {
 		for (int i = 0; i < NN; ++i) {
 			for (int j = 0; j < NN; ++j) {
@@ -399,6 +388,17 @@ template<typename U, typename T, int NN> Matrix< typename tr<U,T>::type, NN> ope
 	for (int i = 0; i < NN; ++i) {
 		for (int j = 0; j < NN; ++j) {
 			result[i][j] = a[i][j]*b;
+		}
+	}
+	return result;
+}
+
+template<typename T, typename U, int NN> Vector< typename tr<U,T>::type , NN> operator*(const Matrix<T,NN>& matrix, const Vector<U, NN>& snd) const {
+	Vector< typename tr<U,T>::type , NN> result;
+	for (int i = 0; i < NN; ++i) {
+		result[i] = 0.;
+		for (int j = 0; j < NN; ++j) {
+			result[i] += matrix[i][j]*snd[j];
 		}
 	}
 	return result;
