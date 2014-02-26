@@ -393,7 +393,7 @@ template<typename U, typename T, int NN> Matrix< typename tr<U,T>::type, NN> ope
 	return result;
 }
 
-template<typename T, typename U, int NN> Vector< typename tr<U,T>::type , NN> operator*(const Matrix<T,NN>& matrix, const Vector<U, NN>& snd) const {
+template<typename T, typename U, int NN> Vector< typename tr<U,T>::type , NN> operator*(const Matrix<T,NN>& matrix, const Vector<U, NN>& snd) {
 	Vector< typename tr<U,T>::type , NN> result;
 	for (int i = 0; i < NN; ++i) {
 		result[i] = 0.;
