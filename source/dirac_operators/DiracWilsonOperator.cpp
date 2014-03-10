@@ -118,7 +118,7 @@ inline GaugeVector multiply_by_I(const GaugeVector& a) {
 	return result;
 }
 
-inline double conj(const double& t) {
+inline real_t conj(const real_t& t) {
 	return t;
 }
 
@@ -2255,8 +2255,8 @@ void DiracWilsonOperator::multiply(dirac_vector_t& output, const dirac_vector_t&
 		 }
 		 if (!gamma5) {
 			for (int i = 0; i < diracVectorLength; ++i) {
-				output[site][2][i] = -output[site][2][i]+2.*alpha*vector2[site][2][i];
-				output[site][3][i] = -output[site][3][i]+2.*alpha*vector2[site][3][i];
+				output[site][2][i] = -output[site][2][i]+static_cast<real_t>(2)*alpha*vector2[site][2][i];
+				output[site][3][i] = -output[site][3][i]+static_cast<real_t>(2)*alpha*vector2[site][3][i];
 			}
 		}
 	 }

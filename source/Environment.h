@@ -14,6 +14,8 @@
 #ifdef ENABLE_MPI
 #include "./MPILattice/MPILayout.h"
 #include "./MPILattice/ReducedStencil.h"
+#include "./MPILattice/ReducedUpStencil.h"
+#include "./MPILattice/ReducedDownStencil.h"
 #include "./MPILattice/StandardStencil.h"
 #include "./MPILattice/ExtendedStencil.h"
 
@@ -28,6 +30,9 @@ typedef Lattice::Lattice<Update::FermionicGroup[4], Lattice::MpiLayout<Lattice::
 typedef Lattice::Lattice<Update::GaugeVector[4], Lattice::MpiLayout<Lattice::ExtendedStencil> > extended_dirac_vector_t;
 typedef Lattice::Lattice<Update::GaugeVector[4], Lattice::MpiLayout<Lattice::StandardStencil> > standard_dirac_vector_t;
 typedef Lattice::Lattice<Update::GaugeVector[4], Lattice::MpiLayout<Lattice::ReducedStencil> > reduced_dirac_vector_t;
+
+typedef Lattice::Lattice<Update::GaugeVector[2], Lattice::MpiLayout<Lattice::ReducedUpStencil> > half_spinor_up_vector_t;
+typedef Lattice::Lattice<Update::GaugeVector[2], Lattice::MpiLayout<Lattice::ReducedDownStencil> > half_spinor_down_vector_t;
 
 typedef Lattice::Lattice<Update::FermionicGroup[6], Lattice::MpiLayout<Lattice::ExtendedStencil> > extended_field_strength_lattice_t;
 typedef Lattice::Lattice<Update::FermionicGroup[6], Lattice::MpiLayout<Lattice::StandardStencil> > standard_field_strength_lattice_t;
@@ -52,6 +57,9 @@ typedef Lattice::Lattice<Update::FermionicGroup[4], Lattice::LocalLayout > reduc
 typedef Lattice::Lattice<Update::GaugeVector[4], Lattice::LocalLayout > extended_dirac_vector_t;
 typedef Lattice::Lattice<Update::GaugeVector[4], Lattice::LocalLayout > standard_dirac_vector_t;
 typedef Lattice::Lattice<Update::GaugeVector[4], Lattice::LocalLayout > reduced_dirac_vector_t;
+
+typedef Lattice::Lattice<Update::GaugeVector[2], Lattice::LocalLayout > half_spinor_up_vector_t;
+typedef Lattice::Lattice<Update::GaugeVector[2], Lattice::LocalLayout > half_spinor_down_vector_t;
 
 typedef Lattice::Lattice<Update::FermionicGroup[6], Lattice::LocalLayout > extended_field_strength_lattice_t;
 typedef Lattice::Lattice<Update::FermionicGroup[6], Lattice::LocalLayout > standard_field_strength_lattice_t;

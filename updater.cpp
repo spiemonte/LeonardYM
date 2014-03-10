@@ -349,15 +349,21 @@ int main(int ac, char* av[]) {
 		Lattice::MpiLayout<Lattice::ExtendedStencil>::load(basename+"extended_layout");
 		Lattice::MpiLayout<Lattice::StandardStencil>::load(basename+"standard_layout");
 		Lattice::MpiLayout<Lattice::ReducedStencil>::load(basename+"reduced_layout");
+		//Lattice::MpiLayout<Lattice::ReducedUpStencil>::load(basename+"reduced_up_layout");
+		//Lattice::MpiLayout<Lattice::ReducedDownStencil>::load(basename+"reduced_down_layout");
 	} else {
 		Lattice::MpiLayout<Lattice::ExtendedStencil>::initialize();
 		Lattice::MpiLayout<Lattice::StandardStencil>::initialize();
 		Lattice::MpiLayout<Lattice::ReducedStencil>::initialize();
+		//Lattice::MpiLayout<Lattice::ReducedUpStencil>::initialize();
+		//Lattice::MpiLayout<Lattice::ReducedDownStencil>::initialize();
 		
 		std::string basename = vm["output_directory_configurations"].as<std::string>();
 		Lattice::MpiLayout<Lattice::ExtendedStencil>::save(basename+"extended_layout");
 		Lattice::MpiLayout<Lattice::StandardStencil>::save(basename+"standard_layout");
 		Lattice::MpiLayout<Lattice::ReducedStencil>::save(basename+"reduced_layout");
+		//Lattice::MpiLayout<Lattice::ReducedUpStencil>::save(basename+"reduced_up_layout");
+		//Lattice::MpiLayout<Lattice::ReducedDownStencil>::save(basename+"reduced_down_layout");
 	}
 
 	if (vm.count("print_report_layout")) {

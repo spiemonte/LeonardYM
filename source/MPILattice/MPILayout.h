@@ -366,12 +366,15 @@ template<typename Stencil> class MpiLayout {
 			if (coversion_map.count(T::id)) return coversion_map[T::id];
 			else {
 				int* result = new int[localsize];
+#pragma omp parallel for
 				for (int site = 0; site < localsize; ++site) result[site] = -1;
+#pragma omp parallel for
 				for (int site = 0; site < globalVolume; ++site)	{
 					if (localIndex[site] != -1 && localIndex[site] < localsize) {
 						result[localIndex[site]] = layout.localIndex[site];
 					}
 				}
+#pragma omp parallel for
 				for (int site = 0; site < localsize; ++site) if (result[site] == -1) std::cout << "Fatal error in exchangeTable conversions!" << std::endl;
 				coversion_map[T::id] = result;
 				return result;

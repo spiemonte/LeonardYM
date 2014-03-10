@@ -70,6 +70,7 @@ template<typename T, typename TLayout> class Lattice {
 		
 		template<typename ULayout> Lattice& operator=(const Lattice<T, ULayout>& copy) {
 			int* map = layout.getMapIndex(copy.getLayout());
+#pragma omp parallel for
 			for (int site = 0; site < layout.localsize; ++site) {
 				memcpy(&localdata[site], &copy[map[site]], sizeof(T));
 			}
@@ -96,6 +97,7 @@ template<typename T, typename TLayout> class Lattice {
 			}
 #endif
 			int* map = layout.getMapIndex(copy.getLayout());
+#pragma omp parallel for
 			for (int site = 0; site < layout.localsize; ++site) {
 				memcpy(&localdata[site], &copy[map[site]], sizeof(T));
 			}

@@ -21,7 +21,7 @@ OutputSweep::OutputSweep() : LatticeSweep() { }
 
 OutputSweep::~OutputSweep() { }
 
-void OutputSweep::execute(environment_t& environment) {
+void OutputSweep::execute(environment_t& environment) {/*
 	std::string format_name = environment.configurations.get<std::string>("format_name");
 	typedef extended_gauge_lattice_t::Layout LT;
 	typedef extended_gauge_lattice_t::Layout Layout;
@@ -267,7 +267,7 @@ void OutputSweep::execute(environment_t& environment) {
 			std::cout << "OuputSweep::munster_format not implemented for NC>2!" << std::endl;
 		}
 #endif
-	}
+	}*/
 	/*
 	
 	

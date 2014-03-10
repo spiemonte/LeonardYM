@@ -15,6 +15,7 @@ namespace Update {
 class WilsonFlow : public LatticeSweep {
 public:
 	WilsonFlow();
+	WilsonFlow(const WilsonFlow&);
 	virtual ~WilsonFlow();
 
 
@@ -29,6 +30,9 @@ protected:
 private:
 	real_t gaugeEnergy;
 	real_t topologicalCharge;
+
+	long_real_t *energy_correlator;
+	long_real_t *topological_correlator;
 };
 
 } /* namespace Update */

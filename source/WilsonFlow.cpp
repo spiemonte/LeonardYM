@@ -14,7 +14,9 @@
 
 namespace Update {
 
-WilsonFlow::WilsonFlow() { }
+WilsonFlow::WilsonFlow() : energy_correlator(0), topological_correlator(0) { }
+
+WilsonFlow::WilsonFlow(const WilsonFlow&) : LatticeSweep(), energy_correlator(0), topological_correlator(0) { }
 
 WilsonFlow::~WilsonFlow() { }
 
@@ -33,10 +35,16 @@ void WilsonFlow::execute(environment_t& environment) {
 		exit(1);
 	}
 
+	typedef extended_fermion_lattice_t::Layout Layout;
+	if (energy_correlator == 0) energy_correlator = new long_real_t[Layout::glob_t];
+	if (topological_correlator == 0) topological_correlator = new long_real_t[Layout::glob_t];
+
 	if (environment.measurement && isOutputProcess()) {
 		GlobalOutput* output = GlobalOutput::getInstance();
 		output->push("wilson_flow");
 		output->push("topological_charge");
+		output->push("energy_correlator");
+		output->push("topological_correlator");
 	}
 
 	real_t step = environment.configurations.get<real_t>("flow_step");
@@ -62,6 +70,15 @@ void WilsonFlow::execute(environment_t& environment) {
 			output->write("topological_charge", t);
 			output->write("topological_charge", topologicalCharge);
 			output->pop("topological_charge");
+
+			output->push("energy_correlator");
+			output->push("topological_correlator");
+			for (int t = 0; t < Layout::glob_t; ++t) {
+				output->write("energy_correlator", energy_correlator[t]/Layout::glob_spatial_volume);
+				output->write("topological_correlator", topological_correlator[t]/Layout::glob_spatial_volume);
+			}
+			output->pop("energy_correlator");
+			output->pop("topological_correlator");
 		}
 	}
 
@@ -69,6 +86,8 @@ void WilsonFlow::execute(environment_t& environment) {
 		GlobalOutput* output = GlobalOutput::getInstance();
 		output->pop("wilson_flow");
 		output->pop("topological_charge");
+		output->pop("energy_correlator");
+		output->pop("topological_correlator");
 	}
 
 	delete action;
@@ -164,9 +183,31 @@ void WilsonFlow::measureEnergy(const extended_gauge_lattice_t& _lattice) {
 	typedef extended_fermion_lattice_t::Layout Layout;
 	long_real_t energy = 0.;
 	long_real_t topological = 0.;
+
+#ifdef MULTITHREADING
+	long_real_t result_energy[Layout::glob_t][omp_get_max_threads()];
+	long_real_t result_topological[Layout::glob_t][omp_get_max_threads()];
+	for (int i = 0; i < Layout::glob_t; ++i) {
+		for (int j = 0; j < omp_get_max_threads(); ++j) {
+			result_energy[i][j] = 0.;
+			result_topological[i][j] = 0.;
+		}
+	}
+#endif
+#ifndef MULTITHREADING
+	long_real_t result_energy[Layout::glob_t];
+	long_real_t result_topological[Layout::glob_t];
+	for (int i = 0; i < Layout::glob_t; ++i) {
+		result_energy[i] = 0.;
+		result_topological[i] = 0.;
+	}
+#endif
+
 #pragma omp parallel for reduction(+:energy,topological)
 	for (int site = 0; site < _lattice.localsize; ++site) {
 		GaugeGroup *tmpF = new GaugeGroup[6];
+		long_real_t site_energy = 0.;
+		long_real_t site_topological = 0.;
 		tmpF[0] = htrans(_lattice[LT::sdn(site, 0)][0])*htrans(_lattice[LT::sdn(LT::sdn(site, 0), 1)][1])*(_lattice[LT::sdn(LT::sdn(site, 0), 1)][0])*(_lattice[LT::sdn(site, 1)][1]) + htrans(_lattice[LT::sdn(site, 1)][1])*(_lattice[LT::sdn(site, 1)][0])*(_lattice[LT::sup(LT::sdn(site, 1), 0)][1])*htrans(_lattice[site][0]) + (_lattice[site][0])*(_lattice[LT::sup(site, 0)][1])*htrans(_lattice[LT::sup(site, 1)][0])*htrans(_lattice[site][1]) + (_lattice[site][1])*htrans(_lattice[LT::sup(LT::sdn(site, 0), 1)][0])*htrans(_lattice[LT::sdn(site, 0)][1])*(_lattice[LT::sdn(site, 0)][0]);
 		tmpF[1] = htrans(_lattice[LT::sdn(site, 0)][0])*htrans(_lattice[LT::sdn(LT::sdn(site, 0), 2)][2])*(_lattice[LT::sdn(LT::sdn(site, 0), 2)][0])*(_lattice[LT::sdn(site, 2)][2]) + htrans(_lattice[LT::sdn(site, 2)][2])*(_lattice[LT::sdn(site, 2)][0])*(_lattice[LT::sup(LT::sdn(site, 2), 0)][2])*htrans(_lattice[site][0]) + (_lattice[site][0])*(_lattice[LT::sup(site, 0)][2])*htrans(_lattice[LT::sup(site, 2)][0])*htrans(_lattice[site][2]) + (_lattice[site][2])*htrans(_lattice[LT::sup(LT::sdn(site, 0), 2)][0])*htrans(_lattice[LT::sdn(site, 0)][2])*(_lattice[LT::sdn(site, 0)][0]);
 		tmpF[2] = htrans(_lattice[LT::sdn(site, 0)][0])*htrans(_lattice[LT::sdn(LT::sdn(site, 0), 3)][3])*(_lattice[LT::sdn(LT::sdn(site, 0), 3)][0])*(_lattice[LT::sdn(site, 3)][3]) + htrans(_lattice[LT::sdn(site, 3)][3])*(_lattice[LT::sdn(site, 3)][0])*(_lattice[LT::sup(LT::sdn(site, 3), 0)][3])*htrans(_lattice[site][0]) + (_lattice[site][0])*(_lattice[LT::sup(site, 0)][3])*htrans(_lattice[LT::sup(site, 3)][0])*htrans(_lattice[site][3]) + (_lattice[site][3])*htrans(_lattice[LT::sup(LT::sdn(site, 0), 3)][0])*htrans(_lattice[LT::sdn(site, 0)][3])*(_lattice[LT::sdn(site, 0)][0]);
@@ -177,16 +218,50 @@ void WilsonFlow::measureEnergy(const extended_gauge_lattice_t& _lattice) {
 			//Manual antialiasing, error of eigen!
 			GaugeGroup antialias = tmpF[i];
 			tmpF[i] = (1./8.)*(antialias - htrans(antialias));
-			energy += real(trace(tmpF[i]*tmpF[i]));
+			site_energy += real(trace(tmpF[i]*tmpF[i]));
 		}
-		topological += real(trace(tmpF[2]*tmpF[3]) - trace(tmpF[1]*tmpF[4]) + trace(tmpF[0]*tmpF[5]))/(4.*PI*PI);
+		site_topological = real(trace(tmpF[2]*tmpF[3]) - trace(tmpF[1]*tmpF[4]) + trace(tmpF[0]*tmpF[5]))/(4.*PI*PI);
+
+		energy += site_energy;
+		topological += site_topological;
+
+#ifndef MULTITHREADING
+		result_energy[Layout::globalIndexT(site)] += site_energy;
+		result_topological[Layout::globalIndexT(site)] += site_topological;
+#endif
+#ifdef MULTITHREADING
+		result_energy[Layout::globalIndexT(site)][omp_get_thread_num()] += site_energy;
+		result_topological[Layout::globalIndexT(site)][omp_get_thread_num()] += site_topological;
+#endif
+
 		delete[] tmpF;
 	}
 	reduceAllSum(energy);
 	reduceAllSum(topological);
-
 	topologicalCharge = topological;
 	gaugeEnergy = -energy/Layout::globalVolume;
+
+	//We collect the results
+	for (int t = 0; t < Layout::glob_t; ++t) {
+#ifdef MULTITHREADING
+		energy_correlator[t] = 0;
+		topological_correlator[t] = 0;
+		for (int thread = 0; thread < omp_get_max_threads(); ++thread) {
+			energy_correlator[t] += result_energy[t][thread];
+			topological_correlator[t] += result_topological[t][thread];
+		}
+#endif
+#ifndef MULTITHREADING
+		energy_correlator[t] = result_energy[t];
+		topological_correlator[t] = result_topological[t];
+#endif
+	}
+
+	for (int t = 0; t < Layout::glob_t; ++t) {
+		reduceAllSum(energy_correlator[t]);
+		reduceAllSum(topological_correlator[t]);
+	}
+
 	/*
 	std::cout << "Primo: " << -energy/Layout::globalVolume << std::endl;
 

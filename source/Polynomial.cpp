@@ -112,13 +112,13 @@ complex Polynomial::evaluate(const complex& x) const {
 	complex result;
 	if (roots.size() % 2 == 0) {
 		std::vector<complex>::const_iterator i = roots.begin();
-		result = fabs(real(scaling))*(x - *i);
+		result = static_cast<real_t>(fabs(real(scaling)))*(x - *i);
 		++i;
 		while (i != roots.end()) {
-			result = fabs(real(scaling))*result*(x - *i);
+			result = static_cast<real_t>(fabs(real(scaling)))*result*(x - *i);
 			++i;
 			if (i != roots.end()) {
-				result = fabs(real(scaling))*result*(x - *i);
+				result = static_cast<real_t>(fabs(real(scaling)))*result*(x - *i);
 				++i;
 			}
 		}
@@ -126,13 +126,13 @@ complex Polynomial::evaluate(const complex& x) const {
 		else return result;
 	} else {
 		std::vector<complex>::const_iterator i = roots.begin();
-		result = fabs(real(scaling))*(x - *i);
+		result = static_cast<real_t>(fabs(real(scaling)))*(x - *i);
 		++i;
 		while (i != roots.end()) {
-			result = fabs(real(scaling))*result*(x - *i);
+			result = static_cast<real_t>(fabs(real(scaling)))*result*(x - *i);
 			++i;
 			if (i != roots.end()) {
-				result = fabs(real(scaling))*result*(x - *i);
+				result = static_cast<real_t>(fabs(real(scaling)))*result*(x - *i);
 				++i;
 			}
 		}
