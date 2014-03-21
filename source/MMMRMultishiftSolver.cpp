@@ -7,6 +7,7 @@
 
 #include "MMMRMultishiftSolver.h"
 #include "AlgebraUtils.h"
+#include "BiConjugateGradient.h"
 #ifdef TEST_PAPI_SPEED
 #include <papi.h>
 

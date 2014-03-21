@@ -11,7 +11,7 @@
 #include "BiConjugateGradient.h"
 
 namespace Update {
-/*
+
 class DeflationInverter {
 public:
 	DeflationInverter();
@@ -43,6 +43,6 @@ private:
 
 	void generateBasis(DiracOperator* dirac);
 };
-*/
+
 } /* namespace Update */
 #endif /* DEFLATIONINVERTER_H_ */

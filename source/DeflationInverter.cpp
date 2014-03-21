@@ -11,7 +11,7 @@
 #include "ToString.h"
 
 namespace Update {
-/*
+
 //Projectors as defined in hep_lat:0706.2298
 class Projector : public DiracOperator {
 public:
@@ -48,6 +48,45 @@ public:
 			}
 		}
 		output.updateHalo();
+	}
+
+	void addVector(reduced_dirac_vector_t* vector) {
+		vectorspace.push_back(vector);
+	}
+
+	void clearVectorSpace() {
+		vectorspace.clear();
+	}
+
+	virtual FermionForce* getForce() const {
+		return 0;
+	}
+private:
+	//The vector space used for the projection
+	std::vector<reduced_dirac_vector_t*> vectorspace;
+};
+
+class IdentityMinusProjector : public DiracOperator {
+public:
+	IdentityMinusProjector() : DiracOperator() { }
+
+	virtual void multiply(reduced_dirac_vector_t & output, const reduced_dirac_vector_t & input) {
+		output = input;
+		for (unsigned int i = 0; i < vectorspace.size(); ++i) {
+			std::complex<real_t> scalar_product = static_cast< std::complex<real_t> >(AlgebraUtils::dot(*vectorspace[i], input));
+#pragma omp parallel for
+			for (int site = 0; site < output.localsize; ++site) {
+				for (unsigned int mu = 0; mu < 4; ++mu) {
+					output[site][mu] -= scalar_product*(*vectorspace[i])[site][mu];
+				}
+			}
+		}
+		output.updateHalo();
+	}
+
+	virtual void multiplyAdd(reduced_dirac_vector_t & output, const reduced_dirac_vector_t & vector1, const reduced_dirac_vector_t & vector2, const complex& alpha) {
+		std::cout << "Not implemented" << std::endl;
+		exit(1);
 	}
 
 	void addVector(reduced_dirac_vector_t* vector) {
@@ -389,6 +428,15 @@ bool DeflationInverter::solve(DiracOperator* dirac, const extended_dirac_vector_
 	extended_dirac_vector_t chie, projectedSourcee = projectedSource;
 	biConjugateGradient->solve(deflatedDirac,projectedSourcee,chie);//TODO
 	reduced_dirac_vector_t chi = chie;
+
+	/*biConjugateGradient->setPrecision(precision);
+	reduced_dirac_vector_t chie, projectedSourcee = projectedSource, projections1, projections2;
+	IdentityMinusProjector* projector = new IdentityMinusProjector();
+	for (int i = 0; i < totalNumberOfVectors; ++i) projector->addVector(&localBasis[i]);
+	projector->multiply(projections1, projectedSource);
+	biConjugateGradient->solve(dirac,projections1,chie);//TODO
+	projector->multiply(projections2,chie);
+	reduced_dirac_vector_t chi = projections2;*/
 	
 	lastStep += biConjugateGradient->getLastSteps();
 
@@ -467,7 +515,7 @@ void DeflationInverter::generateBasis(DiracOperator* dirac) {
 	if (localBasis != 0) delete[] localBasis;
 	localBasis = new reduced_dirac_vector_t[totalNumberOfVectors];
 	
-	biConjugateGradient->setPrecision(0.000001);
+	biConjugateGradient->setPrecision(0.00001);
 	
 	for (int i = 0; i < totalNumberOfVectors; i += 4) {
 		extended_dirac_vector_t randomVector, tmp;
@@ -520,5 +568,5 @@ void DeflationInverter::generateBasis(DiracOperator* dirac) {
 	std::cout << "DeflationInverter::Deflation basis generated in " << lastStep << " inversion steps" << std::endl;
 
 }
-*/
+
 } /* namespace Update */

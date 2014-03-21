@@ -62,7 +62,7 @@ void TestLinearAlgebra::execute(environment_t& environment) {
 	environment.gaugeLinkConfiguration.updateHalo();
 	environment.synchronize();
 
-	{
+	/*{
 		extended_dirac_vector_t source, tmp1, tmp2, tmp3, tmp4;
 		//First we take a random vector for tests
 		AlgebraUtils::generateRandomVector(source);
@@ -118,7 +118,7 @@ void TestLinearAlgebra::execute(environment_t& environment) {
 		delete improvedDiracWilsonOperator;
 		delete squareImprovedDiracWilsonOperator;
 		delete biConjugateGradient;
-	}
+	}*/
 
 	//Gamma5 test
 	{
@@ -214,6 +214,39 @@ void TestLinearAlgebra::execute(environment_t& environment) {
 		//delete deflationInverter;
 		delete squareBlockDiracWilsonOperator;
 	}*/
+
+	{
+		BiConjugateGradient* biConjugateGradient = new BiConjugateGradient();
+		biConjugateGradient->setPrecision(0.00000000001);
+		reduced_dirac_vector_t source, tmp1, tmp2, tmp3, tmp4, tmp5;
+		//First we take a random vector for tests
+		AlgebraUtils::generateRandomVector(source);
+		AlgebraUtils::normalize(source);
+		DiracOperator* squareDiracWilsonOperator = new SquareDiracWilsonOperator();
+		squareDiracWilsonOperator->setKappa(0.205);
+		squareDiracWilsonOperator->setLattice(environment.getFermionLattice());
+
+		biConjugateGradient->solve(squareDiracWilsonOperator, source, tmp1);
+		int stepsMax = biConjugateGradient->getLastSteps();
+		std::cout << "Undeflated number of steps: " << stepsMax << std::endl;
+
+		DeflationInverter* deflationInverter = new DeflationInverter();
+		deflationInverter->setPrecision(0.00000000001);
+		deflationInverter->setBasisDimension(50);
+		deflationInverter->setBlockDivision(4);
+		//deflationInverter->generateBasis(squareDiracWilsonOperator);
+		deflationInverter->solve(squareDiracWilsonOperator,source,tmp2);
+		double normError1 = AlgebraUtils::differenceNorm(tmp1,tmp2);
+		squareDiracWilsonOperator->multiply(tmp3, tmp2);
+		double normError2 = AlgebraUtils::differenceNorm(tmp3,source);
+		squareDiracWilsonOperator->multiply(tmp4, tmp1);
+		double normError3 = AlgebraUtils::differenceNorm(tmp4,source);
+		if (isOutputProcess()) std::cout << "Ridiamo di gusto: " << normError1 << " " << normError2 << " " << " " << normError3 << " " << deflationInverter->getLastSteps() << std::endl;
+		if (isOutputProcess()) std::cout << "Zum beispiel: " << tmp2[5][3] << std::endl << tmp1[5][3] << std::endl;
+		delete biConjugateGradient;
+		delete squareDiracWilsonOperator;
+		//delete deflationInverter;
+	}
 
 	//Determinant test
 	/*{

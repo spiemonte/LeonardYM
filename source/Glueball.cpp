@@ -115,6 +115,94 @@ void Glueball::execute(environment_t& environment) {
 		}
 	}
 
+
+	long_real_t energy_correlator[Layout::glob_t];
+	long_real_t topological_correlator[Layout::glob_t];
+
+#ifdef MULTITHREADING
+	long_real_t result_energy[Layout::glob_t][omp_get_max_threads()];
+	long_real_t result_topological[Layout::glob_t][omp_get_max_threads()];
+	for (int i = 0; i < Layout::glob_t; ++i) {
+		for (int j = 0; j < omp_get_max_threads(); ++j) {
+			result_energy[i][j] = 0.;
+			result_topological[i][j] = 0.;
+		}
+	}
+#endif
+#ifndef MULTITHREADING
+	long_real_t result_energy[Layout::glob_t];
+	long_real_t result_topological[Layout::glob_t];
+	for (int i = 0; i < Layout::glob_t; ++i) {
+		result_energy[i] = 0.;
+		result_topological[i] = 0.;
+	}
+#endif
+
+	for (int site = 0; site < lattice.localsize; ++site) {
+		GaugeGroup *tmpF = new GaugeGroup[6];
+		long_real_t site_energy = 0.;
+		long_real_t site_topological = 0.;
+		tmpF[0] = htrans(lattice[LT::sdn(site, 0)][0])*htrans(lattice[LT::sdn(LT::sdn(site, 0), 1)][1])*(lattice[LT::sdn(LT::sdn(site, 0), 1)][0])*(lattice[LT::sdn(site, 1)][1]) + htrans(lattice[LT::sdn(site, 1)][1])*(lattice[LT::sdn(site, 1)][0])*(lattice[LT::sup(LT::sdn(site, 1), 0)][1])*htrans(lattice[site][0]) + (lattice[site][0])*(lattice[LT::sup(site, 0)][1])*htrans(lattice[LT::sup(site, 1)][0])*htrans(lattice[site][1]) + (lattice[site][1])*htrans(lattice[LT::sup(LT::sdn(site, 0), 1)][0])*htrans(lattice[LT::sdn(site, 0)][1])*(lattice[LT::sdn(site, 0)][0]);
+		tmpF[1] = htrans(lattice[LT::sdn(site, 0)][0])*htrans(lattice[LT::sdn(LT::sdn(site, 0), 2)][2])*(lattice[LT::sdn(LT::sdn(site, 0), 2)][0])*(lattice[LT::sdn(site, 2)][2]) + htrans(lattice[LT::sdn(site, 2)][2])*(lattice[LT::sdn(site, 2)][0])*(lattice[LT::sup(LT::sdn(site, 2), 0)][2])*htrans(lattice[site][0]) + (lattice[site][0])*(lattice[LT::sup(site, 0)][2])*htrans(lattice[LT::sup(site, 2)][0])*htrans(lattice[site][2]) + (lattice[site][2])*htrans(lattice[LT::sup(LT::sdn(site, 0), 2)][0])*htrans(lattice[LT::sdn(site, 0)][2])*(lattice[LT::sdn(site, 0)][0]);
+		tmpF[2] = htrans(lattice[LT::sdn(site, 0)][0])*htrans(lattice[LT::sdn(LT::sdn(site, 0), 3)][3])*(lattice[LT::sdn(LT::sdn(site, 0), 3)][0])*(lattice[LT::sdn(site, 3)][3]) + htrans(lattice[LT::sdn(site, 3)][3])*(lattice[LT::sdn(site, 3)][0])*(lattice[LT::sup(LT::sdn(site, 3), 0)][3])*htrans(lattice[site][0]) + (lattice[site][0])*(lattice[LT::sup(site, 0)][3])*htrans(lattice[LT::sup(site, 3)][0])*htrans(lattice[site][3]) + (lattice[site][3])*htrans(lattice[LT::sup(LT::sdn(site, 0), 3)][0])*htrans(lattice[LT::sdn(site, 0)][3])*(lattice[LT::sdn(site, 0)][0]);
+		tmpF[3] = htrans(lattice[LT::sdn(site, 1)][1])*htrans(lattice[LT::sdn(LT::sdn(site, 1), 2)][2])*(lattice[LT::sdn(LT::sdn(site, 1), 2)][1])*(lattice[LT::sdn(site, 2)][2]) + htrans(lattice[LT::sdn(site, 2)][2])*(lattice[LT::sdn(site, 2)][1])*(lattice[LT::sup(LT::sdn(site, 2), 1)][2])*htrans(lattice[site][1]) + (lattice[site][1])*(lattice[LT::sup(site, 1)][2])*htrans(lattice[LT::sup(site, 2)][1])*htrans(lattice[site][2]) + (lattice[site][2])*htrans(lattice[LT::sup(LT::sdn(site, 1), 2)][1])*htrans(lattice[LT::sdn(site, 1)][2])*(lattice[LT::sdn(site, 1)][1]);
+		tmpF[4] = htrans(lattice[LT::sdn(site, 1)][1])*htrans(lattice[LT::sdn(LT::sdn(site, 1), 3)][3])*(lattice[LT::sdn(LT::sdn(site, 1), 3)][1])*(lattice[LT::sdn(site, 3)][3]) + htrans(lattice[LT::sdn(site, 3)][3])*(lattice[LT::sdn(site, 3)][1])*(lattice[LT::sup(LT::sdn(site, 3), 1)][3])*htrans(lattice[site][1]) + (lattice[site][1])*(lattice[LT::sup(site, 1)][3])*htrans(lattice[LT::sup(site, 3)][1])*htrans(lattice[site][3]) + (lattice[site][3])*htrans(lattice[LT::sup(LT::sdn(site, 1), 3)][1])*htrans(lattice[LT::sdn(site, 1)][3])*(lattice[LT::sdn(site, 1)][1]);
+		tmpF[5] = htrans(lattice[LT::sdn(site, 2)][2])*htrans(lattice[LT::sdn(LT::sdn(site, 2), 3)][3])*(lattice[LT::sdn(LT::sdn(site, 2), 3)][2])*(lattice[LT::sdn(site, 3)][3]) + htrans(lattice[LT::sdn(site, 3)][3])*(lattice[LT::sdn(site, 3)][2])*(lattice[LT::sup(LT::sdn(site, 3), 2)][3])*htrans(lattice[site][2]) + (lattice[site][2])*(lattice[LT::sup(site, 2)][3])*htrans(lattice[LT::sup(site, 3)][2])*htrans(lattice[site][3]) + (lattice[site][3])*htrans(lattice[LT::sup(LT::sdn(site, 2), 3)][2])*htrans(lattice[LT::sdn(site, 2)][3])*(lattice[LT::sdn(site, 2)][2]);
+		for (unsigned int i = 0; i < 6; ++i) {
+			//Manual antialiasing, error of eigen!
+			GaugeGroup antialias = tmpF[i];
+			tmpF[i] = (1./8.)*(antialias - htrans(antialias));
+			site_energy += real(trace(tmpF[i]*tmpF[i]));
+		}
+		site_topological = real(trace(tmpF[2]*tmpF[3]) - trace(tmpF[1]*tmpF[4]) + trace(tmpF[0]*tmpF[5]))/(4.*PI*PI);
+
+#ifndef MULTITHREADING
+		result_energy[Layout::globalIndexT(site)] += site_energy;
+		result_topological[Layout::globalIndexT(site)] += site_topological;
+#endif
+#ifdef MULTITHREADING
+		result_energy[Layout::globalIndexT(site)][omp_get_thread_num()] += site_energy;
+		result_topological[Layout::globalIndexT(site)][omp_get_thread_num()] += site_topological;
+#endif
+
+		delete[] tmpF;
+	}
+
+	//We collect the results
+	for (int t = 0; t < Layout::glob_t; ++t) {
+#ifdef MULTITHREADING
+		energy_correlator[t] = 0;
+		topological_correlator[t] = 0;
+		for (int thread = 0; thread < omp_get_max_threads(); ++thread) {
+			energy_correlator[t] += result_energy[t][thread];
+			topological_correlator[t] += result_topological[t][thread];
+		}
+#endif
+#ifndef MULTITHREADING
+		energy_correlator[t] = result_energy[t];
+		topological_correlator[t] = result_topological[t];
+#endif
+	}
+
+	for (int t = 0; t < Layout::glob_t; ++t) {
+		reduceAllSum(energy_correlator[t]);
+		reduceAllSum(topological_correlator[t]);
+	}
+
+	if (environment.measurement && isOutputProcess()) {
+		GlobalOutput* output = GlobalOutput::getInstance();
+		output->push("energy_correlator");
+		output->push("topological_correlator");
+		for (int t = 0; t < Layout::glob_t; ++t) {
+			output->write("energy_correlator", energy_correlator[t]/Layout::glob_spatial_volume);
+			output->write("topological_correlator", topological_correlator[t]/Layout::glob_spatial_volume);
+		}
+		output->pop("energy_correlator");
+		output->pop("topological_correlator");
+	}
+
+
+
 	//then we measure the non zero projection
 	bool doMomentum;
 	try {

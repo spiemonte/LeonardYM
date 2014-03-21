@@ -19,7 +19,7 @@ FermionHMCUpdater::FermionHMCUpdater()
 : HMCUpdater() {
 	randomGenerator = new random_generator_t*[omp_get_max_threads()];
 	randomNormal = new random_normal_generator_t*[omp_get_max_threads()];
-	for (unsigned int i = 0; i < omp_get_max_threads(); ++i) {
+	for (int i = 0; i < omp_get_max_threads(); ++i) {
 		randomGenerator[i] = new random_generator_t(RandomSeed::randomSeed());
 		randomNormal[i] = new random_normal_generator_t(RandomSeed::getNormalNumberGenerator(*randomGenerator[i],sqrt(0.5)));
 	}
@@ -28,7 +28,7 @@ FermionHMCUpdater::FermionHMCUpdater()
 
 FermionHMCUpdater::~FermionHMCUpdater() {
 #ifdef MULTITHREADING
-	for (unsigned int i = 0; i < omp_get_max_threads(); ++i) {
+	for (int i = 0; i < omp_get_max_threads(); ++i) {
 		delete randomGenerator[i];
 		delete randomNormal[i];
 	}
