@@ -164,13 +164,15 @@ void MesonCorrelator::execute(environment_t& environment) {
 #endif					
 				}
 				//Vector correlator then
-				std::complex<real_t> dottmp = - vector_dot(tmp[site][0],tmp[site][0]) + vector_dot(tmp[site][1],tmp[site][1]) - vector_dot(tmp[site][2],tmp[site][2]) + vector_dot(tmp[site][3],tmp[site][3]);
+				for (unsigned int mu = 0; mu < 4; ++mu) {
+					std::complex<real_t> dottmp = (alpha < 2 ? 1.0 : -1.0)*(mu < 2 ? 1.0 : -1.0)*vector_dot(tmp[site][mu],tmp[site][mu]);
 #ifdef MULTITHREADING
-				resultVector[Layout::globalIndexT(site)][omp_get_thread_num()] += real(dottmp);
+					resultVector[Layout::globalIndexT(site)][omp_get_thread_num()] += real(dottmp);
 #endif
 #ifndef MULTITHREADING
-				resultVector[Layout::globalIndexT(site)] += real(dottmp);
+					resultVector[Layout::globalIndexT(site)] += real(dottmp);
 #endif
+				}
 			}
 			
 			for (int t = 0; t < Layout::glob_t; ++t) {

@@ -261,26 +261,6 @@ void WilsonFlow::measureEnergy(const extended_gauge_lattice_t& _lattice) {
 		reduceAllSum(energy_correlator[t]);
 		reduceAllSum(topological_correlator[t]);
 	}
-
-	/*
-	std::cout << "Primo: " << -energy/Layout::globalVolume << std::endl;
-
-	//typedef extended_gauge_lattice_t LT;
-	long_real_t plaquette = 0.;
-
-#pragma omp parallel for reduction(+:plaquette)
-	for (int site = 0; site < _lattice.localsize; ++site) {
-		for (unsigned int mu = 0; mu < 4; ++mu) {
-			for (unsigned int nu = mu + 1; nu < 4; ++nu) {
-				plaquette += (numberColors - real(trace(_lattice[site][mu]*_lattice[LT::sup(site,mu)][nu]*htrans(_lattice[LT::sup(site,nu)][mu])*htrans(_lattice[site][nu]))));
-			}
-		}
-	}
-	reduceAllSum(plaquette);
-
-	std::cout << "Secondo: " << 2*plaquette/Layout::globalVolume << std::endl;
-
-	return 2*plaquette/Layout::globalVolume;*/
 }
 
 } /* namespace Update */

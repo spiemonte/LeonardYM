@@ -143,28 +143,35 @@ void NFlavorQCDUpdater::execute(environment_t& environment) {
 		++j;
 	}
 
-	if (environment.sweep == 0 && environment.iteration == 0 && environment.measurement) {
-		//Now we test the correctness of rational/heatbath
-		long_real_t test = 0.;
-		//Now we use the better approximation for the metropolis step
-		std::vector<RationalApproximation>::iterator rational = rationalApproximationsMetropolis.begin();
-		for (i = pseudofermions.begin(); i != pseudofermions.end(); ++i) {
-			//Now we evaluate it with the rational approximation of the inverse
-			rational->evaluate(squareDiracOperator,tmp_pseudofermion,*i);
-			test += real(AlgebraUtils::dot(*i,tmp_pseudofermion));
-			++rational;
+	try {
+		std::string flag = environment.configurations.get<std::string>("check_rational_approximations");
+
+		if (environment.sweep == 0 && environment.iteration == 0 && environment.measurement && flag == "true") {
+			//Now we test the correctness of rational/heatbath
+			long_real_t test = 0.;
+			//Now we use the better approximation for the metropolis step
+			std::vector<RationalApproximation>::iterator rational = rationalApproximationsMetropolis.begin();
+			for (i = pseudofermions.begin(); i != pseudofermions.end(); ++i) {
+				//Now we evaluate it with the rational approximation of the inverse
+				rational->evaluate(squareDiracOperator,tmp_pseudofermion,*i);
+				test += real(AlgebraUtils::dot(*i,tmp_pseudofermion));
+				++rational;
+			}
+			if (isOutputProcess()) std::cout << "NFlavoQCDUpdater::Consistency check for the metropolis: " << test - oldPseudoFermionEnergy << std::endl;
+			//Now we use the approximation for the force step
+			rational = rationalApproximationsForce.begin();
+			test = 0.;
+			for (i = pseudofermions.begin(); i != pseudofermions.end(); ++i) {
+				//Now we evaluate it with the rational approximation of the inverse
+				rational->evaluate(squareDiracOperator,tmp_pseudofermion,*i);
+				test += real(AlgebraUtils::dot(*i,tmp_pseudofermion));
+				++rational;
+			}
+			if (isOutputProcess()) std::cout << "NFlavoQCDUpdater::Consistency check for the force: " << test - oldPseudoFermionEnergy << std::endl;
 		}
-		if (isOutputProcess()) std::cout << "NFlavoQCDUpdater::Consistency check for the metropolis: " << test - oldPseudoFermionEnergy << std::endl;
-		//Now we use the approximation for the force step
-		rational = rationalApproximationsForce.begin();
-		test = 0.;
-		for (i = pseudofermions.begin(); i != pseudofermions.end(); ++i) {
-			//Now we evaluate it with the rational approximation of the inverse
-			rational->evaluate(squareDiracOperator,tmp_pseudofermion,*i);
-			test += real(AlgebraUtils::dot(*i,tmp_pseudofermion));
-			++rational;
-		}
-		if (isOutputProcess()) std::cout << "NFlavoQCDUpdater::Consistency check for the force: " << test - oldPseudoFermionEnergy << std::endl;
+
+	} catch (NotFoundOption& ex) {
+		std::cout << "NFlavorQCDUpdater::No consistency check of metropolis/force approximations!" << std::endl;
 	}
 
 	//Get the initial energy of momenta
