@@ -232,6 +232,9 @@ NFlavorQCDAction.o: ./source/NFlavorQCDAction.h ./source/NFlavorQCDAction.cpp
 NFlavorQCDUpdater.o : ./source/NFlavorQCDUpdater.h ./source/NFlavorQCDUpdater.cpp
 	$(CPP) $(CPPFLAGS) -c -o NFlavorQCDUpdater.o ./source/NFlavorQCDUpdater.cpp
 
+MultiStepNFlavorQCDUpdater.o : ./source/MultiStepNFlavorQCDUpdater.h ./source/MultiStepNFlavorQCDUpdater.cpp
+	$(CPP) $(CPPFLAGS) -c -o MultiStepNFlavorQCDUpdater.o ./source/MultiStepNFlavorQCDUpdater.cpp
+
 NFlavorBlockUpdater.o : ./source/NFlavorBlockUpdater.h ./source/NFlavorBlockUpdater.cpp
 	$(CPP) $(CPPFLAGS) -c -o NFlavorBlockUpdater.o ./source/NFlavorBlockUpdater.cpp
 

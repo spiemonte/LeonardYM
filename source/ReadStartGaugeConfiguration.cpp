@@ -246,10 +246,10 @@ void ReadStartGaugeConfiguration::readConfiguration(environment_t& environment, 
 
 			// - compare read parameters to the ones in measureconfig.dat / Stop program if they are not the same (This is first done directly on the master node without communication of all the paramters)
 			// - test for lattice size - new included: reading failure if given incorrect
-			if (static_cast<size_t >(lato[0]) != Layout::glob_x
-					|| static_cast<size_t >(lato[1]) != Layout::glob_y
-					|| static_cast<size_t >(lato[2]) != Layout::glob_z
-					|| static_cast<size_t >(lato[3]) != Layout::glob_t) {
+			if (static_cast<int>(lato[0]) != Layout::glob_x
+					|| static_cast<int>(lato[1]) != Layout::glob_y
+					|| static_cast<int>(lato[2]) != Layout::glob_z
+					|| static_cast<int>(lato[3]) != Layout::glob_t) {
 				if (isOutputProcess()) std::cout << "Lattice size is different:\n" << lato[0] << " " << lato[1] << " "
 						<< lato[2] << " " << lato[3] << "\n" << Layout::glob_x << " "
 						<< Layout::glob_y << " " << Layout::glob_z << " "

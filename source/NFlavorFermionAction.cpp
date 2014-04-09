@@ -14,11 +14,7 @@
 
 namespace Update {
 
-std::vector< std::vector<extended_dirac_vector_t> > NFlavorFermionAction::Xs;
-std::vector< std::vector<extended_dirac_vector_t> > NFlavorFermionAction::Ys;
-extended_dirac_vector_t* NFlavorFermionAction::tmp_pseudofermion = 0;
-
-NFlavorFermionAction::NFlavorFermionAction(DiracOperator* _squareDiracOperator, DiracOperator* _diracOperator, const std::vector<RationalApproximation>& _rationalApproximations) : FermionicAction(_diracOperator), squareDiracOperator(_squareDiracOperator), forcePrecision(0.00000000001), maxIterations(5000), rationalApproximations(_rationalApproximations) {
+NFlavorFermionAction::NFlavorFermionAction(DiracOperator* _squareDiracOperator, DiracOperator* _diracOperator, const std::vector<RationalApproximation>& _rationalApproximations) : FermionicAction(_diracOperator), squareDiracOperator(_squareDiracOperator), forcePrecision(0.00000000001), maxIterations(5000), rationalApproximations(_rationalApproximations), tmp_pseudofermion(0) {
 	fermionForce = diracOperator->getForce();
 	//Allocate the memory for all the pseudofermions needed for the calculation of the force ( # of vectors = 2*sum(order(rationalApproximations[i]) )
 	if (Xs.size() != rationalApproximations.size() || Ys.size() != rationalApproximations.size()) {

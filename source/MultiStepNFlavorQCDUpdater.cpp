@@ -5,7 +5,7 @@
  *      Author: spiem_01
  */
 
-#include "NFlavorQCDUpdater.h"
+#include "MultiStepNFlavorQCDUpdater.h"
 #include "NFlavorQCDAction.h"
 #include "AlgebraUtils.h"
 #include "MultishiftSolver.h"
@@ -27,15 +27,15 @@
 
 namespace Update {
 
-NFlavorQCDUpdater::NFlavorQCDUpdater() : LatticeSweep(), nFlavorQCDAction(0), gaugeAction(0), fermionAction(0), squareDiracOperator(0), diracOperator(0) { }
+MultiStepNFlavorQCDUpdater::MultiStepNFlavorQCDUpdater() : LatticeSweep(), nFlavorQCDAction(0), gaugeAction(0), fermionAction(0), squareDiracOperator(0), diracOperator(0) { }
 
-NFlavorQCDUpdater::NFlavorQCDUpdater(const NFlavorQCDUpdater& toCopy) : LatticeSweep(toCopy), nFlavorQCDAction(0), gaugeAction(0), fermionAction(0), squareDiracOperator(0), diracOperator(0) { }
+MultiStepNFlavorQCDUpdater::MultiStepNFlavorQCDUpdater(const MultiStepNFlavorQCDUpdater& toCopy) : LatticeSweep(toCopy), nFlavorQCDAction(0), gaugeAction(0), fermionAction(0), squareDiracOperator(0), diracOperator(0) { }
 
-NFlavorQCDUpdater::~NFlavorQCDUpdater() {
+MultiStepNFlavorQCDUpdater::~MultiStepNFlavorQCDUpdater() {
 	if (nFlavorQCDAction != 0) delete nFlavorQCDAction;
 }
 
-void NFlavorQCDUpdater::initializeApproximations(environment_t& environment) {
+void MultiStepNFlavorQCDUpdater::initializeApproximations(environment_t& environment) {
 	//First take the rational function approximation for the heatbath step
 	if (rationalApproximationsHeatBath.empty()) {
 		int numberPseudofermions = environment.configurations.get< unsigned int >("number_pseudofermions");
@@ -67,25 +67,30 @@ void NFlavorQCDUpdater::initializeApproximations(environment_t& environment) {
 
 	//Then take the rational function approximation for the force step
 	if (rationalApproximationsForce.empty()) {
-		int numberPseudofermions = environment.configurations.get< unsigned int >("number_pseudofermions");
-		for (int i = 1; i <= numberPseudofermions; ++i) {
-			std::vector<real_t> rat = environment.configurations.get< std::vector<real_t> >(std::string("force_rational_fraction_")+toString(i));
-			RationalApproximation rational;
-			rational.setAlphas(std::vector<real_t>(rat.begin(), rat.begin() + rat.size()/2));
-			rational.setBetas(std::vector<real_t>(rat.begin() + rat.size()/2, rat.end()));
-			rational.setPrecision(environment.configurations.get<double>("force_inverter_precision"));
-			rational.setMaximumRecursion(environment.configurations.get<unsigned int>("force_inverter_max_steps"));
-			rationalApproximationsForce.push_back(rational);
+		int numberLevels = environment.configurations.get< unsigned int >("number_force_levels");
+		for (int i = 1; i <= numberLevels; ++i) {
+			int numberPseudofermions = environment.configurations.get< unsigned int >("number_pseudofermions");
+			std::vector<RationalApproximation> levelRationaApproximationForce;
+			for (int j = 1; j <= numberPseudofermions; ++j) {
+				std::vector<real_t> rat = environment.configurations.get< std::vector<real_t> >(std::string("force_rational_fraction_")+toString(j)+"_level_"+toString(i));
+				RationalApproximation rational;
+				rational.setAlphas(std::vector<real_t>(rat.begin(), rat.begin() + rat.size()/2));
+				rational.setBetas(std::vector<real_t>(rat.begin() + rat.size()/2, rat.end()));
+				rational.setPrecision(environment.configurations.get<double>("force_inverter_precision"));
+				rational.setMaximumRecursion(environment.configurations.get<unsigned int>("force_inverter_max_steps"));
+				levelRationaApproximationForce.push_back(rational);
+			}
+			rationalApproximationsForce.push_back(levelRationaApproximationForce);
 		}
 	}
 }
 
-void NFlavorQCDUpdater::checkTheory(const environment_t& environment) const {
+void MultiStepNFlavorQCDUpdater::checkTheory(const environment_t& environment) const {
 	double testerForce = 1., testerMetropolis = 1., testerHeatBath = 1.;
 	double epsilon = 0.0001;
 	int numberPseudofermions = environment.configurations.get< unsigned int >("number_pseudofermions");
 	for (int i = 0; i < numberPseudofermions; ++i) {
-		testerForce *= rationalApproximationsForce[i].evaluate(2.).real();
+		testerForce *= rationalApproximationsForce[0][i].evaluate(2.).real();
 		testerMetropolis *= rationalApproximationsMetropolis[i].evaluate(2.).real();
 		testerHeatBath *= rationalApproximationsHeatBath[i].evaluate(2.).real();
 	}
@@ -106,7 +111,7 @@ void NFlavorQCDUpdater::checkTheory(const environment_t& environment) const {
 	}
 }
 
-void NFlavorQCDUpdater::execute(environment_t& environment) {	
+void MultiStepNFlavorQCDUpdater::execute(environment_t& environment) {
 	//First we initialize the approximations
 	this->initializeApproximations(environment);
 
@@ -159,7 +164,7 @@ void NFlavorQCDUpdater::execute(environment_t& environment) {
 			}
 			if (isOutputProcess()) std::cout << "NFlavoQCDUpdater::Consistency check for the metropolis: " << test - oldPseudoFermionEnergy << std::endl;
 			//Now we use the approximation for the force step
-			rational = rationalApproximationsForce.begin();
+			rational = rationalApproximationsForce[0].begin();
 			test = 0.;
 			for (i = pseudofermions.begin(); i != pseudofermions.end(); ++i) {
 				//Now we evaluate it with the rational approximation of the inverse
@@ -167,7 +172,7 @@ void NFlavorQCDUpdater::execute(environment_t& environment) {
 				test += real(AlgebraUtils::dot(*i,tmp_pseudofermion));
 				++rational;
 			}
-			if (isOutputProcess()) std::cout << "NFlavoQCDUpdater::Consistency check for the force: " << test - oldPseudoFermionEnergy << std::endl;
+			if (isOutputProcess()) std::cout << "NFlavoQCDUpdater::Consistency check for the first level of the force: " << test - oldPseudoFermionEnergy << std::endl;
 		}
 
 	} catch (NotFoundOption& ex) {
@@ -184,18 +189,25 @@ void NFlavorQCDUpdater::execute(environment_t& environment) {
 	diracOperator->setLattice(environmentNew.getFermionLattice());
 
 	//Take the fermion action
-	if (fermionAction == 0) fermionAction = new NFlavorFermionAction(squareDiracOperator, diracOperator, rationalApproximationsForce);
-	//TODO dirac operator correctly set?
-	for (i = pseudofermions.begin(); i != pseudofermions.end(); ++i) {
-		//Add the pseudofermions
-		fermionAction->addPseudoFermion(&(*i));
+	if (fermionAction == 0) {
+		int numberLevels = environment.configurations.get< unsigned int >("number_force_levels");
+		fermionAction = new NFlavorFermionAction*[numberLevels];
+		for (int j = 0; j < numberLevels; ++j) {
+			fermionAction[j] = new NFlavorFermionAction(squareDiracOperator, diracOperator, rationalApproximationsForce[j]);
+			//TODO dirac operator correctly set?
+			for (i = pseudofermions.begin(); i != pseudofermions.end(); ++i) {
+				//Add the pseudofermions
+				fermionAction[j]->addPseudoFermion(&(*i));
+			}
+			//Set the precision of the inverter
+			fermionAction[j]->setForcePrecision(environment.configurations.get<double>("force_inverter_precision"));
+			fermionAction[j]->setForceMaxIterations(environment.configurations.get<unsigned int>("force_inverter_max_steps"));
+		}
 	}
-	//Set the precision of the inverter
-	fermionAction->setForcePrecision(environment.configurations.get<double>("force_inverter_precision"));
-	fermionAction->setForceMaxIterations(environment.configurations.get<unsigned int>("force_inverter_max_steps"));
+
 
 	//Take the global action
-	if (nFlavorQCDAction == 0) nFlavorQCDAction = new NFlavorAction(gaugeAction, fermionAction);
+	if (nFlavorQCDAction == 0) nFlavorQCDAction = new NFlavorAction(gaugeAction, fermionAction[0]);//TODO, we skip the other forces
 
 	//The t-length of a single integration step
 	real_t t_length = environment.configurations.get<double>("hmc_t_length");
@@ -203,13 +215,23 @@ void NFlavorQCDUpdater::execute(environment_t& environment) {
 	//The numbers of integration steps
 	std::vector<unsigned int> numbers_steps = environment.configurations.get< std::vector<unsigned int> >("number_hmc_steps");
 	if (numbers_steps.size() == 1) {
+		int numberLevels = environment.configurations.get< unsigned int >("number_force_levels");
+		if (isOutputProcess() && numberLevels != 1) std::cout << "MultiStepNFlavorHMCUpdater::Warning, with only one time integration only the first level of the force is used!" << std::endl;
 		forces.push_back(nFlavorQCDAction);
 	} else if (numbers_steps.size() == 2) {
-		forces.push_back(fermionAction);
+		int numberLevels = environment.configurations.get< unsigned int >("number_force_levels");
+		if (isOutputProcess() && numberLevels != 1) std::cout << "MultiStepNFlavorHMCUpdater::Warning, with only two time integration only the first level of the force is used!" << std::endl;
+		forces.push_back(fermionAction[0]);
+		forces.push_back(gaugeAction);
+	} else if (numbers_steps.size() == 3) {
+		int numberLevels = environment.configurations.get< unsigned int >("number_force_levels");
+		if (isOutputProcess() && numberLevels != 2) std::cout << "MultiStepNFlavorHMCUpdater::Warning, with only three time integration only the first two levels of the force is used!" << std::endl;
+		forces.push_back(fermionAction[1]);
+		forces.push_back(fermionAction[0]);
 		forces.push_back(gaugeAction);
 	}
 	else {
-		if (isOutputProcess()) std::cout << "NFlavorHMCUpdater::Warning, NFlavor does not support more than two time integrations!" << std::endl;
+		if (isOutputProcess()) std::cout << "MultiStepNFlavorHMCUpdater::Warning, NFlavor does not support more than three time integrations!" << std::endl;
 		numbers_steps.resize(1);
 		forces.push_back(nFlavorQCDAction);
 	}

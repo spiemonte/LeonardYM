@@ -51,9 +51,9 @@ private:
 	//The rational function approximation
 	std::vector<RationalApproximation> rationalApproximations;
 	//Static vector of the dirac_vector needed for the calculation of the force
-	static std::vector< std::vector<extended_dirac_vector_t> > Xs;
-	static std::vector< std::vector<extended_dirac_vector_t> > Ys;
-	static extended_dirac_vector_t* tmp_pseudofermion;
+	std::vector< std::vector<extended_dirac_vector_t> > Xs;
+	std::vector< std::vector<extended_dirac_vector_t> > Ys;
+	extended_dirac_vector_t* tmp_pseudofermion;
 
 	MultishiftSolver* multishiftSolver;
 };

@@ -15,6 +15,7 @@
 #include "./source/MPILattice/StandardStencil.h"
 #include "./source/MPILattice/ExtendedStencil.h"
 #include "./source/MPILattice/LocalLayout.h"
+#include "./source/ToString.h"
 #include <iostream>
 
 int Update::RandomSeed::counter = -1;
@@ -90,6 +91,7 @@ int main(int ac, char* av[]) {
 	    ("number_hmc_steps", po::value<std::string>(), "the vector of the numbers of HMC steps for a single trajectory (examples: 2, 7 ...)")
 	    ("dirac_operator", po::value<std::string>(), "the name of the dirac wilson operator that should be used (supported: DiracWilson)")
 	    ("number_pseudofermions", po::value<unsigned int>(), "the number of pseudofermions used")
+	    ("number_force_levels", po::value<unsigned int>(), "the number of levels used for the force")
 		("check_rational_approximations", po::value< std::string >(), "Set to true for checking the approximations in the beginning of the simulation")
 
 	    ("heatbath_rational_fraction_1", po::value<std::string>(), "the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
@@ -247,6 +249,12 @@ int main(int ac, char* av[]) {
 		("flow_integration_intervals", po::value<unsigned int>(), "The number of intervals for each flow integration step")
 		("flow_time", po::value<double>(), "The total time of the flow")
 	;
+
+	for (int level = 1; level < 4; ++level) {
+		for (int i = 1; i < 33; ++i) {
+			desc.add_options()((std::string("force_rational_fraction_")+Update::toString(i)+"_level_"+Update::toString(level)).c_str(),po::value<std::string>(),"Rational approximation of the force used by MultiStep integrator");
+		}
+	}
 
 	//Now we can parse the command line
 	po::variables_map vm;

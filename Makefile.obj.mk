@@ -17,7 +17,7 @@ OBJECTS  = ReducedStencil.o StandardStencil.o ExtendedStencil.o LocalLayout.o \
 			StochasticEstimator.o MesonCorrelator.o ChiralCondensate.o GluinoGlue.o \
 			PureGaugeUpdater.o PureGaugeOverrelaxation.o PureGaugeHMCUpdater.o Checkerboard.o \
 			TwoFlavorFermionAction.o TwoFlavorQCDAction.o TwoFlavorHMCUpdater.o \
-			NFlavorFermionAction.o NFlavorQCDAction.o NFlavorQCDUpdater.o NFlavorBlockUpdater.o \
+			NFlavorFermionAction.o NFlavorQCDAction.o NFlavorQCDUpdater.o MultiStepNFlavorQCDUpdater.o NFlavorBlockUpdater.o \
 			DiracEigenSolver.o Eigenvalues.o \
 			TestCommunication.o TestLinearAlgebra.o \
 			StartGaugeConfiguration.o ReadStartGaugeConfiguration.o HotStartGaugeConfiguration.o ColdStartGaugeConfiguration.o \
