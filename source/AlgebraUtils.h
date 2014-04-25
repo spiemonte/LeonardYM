@@ -99,6 +99,46 @@ public:
 	}
 
 	/**
+	 * This function generates a complex random gaussian vector, normalized to exp(-x^2)
+	 */
+	template<typename dirac_vector_t> static void generateRandomComplexGaussianVector(dirac_vector_t& vector) {
+#ifndef MULTITHREADING
+		random_generator_t rng(RandomSeed::randomSeed());
+		random_normal_generator_t randomNormal(RandomSeed::getNormalNumberGenerator(rng,1./sqrt(2.)));
+#endif
+#ifdef MULTITHREADING
+		random_generator_t** randomGenerator = new random_generator_t*[omp_get_max_threads()];
+		random_normal_generator_t** randomNormal = new random_normal_generator_t*[omp_get_max_threads()];
+		for (int i = 0; i < omp_get_max_threads(); ++i) {
+			randomGenerator[i] = new random_generator_t(RandomSeed::randomSeed());
+			randomNormal[i] = new random_normal_generator_t(RandomSeed::getNormalNumberGenerator(*randomGenerator[i],1./sqrt(2.)));
+		}
+#endif
+#pragma omp parallel for
+		for (int site = 0; site < vector.localsize; ++site) {
+			for (unsigned int mu = 0; mu < 4; ++mu) {
+				for (int c = 0; c < diracVectorLength; ++c) {
+#ifndef MULTITHREADING
+					vector[site][mu][c] = std::complex<real_t>(randomNormal(), randomNormal());
+#endif
+#ifdef MULTITHREADING
+					vector[site][mu][c] = std::complex<real_t>((*randomNormal[omp_get_thread_num()])(), (*randomNormal[omp_get_thread_num()])());
+#endif
+				}
+			}
+		}
+		vector.updateHalo();
+#ifdef MULTITHREADING
+		for (int i = 0; i < omp_get_max_threads(); ++i) {
+			delete randomGenerator[i];
+			delete randomNormal[i];
+		}
+		delete[] randomGenerator;
+		delete[] randomNormal;
+#endif
+	}
+
+	/**
 	 * This function generates a random vector
 	 */
 	template<typename dirac_vector_t> static void generateRandomVector(dirac_vector_t& vector) {

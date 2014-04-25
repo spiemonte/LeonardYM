@@ -12,14 +12,16 @@
 #include "FermionHMCUpdater.h"
 #include "Polynomial.h"
 #include "RationalApproximation.h"
-#include "NFlavorQCDUpdater.h"
+#include "MultiStepNFlavorQCDUpdater.h"
 #include "GaugeAction.h"
 
 #include <vector>
 
 namespace Update {
 
-class NFlavorBlockUpdater: public Update::NFlavorQCDUpdater {
+class BiConjugateGradient;
+
+class NFlavorBlockUpdater: public Update::MultiStepNFlavorQCDUpdater {
 public:
 	NFlavorBlockUpdater();
 	NFlavorBlockUpdater(const NFlavorBlockUpdater& toCopy);
@@ -27,14 +29,13 @@ public:
 
 	virtual void execute(environment_t& environment);
 protected:
-	void initializeCorrectionStepApproximations(const environment_t& environment);
-	void checkCorrectionStepApproximations(const environment_t& environment) const;
+	long_real_t logDeterminant(const environment_t& environment, real_t alpha);
+	long_real_t logDeterminant_test(const environment_t& environment, real_t alpha);
+	long_real_t logDeterminant(const environment_t& environment_new, const environment_t& environment_old, real_t alpha);
 
-	void stochasticCorrectionStep(environment_t& environment, const environment_t& environmentNew);
-	
-private:
-	std::vector<Polynomial> polynomialApproximationsInverse;
-	std::vector<Polynomial> polynomialApproximationsDirect;
+	reduced_dirac_vector_t temp1, temp2, temp3, temp4, result;
+	long_real_t log_determinant;
+	BiConjugateGradient* biConjugateGradient;
 };
 
 } /* namespace Update */

@@ -53,12 +53,12 @@ void ComplementBlockDiracWilsonOperator::setLattice(const extended_fermion_latti
 	diracWilsonOperator.setLattice(_lattice);
 }
 
-void ComplementBlockDiracWilsonOperator::setBlockSize(int _blockSize) {
+void ComplementBlockDiracWilsonOperator::setBlockSize(const std::vector<unsigned int>& _blockSize) {
 	blockDiracWilsonOperator.setBlockSize(_blockSize);
 	squareBlockDiracWilsonOperator.setBlockSize(_blockSize);
 }
 
-int ComplementBlockDiracWilsonOperator::getBlockSize() const {
+std::vector<unsigned int> ComplementBlockDiracWilsonOperator::getBlockSize() const {
 	return blockDiracWilsonOperator.getBlockSize();
 }
 

@@ -106,6 +106,10 @@ public:
 	}
 
 	Environment& operator=(const Environment& toCopy) {
+		configurations = toCopy.configurations;
+		sweep = toCopy.sweep;
+		iteration = toCopy.iteration;
+		measurement = toCopy.measurement;
 		gaugeLinkConfiguration = toCopy.gaugeLinkConfiguration;
 		fermionicLinkConfiguration = toCopy.fermionicLinkConfiguration;
 		return *this;

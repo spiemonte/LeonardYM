@@ -15,7 +15,9 @@
 #include "dirac_operators/BasicDiracWilsonOperator.h"
 #include "dirac_operators/SquareBlockDiracWilsonOperator.h"
 #include "dirac_operators/SquareComplementBlockDiracWilsonOperator.h"
+#include "dirac_operators/SquareTwistedDiracOperator.h"
 #include "DeflationInverter.h"
+#include <vector>
 #ifdef TEST_PAPI_SPEED
 #include <papi.h>
 
@@ -215,7 +217,7 @@ void TestLinearAlgebra::execute(environment_t& environment) {
 		delete squareBlockDiracWilsonOperator;
 	}*/
 
-	{
+	/*{
 		BiConjugateGradient* biConjugateGradient = new BiConjugateGradient();
 		biConjugateGradient->setPrecision(0.00000000001);
 		reduced_dirac_vector_t source, tmp1, tmp2, tmp3, tmp4, tmp5;
@@ -235,7 +237,7 @@ void TestLinearAlgebra::execute(environment_t& environment) {
 		deflationInverter->setBasisDimension(50);
 		deflationInverter->setBlockDivision(4);
 		//deflationInverter->generateBasis(squareDiracWilsonOperator);
-		deflationInverter->solve(squareDiracWilsonOperator,source,tmp2);
+		//deflationInverter->solve(squareDiracWilsonOperator,source,tmp2);
 		double normError1 = AlgebraUtils::differenceNorm(tmp1,tmp2);
 		squareDiracWilsonOperator->multiply(tmp3, tmp2);
 		double normError2 = AlgebraUtils::differenceNorm(tmp3,source);
@@ -246,29 +248,51 @@ void TestLinearAlgebra::execute(environment_t& environment) {
 		delete biConjugateGradient;
 		delete squareDiracWilsonOperator;
 		//delete deflationInverter;
-	}
+	}*/
 
 	//Determinant test
-	/*{
-		reduced_dirac_vector_t temp, result;
-		AlgebraUtils::generateRandomGaussianVector(temp);
+	{
+		reduced_dirac_vector_t temp1, temp2, result;
+		BiConjugateGradient* biConjugateGradient = new BiConjugateGradient();
+		biConjugateGradient->setPrecision(0.00000000001);
 
-		SquareComplementBlockDiracWilsonOperator* squareComplementBlockDiracWilsonOperator = new SquareComplementBlockDiracWilsonOperator();
-		squareComplementBlockDiracWilsonOperator->setKappa(0.03);
-		squareComplementBlockDiracWilsonOperator->setLattice(environment.getFermionLattice());
+		SquareImprovedDiracWilsonOperator* squareImprovedDiracWilsonOperator = new SquareImprovedDiracWilsonOperator();
+		squareImprovedDiracWilsonOperator->setCSW(1.);
+		squareImprovedDiracWilsonOperator->setKappa(0.18);
+		squareImprovedDiracWilsonOperator->setLattice(environment.getFermionLattice());
 
-		DiracWilsonOperator* diracWilsonOperator = new DiracWilsonOperator();
-		diracWilsonOperator->setKappa(0.20);
-		diracWilsonOperator->setLattice(environment.getFermionLattice());
+		SquareTwistedDiracOperator* squareTwistedDiracOperator = new SquareTwistedDiracOperator();
+		squareTwistedDiracOperator->setDiracOperator(squareImprovedDiracWilsonOperator);
+		squareTwistedDiracOperator->setTwist(0.0005);
+		squareTwistedDiracOperator->setKappa(0.18);
+		squareTwistedDiracOperator->setLattice(environment.getFermionLattice());
+
+		std::vector<long_real_t> stochastic_estimates;
+
 		for (int i = 0; i < 30; ++i) {
-			AlgebraUtils::generateRandomGaussianVector(temp);
-			squareComplementBlockDiracWilsonOperator->multiply(result, temp);
+			AlgebraUtils::generateRandomGaussianVector(temp1);
+			biConjugateGradient->solve(squareTwistedDiracOperator, temp1, temp2);
+			squareImprovedDiracWilsonOperator->multiply(result, temp2);
 		
-			std::complex<long_real_t> saturno = exp(AlgebraUtils::dot(temp, temp) - AlgebraUtils::dot(result,result));
+			std::complex<long_real_t> saturno = exp(AlgebraUtils::dot(result, temp1) - AlgebraUtils::dot(result,result));
+			stochastic_estimates.push_back(real(saturno));
 
-			std::cout << "Stima stocastica del determinante: " << saturno << " " << AlgebraUtils::dot(temp, temp) << " " << AlgebraUtils::dot(result,result) << std::endl;
+			if (isOutputProcess()) std::cout << "Stima stocastica del determinante: " << saturno << std::endl;
 		}
-	}*/
+
+		long_real_t average = 0.;
+		long_real_t sd = 0.;
+		for (std::vector<long_real_t>::iterator i = stochastic_estimates.begin(); i != stochastic_estimates.end(); ++i) {
+			average += *i;
+			sd += (*i)*(*i);
+		}
+		sd = sd/stochastic_estimates.size();
+		average = average/stochastic_estimates.size();
+
+		if (isOutputProcess()) {
+			std::cout << "Average stochastic estimation of the reweighting factor: " << pow(average,0.25) << std::endl;
+		}
+	}
 
 	//Hermitian test
 	{

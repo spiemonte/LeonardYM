@@ -11,7 +11,7 @@
 
 namespace Update {
 
-BlockDiracWilsonFermionForce::BlockDiracWilsonFermionForce(real_t _kappa, int _blockSize) : FermionForce(_kappa), blockSize(_blockSize) { }
+BlockDiracWilsonFermionForce::BlockDiracWilsonFermionForce(real_t _kappa, int _xBlockSize, int _yBlockSize, int _zBlockSize, int _tBlockSize) : FermionForce(_kappa), xBlockSize(_xBlockSize), yBlockSize(_yBlockSize), zBlockSize(_zBlockSize), tBlockSize(_tBlockSize) { }
 
 BlockDiracWilsonFermionForce::~BlockDiracWilsonFermionForce() { }
 
@@ -23,10 +23,10 @@ FermionicForceMatrix BlockDiracWilsonFermionForce::derivative(const extended_fer
 
 	//We have to ensure that we are not in the block boundary
 	bool inBlockBoundary = false;
-	if (mu == 0 && Layout::globalIndexX(site) % blockSize == 0) inBlockBoundary = true;
-	if (mu == 1 && Layout::globalIndexY(site) % blockSize == 0) inBlockBoundary = true;
-	if (mu == 2 && Layout::globalIndexZ(site) % blockSize == 0) inBlockBoundary = true;
-	if (mu == 3 && Layout::globalIndexT(site) % blockSize == 0) inBlockBoundary = true;
+	if (mu == 0 && Layout::globalIndexX(site) % xBlockSize == 0) inBlockBoundary = true;
+	if (mu == 1 && Layout::globalIndexY(site) % yBlockSize == 0) inBlockBoundary = true;
+	if (mu == 2 && Layout::globalIndexZ(site) % zBlockSize == 0) inBlockBoundary = true;
+	if (mu == 3 && Layout::globalIndexT(site) % tBlockSize == 0) inBlockBoundary = true;
 
 	if (inBlockBoundary) {
 		return force;

@@ -14,12 +14,15 @@ namespace Update {
 
 class BlockDiracWilsonFermionForce: public Update::FermionForce {
 	public:
-		BlockDiracWilsonFermionForce(real_t _kappa, int _blockSize);
+		BlockDiracWilsonFermionForce(real_t _kappa, int _xBlockSize, int _yBlockSize, int _zBlockSize, int _tBlockSize);
 		~BlockDiracWilsonFermionForce();
 
 		virtual FermionicForceMatrix derivative(const extended_fermion_lattice_t& lattice, const extended_dirac_vector_t& X, const extended_dirac_vector_t& Y, int site, int mu) const;
 	private:
-		int blockSize;
+		int xBlockSize;
+		int yBlockSize;
+		int zBlockSize;
+		int tBlockSize;
 };
 
 } /* namespace Update */

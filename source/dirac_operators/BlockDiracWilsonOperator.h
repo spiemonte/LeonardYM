@@ -25,6 +25,7 @@ public:
 	virtual FermionForce* getForce() const;
 
 	virtual void setLattice(const extended_fermion_lattice_t& _lattice);
+
 };
 
 } /* namespace Update */

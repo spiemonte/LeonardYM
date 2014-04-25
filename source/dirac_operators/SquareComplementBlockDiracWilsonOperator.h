@@ -29,8 +29,8 @@ public:
 
 	virtual void setKappa(real_t _kappa);
 	
-	void setBlockSize(int _blockSize);
-	int getBlockSize() const;
+	void setBlockSize(const std::vector<unsigned int>&_blockSize);
+	std::vector<unsigned int> getBlockSize() const;
 
 	//Set the precision of the inner inverter
 	void setPrecision(const real_t& _precision);

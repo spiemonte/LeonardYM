@@ -41,7 +41,7 @@ public:
 
 	virtual void setLattice(const extended_fermion_lattice_t& _lattice);
 
-	virtual void setBlockSize(int _blockSize);
+	virtual void setBlockSize(const std::vector<unsigned int>& _blockSize);
 private:
 	BlockDiracWilsonOperator blockDiracWilsonOperator;
 	

@@ -20,10 +20,13 @@ public:
 
 	static DiracOperator* getInstance(const std::string& name, unsigned int power, const StorageParameters& parameters);
 
-	virtual void setBlockSize(int _blockSize);
-	int getBlockSize() const;
+	virtual void setBlockSize(const std::vector<unsigned int>& _blockSize);
+	std::vector<unsigned int> getBlockSize() const;
 protected:
-	int blockSize;
+	int xBlockSize;
+	int yBlockSize;
+	int zBlockSize;
+	int tBlockSize;
 };
 
 } /* namespace Update */

@@ -46,6 +46,28 @@ void GluinoGlue::execute(environment_t& environment) {
 		if (isOutputProcess()) std::cout << "GluinoGlue::No smearing options found, proceeding without!" << std::endl;
 	}
 
+	try {
+		unsigned int t = environment.configurations.get<unsigned int>("t_source_origin");
+		extended_fermion_lattice_t swaplinkconfig;
+		typedef extended_fermion_lattice_t LT;
+		if (t != 0) {
+			for (unsigned int n = 0; n < t; ++n) {
+				//We do a swap
+				for(int site = 0; site < (lattice.localsize); ++site){
+					for (unsigned int mu = 0; mu < 4; ++mu) swaplinkconfig[site][mu] = lattice[site][mu];
+				}
+				swaplinkconfig.updateHalo();
+				//We wrap
+				for(int site = 0; site < (lattice.localsize); ++site){
+					for (unsigned int mu = 0; mu < 4; ++mu) lattice[site][mu] = swaplinkconfig[LT::sup(site,3)][mu];
+				}
+				lattice.updateHalo();
+			}
+		}
+	} catch (NotFoundOption& ex) {
+
+	}
+
 	diracOperator->setLattice(lattice);
 	diracOperator->setGamma5(false);
 

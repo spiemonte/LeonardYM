@@ -38,11 +38,14 @@ void SquareBlockDiracWilsonOperator::setLattice(const extended_fermion_lattice_t
 
 FermionForce* SquareBlockDiracWilsonOperator::getForce() const {
 	std::cout << "Gauge force not implemented for SquareBlockDiracWilsonOperator, return that for DiracWilsonOperator" << std::endl;
-	return new BlockDiracWilsonFermionForce(kappa, blockSize);
+	return new BlockDiracWilsonFermionForce(kappa, xBlockSize, yBlockSize, zBlockSize, tBlockSize);
 }
 
-void SquareBlockDiracWilsonOperator::setBlockSize(int _blockSize) {
-	blockSize = _blockSize;
+void SquareBlockDiracWilsonOperator::setBlockSize(const std::vector<unsigned int>& _blockSize) {
+	xBlockSize = _blockSize[0];
+	yBlockSize = _blockSize[1];
+	zBlockSize = _blockSize[2];
+	tBlockSize = _blockSize[3];
 	blockDiracWilsonOperator.setBlockSize(_blockSize);
 }
 

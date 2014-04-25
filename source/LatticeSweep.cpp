@@ -32,6 +32,7 @@
 #include "GaugeEnergy.h"
 #include "AdjointPolyakovLoop.h"
 #include "MultiStepNFlavorQCDUpdater.h"
+#include "TwistedMultiStepNFlavorQCDUpdater.h"
 
 namespace Update {
 
@@ -92,6 +93,8 @@ LatticeSweep* LatticeSweep::getInstance(const std::string& name) {
 		return new GaugeEnergy();
 	} else if (name == "MultiStepNFlavorQCD") {
 		return new MultiStepNFlavorQCDUpdater();
+	} else if (name == "TwistedMultiStepNFlavorQCD") {
+		return new TwistedMultiStepNFlavorQCDUpdater();
 	}
 	else {
 		if (isOutputProcess()) std::cout << "Unknown name sweep: " << name << std::endl;

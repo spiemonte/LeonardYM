@@ -93,6 +93,13 @@ int main(int ac, char* av[]) {
 	    ("number_pseudofermions", po::value<unsigned int>(), "the number of pseudofermions used")
 	    ("number_force_levels", po::value<unsigned int>(), "the number of levels used for the force")
 		("check_rational_approximations", po::value< std::string >(), "Set to true for checking the approximations in the beginning of the simulation")
+		("twisted_mass_squared", po::value<double>(), "The twisted mass squared used by twisted updater to regularize to RHMC")
+		("number_twisted_correction_noise_vectors", po::value<unsigned int>(), "Number of noise vectors used to estimate the correction factor")
+		("number_block_correction_noise_vectors", po::value<unsigned int>(), "Number of noise vectors used to estimate the correction factor")
+		("theory_power_factor", po::value<double>(), "The half of the number of fermion (1/4 for SUSY, 1 for two flavor, etc)")
+		("twisted_breakup", po::value<unsigned int>(), "The value of the determinant breakup used in the correction step")
+		("deflation_block_size", po::value<std::string>(), "The vector of the block size {lx,ly,lz,lt}")
+		("t_source_origin", po::value<unsigned int>(), "The t-origin for the source of the pion and gluino correlators")
 
 	    ("heatbath_rational_fraction_1", po::value<std::string>(), "the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
 	    ("metropolis_rational_fraction_1", po::value<std::string>(), "the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")

@@ -11,13 +11,14 @@
 
 namespace Update {
 
-BlockDiracOperator::BlockDiracOperator() : DiracOperator(), blockSize(4)  { }
+BlockDiracOperator::BlockDiracOperator() : DiracOperator(), xBlockSize(4), yBlockSize(4), zBlockSize(4), tBlockSize(4)  { }
 
-BlockDiracOperator::BlockDiracOperator(const extended_fermion_lattice_t& _lattice, real_t _kappa) : DiracOperator(_lattice, _kappa), blockSize(4) { }
+BlockDiracOperator::BlockDiracOperator(const extended_fermion_lattice_t& _lattice, real_t _kappa) : DiracOperator(_lattice, _kappa), xBlockSize(4), yBlockSize(4), zBlockSize(4), tBlockSize(4) { }
 
 BlockDiracOperator::~BlockDiracOperator() { }
 
 DiracOperator* BlockDiracOperator::getInstance(const std::string& name, unsigned int power, const StorageParameters& parameters) {
+	std::vector<unsigned int> blockSize = parameters.get< std::vector<unsigned int> >("deflation_block_size");
 	if (power == 1) {
 		if (name == "DiracWilson") {
 			BlockDiracWilsonOperator* result = new BlockDiracWilsonOperator();
@@ -44,12 +45,20 @@ DiracOperator* BlockDiracOperator::getInstance(const std::string& name, unsigned
 	}
 }
 
-void BlockDiracOperator::setBlockSize(int _blockSize) {
-	blockSize = _blockSize;
+void BlockDiracOperator::setBlockSize(const std::vector<unsigned int>& _blockSize) {
+	xBlockSize = _blockSize[0];
+	yBlockSize = _blockSize[1];
+	zBlockSize = _blockSize[2];
+	tBlockSize = _blockSize[3];
 }
 
-int BlockDiracOperator::getBlockSize() const {
-	return blockSize;
+std::vector<unsigned int> BlockDiracOperator::getBlockSize() const {
+	std::vector<unsigned int> result;
+	result.push_back(xBlockSize);
+	result.push_back(yBlockSize);
+	result.push_back(zBlockSize);
+	result.push_back(tBlockSize);
+	return result;
 }
 
 } /* namespace Update */

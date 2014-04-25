@@ -15,6 +15,7 @@
 #include "GaugeAction.h"
 #include "Integrate.h"
 #include "ToString.h"
+#include "GlobalOutput.h"
 #include "./dirac_operators/BlockDiracOperator.h"
 #include "./dirac_operators/SquareComplementBlockDiracWilsonOperator.h"
 #include "./dirac_operators/SquareDiracWilsonOperator.h"
@@ -29,72 +30,22 @@
 
 namespace Update {
 
-NFlavorBlockUpdater::NFlavorBlockUpdater() : NFlavorQCDUpdater() { }
+NFlavorBlockUpdater::NFlavorBlockUpdater() : MultiStepNFlavorQCDUpdater(), biConjugateGradient(0) { }
 
-NFlavorBlockUpdater::NFlavorBlockUpdater(const NFlavorBlockUpdater& toCopy) : NFlavorQCDUpdater(toCopy) { }
+NFlavorBlockUpdater::NFlavorBlockUpdater(const NFlavorBlockUpdater& toCopy) : MultiStepNFlavorQCDUpdater(toCopy), biConjugateGradient(0) { }
 
-NFlavorBlockUpdater::~NFlavorBlockUpdater() { }
-
-void NFlavorBlockUpdater::initializeCorrectionStepApproximations(const environment_t& environment) {
-	int breakupLevel = environment.configurations.get< unsigned int >("correction_step_breakup_level");
-	
-	if (polynomialApproximationsInverse.empty()) {
-		for (int i = 1; i <= breakupLevel; ++i) {
-			std::vector< std::complex<real_t> > coeff = environment.configurations.get< std::vector< std::complex<real_t> > >(std::string("correction_approximation_inverse_")+toString(i));
-			Polynomial approx;
-			approx.setScaling(coeff.front());
-			coeff.erase(coeff.begin(),coeff.begin()+1);
-			approx.setRoots(coeff);
-			polynomialApproximationsInverse.push_back(approx);
-		}
-	}
-
-	if (polynomialApproximationsDirect.empty()) {
-		for (int i = 1; i <= breakupLevel; ++i) {
-			std::vector< std::complex<real_t> > coeff = environment.configurations.get< std::vector< std::complex<real_t> > >(std::string("correction_approximation_direct_")+toString(i));
-			Polynomial approx;
-			approx.setScaling(coeff.front());
-			coeff.erase(coeff.begin(),coeff.begin()+1);
-			approx.setRoots(coeff);
-			polynomialApproximationsDirect.push_back(approx);
-		}
-	}
-}
-
-void NFlavorBlockUpdater::checkCorrectionStepApproximations(const environment_t& environment) const {
-	double testerDirect = 1., testerInverse = 1.;
-	double epsilon = 0.0001;
-	int breakupLevel = environment.configurations.get< unsigned int >("correction_step_breakup_level");
-	for (int i = 0; i < breakupLevel; ++i) {
-		testerInverse *= polynomialApproximationsInverse[i].evaluate(2.).real();
-		testerDirect *= polynomialApproximationsDirect[i].evaluate(2.).real();
-	}
-	std::cout << "Vediamo da dove partire: " << testerInverse << " " << testerDirect << std::endl;
-	double numberFermions = -2*log(testerInverse)/log(2.);//We are using the square of the dirac operator, hence we have a factor 2
-	if (isOutputProcess()) std::cout << "NFlavorBlockUpdater::The theory has " <<  numberFermions << " nf." << std::endl;
-#ifdef ADJOINT
-	if (isOutputProcess() && fabs(numberFermions - 0.5) < epsilon) std::cout << "NFlavorQCDUpdater::The theory seems SUSY" << std::endl;
-#endif
-#ifndef ADJOINT
-	if (isOutputProcess() && fabs(numberFermions - 1) < epsilon) std::cout << "NFlavorBlockUpdater::The theory seems 1 FlavorQCD" << std::endl;
-	if (isOutputProcess() && fabs(numberFermions - 2) < epsilon) std::cout << "NFlavorBlockUpdater::The theory seems 2 FlavorQCD" << std::endl;
-#endif
-	if (isOutputProcess() && fabs(testerInverse*testerDirect - 1.) > epsilon) {
-		std::cout << "NFlavorBlockUpdater::Warning, large mismatch between force and metropolis approximations: " << fabs(testerInverse*testerDirect - 1.) << std::endl;
-	}
+NFlavorBlockUpdater::~NFlavorBlockUpdater() {
+	if (biConjugateGradient != 0) delete biConjugateGradient;
+	biConjugateGradient = 0;
 }
 
 void NFlavorBlockUpdater::execute(environment_t& environment) {	
 	//First we initialize the approximations
 	this->initializeApproximations(environment);
 
-	//Then we initialize the approximations for the correction step
-	this->initializeCorrectionStepApproximations(environment);
-
 	//We check the theory that is simulated
 	if (environment.iteration == 0 && environment.sweep == 0) {
 		this->checkTheory(environment);
-		this->checkCorrectionStepApproximations(environment);
 	}
 
 	//Initialize the momenta
@@ -125,28 +76,35 @@ void NFlavorBlockUpdater::execute(environment_t& environment) {
 		++j;
 	}
 
-	if (environment.sweep == 0 && environment.iteration == 0 && environment.measurement) {
-		//Now we test the correctness of rational/heatbath
-		long_real_t test = 0.;
-		//Now we use the better approximation for the metropolis step
-		std::vector<RationalApproximation>::iterator rational = rationalApproximationsMetropolis.begin();
-		for (i = pseudofermions.begin(); i != pseudofermions.end(); ++i) {
-			//Now we evaluate it with the rational approximation of the inverse
-			rational->evaluate(squareDiracOperator,tmp_pseudofermion,*i);
-			test += real(AlgebraUtils::dot(*i,tmp_pseudofermion));
-			++rational;
+	try {
+		std::string flag = environment.configurations.get<std::string>("check_rational_approximations");
+
+		if (environment.sweep == 0 && environment.iteration == 0 && environment.measurement && flag == "true") {
+			//Now we test the correctness of rational/heatbath
+			long_real_t test = 0.;
+			//Now we use the better approximation for the metropolis step
+			std::vector<RationalApproximation>::iterator rational = rationalApproximationsMetropolis.begin();
+			for (i = pseudofermions.begin(); i != pseudofermions.end(); ++i) {
+				//Now we evaluate it with the rational approximation of the inverse
+				rational->evaluate(squareDiracOperator,tmp_pseudofermion,*i);
+				test += real(AlgebraUtils::dot(*i,tmp_pseudofermion));
+				++rational;
+			}
+			if (isOutputProcess()) std::cout << "NFlavorBlockUpdater::Consistency check for the metropolis: " << test - oldPseudoFermionEnergy << std::endl;
+			//Now we use the approximation for the force step
+			rational = rationalApproximationsForce[0].begin();
+			test = 0.;
+			for (i = pseudofermions.begin(); i != pseudofermions.end(); ++i) {
+				//Now we evaluate it with the rational approximation of the inverse
+				rational->evaluate(squareDiracOperator,tmp_pseudofermion,*i);
+				test += real(AlgebraUtils::dot(*i,tmp_pseudofermion));
+				++rational;
+			}
+			if (isOutputProcess()) std::cout << "NFlavorBlockUpdater::Consistency check for the first level of the force: " << test - oldPseudoFermionEnergy << std::endl;
 		}
-		if (isOutputProcess()) std::cout << "NFlavoBlockUpdater::Consistency check for the metropolis: " << test - oldPseudoFermionEnergy << std::endl;
-		//Now we use the approximation for the force step
-		rational = rationalApproximationsForce.begin();
-		test = 0.;
-		for (i = pseudofermions.begin(); i != pseudofermions.end(); ++i) {
-			//Now we evaluate it with the rational approximation of the inverse
-			rational->evaluate(squareDiracOperator,tmp_pseudofermion,*i);
-			test += real(AlgebraUtils::dot(*i,tmp_pseudofermion));
-			++rational;
-		}
-		if (isOutputProcess()) std::cout << "NFlavoBlockUpdater::Consistency check for the force: " << test - oldPseudoFermionEnergy << std::endl;
+
+	} catch (NotFoundOption& ex) {
+		if (isOutputProcess() && environment.sweep == 0 && environment.iteration == 0 && environment.measurement) std::cout << "NFlavorQCDUpdater::No consistency check of metropolis/force approximations!" << std::endl;
 	}
 
 	//Get the initial energy of momenta
@@ -159,17 +117,24 @@ void NFlavorBlockUpdater::execute(environment_t& environment) {
 	diracOperator->setLattice(environmentNew.getFermionLattice());
 
 	//Take the fermion action
-	if (fermionAction == 0) fermionAction = new NFlavorFermionAction(squareDiracOperator, diracOperator, rationalApproximationsForce);
-	//TODO dirac operator correctly set?
-	for (i = pseudofermions.begin(); i != pseudofermions.end(); ++i) {
-		//Add the pseudofermions
-		fermionAction->addPseudoFermion(&(*i));
+	if (fermionAction == 0) {
+		int numberLevels = environment.configurations.get< unsigned int >("number_force_levels");
+		fermionAction = new NFlavorFermionAction*[numberLevels];
+		for (int j = 0; j < numberLevels; ++j) {
+			fermionAction[j] = new NFlavorFermionAction(squareDiracOperator, diracOperator, rationalApproximationsForce[j]);
+			//TODO dirac operator correctly set?
+			for (i = pseudofermions.begin(); i != pseudofermions.end(); ++i) {
+				//Add the pseudofermions
+				fermionAction[j]->addPseudoFermion(&(*i));
+			}
+			//Set the precision of the inverter
+			fermionAction[j]->setForcePrecision(environment.configurations.get<double>("force_inverter_precision"));
+			fermionAction[j]->setForceMaxIterations(environment.configurations.get<unsigned int>("force_inverter_max_steps"));
+		}
 	}
-	//Set the precision of the inverter
-	fermionAction->setForcePrecision(environment.configurations.get<double>("force_inverter_precision"));
 
 	//Take the global action
-	if (nFlavorQCDAction == 0) nFlavorQCDAction = new NFlavorAction(gaugeAction, fermionAction);
+	if (nFlavorQCDAction == 0) nFlavorQCDAction = new NFlavorAction(gaugeAction, fermionAction[0]);//TODO, we skip the other forces
 
 	//The t-length of a single integration step
 	real_t t_length = environment.configurations.get<double>("hmc_t_length");
@@ -177,13 +142,23 @@ void NFlavorBlockUpdater::execute(environment_t& environment) {
 	//The numbers of integration steps
 	std::vector<unsigned int> numbers_steps = environment.configurations.get< std::vector<unsigned int> >("number_hmc_steps");
 	if (numbers_steps.size() == 1) {
+		int numberLevels = environment.configurations.get< unsigned int >("number_force_levels");
+		if (isOutputProcess() && numberLevels != 1) std::cout << "NFlavorBlockUpdater::Warning, with only one time integration only the first level of the force is used!" << std::endl;
 		forces.push_back(nFlavorQCDAction);
 	} else if (numbers_steps.size() == 2) {
-		forces.push_back(fermionAction);
+		int numberLevels = environment.configurations.get< unsigned int >("number_force_levels");
+		if (isOutputProcess() && numberLevels != 1) std::cout << "NFlavorBlockUpdater::Warning, with only two time integration only the first level of the force is used!" << std::endl;
+		forces.push_back(fermionAction[0]);
+		forces.push_back(gaugeAction);
+	} else if (numbers_steps.size() == 3) {
+		int numberLevels = environment.configurations.get< unsigned int >("number_force_levels");
+		if (isOutputProcess() && numberLevels != 2) std::cout << "NFlavorBlockUpdater::Warning, with only three time integration only the first two levels of the force is used!" << std::endl;
+		forces.push_back(fermionAction[1]);
+		forces.push_back(fermionAction[0]);
 		forces.push_back(gaugeAction);
 	}
 	else {
-		if (isOutputProcess()) std::cout << "NFlavorBlockUpdater::Warning, NFlavor does not support more than two time integrations!" << std::endl;
+		if (isOutputProcess()) std::cout << "NFlavorBlockUpdater::Warning, NFlavor does not support more than three time integrations!" << std::endl;
 		numbers_steps.resize(1);
 		forces.push_back(nFlavorQCDAction);
 	}
@@ -225,197 +200,248 @@ void NFlavorBlockUpdater::execute(environment_t& environment) {
 	//Global Metropolis Step
 	bool metropolis = this->metropolis(oldMomentaEnergy + oldLatticeEnergy + oldPseudoFermionEnergy, newMomentaEnergy + newLatticeEnergy + newPseudoFermionEnergy);
 	if (metropolis) {
-		this->stochasticCorrectionStep(environment, environmentNew);
-		//Now we do the correction step
-		/*DiracOperator* squareDiracOperatorCorrection = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 2, environment.configurations);
-		DiracOperator* squareBlockDiracOperatorCorrection = BlockDiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 2, environment.configurations);
+		environment = environmentNew;
 
-		squareDiracOperatorCorrection->setLattice(environment.getFermionLattice());
-		squareBlockDiracOperatorCorrection->setLattice(environment.getFermionLattice());
+		real_t alpha = environment.configurations.get<real_t>("theory_power_factor");
 
-		long_real_t oldCorrectionEnergy = 0., newCorrectionEnergy = 0.;
+		//Now we computed the logarithm of an eventual correction factor correction factor
+		log_determinant = this->logDeterminant(environmentNew,alpha);
 
-		//First we generate and heatbath the gaussian noise vector
-		reduced_dirac_vector_t gaussianVectors[polynomialApproximationsInverse.size()];
-		reduced_dirac_vector_t noiseVector, tmp;
+		if (environment.measurement && isOutputProcess()) {
+			GlobalOutput* output = GlobalOutput::getInstance();
 
-		std::vector<Polynomial>::iterator directApproximation = polynomialApproximationsDirect.begin();
-		std::vector<Polynomial>::iterator inverseApproximation = polynomialApproximationsInverse.begin();
-		
-		for (unsigned int i = 0; i < polynomialApproximationsInverse.size(); ++i) {
-			this->generateGaussianDiracVector(noiseVector);
-			oldCorrectionEnergy += AlgebraUtils::squaredNorm(noiseVector);
-			//Heat bath by multiply the noiseVector to the polynomial of the dirac operator
-			//directApproximation->evaluate(squareDiracOperatorCorrection, tmp, noiseVector);
-			//inverseApproximation->evaluate(squareBlockDiracOperatorCorrection, gaussianVectors[i], tmp);
-			directApproximation->evaluate(squareDiracOperatorCorrection, gaussianVectors[i], noiseVector);
-			++directApproximation;
-			++inverseApproximation;
+			output->push("hmc_history");
+
+			output->write("hmc_history", - (oldMomentaEnergy + oldLatticeEnergy + oldPseudoFermionEnergy) + (newMomentaEnergy + newLatticeEnergy + newPseudoFermionEnergy));
+			output->write("hmc_history", 1);
+
+			output->pop("hmc_history");
+
+			output->push("log_determinant");
+
+			output->write("log_determinant", - log_determinant);
+
+			output->pop("log_determinant");
 		}
-
-		//Now we evaluate the new correction factor energy
-		//squareDiracOperatorCorrection->setLattice(environmentNew.getFermionLattice());
-		//squareBlockDiracOperatorCorrection->setLattice(environmentNew.getFermionLattice());
-
-		directApproximation = polynomialApproximationsDirect.begin();
-		inverseApproximation = polynomialApproximationsInverse.begin();
-		for (unsigned int i = 0; i < polynomialApproximationsInverse.size(); ++i) {
-			//The energy now is computed in the reverse order!
-			//directApproximation->evaluate(squareBlockDiracOperatorCorrection, tmp, gaussianVectors[i]);
-			//Use noiseVector as a temporary storage
-			//inverseApproximation->evaluate(squareDiracOperatorCorrection, noiseVector, tmp);
-			inverseApproximation->evaluate(squareDiracOperatorCorrection, noiseVector, gaussianVectors[i]);
-			++directApproximation;
-			++inverseApproximation;
-			newCorrectionEnergy += AlgebraUtils::squaredNorm(noiseVector);
-		}
-
-		std::cout << "Giusto per: " << oldCorrectionEnergy << " " << newCorrectionEnergy << std::endl;
-		
-		bool correction = this->metropolis(oldCorrectionEnergy, newCorrectionEnergy);
-		if (correction) {
-			environment = environmentNew;
 	}
+	else {
+		if (environment.measurement && isOutputProcess()) {
+			GlobalOutput* output = GlobalOutput::getInstance();
 
-	delete squareDiracOperatorCorrection;
-	delete squareBlockDiracOperatorCorrection;*/
+			output->push("hmc_history");
 
-		/*std::cout << "Giusto per: " << newPseudoFermionEnergy - oldPseudoFermionEnergy << std::endl;
+			output->write("hmc_history", - (oldMomentaEnergy + oldLatticeEnergy + oldPseudoFermionEnergy) + (newMomentaEnergy + newLatticeEnergy + newPseudoFermionEnergy));
+			output->write("hmc_history", 0);
 
-		BiConjugateGradient* biConjugateGradient = new BiConjugateGradient();
-		biConjugateGradient->setPrecision(0.0001);
-		reduced_dirac_vector_t random, temp, result;
-		AlgebraUtils::generateRandomGaussianVector(temp);*/
+			output->pop("hmc_history");
 
-		/*ComplementBlockDiracWilsonOperator* complementBlockDiracWilsonOperatorOld = new ComplementBlockDiracWilsonOperator();
-		complementBlockDiracWilsonOperatorOld->setKappa(environment.configurations.get<real_t>("kappa"));
-		complementBlockDiracWilsonOperatorOld->setLattice(environment.getFermionLattice());
-		complementBlockDiracWilsonOperatorOld->setPrecision(0.000001);
+			output->push("log_determinant");
 
-		ComplementBlockDiracWilsonOperator* complementBlockDiracWilsonOperatorNew = new ComplementBlockDiracWilsonOperator();
-		complementBlockDiracWilsonOperatorNew->setKappa(environment.configurations.get<real_t>("kappa"));
-		complementBlockDiracWilsonOperatorNew->setLattice(environmentNew.getFermionLattice());
-		complementBlockDiracWilsonOperatorNew->setPrecision(0.000001);*/
+			output->write("log_determinant", - log_determinant);
 
-		/*DiracWilsonOperator* diracWilsonOperatorOld = new DiracWilsonOperator();
-		diracWilsonOperatorOld->setKappa(environment.configurations.get<real_t>("kappa"));
-		diracWilsonOperatorOld->setLattice(environment.getFermionLattice());
-
-		DiracWilsonOperator* diracWilsonOperatorNew = new DiracWilsonOperator();
-		diracWilsonOperatorNew->setKappa(environment.configurations.get<real_t>("kappa"));
-		diracWilsonOperatorNew->setLattice(environmentNew.getFermionLattice());
-
-		long_real_t mean = 0.;
-		long_real_t meansq = 0.;
-
-		for (int i = 0; i < 10; ++i) {
-			AlgebraUtils::generateRandomGaussianVector(random);
-			
-			biConjugateGradient->solve(diracWilsonOperatorOld, random, temp);
-			diracWilsonOperatorNew->multiply(result, temp);
-			
-
-			real_t partial = real(AlgebraUtils::dot(random, random) - AlgebraUtils::dot(result,result));
-			mean += partial;
-			meansq += partial*partial;
-			
-			std::cout << "Partial result: " << partial << std::endl;
+			output->pop("log_determinant");
 		}
-
-		std::cout << "NFlavorBlockUpdate::Stochastic mean: " << mean/10 << std::endl;
-		std::cout << "NFlavorBlockUpdate::Stochastic standard deviation: " << sqrt((meansq/10.) - (mean/10.)*(mean/10.))/sqrt(10.) << std::endl;*/
-		/*long_real_t meanNew = 0.;
-
-		complementBlockDiracWilsonOperator->setLattice(environmentNew.getFermionLattice());
-
-		for (int i = 0; i < 30; ++i) {
-			AlgebraUtils::generateRandomGaussianVector(temp);
-			complementBlockDiracWilsonOperator->multiply(result, temp);
-
-			meanNew += real(AlgebraUtils::dot(temp, temp) - AlgebraUtils::dot(result,result));
-		}
-		std::cout << "Media stocastica: " << meanNew/30 << std::endl;*/
-
-		/*std::cout << "NFlavorBlockUpdate::Determinant ratio: " << sqrt(exp(-mean/10.)) << std::endl;	
-		real_t determinantRatio = sqrt(exp(-mean/10));
-		bool correction = this->metropolis(determinantRatio);*/
-		
-		/*if (correction) {
-			environment = environmentNew;
-		}*/
 	}
-
-	//Determinant test
-	/*{
-		reduced_dirac_vector_t temp, result;
-		AlgebraUtils::generateRandomGaussianVector(temp);
-
-		ComplementBlockDiracWilsonOperator* complementBlockDiracWilsonOperator = new ComplementBlockDiracWilsonOperator();
-		complementBlockDiracWilsonOperator->setKappa(environment.configurations.get<real_t>("kappa"));
-		complementBlockDiracWilsonOperator->setLattice(environment.getFermionLattice());
-
-		long_real_t meanOld = 0.;
-
-		for (int i = 0; i < 100; ++i) {
-			AlgebraUtils::generateRandomGaussianVector(temp);
-			complementBlockDiracWilsonOperator->multiply(result, temp);
-
-			meanOld += real(AlgebraUtils::dot(temp, temp) - AlgebraUtils::dot(result,result));
-		}
-
-		std::cout << "Media stocastica: " << meanOld/100 << std::endl;
-		long_real_t meanNew = 0.;
-
-		complementBlockDiracWilsonOperator->setLattice(environmentNew.getFermionLattice());
-
-		for (int i = 0; i < 100; ++i) {
-			AlgebraUtils::generateRandomGaussianVector(temp);
-			complementBlockDiracWilsonOperator->multiply(result, temp);
-
-			meanNew += real(AlgebraUtils::dot(temp, temp) - AlgebraUtils::dot(result,result));
-		}
-		std::cout << "Media stocastica: " << meanNew/100 << std::endl;
-
-		std::cout << "Determinant ratio: " << sqrt(exp(-(meanNew/100) + (meanOld/100))) << std::endl;
-	}*/
-
 
 	delete integrate;
 }
 
-void NFlavorBlockUpdater::stochasticCorrectionStep(environment_t& environment, const environment_t& environmentNew) {
-	DiracOperator* squareDiracOperator = new SquareComplementBlockDiracWilsonOperator();//
-	squareDiracOperator->setKappa(environment.configurations.get<real_t>("kappa"));
-	squareDiracOperator->setLattice(environment.getFermionLattice());
-	
-	//Initialize the pseudofermion fields
-	std::vector<extended_dirac_vector_t>::iterator i;
-	std::vector<RationalApproximation>::iterator j = rationalApproximationsHeatBath.begin();
-	long_real_t oldPseudoFermionEnergy = 0.;
-	for (i = pseudofermions.begin(); i != pseudofermions.end(); ++i) {
-		this->generateGaussianDiracVector(tmp_pseudofermion);
-		oldPseudoFermionEnergy += AlgebraUtils::squaredNorm(tmp_pseudofermion);
-		//Heat bath by multiply the tmp_pseudofermion to the polynomial of the dirac operator
-		j->evaluate(squareDiracOperator, *i, tmp_pseudofermion);//TODO
-		++j;
+long_real_t NFlavorBlockUpdater::logDeterminant(const environment_t& environment_new, const environment_t& environment_old, real_t alpha) {
+	//Now we get the biconjugate grandient solver
+	if (biConjugateGradient == 0) biConjugateGradient = new BiConjugateGradient();
+	biConjugateGradient->setPrecision(0.01);//environment.configurations.get<double>("generic_inverter_precision"));
+	biConjugateGradient->setMaximumSteps(environment_new.configurations.get<unsigned int>("generic_inverter_max_steps"));
+
+	//Here we store the partial estimates from the noise technique
+	std::vector<long_real_t> stochastic_estimates;
+
+	//Now we get the block dirac wilson operator
+	DiracOperator* squareBlockDiracNew = BlockDiracOperator::getInstance(environment_new.configurations.get<std::string>("dirac_operator"), 2, environment_new.configurations);
+	squareBlockDiracNew->setLattice(environment_new.getFermionLattice());
+
+	DiracOperator* squareDiracNew = DiracOperator::getInstance(environment_new.configurations.get<std::string>("dirac_operator"), 2, environment_new.configurations);
+	squareDiracNew->setLattice(environment_new.getFermionLattice());
+
+	//Now we get the block dirac wilson operator
+	DiracOperator* squareBlockDiracOld = BlockDiracOperator::getInstance(environment_old.configurations.get<std::string>("dirac_operator"), 2, environment_old.configurations);
+	squareBlockDiracOld->setLattice(environment_old.getFermionLattice());
+
+	DiracOperator* squareDiracOld = DiracOperator::getInstance(environment_old.configurations.get<std::string>("dirac_operator"), 2, environment_old.configurations);
+	squareDiracOld->setLattice(environment_old.getFermionLattice());
+
+	int steps = environment_new.configurations.get<unsigned int>("number_block_correction_noise_vectors");
+
+	for (int i = 0; i < steps; ++i) {
+		AlgebraUtils::generateRandomComplexGaussianVector(temp1);
+		biConjugateGradient->solve(squareDiracNew, temp1, temp2);
+		squareBlockDiracNew->multiply(result, temp2);
+
+		if (isOutputProcess()) std::cout << "NFlavorBlockUpdater::Log determinant new: " << AlgebraUtils::dot(temp1,temp1) - AlgebraUtils::dot(temp1, result) << std::endl;
+
+		std::complex<long_real_t> new_log_det = AlgebraUtils::dot(temp1,temp1) - AlgebraUtils::dot(temp1, result);
+
+		biConjugateGradient->solve(squareDiracOld, temp1, temp2);
+		squareBlockDiracOld->multiply(result, temp2);
+
+		if (isOutputProcess()) std::cout << "NFlavorBlockUpdater::Log determinant old: " << AlgebraUtils::dot(temp1,temp1) - AlgebraUtils::dot(temp1, result) << std::endl;
+
+		std::complex<long_real_t> old_log_det = AlgebraUtils::dot(temp1,temp1) - AlgebraUtils::dot(temp1, result);
+		stochastic_estimates.push_back(real(new_log_det - old_log_det));
 	}
 
-	squareDiracOperator->setLattice(environmentNew.getFermionLattice());
-	
-	long_real_t newPseudoFermionEnergy = 0.;
-	//Now we use the better approximation for the metropolis step
-	std::vector<RationalApproximation>::iterator rational = rationalApproximationsMetropolis.begin();
-	for (i = pseudofermions.begin(); i != pseudofermions.end(); ++i) {
-		//Now we evaluate it with the rational approximation of the inverse
-		rational->evaluate(squareDiracOperator,tmp_pseudofermion,*i);
-		newPseudoFermionEnergy += real(AlgebraUtils::dot(*i,tmp_pseudofermion));
-		++rational;
+	long_real_t average = 0., max = stochastic_estimates.front();
+	for (std::vector<long_real_t>::iterator i = stochastic_estimates.begin(); i != stochastic_estimates.end(); ++i) {
+		average += *i;
+		if (*i > max) max = *i;
+	}
+	average = average/stochastic_estimates.size();
+
+	long_real_t sd = 0.;
+	for (std::vector<long_real_t>::iterator i = stochastic_estimates.begin(); i != stochastic_estimates.end(); ++i) {
+		sd += (*i - average)*(*i - average);
+	}
+	sd = sqrt(sd/stochastic_estimates.size());
+
+	long_real_t residuum = 0.;
+	for (std::vector<long_real_t>::iterator i = stochastic_estimates.begin(); i != stochastic_estimates.end(); ++i) {
+		residuum += exp( *i - max );
 	}
 
-	bool metropolis = this->metropolis(oldPseudoFermionEnergy, newPseudoFermionEnergy);
-	if (metropolis) {
-		environment = environmentNew;
+	delete squareBlockDiracNew;
+	delete squareDiracNew;
+	delete squareBlockDiracOld;
+	delete squareDiracOld;
+
+	if (isOutputProcess()) std::cout << "NFlavorBlockUpdater::Difference fermion action " << average << " with standard deviation " << sd << std::endl;
+	return (max - log(static_cast<long_real_t>(stochastic_estimates.size())) + log1p(residuum-1))*alpha;
+}
+
+long_real_t NFlavorBlockUpdater::logDeterminant(const environment_t& environment, real_t alpha) {
+	//Now we get the biconjugate grandient solver
+	if (biConjugateGradient == 0) biConjugateGradient = new BiConjugateGradient();
+	biConjugateGradient->setPrecision(environment.configurations.get<double>("generic_inverter_precision"));
+	biConjugateGradient->setMaximumSteps(environment.configurations.get<unsigned int>("generic_inverter_max_steps"));
+
+	//Here we store the partial estimates from the noise technique
+	std::vector<long_real_t> stochastic_estimates;
+
+	//Now we get the block dirac wilson operator
+	DiracOperator* squareBlockDirac = BlockDiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 2, environment.configurations);
+	squareBlockDirac->setLattice(environment.getFermionLattice());
+
+	DiracOperator* blockDirac = BlockDiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations);
+	blockDirac->setLattice(environment.getFermionLattice());
+
+	DiracOperator* dirac = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations);
+	dirac->setLattice(environment.getFermionLattice());
+
+	int steps = environment.configurations.get<unsigned int>("number_block_correction_noise_vectors");
+
+	for (int i = 0; i < steps; ++i) {
+		AlgebraUtils::generateRandomComplexGaussianVector(temp1);
+		biConjugateGradient->solve(squareBlockDirac, temp1, temp2);
+		blockDirac->multiply(temp3, temp2);
+		dirac->multiply(result,temp3);
+
+		long_real_t saturno = real(AlgebraUtils::dot(temp1,temp1) - AlgebraUtils::dot(result, result));
+
+		if (isOutputProcess()) std::cout << "NFlavorBlockUpdater::Log determinant: " << saturno << std::endl;
+
+
+		stochastic_estimates.push_back(saturno);
 	}
+
+	long_real_t average = 0., max = stochastic_estimates.front();
+	for (std::vector<long_real_t>::iterator i = stochastic_estimates.begin(); i != stochastic_estimates.end(); ++i) {
+		average += *i;
+		if (*i > max) max = *i;
+	}
+
+	average = average/stochastic_estimates.size();
+
+	long_real_t sd = 0.;
+	for (std::vector<long_real_t>::iterator i = stochastic_estimates.begin(); i != stochastic_estimates.end(); ++i) {
+		sd += (*i - average)*(*i - average);
+	}
+	sd = sqrt(sd/stochastic_estimates.size());
+
+	long_real_t residuum = 0.;
+	for (std::vector<long_real_t>::iterator i = stochastic_estimates.begin(); i != stochastic_estimates.end(); ++i) {
+		residuum += exp( *i - max );
+	}
+	//residuum = residuum/;
+
+	delete squareBlockDirac;
+	delete dirac;
+	delete blockDirac;
+
+	if (isOutputProcess()) std::cout << "NFlavorBlockUpdater::Log determinant average " << average << " with standard deviation " << sd << std::endl;
+	return (max - log(static_cast<long_real_t>(stochastic_estimates.size())) + log1p(residuum-1))*alpha;
+}
+
+long_real_t NFlavorBlockUpdater::logDeterminant_test(const environment_t& environment, real_t alpha) {
+	//Now we get the biconjugate grandient solver
+	if (biConjugateGradient == 0) biConjugateGradient = new BiConjugateGradient();
+	biConjugateGradient->setPrecision(0.000001);//environment.configurations.get<double>("generic_inverter_precision"));
+	biConjugateGradient->setMaximumSteps(environment.configurations.get<unsigned int>("generic_inverter_max_steps"));
+
+	//Here we store the partial estimates from the noise technique
+	std::vector<long_real_t> stochastic_estimates;
+
+	//Now we get the block dirac wilson operator
+	DiracOperator* squareDiracMass = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 2, environment.configurations);
+	squareDiracMass->setKappa(0.19);
+	squareDiracMass->setLattice(environment.getFermionLattice());
+
+	DiracOperator* diracMass = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations);
+	diracMass->setKappa(0.19);
+	diracMass->setLattice(environment.getFermionLattice());
+
+	DiracOperator* dirac = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations);
+	dirac->setLattice(environment.getFermionLattice());
+
+	int steps = environment.configurations.get<unsigned int>("number_twisted_correction_noise_vectors");
+
+	for (int i = 0; i < steps; ++i) {
+		AlgebraUtils::generateRandomComplexGaussianVector(temp1);
+		biConjugateGradient->solve(squareDiracMass, temp1, temp2);
+		diracMass->multiply(temp3, temp2);
+		dirac->multiply(result,temp3);
+
+		long_real_t saturno = real(AlgebraUtils::dot(temp1,temp1) - AlgebraUtils::dot(result, result));
+
+		if (isOutputProcess()) std::cout << "NFlavorBlockUpdater::Log determinant: " << saturno << std::endl;
+
+
+		stochastic_estimates.push_back(saturno);
+	}
+
+	long_real_t average = 0., max = stochastic_estimates.front();
+	for (std::vector<long_real_t>::iterator i = stochastic_estimates.begin(); i != stochastic_estimates.end(); ++i) {
+		average += *i;
+		if (*i > max) max = *i;
+	}
+
+	average = average/stochastic_estimates.size();
+
+	long_real_t sd = 0.;
+	for (std::vector<long_real_t>::iterator i = stochastic_estimates.begin(); i != stochastic_estimates.end(); ++i) {
+		sd += (*i - average)*(*i - average);
+	}
+	sd = sqrt(sd/stochastic_estimates.size());
+
+	long_real_t residuum = 0.;
+	for (std::vector<long_real_t>::iterator i = stochastic_estimates.begin(); i != stochastic_estimates.end(); ++i) {
+		residuum += exp( *i - max );
+	}
+	//residuum = residuum/;
+
+	delete squareDiracMass;
+	delete dirac;
+	delete diracMass;
+
+	if (isOutputProcess()) std::cout << "NFlavorBlockUpdater::Log determinant average " << average << " with standard deviation " << sd << std::endl;
+	return (max - log(static_cast<long_real_t>(stochastic_estimates.size())) + log1p(residuum-1))*alpha;
 }
 
 } /* namespace Update */

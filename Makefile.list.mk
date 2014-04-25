@@ -52,6 +52,9 @@ BlockDiracWilsonOperator.o: ./source/dirac_operators/BlockDiracWilsonOperator.h 
 SquareBlockDiracWilsonOperator.o: ./source/dirac_operators/SquareBlockDiracWilsonOperator.h ./source/dirac_operators/SquareBlockDiracWilsonOperator.cpp
 	$(CPP) $(CPPFLAGS) -c -o SquareBlockDiracWilsonOperator.o ./source/dirac_operators/SquareBlockDiracWilsonOperator.cpp
 
+SquareTwistedDiracOperator.o: ./source/dirac_operators/SquareTwistedDiracOperator.h ./source/dirac_operators/SquareTwistedDiracOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o SquareTwistedDiracOperator.o ./source/dirac_operators/SquareTwistedDiracOperator.cpp
+
 ComplementBlockDiracWilsonOperator.o: ./source/dirac_operators/ComplementBlockDiracWilsonOperator.h ./source/dirac_operators/ComplementBlockDiracWilsonOperator.cpp
 	$(CPP) $(CPPFLAGS) -c -o ComplementBlockDiracWilsonOperator.o ./source/dirac_operators/ComplementBlockDiracWilsonOperator.cpp
 
@@ -234,6 +237,9 @@ NFlavorQCDUpdater.o : ./source/NFlavorQCDUpdater.h ./source/NFlavorQCDUpdater.cp
 
 MultiStepNFlavorQCDUpdater.o : ./source/MultiStepNFlavorQCDUpdater.h ./source/MultiStepNFlavorQCDUpdater.cpp
 	$(CPP) $(CPPFLAGS) -c -o MultiStepNFlavorQCDUpdater.o ./source/MultiStepNFlavorQCDUpdater.cpp
+
+TwistedMultiStepNFlavorQCDUpdater.o : ./source/TwistedMultiStepNFlavorQCDUpdater.h ./source/TwistedMultiStepNFlavorQCDUpdater.cpp
+	$(CPP) $(CPPFLAGS) -c -o TwistedMultiStepNFlavorQCDUpdater.o ./source/TwistedMultiStepNFlavorQCDUpdater.cpp
 
 NFlavorBlockUpdater.o : ./source/NFlavorBlockUpdater.h ./source/NFlavorBlockUpdater.cpp
 	$(CPP) $(CPPFLAGS) -c -o NFlavorBlockUpdater.o ./source/NFlavorBlockUpdater.cpp

@@ -22,7 +22,7 @@ void BlockDiracWilsonOperator::multiply(reduced_dirac_vector_t& output, const re
 	typedef reduced_dirac_vector_t::Layout Layout;
 
 #pragma omp parallel for
-	for (unsigned int site = 0; site < lattice.localsize; ++site) {
+	for (int site = 0; site < lattice.localsize; ++site) {
 		GaugeVector tmp[4][4];
 
 		//First we put U(x,mu)*input(x+mu)
@@ -34,7 +34,7 @@ void BlockDiracWilsonOperator::multiply(reduced_dirac_vector_t& output, const re
 
 		//We store the result in a cache multiplied by gamma5(id-gamma[mu]) in dirac space
 		GaugeVector hopping[4];
-		for (unsigned int n = 0; n < diracVectorLength; ++n) {
+		for (int n = 0; n < diracVectorLength; ++n) {
 			hopping[0][n] = (tmp[0][0][n]+I*tmp[0][3][n]+tmp[1][0][n]+tmp[1][3][n]+tmp[2][0][n]+I*tmp[2][2][n]+tmp[3][0][n]-tmp[3][2][n]);
 			hopping[1][n] = (tmp[0][1][n]+I*tmp[0][2][n]+tmp[1][1][n]-tmp[1][2][n]+tmp[2][1][n]-I*tmp[2][3][n]+tmp[3][1][n]-tmp[3][3][n]);
 			hopping[2][n] = (I*tmp[0][1][n]-tmp[0][2][n]+tmp[1][1][n]-tmp[1][2][n]+I*tmp[2][0][n]-tmp[2][2][n]+tmp[3][0][n]-tmp[3][2][n]);
@@ -49,7 +49,7 @@ void BlockDiracWilsonOperator::multiply(reduced_dirac_vector_t& output, const re
 		}
 
 		//We store the result in the same a cache multiplied by gamma5(id+gamma[mu]) in dirac space
-		for (unsigned int n = 0; n < diracVectorLength; ++n) {
+		for (int n = 0; n < diracVectorLength; ++n) {
 			hopping[0][n] += (tmp[0][0][n]-I*tmp[0][3][n]+tmp[1][0][n]-tmp[1][3][n]+tmp[2][0][n]-I*tmp[2][2][n]+tmp[3][0][n]+tmp[3][2][n]);
 			hopping[1][n] += (tmp[0][1][n]-I*tmp[0][2][n]+tmp[1][1][n]+tmp[1][2][n]+tmp[2][1][n]+I*tmp[2][3][n]+tmp[3][1][n]+tmp[3][3][n]);
 			hopping[2][n] += (-I*tmp[0][1][n]-tmp[0][2][n]-tmp[1][1][n]-tmp[1][2][n]-I*tmp[2][0][n]-tmp[2][2][n]-tmp[3][0][n]-tmp[3][2][n]);
@@ -57,7 +57,7 @@ void BlockDiracWilsonOperator::multiply(reduced_dirac_vector_t& output, const re
 		}
 
 		//The final result is gamma5*input - kappa*hopping
-		for (unsigned int n = 0; n < diracVectorLength; ++n) {
+		for (int n = 0; n < diracVectorLength; ++n) {
 			output[site][0][n] = + input[site][0][n] - kappa*hopping[0][n];
 			output[site][1][n] = + input[site][1][n] - kappa*hopping[1][n];
 			output[site][2][n] = - (input[site][2][n] + kappa*hopping[2][n]);
@@ -73,7 +73,7 @@ void BlockDiracWilsonOperator::multiplyAdd(reduced_dirac_vector_t& output, const
 	typedef reduced_dirac_vector_t::Layout Layout;
 
 #pragma omp parallel for
-	for (unsigned int site = 0; site < lattice.localsize; ++site) {
+	for (int site = 0; site < lattice.localsize; ++site) {
 		//First we start the hopping parameter terms
 		GaugeVector tmp[4][4];
 
@@ -86,7 +86,7 @@ void BlockDiracWilsonOperator::multiplyAdd(reduced_dirac_vector_t& output, const
 
 		//We store the result in a cache multiplied by gamma5(id-gamma[mu]) in dirac space
 		GaugeVector hopping[4];
-		for (unsigned int n = 0; n < diracVectorLength; ++n) {
+		for (int n = 0; n < diracVectorLength; ++n) {
 			hopping[0][n] = (tmp[0][0][n]+I*tmp[0][3][n]+tmp[1][0][n]+tmp[1][3][n]+tmp[2][0][n]+I*tmp[2][2][n]+tmp[3][0][n]-tmp[3][2][n]);
 			hopping[1][n] = (tmp[0][1][n]+I*tmp[0][2][n]+tmp[1][1][n]-tmp[1][2][n]+tmp[2][1][n]-I*tmp[2][3][n]+tmp[3][1][n]-tmp[3][3][n]);
 			hopping[2][n] = (I*tmp[0][1][n]-tmp[0][2][n]+tmp[1][1][n]-tmp[1][2][n]+I*tmp[2][0][n]-tmp[2][2][n]+tmp[3][0][n]-tmp[3][2][n]);
@@ -101,7 +101,7 @@ void BlockDiracWilsonOperator::multiplyAdd(reduced_dirac_vector_t& output, const
 		}
 
 		//We store the result in the same a cache multiplied by gamma5(id+gamma[mu]) in dirac space
-		for (unsigned int n = 0; n < diracVectorLength; ++n) {
+		for (int n = 0; n < diracVectorLength; ++n) {
 			hopping[0][n] += (tmp[0][0][n]-I*tmp[0][3][n]+tmp[1][0][n]-tmp[1][3][n]+tmp[2][0][n]-I*tmp[2][2][n]+tmp[3][0][n]+tmp[3][2][n]);
 			hopping[1][n] += (tmp[0][1][n]-I*tmp[0][2][n]+tmp[1][1][n]+tmp[1][2][n]+tmp[2][1][n]+I*tmp[2][3][n]+tmp[3][1][n]+tmp[3][3][n]);
 			hopping[2][n] += (-I*tmp[0][1][n]-tmp[0][2][n]-tmp[1][1][n]-tmp[1][2][n]-I*tmp[2][0][n]-tmp[2][2][n]-tmp[3][0][n]-tmp[3][2][n]);
@@ -109,7 +109,7 @@ void BlockDiracWilsonOperator::multiplyAdd(reduced_dirac_vector_t& output, const
 		}
 
 		//The final result is gamma5*input - kappa*hopping
-		for (unsigned int n = 0; n < diracVectorLength; ++n) {
+		for (int n = 0; n < diracVectorLength; ++n) {
 			output[site][0][n] = alpha*vector2[site][0][n] + vector1[site][0][n] - kappa*hopping[0][n];
 			output[site][1][n] = alpha*vector2[site][1][n] + vector1[site][1][n] - kappa*hopping[1][n];
 			output[site][2][n] = alpha*vector2[site][2][n] - (vector1[site][2][n] + kappa*hopping[2][n]);
@@ -123,15 +123,15 @@ void BlockDiracWilsonOperator::setLattice(const extended_fermion_lattice_t& _lat
 	this->lattice = _lattice;
 	typedef reduced_fermion_lattice_t::Layout Layout;
 	for (int site = 0; site < lattice.localsize; ++site) {
-		if (Layout::globalIndexX(site) % blockSize == 0) set_to_zero(this->lattice[site][0]);
-		if (Layout::globalIndexY(site) % blockSize == 0) set_to_zero(this->lattice[site][1]);
-		if (Layout::globalIndexZ(site) % blockSize == 0) set_to_zero(this->lattice[site][2]);
-		if (Layout::globalIndexT(site) % blockSize == 0) set_to_zero(this->lattice[site][3]);
+		if (Layout::globalIndexX(site) % xBlockSize == 0) set_to_zero(this->lattice[site][0]);
+		if (Layout::globalIndexY(site) % yBlockSize == 0) set_to_zero(this->lattice[site][1]);
+		if (Layout::globalIndexZ(site) % zBlockSize == 0) set_to_zero(this->lattice[site][2]);
+		if (Layout::globalIndexT(site) % tBlockSize == 0) set_to_zero(this->lattice[site][3]);
 	}
 }
 
 FermionForce* BlockDiracWilsonOperator::getForce() const {
-	return new BlockDiracWilsonFermionForce(kappa, blockSize);
+	return new BlockDiracWilsonFermionForce(kappa, xBlockSize, yBlockSize, zBlockSize, tBlockSize);
 }
 
 } /* namespace Update */
