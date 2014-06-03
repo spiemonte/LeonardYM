@@ -100,8 +100,11 @@ int main(int ac, char* av[]) {
 		("twisted_breakup", po::value<unsigned int>(), "The value of the determinant breakup used in the correction step")
 		("deflation_block_size", po::value<std::string>(), "The vector of the block size {lx,ly,lz,lt}")
 		("t_source_origin", po::value<unsigned int>(), "The t-origin for the source of the pion and gluino correlators")
+		("preconditioner_recursions", po::value<unsigned int>(), "Number of preconditioner recursions used for evaluating the rational approximations")
+		("preconditioner_precision", po::value<double>(), "The precision for the inversion of the preconditioner used for evaluating the rational approximations")
+		("boundary_conditions", po::value<std::string>(), "Boundary conditions to use: periodic (fermions), antiperiodic (fermions), spatialantiperiodic (fermion), open")
 
-	    ("heatbath_rational_fraction_1", po::value<std::string>(), "the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
+/*	    ("heatbath_rational_fraction_1", po::value<std::string>(), "the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
 	    ("metropolis_rational_fraction_1", po::value<std::string>(), "the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
 	    ("force_rational_fraction_1", po::value<std::string>(), "the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
 	    ("heatbath_rational_fraction_2", po::value<std::string>(), "the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
@@ -197,7 +200,7 @@ int main(int ac, char* av[]) {
 		("heatbath_rational_fraction_32",po::value<std::string>(),"the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
 		("metropolis_rational_fraction_32",po::value<std::string>(),"the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
 		("force_rational_fraction_32",po::value<std::string>(),"the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-
+*/
 
 
 		
@@ -261,6 +264,12 @@ int main(int ac, char* av[]) {
 		for (int i = 1; i < 33; ++i) {
 			desc.add_options()((std::string("force_rational_fraction_")+Update::toString(i)+"_level_"+Update::toString(level)).c_str(),po::value<std::string>(),"Rational approximation of the force used by MultiStep integrator");
 		}
+		desc.add_options()(std::string("force_inverter_precision_level_"+Update::toString(level)).c_str(),po::value<double>(),"Precision of the inverter of the force used by MultiStep integrator");
+	}
+	for (int i = 1; i < 33; ++i) {
+		desc.add_options()((std::string("heatbath_rational_fraction_")+Update::toString(i)).c_str(),po::value<std::string>(),"the rational fraction approximation that should be used for the heatbath (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})");
+		desc.add_options()((std::string("metropolis_rational_fraction_")+Update::toString(i)).c_str(),po::value<std::string>(),"the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})");
+		desc.add_options()((std::string("force_rational_fraction_")+Update::toString(i)).c_str(),po::value<std::string>(),"the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})");
 	}
 
 	//Now we can parse the command line

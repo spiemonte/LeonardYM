@@ -11,90 +11,49 @@
 
 namespace Update {
 
-ComplementBlockDiracWilsonOperator::ComplementBlockDiracWilsonOperator() : DiracOperator(), diracWilsonOperator(), blockDiracWilsonOperator(), squareBlockDiracWilsonOperator(), log(false), counterSteps(0) { }
+ComplementBlockDiracWilsonOperator::ComplementBlockDiracWilsonOperator() : BlockDiracOperator(), diracWilsonOperator(), dir(0) { }
 
-ComplementBlockDiracWilsonOperator::ComplementBlockDiracWilsonOperator(const extended_fermion_lattice_t& _lattice, real_t _kappa) : DiracOperator(_lattice, _kappa), diracWilsonOperator(_lattice, _kappa), blockDiracWilsonOperator(_lattice, _kappa), squareBlockDiracWilsonOperator(_lattice, _kappa), log(false), counterSteps(0) { }
+ComplementBlockDiracWilsonOperator::ComplementBlockDiracWilsonOperator(const extended_fermion_lattice_t& _lattice, real_t _kappa) : BlockDiracOperator(_lattice, _kappa), diracWilsonOperator(_lattice, _kappa), dir(0) {
+	this->setLattice(_lattice);
+}
 
 ComplementBlockDiracWilsonOperator::~ComplementBlockDiracWilsonOperator() { }
 
 void ComplementBlockDiracWilsonOperator::multiply(reduced_dirac_vector_t& output, const reduced_dirac_vector_t& input) {
-	//First we apply D
 	diracWilsonOperator.multiply(output, input);
-	
-	//Now we apply D_1^(-1) to (D.input)
-	biConjugateGradient.solve(&squareBlockDiracWilsonOperator, output, tmpVector);
-	blockDiracWilsonOperator.multiply(output, tmpVector);
-	
-	if (log && isOutputProcess()) std::cout << "ComplementBlockDiracWilsonOperator::Complement inner inversion done in: " << biConjugateGradient.getLastSteps() << std::endl;
 }
 
 void ComplementBlockDiracWilsonOperator::multiplyAdd(reduced_dirac_vector_t& output, const reduced_dirac_vector_t& vector1, const reduced_dirac_vector_t& vector2, const std::complex<real_t>& alpha) {
-	//First we apply D
-	diracWilsonOperator.multiply(output, vector1);
-	
-	//Now we apply D_1^(-1) to (D.input)
-	biConjugateGradient.solve(&squareBlockDiracWilsonOperator, output, tmpVector);
-	counterSteps += biConjugateGradient.getLastSteps();	
-	blockDiracWilsonOperator.multiply(output, tmpVector);
-
-	//Now we add the shift
-	for (int site = 0; site < output.completesize; ++site) {
-		for (unsigned int mu = 0; mu < 4; ++mu) output[site][mu] += alpha*vector2[site][mu];
-	}
-	
-	if (log && isOutputProcess()) std::cout << "ComplementBlockDiracWilsonOperator::Complement inner inversion done in: " << biConjugateGradient.getLastSteps() << std::endl;
-	
+	diracWilsonOperator.multiplyAdd(output, vector1, vector2, alpha);
 }
 
 void ComplementBlockDiracWilsonOperator::setLattice(const extended_fermion_lattice_t& _lattice) {
 	this->lattice = _lattice;
-	blockDiracWilsonOperator.setLattice(_lattice);
-	squareBlockDiracWilsonOperator.setLattice(_lattice);
-	diracWilsonOperator.setLattice(_lattice);
-}
-
-void ComplementBlockDiracWilsonOperator::setBlockSize(const std::vector<unsigned int>& _blockSize) {
-	blockDiracWilsonOperator.setBlockSize(_blockSize);
-	squareBlockDiracWilsonOperator.setBlockSize(_blockSize);
-}
-
-std::vector<unsigned int> ComplementBlockDiracWilsonOperator::getBlockSize() const {
-	return blockDiracWilsonOperator.getBlockSize();
+	typedef reduced_fermion_lattice_t::Layout Layout;
+	for (int site = 0; site < lattice.localsize; ++site) {
+		if (Layout::globalIndexX(site) % xBlockSize != 0 || (Layout::globalIndexX(site) % xBlockSize == 0 && dir != 0) ) set_to_zero(this->lattice[site][0]);
+		if (Layout::globalIndexY(site) % yBlockSize != 0 || (Layout::globalIndexY(site) % yBlockSize == 0 && dir != 1) ) set_to_zero(this->lattice[site][1]);
+		if (Layout::globalIndexZ(site) % zBlockSize != 0 || (Layout::globalIndexZ(site) % zBlockSize == 0 && dir != 2) ) set_to_zero(this->lattice[site][2]);
+		if (Layout::globalIndexT(site) % tBlockSize != 0 || (Layout::globalIndexT(site) % tBlockSize == 0 && dir != 3) ) set_to_zero(this->lattice[site][3]);
+	}
+	diracWilsonOperator.setLattice(this->lattice);
 }
 
 FermionForce* ComplementBlockDiracWilsonOperator::getForce() const {
 	return new DiracWilsonFermionForce(kappa);
 }
 
-void ComplementBlockDiracWilsonOperator::setPrecision(const real_t& _precision) {
-	biConjugateGradient.setPrecision(_precision);
-}
-
-real_t ComplementBlockDiracWilsonOperator::getPrecision() const {
-	return biConjugateGradient.getPrecision();
-}
-
 void ComplementBlockDiracWilsonOperator::setKappa(real_t _kappa) {
 	kappa = _kappa;
-	blockDiracWilsonOperator.setKappa(_kappa);
 	diracWilsonOperator.setKappa(_kappa);
-	squareBlockDiracWilsonOperator.setKappa(_kappa);
 }
 
-void ComplementBlockDiracWilsonOperator::setLog(bool _log) {
-	log = _log;
+void ComplementBlockDiracWilsonOperator::setDirection(unsigned int mu) {
+	dir = mu;
 }
 
-void ComplementBlockDiracWilsonOperator::resetCounterInnerSteps() {
-	counterSteps = 0;
-}
-
-int ComplementBlockDiracWilsonOperator::getInnerSteps() const {
-	return counterSteps;
-}
-
-int ComplementBlockDiracWilsonOperator::getInnerInverterSteps() const {
-	return biConjugateGradient.getLastSteps();
+unsigned int ComplementBlockDiracWilsonOperator::getDirection() const {
+	return dir;
 }
 
 

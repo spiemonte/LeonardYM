@@ -74,16 +74,68 @@ typedef Lattice::Lattice<Update::GaugeGroup, Lattice::LocalLayout > reduced_matr
 inline void switchAntiperiodicBc(extended_fermion_lattice_t& lattice) {
 	typedef extended_fermion_lattice_t::Layout LT;
 #pragma omp parallel for
-	for (int site = 0; site < lattice.localsize; ++site) {
+	for (int site = 0; site < lattice.completesize; ++site) {
 		if (LT::globalIndexT(site) == (LT::glob_t - 1)) lattice[site][3] = -lattice[site][3];
 	}
-	lattice.updateHalo();
+	//lattice.updateHalo(); TODO
 }
+
+inline void switchSpatialAntiperiodicBc(extended_fermion_lattice_t& lattice) {
+	typedef extended_fermion_lattice_t::Layout LT;
+#pragma omp parallel for
+	for (int site = 0; site < lattice.completesize; ++site) {
+		if (LT::globalIndexZ(site) == (LT::glob_z - 1)) lattice[site][2] = -lattice[site][2];
+	}
+	//lattice.updateHalo(); TODO
+}
+
+inline void switchOpenBc(extended_gauge_lattice_t& lattice) {
+	typedef extended_gauge_lattice_t::Layout LT;
+#pragma omp parallel for
+	for (int site = 0; site < lattice.completesize; ++site) {
+		int t_index = LT::globalIndexT(site);
+		if (t_index == (LT::glob_t - 1)) {
+			for (unsigned int mu = 0; mu < 4; ++mu) set_to_zero(lattice[site][mu]);
+		}
+		else if (t_index == (LT::glob_t - 2)) {
+			set_to_zero(lattice[site][3]);
+		}
+	}
+	//lattice.updateHalo();
+}
+
+#ifdef ADJOINT
+inline void switchOpenBc(extended_fermion_lattice_t& lattice) {
+	typedef extended_fermion_lattice_t::Layout LT;
+#pragma omp parallel for
+	for (int site = 0; site < lattice.completesize; ++site) {
+		int t_index = LT::globalIndexT(site);
+		if (t_index == (LT::glob_t - 1)) {
+			for (unsigned int mu = 0; mu < 4; ++mu) set_to_zero(lattice[site][mu]);
+		}
+		else if (t_index == (LT::glob_t - 2)) {
+			set_to_zero(lattice[site][3]);
+		}
+	}
+	//lattice.updateHalo();
+}
+#endif
 
 #include "StorageParameters.h"
 #include "ConvertLattice.h"
 
 namespace Update {
+
+inline bool isOutputProcess() {
+#ifdef ENABLE_MPI
+	int this_processor;
+	MPI_Comm_rank(MPI_COMM_WORLD, &this_processor);
+	return this_processor == 0;
+#endif
+#ifndef ENABLE_MPI
+	return true;
+#endif
+}
 
 // @class Environment
 // @brief This class is a container of the dynamical
@@ -102,7 +154,56 @@ public:
 #ifndef ADJOINT
 		fermionicLinkConfiguration = gaugeLinkConfiguration;
 #endif
-		switchAntiperiodicBc(fermionicLinkConfiguration);
+		try {
+			std::string bc = configurations.get<std::string>("boundary_conditions");
+			if (bc == "fermion_antiperiodic") {
+				switchAntiperiodicBc(fermionicLinkConfiguration);
+			}
+			if (bc == "fermion_spatial_antiperiodic") {
+				switchSpatialAntiperiodicBc(fermionicLinkConfiguration);
+			}
+			else if (bc == "fermion_periodic") {
+
+			}
+			else if (bc == "open") {
+				switchOpenBc(fermionicLinkConfiguration);
+				switchOpenBc(gaugeLinkConfiguration);
+			}
+		}
+		catch (NotFoundOption& ex) {
+			static int count = 0;
+			if (count == 0 && isOutputProcess()) {
+				std::cout << "Warning, boundary conditions not or badly set, using antiperiodic!" << std::endl;
+				count = count + 1;
+			}
+			switchAntiperiodicBc(fermionicLinkConfiguration);
+		}
+	}
+
+	void setFermionBc(extended_fermion_lattice_t& lattice) const {
+		try {
+			std::string bc = configurations.get<std::string>("boundary_conditions");
+			if (bc == "fermion_antiperiodic") {
+				switchAntiperiodicBc(lattice);
+			}
+			if (bc == "fermion_spatial_antiperiodic") {
+				switchSpatialAntiperiodicBc(lattice);
+			}
+			else if (bc == "fermion_periodic") {
+
+			}
+			else if (bc == "open") {
+				switchOpenBc(lattice);
+			}
+		}
+		catch (NotFoundOption& ex) {
+			static int count = 0;
+			if (count == 0 && isOutputProcess()) {
+				std::cout << "Warning, boundary conditions not or badly set, using antiperiodic!" << std::endl;
+				count = count + 1;
+			}
+			switchAntiperiodicBc(lattice);
+		}
 	}
 
 	Environment& operator=(const Environment& toCopy) {
@@ -133,16 +234,6 @@ public:
 	bool measurement;
 };
 
-inline bool isOutputProcess() {
-#ifdef ENABLE_MPI
-	int this_processor;
-	MPI_Comm_rank(MPI_COMM_WORLD, &this_processor);
-	return this_processor == 0;
-#endif
-#ifndef ENABLE_MPI
-	return true;
-#endif
-}
 
 #ifdef ENABLE_MPI
 inline void reduceAllSum(double& value) {

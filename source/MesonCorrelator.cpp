@@ -48,7 +48,7 @@ void MesonCorrelator::execute(environment_t& environment) {
 #ifndef ADJOINT
 		stoutSmearing.spatialSmearing(environment.gaugeLinkConfiguration, lattice, numberLevelSmearing, smearingRho);
 #endif
-		switchAntiperiodicBc(lattice);
+		environment.setFermionBc(lattice);
 	} catch (NotFoundOption& ex) {
 		lattice =  environment.getFermionLattice();
 		if (isOutputProcess()) std::cout << "MesonCorrelator::No smearing options found, proceeding without!" << std::endl;

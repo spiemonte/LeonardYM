@@ -13,25 +13,38 @@
 namespace Update {
 
 std::vector< extended_dirac_vector_t > RationalApproximation::tmp;
+//extended_dirac_vector_t RationalApproximation::tmp1;
+//extended_dirac_vector_t RationalApproximation::tmp2;
 
-RationalApproximation::RationalApproximation() : precision(0.0000000000000001), maximumSteps(3000), multishiftSolver(new MMMRMultishiftSolver()) { }
+RationalApproximation::RationalApproximation() : precision(0.0000000000001), preconditionerPrecision(0.00000000000001), maximumSteps(3000), multishiftSolver(new MMMRMultishiftSolver()), biConjugateGradient(new BiConjugateGradient()), preconditionerRecursion(0) { }
 
-RationalApproximation::RationalApproximation(const RationalApproximation& toCopy) : alphas(toCopy.alphas), betas(toCopy.betas), precision(toCopy.precision), maximumSteps(toCopy.maximumSteps), multishiftSolver(new MMMRMultishiftSolver()) { }
+RationalApproximation::RationalApproximation(const RationalApproximation& toCopy) : alphas(toCopy.alphas), betas(toCopy.betas), precision(toCopy.precision),  preconditionerPrecision(toCopy.preconditionerPrecision), maximumSteps(toCopy.maximumSteps), multishiftSolver(new MMMRMultishiftSolver()), biConjugateGradient(new BiConjugateGradient()), preconditionerRecursion(toCopy.preconditionerRecursion) { }
 
-RationalApproximation::RationalApproximation(const std::vector< real_t >& _alphas, const std::vector< real_t >& _betas) : alphas(_alphas), betas(_betas), precision(0.0000000001), maximumSteps(3000), multishiftSolver(new MMMRMultishiftSolver()) { }
+RationalApproximation::RationalApproximation(const std::vector< real_t >& _alphas, const std::vector< real_t >& _betas) : alphas(_alphas), betas(_betas), precision(0.0000000000001), preconditionerPrecision(0.00000000000001), maximumSteps(3000), multishiftSolver(new MMMRMultishiftSolver()), biConjugateGradient(new BiConjugateGradient()), preconditionerRecursion(0) { }
 
 RationalApproximation::~RationalApproximation() {
 	delete multishiftSolver;
+	delete biConjugateGradient;
 }
 
-void RationalApproximation::evaluate(DiracOperator* diracOperator, extended_dirac_vector_t& output, const extended_dirac_vector_t& input) {
+void RationalApproximation::evaluate(DiracOperator* diracOperator, extended_dirac_vector_t& output, const extended_dirac_vector_t& input, DiracOperator* preconditioner) {
 	//Allocate the memory
 	if (tmp.size() != betas.size()) tmp.resize(betas.size());
 	//get and set the multishiftSolver
 	multishiftSolver->setPrecision(precision);
 	multishiftSolver->setMaxSteps(maximumSteps);
+	biConjugateGradient->setMaximumSteps(maximumSteps);
+	biConjugateGradient->setPrecision(preconditionerPrecision);
+	tmp1 = input;
+	if (preconditioner != 0) {
+		//First we apply the transformation
+		for (unsigned int k = 0; k < preconditionerRecursion; ++k) {
+			preconditioner->multiply(output,tmp1);
+			tmp1 = output;
+		}
+	}
 	//Solve the dirac equations
-	multishiftSolver->solve(diracOperator, input, tmp, betas);
+	multishiftSolver->solve(diracOperator, tmp1, tmp, betas);
 	//Test of multishift
 	/*std::vector<real_t>::iterator beta;
 	std::vector<dirac_vector_t>::iterator vv;
@@ -56,6 +69,24 @@ void RationalApproximation::evaluate(DiracOperator* diracOperator, extended_dira
 		}
 	}
 	output.updateHalo();
+	if (preconditioner != 0) {
+		unsigned int invertSteps = 0;
+		//Now we invert the initial transformation
+		preconditioner->setGamma5(false);
+		for (unsigned int k = 0; k < preconditionerRecursion; ++k) {
+			//We apply first gamma_5
+#pragma omp parallel for
+			for (int site = 0; site < output.completesize; ++site) {
+				output[site][2] = -output[site][2];
+				output[site][3] = -output[site][3];
+			}
+			biConjugateGradient->solve(preconditioner, output, tmp1);
+			invertSteps += biConjugateGradient->getLastSteps();
+			output = tmp1;
+		}
+		preconditioner->setGamma5(true);
+		if (preconditionerRecursion != 0 && isOutputProcess()) std::cout << "RationalApproximation::Map convergence in " << invertSteps << " steps." << std::endl;
+	}
 }
 
 complex RationalApproximation::evaluate(const complex& x) const {
@@ -92,12 +123,28 @@ real_t RationalApproximation::getPrecision() const {
 	return precision;
 }
 
+void RationalApproximation::setPreconditionerPrecision(const real_t& _precision) {
+	preconditionerPrecision = _precision;
+}
+
+real_t RationalApproximation::getPreconditionerPrecision() const {
+	return preconditionerPrecision;
+}
+
 void RationalApproximation::setMaximumRecursion(unsigned int maximumRecursion) {
 	maximumSteps = maximumRecursion;
 }
 
 unsigned int RationalApproximation::getMaximumRecursion() const {
 	return maximumSteps;
+}
+
+void RationalApproximation::setPreconditionerRecursion(unsigned int recursion) {
+	preconditionerRecursion = recursion;
+}
+
+unsigned int RationalApproximation::getPreconditionerRecursion() const {
+	return preconditionerRecursion;
 }
 
 } /* namespace Update */

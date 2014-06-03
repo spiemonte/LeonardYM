@@ -519,7 +519,7 @@ void DeflationInverter::generateBasis(DiracOperator* dirac) {
 	
 	for (int i = 0; i < totalNumberOfVectors; i += 4) {
 		extended_dirac_vector_t randomVector, tmp;
-		AlgebraUtils::generateRandomVector(randomVector);
+		AlgebraUtils::setToZero(randomVector);
 		biConjugateGradient->solve(dirac,randomVector,tmp);//TODO
 		lastStep += biConjugateGradient->getLastSteps();
 		reduced_dirac_vector_t base = tmp;

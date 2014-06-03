@@ -25,4 +25,5 @@ OBJECTS  = ReducedStencil.o StandardStencil.o ExtendedStencil.o LocalLayout.o \
 			LatticeSweep.o Simulation.o \
 			StorageParameters.o \
 			WilsonFlow.o \
-			updater.o
+			updater.o \
+			#MultiGridDiracOperator.o MultiGridSolver.o \

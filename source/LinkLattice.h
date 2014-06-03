@@ -9,24 +9,28 @@
 #define LINKLATTICE_H_
 #include <iostream>
 #include <cstdlib>
-#include "../geometryspecification.h"
 
 namespace Update {
 
-template<typename T> class LinkLattice {
+template<typename T> class PrivateLattice {
 public:
-	LinkLattice() : periodic(true) {
+	PrivateLattice() : sup_lookuptable(0), lengthX(4), lengthY(4), lengthZ(4), lengthT(4) {
 		if (sup_lookuptable == 0) {
 			initialize();
 		}
-		lattice = new T[lengthX*lengthY*lengthZ*lengthT][4];
+		lattice = new T[lengthX*lengthY*lengthZ*lengthT];
 	}
 
-	LinkLattice(const LinkLattice& toCopy) : periodic(toCopy.periodic) {
-		if (sup_lookuptable == 0) {
-			initialize();
+	PrivateLattice(const PrivateLattice& toCopy) : lengthX(toCopy.lengthX), lengthY(toCopy.lengthY), lengthZ(toCopy.lengthZ), lengthT(toCopy.lengthT), localsize(toCopy.localsize) {
+		sup_lookuptable = new unsigned int[lengthX*lengthY*lengthZ*lengthT][4];
+		sdn_lookuptable = new unsigned int[lengthX*lengthY*lengthZ*lengthT][4];
+		for (int site = 0; site < lengthX*lengthY*lengthZ*lengthT; ++site) {
+			for (unsigned int mu = 0; mu < 4; ++mu) {
+				sup_lookuptable[site][mu] = toCopy.sup_lookuptable[site][mu];
+				sdn_lookuptable[site][mu] = toCopy.sdn_lookuptable[site][mu];
+			}
 		}
-		lattice = new T[lengthX*lengthY*lengthZ*lengthT][4];
+		lattice = new T[lengthX*lengthY*lengthZ*lengthT];
 		for (unsigned int site = 0; site < localsize; ++site) {
 			for (unsigned int mu = 0; mu < 4; ++mu) {
 				lattice[site][mu] = toCopy.lattice[site][mu];
@@ -34,14 +38,33 @@ public:
 		}
 	}
 
-	~LinkLattice() {
+	~PrivateLattice() {
 		delete[] lattice;
+		delete[] sup_lookuptable;
+		delete[] sdn_lookuptable;
 	}
 
-	LinkLattice& operator=(const LinkLattice& toCopy) {
-		periodic = toCopy.periodic;
-		if (sup_lookuptable == 0) {
-			initialize();
+	PrivateLattice& operator=(const PrivateLattice& toCopy) {
+		if (lengthX != toCopy.lengthX || lengthY != toCopy.lengthY || lengthZ != toCopy.lengthZ || lengthT != toCopy.lengthT) {
+			lengthX = toCopy.lengthX;
+			lengthY = toCopy.lengthY;
+			lengthZ = toCopy.lengthZ;
+			lengthT = toCopy.lengthT;
+			localsize = toCopy.localsize;
+
+			delete[] lattice;
+			delete[] sup_lookuptable;
+			delete[] sdn_lookuptable;
+
+			sup_lookuptable = new unsigned int[lengthX*lengthY*lengthZ*lengthT][4];
+			sdn_lookuptable = new unsigned int[lengthX*lengthY*lengthZ*lengthT][4];
+			for (int site = 0; site < lengthX*lengthY*lengthZ*lengthT; ++site) {
+				for (unsigned int mu = 0; mu < 4; ++mu) {
+					sup_lookuptable[site][mu] = toCopy.sup_lookuptable[site][mu];
+					sdn_lookuptable[site][mu] = toCopy.sdn_lookuptable[site][mu];
+				}
+			}
+			lattice = new T[lengthX*lengthY*lengthZ*lengthT];
 		}
 		for (unsigned int site = 0; site < localsize; ++site) {
 			for (unsigned int mu = 0; mu < 4; ++mu) {
@@ -51,12 +74,11 @@ public:
 		return *this;
 	}
 
-
-	static unsigned int sup(unsigned int site, unsigned int mu) {
+	unsigned int sup(unsigned int site, unsigned int mu) {
 		return sup_lookuptable[site][mu];
 	}
 
-	static unsigned int sdn(unsigned int site, unsigned int mu) {
+	unsigned int sdn(unsigned int site, unsigned int mu) {
 		return sdn_lookuptable[site][mu];
 	}
 
@@ -76,45 +98,24 @@ public:
 		return lattice[(((t*lengthX)+x)*lengthY + y)*lengthZ + z];
 	}
 
-	static unsigned int lengthX;
-	static unsigned int lengthY;
-	static unsigned int lengthZ;
-	static unsigned int lengthT;
-	static unsigned int localsize;
-
 	unsigned int spatialVolume() const {
 		return lengthX*lengthY*lengthZ;
 	}
 
-	void updateHalo() { }
-
-	void setPeriodicBC() {
-		if (periodic == false) {
-			for (int x = 0; x < lengthX; ++x) {
-				for (int y = 0; y < lengthY; ++y) {
-					for (int z = 0; z < lengthZ; ++z) {
-						Coordinate coord(x, y, z, lengthT - 1);
-						lattice[coord.toNumber()][3] = -lattice[coord.toNumber()][3];
-					}
-				}
-			}
-		}
+	unsigned int globalVolume() const {
+		return lengthX*lengthY*lengthZ*lengthT;
 	}
 
-	void setAntiPeriodicBc() {
-		if (periodic == true) {
-			for (int x = 0; x < lengthX; ++x) {
-				for (int y = 0; y < lengthY; ++y) {
-					for (int z = 0; z < lengthZ; ++z) {
-						Coordinate coord(x, y, z, lengthT - 1);
-						lattice[coord.toNumber()][3] = -lattice[coord.toNumber()][3];
-					}
-				}
-			}
-		}
+	void setLatticeSize(int _lengthX, int _lengthY, int _lengthZ, int _lengthT) {
+		lengthX = _lengthX;
+		lengthY = _lengthY;
+		lengthZ = _lengthZ;
+		lengthT = _lengthT;
+		localsize = lengthX*lengthY*lengthZ*lengthT;
+		this->initialize();
 	}
 
-	class Layout {
+	/*class Layout {
 	public:
 		static unsigned int pgrid_t;
 		static unsigned int pgrid_x;
@@ -135,13 +136,12 @@ public:
 		}
 
 		static unsigned int glob_spatial_volume;
-	};
+	};*/
 private:
-	T (* lattice)[4];
-	bool periodic;
+	T *lattice;
 
-	static unsigned int (* sup_lookuptable)[4];
-	static unsigned int (* sdn_lookuptable)[4];
+	unsigned int (* sup_lookuptable)[4];
+	unsigned int (* sdn_lookuptable)[4];
 
 	struct Coordinate {
 		int x;
@@ -220,32 +220,13 @@ private:
 		}
 	}
 
+	unsigned int lengthX;
+	unsigned int lengthY;
+	unsigned int lengthZ;
+	unsigned int lengthT;
+	unsigned int localsize;
+
 };
-
-template<typename T> unsigned int (*LinkLattice<T>::sup_lookuptable)[4] = 0;
-template<typename T> unsigned int (*LinkLattice<T>::sdn_lookuptable)[4] = 0;
-template<typename T> unsigned int LinkLattice<T>::lengthX = GLOBAL_S;
-template<typename T> unsigned int LinkLattice<T>::lengthY = GLOBAL_S;
-template<typename T> unsigned int LinkLattice<T>::lengthZ = GLOBAL_S;
-template<typename T> unsigned int LinkLattice<T>::lengthT = GLOBAL_T;
-template<typename T> unsigned int LinkLattice<T>::localsize = GLOBAL_S*GLOBAL_S*GLOBAL_S*GLOBAL_T;
-
-template<typename T> unsigned int LinkLattice<T>::Layout::loc_x = GLOBAL_S;
-template<typename T> unsigned int LinkLattice<T>::Layout::loc_y = GLOBAL_S;
-template<typename T> unsigned int LinkLattice<T>::Layout::loc_z = GLOBAL_S;
-template<typename T> unsigned int LinkLattice<T>::Layout::loc_t = GLOBAL_T;
-
-template<typename T> unsigned int LinkLattice<T>::Layout::glob_x = GLOBAL_S;
-template<typename T> unsigned int LinkLattice<T>::Layout::glob_y = GLOBAL_S;
-template<typename T> unsigned int LinkLattice<T>::Layout::glob_z = GLOBAL_S;
-template<typename T> unsigned int LinkLattice<T>::Layout::glob_t = GLOBAL_T;
-
-template<typename T> unsigned int LinkLattice<T>::Layout::pgrid_t = 1;
-template<typename T> unsigned int LinkLattice<T>::Layout::pgrid_x = 1;
-template<typename T> unsigned int LinkLattice<T>::Layout::pgrid_y = 1;
-template<typename T> unsigned int LinkLattice<T>::Layout::pgrid_z = 1;
-template<typename T> unsigned int LinkLattice<T>::Layout::glob_spatial_volume = GLOBAL_S*GLOBAL_S*GLOBAL_S;
-
 
 } /* namespace Update */
 #endif /* LINKLATTICE_H_ */

@@ -231,7 +231,13 @@ bool BiConjugateGradient::solve(DiracOperator* dirac, const extended_dirac_vecto
 
 bool BiConjugateGradient::solve(DiracOperator* dirac, const reduced_dirac_vector_t& source, reduced_dirac_vector_t& solution) {
 	//First set the initial solution
-	solution = source;
+	long_real_t normSource = AlgebraUtils::squaredNorm(source);
+	if (normSource > epsilon) {
+		solution = source;
+	}
+	else {
+		AlgebraUtils::generateRandomVector(solution);
+	}
 	
 	//Use p as temporary vector
 	dirac->multiply(p,solution);
@@ -287,12 +293,12 @@ bool BiConjugateGradient::solve(DiracOperator* dirac, const reduced_dirac_vector
 		std::complex<real_t> beta = static_cast< std::complex<real_t> >((rho_next/rho))*(alpha/omega);
 		//p = r[[k - 1]] + beta*(p[[k - 1]] - omega[[k - 1]]*nu[[k - 1]])
 #pragma omp parallel for
-		for (int site = 0; site < solution.localsize; ++site) {
+		for (int site = 0; site < solution.completesize; ++site) {
 			for (unsigned int mu = 0; mu < 4; ++mu) {
 				p[site][mu] = residual[site][mu] + beta*(p[site][mu] - omega*nu[site][mu]);
 			}
 		}
-		p.updateHalo();
+		//p.updateHalo();
 
 		//nu = A.p[[k]]
 		dirac->multiply(nu,p);
@@ -316,12 +322,12 @@ bool BiConjugateGradient::solve(DiracOperator* dirac, const reduced_dirac_vector
 
 		//s = r[[k - 1]] - alpha*nu[[k]]
 #pragma omp parallel for
-		for (int site = 0; site < solution.localsize; ++site) {
+		for (int site = 0; site < solution.completesize; ++site) {
 			for (unsigned int mu = 0; mu < 4; ++mu) {
 				s[site][mu] = residual[site][mu] - alpha *(nu[site][mu]);
 			}
 		}
-		s.updateHalo();
+		//s.updateHalo();
 
 		//t = A.s;
 		dirac->multiply(t,s);
@@ -349,23 +355,23 @@ bool BiConjugateGradient::solve(DiracOperator* dirac, const reduced_dirac_vector
 
 		if (real(tmp2) == 0) {
 #pragma omp parallel for
-			for (int site = 0; site < solution.localsize; ++site) {
+			for (int site = 0; site < solution.completesize; ++site) {
 				for (unsigned int mu = 0; mu < 4; ++mu) {
 					solution[site][mu] = source[site][mu];
 				}
 			}
-			solution.updateHalo();
+			//solution.updateHalo();
 			return true;//TODO, identity only?
 		}
 
 		//solution[[k]] = solution[[k - 1]] + alpha*p[[k]] + omega[[k]]*s
 #pragma omp parallel for
-		for (int site = 0; site < solution.localsize; ++site) {
+		for (int site = 0; site < solution.completesize; ++site) {
 			for (unsigned int mu = 0; mu < 4; ++mu) {
 				solution[site][mu] += alpha*(p[site][mu]) + omega*(s[site][mu]);
 			}
 		}
-		solution.updateHalo();
+		//solution.updateHalo();
 
 		//residual[[k]] = s - omega[[k]]*t
 		//norm = residual[[k]].residual[[k]]

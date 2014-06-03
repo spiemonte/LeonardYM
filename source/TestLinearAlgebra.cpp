@@ -160,47 +160,10 @@ void TestLinearAlgebra::execute(environment_t& environment) {
 		biConjugateGradient->solve(squareDiracWilsonOperator, source, tmp1);
 		int stepsMax = biConjugateGradient->getLastSteps();
 		std::cout << "Undeflated number of steps: " << stepsMax << std::endl;
-		
-		SquareBlockDiracWilsonOperator* squareBlockDiracWilsonOperator = new SquareBlockDiracWilsonOperator();
-		squareBlockDiracWilsonOperator->setKappa(0.20);
-		squareBlockDiracWilsonOperator->setLattice(environment.getFermionLattice());
-		
-		biConjugateGradient->solve(squareBlockDiracWilsonOperator, source, tmp2);
-		int stepsDeflated = biConjugateGradient->getLastSteps();
-		std::cout << "Deflated number of steps: " << stepsDeflated << std::endl;
 
-		DiracWilsonOperator* diracWilsonOperator = new DiracWilsonOperator();
-		diracWilsonOperator->setKappa(0.20);
-		diracWilsonOperator->setLattice(environment.getFermionLattice());
-
-		BlockDiracWilsonOperator* blockDiracWilsonOperator = new BlockDiracWilsonOperator();
-		blockDiracWilsonOperator->setKappa(0.20);
-		blockDiracWilsonOperator->setLattice(environment.getFermionLattice());
-
-		ComplementBlockDiracWilsonOperator* complementBlockDiracWilsonOperator = new ComplementBlockDiracWilsonOperator();
-		complementBlockDiracWilsonOperator->setKappa(0.20);
-		complementBlockDiracWilsonOperator->setLattice(environment.getFermionLattice());
-
-		complementBlockDiracWilsonOperator->multiply(tmp3,source);
-		blockDiracWilsonOperator->multiply(tmp4,tmp3);
-		diracWilsonOperator->multiply(tmp5,source);
-
-		long_real_t zerotest = AlgebraUtils::differenceNorm(tmp4,tmp5);
-		if (isOutputProcess()) std::cout << "Ridiamo di gusto: " << zerotest << std::endl;
-
-		SquareComplementBlockDiracWilsonOperator* squareComplementBlockDiracWilsonOperator = new SquareComplementBlockDiracWilsonOperator();
-		squareComplementBlockDiracWilsonOperator->setKappa(0.20);
-		squareComplementBlockDiracWilsonOperator->setLattice(environment.getFermionLattice());
-
-		complementBlockDiracWilsonOperator->resetCounterInnerSteps();
-		biConjugateGradient->setPrecision(0.0001);
-		biConjugateGradient->solve(complementBlockDiracWilsonOperator, source, tmp2);
-		
-		int stepsComplementDeflated = biConjugateGradient->getLastSteps();
-		std::cout << "Complement Deflated number of steps: " << stepsComplementDeflated << std::endl;
 		DeflationInverter* deflationInverter = new DeflationInverter();
 		deflationInverter->setPrecision(0.00000000001);
-		deflationInverter->setBasisDimension(50);
+		deflationInverter->setBasisDimension(10);
 		deflationInverter->setBlockDivision(4);
 		//deflationInverter->generateBasis(squareDiracWilsonOperator);
 		deflationInverter->solve(squareDiracWilsonOperator,source,tmp2);
@@ -213,8 +176,8 @@ void TestLinearAlgebra::execute(environment_t& environment) {
 		if (isOutputProcess()) std::cout << "Zum beispiel: " << tmp2[5][3] << std::endl << tmp1[5][3] << std::endl;
 		delete biConjugateGradient;
 		delete squareDiracWilsonOperator;
-		//delete deflationInverter;
-		delete squareBlockDiracWilsonOperator;
+		delete deflationInverter;
+		//delete squareBlockDiracWilsonOperator;
 	}*/
 
 	/*{

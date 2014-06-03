@@ -16,6 +16,7 @@
 #include "Integrate.h"
 #include "ToString.h"
 #include "GlobalOutput.h"
+#include "./dirac_operators/SquareTwistedDiracOperator.h"
 #include <iomanip>
 
 //#define DEBUGFORCE
@@ -36,6 +37,20 @@ MultiStepNFlavorQCDUpdater::~MultiStepNFlavorQCDUpdater() {
 }
 
 void MultiStepNFlavorQCDUpdater::initializeApproximations(environment_t& environment) {
+	unsigned int preconditionerRecursion = 0;
+	real_t preconditionerPrecision = 0.00000001;
+	try {
+		preconditionerRecursion = environment.configurations.get<unsigned int>("preconditioner_recursions");
+		preconditionerPrecision = environment.configurations.get<real_t>("preconditioner_precision");
+
+	}
+	catch (NotFoundOption& ex) {
+		preconditionerRecursion = 0;
+		preconditionerPrecision = 0.00000001;
+		if (isOutputProcess()) std::cout << "MultiStepNFlavorQCDUpdater::No preconditioner_recursion or preconditioner_precision provided, proceeding without. This can slow the convergence!" << std::endl;
+	}
+
+
 	//First take the rational function approximation for the heatbath step
 	if (rationalApproximationsHeatBath.empty()) {
 		int numberPseudofermions = environment.configurations.get< unsigned int >("number_pseudofermions");
@@ -46,6 +61,8 @@ void MultiStepNFlavorQCDUpdater::initializeApproximations(environment_t& environ
 			rational.setBetas(std::vector<real_t>(rat.begin() + rat.size()/2, rat.end()));
 			rational.setPrecision(environment.configurations.get<double>("metropolis_inverter_precision"));
 			rational.setMaximumRecursion(environment.configurations.get<unsigned int>("metropolis_inverter_max_steps"));
+			rational.setPreconditionerRecursion(preconditionerRecursion);
+			rational.setPreconditionerPrecision(preconditionerPrecision);
 			rationalApproximationsHeatBath.push_back(rational);
 		}
 		pseudofermions.resize(numberPseudofermions);
@@ -61,13 +78,29 @@ void MultiStepNFlavorQCDUpdater::initializeApproximations(environment_t& environ
 			rational.setBetas(std::vector<real_t>(rat.begin() + rat.size()/2, rat.end()));
 			rational.setPrecision(environment.configurations.get<double>("metropolis_inverter_precision"));
 			rational.setMaximumRecursion(environment.configurations.get<unsigned int>("metropolis_inverter_max_steps"));
+			rational.setPreconditionerRecursion(preconditionerRecursion);
+			rational.setPreconditionerPrecision(preconditionerPrecision);
 			rationalApproximationsMetropolis.push_back(rational);
 		}
 	}
 
+	//We allow the usage of different precision for different level
+	int numberLevels = environment.configurations.get< unsigned int >("number_force_levels");
+	real_t level_precisions[numberLevels];
+	try {
+		for (int i = 1; i <= numberLevels; ++i) {
+			level_precisions[i-1] = environment.configurations.get<double>(std::string("force_inverter_precision_level_")+toString(i));
+		}
+	} catch (NotFoundOption& ex) {
+		for (int i = 1; i <= numberLevels; ++i) {
+			level_precisions[i-1] = environment.configurations.get<double>("force_inverter_precision");
+		}
+		if (isOutputProcess()) std::cout << "MultiStepNFlavorQCDUpdater::Warning, a single precision is provided for all the level of the force!" << std::endl;
+	}
+
 	//Then take the rational function approximation for the force step
 	if (rationalApproximationsForce.empty()) {
-		int numberLevels = environment.configurations.get< unsigned int >("number_force_levels");
+
 		for (int i = 1; i <= numberLevels; ++i) {
 			int numberPseudofermions = environment.configurations.get< unsigned int >("number_pseudofermions");
 			std::vector<RationalApproximation> levelRationaApproximationForce;
@@ -76,8 +109,17 @@ void MultiStepNFlavorQCDUpdater::initializeApproximations(environment_t& environ
 				RationalApproximation rational;
 				rational.setAlphas(std::vector<real_t>(rat.begin(), rat.begin() + rat.size()/2));
 				rational.setBetas(std::vector<real_t>(rat.begin() + rat.size()/2, rat.end()));
-				rational.setPrecision(environment.configurations.get<double>("force_inverter_precision"));
+				rational.setPrecision(level_precisions[i - 1]);
 				rational.setMaximumRecursion(environment.configurations.get<unsigned int>("force_inverter_max_steps"));
+				//We do not use preconditioning for the last level of the force
+				if (i != numberLevels) {
+					rational.setPreconditionerRecursion(preconditionerRecursion);
+					rational.setPreconditionerPrecision(preconditionerPrecision);
+				}
+				else {
+					rational.setPreconditionerRecursion(0);
+					rational.setPreconditionerPrecision(0.000001);
+				}
 				levelRationaApproximationForce.push_back(rational);
 			}
 			rationalApproximationsForce.push_back(levelRationaApproximationForce);
@@ -140,43 +182,45 @@ void MultiStepNFlavorQCDUpdater::execute(environment_t& environment) {
 	std::vector<extended_dirac_vector_t>::iterator i;
 	std::vector<RationalApproximation>::iterator j = rationalApproximationsHeatBath.begin();
 	long_real_t oldPseudoFermionEnergy = 0.;
+
 	for (i = pseudofermions.begin(); i != pseudofermions.end(); ++i) {
 		this->generateGaussianDiracVector(tmp_pseudofermion);
 		oldPseudoFermionEnergy += AlgebraUtils::squaredNorm(tmp_pseudofermion);
 		//Heat bath by multiply the tmp_pseudofermion to the polynomial of the dirac operator
-		j->evaluate(squareDiracOperator, *i, tmp_pseudofermion);//TODO
+		j->evaluate(squareDiracOperator, *i, tmp_pseudofermion, diracOperator);
 		++j;
-	}
 
-	try {
-		std::string flag = environment.configurations.get<std::string>("check_rational_approximations");
 
-		if (environment.sweep == 0 && environment.iteration == 0 && environment.measurement && flag == "true") {
-			//Now we test the correctness of rational/heatbath
-			long_real_t test = 0.;
-			//Now we use the better approximation for the metropolis step
-			std::vector<RationalApproximation>::iterator rational = rationalApproximationsMetropolis.begin();
-			for (i = pseudofermions.begin(); i != pseudofermions.end(); ++i) {
-				//Now we evaluate it with the rational approximation of the inverse
-				rational->evaluate(squareDiracOperator,tmp_pseudofermion,*i);
-				test += real(AlgebraUtils::dot(*i,tmp_pseudofermion));
-				++rational;
+		if (i == pseudofermions.begin()) {
+			try {
+				std::string flag = environment.configurations.get<std::string>("check_rational_approximations");
+
+				if (environment.sweep == 0 && environment.iteration == 0 && flag == "true") {
+					//Now we test the correctness of rational/heatbath
+					long_real_t test = 0.;
+
+					//Now we use the better approximation for the metropolis step
+					std::vector<RationalApproximation>::iterator rational = rationalApproximationsMetropolis.begin();
+					//Now we evaluate it with the rational approximation of the inverse
+					rational->evaluate(squareDiracOperator,tmp_pseudofermion,*i,diracOperator);
+					test += real(AlgebraUtils::dot(*i,tmp_pseudofermion));
+					if (isOutputProcess()) std::cout << "NFlavoQCDUpdater::Consistency check for the metropolis: " << test - oldPseudoFermionEnergy << std::endl;
+
+					//Now we use the approximation for the force step
+					rational = rationalApproximationsForce[0].begin();
+					test = 0.;
+					//Now we evaluate it with the rational approximation of the inverse
+					rational->evaluate(squareDiracOperator,tmp_pseudofermion,*i);
+					test += real(AlgebraUtils::dot(*i,tmp_pseudofermion));
+
+					if (isOutputProcess()) std::cout << "NFlavoQCDUpdater::Consistency check for the first level of the force: " << test - oldPseudoFermionEnergy << std::endl;
+				}
+
+			} catch (NotFoundOption& ex) {
+				if (isOutputProcess() && environment.sweep == 0 && environment.iteration == 0 && environment.measurement) std::cout << "NFlavorQCDUpdater::No consistency check of metropolis/force approximations!" << std::endl;
 			}
-			if (isOutputProcess()) std::cout << "NFlavoQCDUpdater::Consistency check for the metropolis: " << test - oldPseudoFermionEnergy << std::endl;
-			//Now we use the approximation for the force step
-			rational = rationalApproximationsForce[0].begin();
-			test = 0.;
-			for (i = pseudofermions.begin(); i != pseudofermions.end(); ++i) {
-				//Now we evaluate it with the rational approximation of the inverse
-				rational->evaluate(squareDiracOperator,tmp_pseudofermion,*i);
-				test += real(AlgebraUtils::dot(*i,tmp_pseudofermion));
-				++rational;
-			}
-			if (isOutputProcess()) std::cout << "NFlavoQCDUpdater::Consistency check for the first level of the force: " << test - oldPseudoFermionEnergy << std::endl;
 		}
 
-	} catch (NotFoundOption& ex) {
-		if (isOutputProcess() && environment.sweep == 0 && environment.iteration == 0 && environment.measurement) std::cout << "NFlavorQCDUpdater::No consistency check of metropolis/force approximations!" << std::endl;
 	}
 
 	//Get the initial energy of momenta
@@ -200,7 +244,7 @@ void MultiStepNFlavorQCDUpdater::execute(environment_t& environment) {
 				fermionAction[j]->addPseudoFermion(&(*i));
 			}
 			//Set the precision of the inverter
-			fermionAction[j]->setForcePrecision(environment.configurations.get<double>("force_inverter_precision"));
+			fermionAction[j]->setForcePrecision(rationalApproximationsForce[j].begin()->getPrecision());
 			fermionAction[j]->setForceMaxIterations(environment.configurations.get<unsigned int>("force_inverter_max_steps"));
 		}
 	}
@@ -265,7 +309,7 @@ void MultiStepNFlavorQCDUpdater::execute(environment_t& environment) {
 	std::vector<RationalApproximation>::iterator rational = rationalApproximationsMetropolis.begin();
 	for (i = pseudofermions.begin(); i != pseudofermions.end(); ++i) {
 		//Now we evaluate it with the rational approximation of the inverse
-		rational->evaluate(squareDiracOperator,tmp_pseudofermion,*i);
+		rational->evaluate(squareDiracOperator,tmp_pseudofermion,*i,diracOperator);
 		newPseudoFermionEnergy += real(AlgebraUtils::dot(*i,tmp_pseudofermion));
 		++rational;
 	}

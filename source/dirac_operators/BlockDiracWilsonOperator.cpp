@@ -12,7 +12,9 @@ namespace Update {
 
 BlockDiracWilsonOperator::BlockDiracWilsonOperator() : BlockDiracOperator()  { }
 
-BlockDiracWilsonOperator::BlockDiracWilsonOperator(const extended_fermion_lattice_t& _lattice, real_t _kappa) : BlockDiracOperator(_lattice, _kappa) { }
+BlockDiracWilsonOperator::BlockDiracWilsonOperator(const extended_fermion_lattice_t& _lattice, real_t _kappa) : BlockDiracOperator(_lattice, _kappa) {
+	this->setLattice(_lattice);
+}
 
 BlockDiracWilsonOperator::~BlockDiracWilsonOperator() { }
 

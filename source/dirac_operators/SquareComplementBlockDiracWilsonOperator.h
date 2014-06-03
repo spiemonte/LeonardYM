@@ -9,6 +9,7 @@
 #define SQUARECOMPLEMENTBLOCKDIRACWILSONOPERATOR_H_
 #include "DiracWilsonOperator.h"
 #include "ComplementBlockDiracWilsonOperator.h"
+#include "SquareBlockDiracWilsonOperator.h"
 #include "../BiConjugateGradient.h"
 
 namespace Update {

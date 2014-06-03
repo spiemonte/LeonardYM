@@ -276,3 +276,10 @@ WilsonFlow.o: ./source/WilsonFlow.h ./source/WilsonFlow.cpp
 
 GaugeEnergy.o: ./source/GaugeEnergy.h ./source/GaugeEnergy.cpp
 	$(CPP) $(CPPFLAGS) -c -o GaugeEnergy.o ./source/GaugeEnergy.cpp
+
+MultiGridDiracOperator.o: ./source/multigrid_solver/MultiGridDiracOperator.h ./source/multigrid_solver/MultiGridDiracOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o MultiGridDiracOperator.o ./source/multigrid_solver/MultiGridDiracOperator.cpp
+
+MultiGridSolver.o: ./source/multigrid_solver/MultiGridSolver.h ./source/multigrid_solver/MultiGridSolver.cpp
+	$(CPP) $(CPPFLAGS) -c -o MultiGridSolver.o ./source/multigrid_solver/MultiGridSolver.cpp
+
