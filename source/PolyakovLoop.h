@@ -9,6 +9,7 @@
 #define POLYAKOVLOOP_H_
 
 #include "LatticeSweep.h"
+#include "histogrammer.h"
 
 namespace Update {
 
@@ -18,6 +19,11 @@ public:
 	~PolyakovLoop();
 
 	virtual void execute(environment_t& environment);
+protected:
+	Histogrammer2D* hist2d_;
+    Histogrammer* evhist_;
+    Histogrammer2D* evhist2d_;
+	// add here histogrammer
 };
 
 } /* namespace Update */
