@@ -10,12 +10,9 @@
 
 namespace Update {
 
-PolyakovLoop::PolyakovLoop():hist2d_(NULL),evhist_(NULL),evhist2d_(NULL) { }
+PolyakovLoop::PolyakovLoop() { }
 
-PolyakovLoop::~PolyakovLoop() {
-    //add here histogrammer: collect from all proc and write out
-    // delete of histogrammer
-}
+PolyakovLoop::~PolyakovLoop() { }
 
 void PolyakovLoop::execute(environment_t& environment) {
 	typedef extended_gauge_lattice_t::Layout Layout;
@@ -52,25 +49,6 @@ void PolyakovLoop::execute(environment_t& environment) {
 			}
 		}
 		tmp.updateHalo();
-	}
-
-	bool histogram(false);
-	bool histogramev(false);
-	try {
-	        histogram = environment.configurations.get<bool >("histpgram_polyakov_loop");
-            histogramev = environment.configurations.get<bool >("histpgram_polyakov_loop");
-            if (isOutputProcess()) std::cout <<"Histograms of PlLoop prepared"<<std::endl;
-	}catch(NotFoundOption& ex){
-	    histogram =histogramev=false;
-	}
-	if(histogram){
-	    if(!hist2d_){
-
-	    }
-	 // add here histogrammer
-	}
-	if(histogramev){
-	 // add here histogrammer
 	}
 
 #pragma omp parallel for reduction(+:polyakovLoopRe,polyakovLoopIm)
