@@ -20,7 +20,7 @@ include Makefile.obj.mk
 LIBOBJ=$(filter-out updater.o,$(OBJECTS))
 
 all: libleonardQCD
-	ar rcs libleonardo.a $(LIBOBJ) /usr/lib/libboost_program_options.a
+	ar rcs libleonardo.a $(LIBOBJ)
 
 
 libleonardQCD: $(OBJECTS)
