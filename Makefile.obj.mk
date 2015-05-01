@@ -15,7 +15,7 @@ OBJECTS  = ReducedStencil.o StandardStencil.o ExtendedStencil.o LocalLayout.o \
 			GlobalOutput.o OutputSweep.o \
 			FermionForce.o DiracWilsonFermionForce.o BlockDiracWilsonFermionForce.o ImprovedFermionForce.o TestForce.o \
 			StochasticEstimator.o MesonCorrelator.o ChiralCondensate.o GluinoGlue.o \
-			PureGaugeUpdater.o PureGaugeOverrelaxation.o PureGaugeHMCUpdater.o Checkerboard.o \
+			PureGaugeUpdater.o PureGaugeOverrelaxation.o PureGaugeHMCUpdater.o Checkerboard.o PureGaugeWilsonLoops.o \
 			TwoFlavorFermionAction.o TwoFlavorQCDAction.o TwoFlavorHMCUpdater.o \
 			NFlavorFermionAction.o NFlavorQCDAction.o NFlavorQCDUpdater.o MultiStepNFlavorQCDUpdater.o TwistedMultiStepNFlavorQCDUpdater.o NFlavorBlockUpdater.o \
 			DiracEigenSolver.o Eigenvalues.o \
