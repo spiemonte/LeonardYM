@@ -8,7 +8,7 @@
 #ifndef TESTFORCE_H_
 #define TESTFORCE_H_
 #include "Environment.h"
-#include "Energy.h"
+#include "actions/Energy.h"
 
 namespace Update {
 

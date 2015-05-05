@@ -6,8 +6,8 @@
  */
 
 #include "Simulation.h"
-#include "StartGaugeConfiguration.h"
-#include "GlobalOutput.h"
+#include "starters/StartGaugeConfiguration.h"
+#include "io/GlobalOutput.h"
 #include <sys/time.h>
 
 namespace Update {

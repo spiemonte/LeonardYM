@@ -8,7 +8,7 @@
 #ifndef HMCUPDATER_H_
 #define HMCUPDATER_H_
 #include "Environment.h"
-#include "RandomSeed.h"
+#include "utils/RandomSeed.h"
 
 namespace Update {
 

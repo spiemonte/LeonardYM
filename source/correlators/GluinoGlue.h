@@ -3,8 +3,8 @@
 
 #include "LatticeSweep.h"
 #include "dirac_operators/DiracOperator.h"
-#include "BiConjugateGradient.h"
-#include "StochasticEstimator.h"
+#include "inverters/BiConjugateGradient.h"
+#include "fermion_measurements/StochasticEstimator.h"
 
 namespace Update {
 

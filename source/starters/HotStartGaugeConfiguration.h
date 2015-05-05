@@ -9,7 +9,7 @@
 #define HOTSTARTGAUGECONFIGURATION_H_
 
 #include "StartGaugeConfiguration.h"
-#include "RandomSeed.h"
+#include "utils/RandomSeed.h"
 
 namespace Update {
 

@@ -6,8 +6,8 @@
  */
 
 #include "AdjointPolyakovLoop.h"
-#include "ConvertLattice.h"
-#include "GlobalOutput.h"
+#include "utils/ConvertLattice.h"
+#include "io/GlobalOutput.h"
 
 namespace Update {
 
@@ -55,7 +55,7 @@ void AdjointPolyakovLoop::execute(environment_t& environment) {
 	for (int site = 0; site < Layout::localsize; ++site) {
 		if (Layout::globalIndexT(site) == 0) {
 			AdjointGroup tmp;
-			toAdjoint(polyakov[site][3], tmp);
+			ConvertLattice<extended_fermion_lattice_t,extended_gauge_lattice_t>::toAdjoint(polyakov[site][3], tmp);
 			adjointPolyakovLoop += trace(tmp);
 		}
 	}

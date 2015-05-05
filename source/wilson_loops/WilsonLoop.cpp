@@ -1,6 +1,6 @@
 #include "WilsonLoop.h"
-#include "GlobalOutput.h"
-#include "StoutSmearing.h"
+#include "io/GlobalOutput.h"
+#include "utils/StoutSmearing.h"
 
 namespace Update {
 

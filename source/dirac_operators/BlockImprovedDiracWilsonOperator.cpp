@@ -6,7 +6,7 @@
  */
 
 #include "BlockImprovedDiracWilsonOperator.h"
-#include "../BlockDiracWilsonFermionForce.h"
+#include "hmc_forces/BlockDiracWilsonFermionForce.h"
 
 namespace Update {
 

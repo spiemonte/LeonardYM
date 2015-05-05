@@ -7,11 +7,10 @@
 
 #include "TwoFlavorHMCUpdater.h"
 #include "dirac_operators/DiracOperator.h"
-#include "BiConjugateGradient.h"
-#include "ConjugateGradient.h"
-#include "Integrate.h"
-#include "AlgebraUtils.h"
-#include "Plaquette.h"
+#include "inverters/BiConjugateGradient.h"
+#include "inverters/ConjugateGradient.h"
+#include "hmc_integrators/Integrate.h"
+#include "algebra_utils/AlgebraUtils.h"
 //#define DEBUGFORCE
 //#define REVERSIBILITY_CHECK
 

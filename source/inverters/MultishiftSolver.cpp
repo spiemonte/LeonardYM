@@ -17,7 +17,7 @@ MultishiftSolver::MultishiftSolver(real_t _epsilon, unsigned int _maxSteps) : ep
 
 MultishiftSolver::~MultishiftSolver() { }
 
-MultishiftSolver* getInstance(const std::string& name, const StorageParameters& sp) {
+MultishiftSolver* MultishiftSolver::getInstance(const std::string& name) {
 	if (name == "mass_estrapolation") {
 		return new MEMultishiftSolver();
 	}

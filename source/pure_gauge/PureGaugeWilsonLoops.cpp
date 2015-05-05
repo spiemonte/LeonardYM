@@ -6,7 +6,7 @@
  */
 
 #include "PureGaugeWilsonLoops.h"
-#include "GlobalOutput.h"
+#include "io/GlobalOutput.h"
 #include "Checkerboard.h"
 
 namespace Update {

@@ -11,7 +11,7 @@
 #include "LatticeSweep.h"
 #include "StochasticEstimator.h"
 #include "dirac_operators/DiracOperator.h"
-#include "BiConjugateGradient.h"
+#include "inverters/BiConjugateGradient.h"
 
 namespace Update {
 

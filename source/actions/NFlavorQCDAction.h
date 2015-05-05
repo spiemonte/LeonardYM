@@ -7,7 +7,7 @@
 
 #ifndef NFLAVORQCDACTION_H_
 #define NFLAVORQCDACTION_H_
-#include "GaugeForce.h"
+#include "hmc_forces/Force.h"
 #include "GaugeAction.h"
 #include "NFlavorFermionAction.h"
 

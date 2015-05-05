@@ -6,11 +6,10 @@
  */
 
 #include "MesonCorrelator.h"
-#include "BiConjugateGradient.h"
-#include "GlobalOutput.h"
-#include "AlgebraUtils.h"
-#include "StoutSmearing.h"
-#include "Gamma.h"
+#include "io/GlobalOutput.h"
+#include "algebra_utils/AlgebraUtils.h"
+#include "utils/StoutSmearing.h"
+#include "utils/Gamma.h"
 #ifndef PI
 #define PI 3.141592653589793238462643
 #endif

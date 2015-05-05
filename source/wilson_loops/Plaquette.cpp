@@ -6,10 +6,8 @@
  */
 
 #include "Plaquette.h"
-#include "StoutSmearing.h"
-#include <omp.h>
 #include <iostream>
-#include "GlobalOutput.h"
+#include "io/GlobalOutput.h"
 
 namespace Update {
 
@@ -53,10 +51,6 @@ void Plaquette::execute(environment_t& environment) {
 		output->pop("plaquette");
 	}
 
-	/*StoutSmearing stout;
-	fundamental_lattice_t result;
-	stout.smearing(environment.gaugeLinkConfiguration, result, 0.15);
-	std::cout << "Comparison smearing: " << this->temporalPlaquette(environment.gaugeLinkConfiguration) << " - " << this->temporalPlaquette(result) << std::endl;*/
 }
 
 long_real_t Plaquette::temporalPlaquette(const extended_gauge_lattice_t& gaugeLinkConfiguration) {

@@ -9,7 +9,7 @@
 #define FERMIONICACTION_H_
 
 #include "Energy.h"
-#include "Force.h"
+#include "hmc_forces/Force.h"
 #include "dirac_operators/DiracOperator.h"
 
 namespace Update {

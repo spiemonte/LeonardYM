@@ -8,7 +8,7 @@
 #ifndef BLOCKDIRACWILSONOPERATOR_H_
 #define BLOCKDIRACWILSONOPERATOR_H_
 #include "BlockDiracOperator.h"
-#include "../RandomSeed.h"
+#include "utils/RandomSeed.h"
 
 namespace Update {
 

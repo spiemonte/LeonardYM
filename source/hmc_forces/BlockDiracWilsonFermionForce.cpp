@@ -6,8 +6,7 @@
  */
 
 #include "BlockDiracWilsonFermionForce.h"
-#include "Gamma.h"
-#include "ToString.h"
+#include "utils/Gamma.h"
 
 namespace Update {
 

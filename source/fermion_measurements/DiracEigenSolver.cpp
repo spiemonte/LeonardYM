@@ -6,13 +6,12 @@
  */
 
 #include "DiracEigenSolver.h"
-#include "AlgebraUtils.h"
-#include "BiConjugateGradient.h"
+#include "algebra_utils/AlgebraUtils.h"
+#include "inverters/BiConjugateGradient.h"
 #ifdef EIGEN
 #include <Eigen/Eigenvalues>
 #endif
 #include <algorithm>
-#include "ToString.h"
 
 namespace Update {
 

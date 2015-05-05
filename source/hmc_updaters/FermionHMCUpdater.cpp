@@ -6,7 +6,7 @@
  */
 
 #include "FermionHMCUpdater.h"
-#include "RandomSeed.h"
+#include "utils/RandomSeed.h"
 #include <omp.h>
 
 namespace Update {

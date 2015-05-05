@@ -12,7 +12,7 @@ AR       = ar
 OPTIMIZE = -O2 -march=native -Wall -Wextra -pipe
 INC	= -I./extra_libs/Eigen -I./extra_libs/
 CFLAGS   = $(OPTIMIZE) $(INC)
-CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/MatrixBaseExtension.h\"" -DNUMCOLORS=$(nc) $(adj) -DEIGEN
+CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/utils/MatrixBaseExtension.h\"" -DNUMCOLORS=$(nc) $(adj) -DEIGEN
 MAIN = updater.o
 
 include Makefile.obj.mk

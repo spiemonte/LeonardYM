@@ -1,9 +1,9 @@
 #include "GluinoGlue.h"
-#include "LieGenerators.h"
-#include "Gamma.h"
-#include "StoutSmearing.h"
-#include "GlobalOutput.h"
-#include "AlgebraUtils.h"
+#include "utils/LieGenerators.h"
+#include "utils/Gamma.h"
+#include "utils/StoutSmearing.h"
+#include "io/GlobalOutput.h"
+#include "algebra_utils/AlgebraUtils.h"
 
 namespace Update {
 

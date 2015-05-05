@@ -31,7 +31,7 @@ GaugeGroup WilsonGaugeAction::force(const extended_gauge_lattice_t& lattice, int
 	GaugeGroup force = -(0.25*this->getBeta()/numberColors)*(htrans(plaquette) - plaquette);
 	std::complex<real_t> trc = trace(force);
 	//Traceless part
-	for (unsigned int i = 0; i < numberColors; ++i) {
+	for (int i = 0; i < numberColors; ++i) {
 		force.at(i,i) -= std::complex<real_t>(real(trc)/numberColors,imag(trc)/numberColors);
 	}
 	return force;

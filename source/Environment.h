@@ -136,8 +136,8 @@ inline void switchOpenBc(extended_fermion_lattice_t& lattice) {
 }
 #endif
 
-#include "StorageParameters.h"
-#include "ConvertLattice.h"
+#include "io/StorageParameters.h"
+#include "utils/ConvertLattice.h"
 
 namespace Update {
 

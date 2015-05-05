@@ -6,9 +6,9 @@
  */
 
 #include "ChiralCondensate.h"
-#include "AlgebraUtils.h"
-#include "BiConjugateGradient.h"
-#include "GlobalOutput.h"
+#include "algebra_utils/AlgebraUtils.h"
+#include "inverters/BiConjugateGradient.h"
+#include "io/GlobalOutput.h"
 
 namespace Update {
 

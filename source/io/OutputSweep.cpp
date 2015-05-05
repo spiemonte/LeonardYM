@@ -8,8 +8,8 @@
 #include "OutputSweep.h"
 #include "Environment.h"
 //#include "../fieldio/fieldreadwriter.h"
-#include "Plaquette.h"
-#include "ToString.h"
+#include "wilson_loops/Plaquette.h"
+#include "utils/ToString.h"
 #include <fstream>
 #include <rpc/rpc.h>
 #include <rpc/xdr.h>

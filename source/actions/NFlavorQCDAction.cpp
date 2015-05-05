@@ -6,8 +6,8 @@
  */
 
 #include "NFlavorQCDAction.h"
-#include "MultishiftSolver.h"
-#include "AlgebraUtils.h"
+#include "inverters/MultishiftSolver.h"
+#include "algebra_utils/AlgebraUtils.h"
 
 namespace Update {
 

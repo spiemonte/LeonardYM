@@ -6,10 +6,9 @@
  */
 
 #include "DeflationInverter.h"
-#include "BiConjugateGradient.h"
-#include "AlgebraUtils.h"
-#include "ToString.h"
-#include "ConjugateGradient.h"
+#include "inverters/BiConjugateGradient.h"
+#include "algebra_utils/AlgebraUtils.h"
+#include "inverters/ConjugateGradient.h"
 //#include "./vectorclass/vectorclass.h"
 //#include "./vectorclass/complexvec.h"
 

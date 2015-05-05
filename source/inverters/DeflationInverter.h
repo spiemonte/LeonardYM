@@ -7,8 +7,8 @@
 
 #ifndef DEFLATIONINVERTER_H_
 #define DEFLATIONINVERTER_H_
-#include "./dirac_operators/DiracOperator.h"
-#include "ConjugateGradient.h"
+#include "dirac_operators/DiracOperator.h"
+#include "inverters/ConjugateGradient.h"
 
 namespace Update {
 

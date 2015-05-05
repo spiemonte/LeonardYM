@@ -6,8 +6,6 @@
  */
 
 #include "TestForce.h"
-#include "ToString.h"
-#include "Plaquette.h"
 
 namespace Update {
 

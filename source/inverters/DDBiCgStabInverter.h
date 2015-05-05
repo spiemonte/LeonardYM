@@ -7,7 +7,7 @@
 
 #ifndef DDBICGSTABINVERTER_H_
 #define DDBICGSTABINVERTER_H_
-#include "../dirac_operators/DiracOperator.h"
+#include "dirac_operators/DiracOperator.h"
 
 namespace Update {
 

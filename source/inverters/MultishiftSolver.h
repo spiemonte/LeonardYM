@@ -16,7 +16,7 @@ public:
 	MultishiftSolver(real_t _epsilon, unsigned int _maxSteps);
 	virtual ~MultishiftSolver();
 
-	static MultishiftSolver* getInstance(const std::string& name, const StorageParameters& sp);
+	static MultishiftSolver* getInstance(const std::string& name);
 
 	void setPrecision(double _epsilon);
 	double getPrecision() const;

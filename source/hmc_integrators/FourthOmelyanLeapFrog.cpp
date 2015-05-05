@@ -92,7 +92,7 @@ void FourthOmelyanLeapFrog::integrate(environment_t& env, extended_gauge_lattice
 
 	for (unsigned int i = 0; i < numberSteps[forceIndex]; ++i) {
 		//Position version of the integrator, first we integrate the linkconf
-		if (forceIndex + 1 == force.size()) {
+		if (static_cast<unsigned int>(forceIndex + 1) == force.size()) {
 			//Update the linkConfiguration
 			this->updateLinkConfiguration(env.gaugeLinkConfiguration, momenta, theta*step);
 			env.gaugeLinkConfiguration.updateHalo();
@@ -109,7 +109,7 @@ void FourthOmelyanLeapFrog::integrate(environment_t& env, extended_gauge_lattice
 		this->updateMomenta(momenta, forceLattice, rho*step);
 
 		//Update the linkConfiguration
-		if (forceIndex + 1 == force.size()) {
+		if (static_cast<unsigned int>(forceIndex + 1) == force.size()) {
 			this->updateLinkConfiguration(env.gaugeLinkConfiguration, momenta, lambda*step);
 			env.gaugeLinkConfiguration.updateHalo();
 			env.synchronize();
@@ -124,7 +124,7 @@ void FourthOmelyanLeapFrog::integrate(environment_t& env, extended_gauge_lattice
 		//Update of the momenta
 		this->updateMomenta(momenta, forceLattice, mu*step);
 
-		if (forceIndex + 1 == force.size()) {
+		if (static_cast<unsigned int>(forceIndex + 1) == force.size()) {
 			//Update the linkConfiguration
 			this->updateLinkConfiguration(env.gaugeLinkConfiguration, momenta, (1. - 2.*(lambda + theta))*step/2.);
 			env.gaugeLinkConfiguration.updateHalo();
@@ -140,7 +140,7 @@ void FourthOmelyanLeapFrog::integrate(environment_t& env, extended_gauge_lattice
 		//Update of the momenta
 		this->updateMomenta(momenta, forceLattice, (1. - 2.*(mu + rho))*step);
 
-		if (forceIndex + 1 == force.size()) {
+		if (static_cast<unsigned int>(forceIndex + 1) == force.size()) {
 			//Update the linkConfiguration
 			this->updateLinkConfiguration(env.gaugeLinkConfiguration, momenta, (1. - 2.*(lambda + theta))*step/2.);
 			env.gaugeLinkConfiguration.updateHalo();
@@ -156,7 +156,7 @@ void FourthOmelyanLeapFrog::integrate(environment_t& env, extended_gauge_lattice
 		//Update of the momenta
 		this->updateMomenta(momenta, forceLattice, mu*step);
 
-		if (forceIndex + 1 == force.size()) {
+		if (static_cast<unsigned int>(forceIndex + 1) == force.size()) {
 			//Update the linkConfiguration
 			this->updateLinkConfiguration(env.gaugeLinkConfiguration, momenta, lambda*step);
 			env.gaugeLinkConfiguration.updateHalo();
@@ -172,7 +172,7 @@ void FourthOmelyanLeapFrog::integrate(environment_t& env, extended_gauge_lattice
 		//Update of the momenta
 		this->updateMomenta(momenta, forceLattice, rho*step);
 
-		if (forceIndex + 1 == force.size()) {
+		if (static_cast<unsigned int>(forceIndex + 1) == force.size()) {
 			//Update the linkConfiguration
 			this->updateLinkConfiguration(env.gaugeLinkConfiguration, momenta, theta*step);
 			env.gaugeLinkConfiguration.updateHalo();

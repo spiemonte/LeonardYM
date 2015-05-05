@@ -11,7 +11,7 @@ OBJECTS  = ReducedStencil.o StandardStencil.o ExtendedStencil.o LocalLayout.o \
 			ReUnit.o StoutSmearing.o Gamma.o \
 			RandomSeed.o \
 			Glueball.o \
-			Plaquette.o PolyakovLoop.o AdjointPolyakovLoop.o  WilsonLoop.o GaugeEnergy.o \
+			Plaquette.o PolyakovLoop.o AdjointPolyakovLoop.o WilsonLoop.o GaugeEnergy.o \
 			GlobalOutput.o OutputSweep.o \
 			FermionForce.o DiracWilsonFermionForce.o BlockDiracWilsonFermionForce.o ImprovedFermionForce.o TestForce.o \
 			StochasticEstimator.o MesonCorrelator.o ChiralCondensate.o GluinoGlue.o \
@@ -19,7 +19,7 @@ OBJECTS  = ReducedStencil.o StandardStencil.o ExtendedStencil.o LocalLayout.o \
 			TwoFlavorFermionAction.o TwoFlavorQCDAction.o TwoFlavorHMCUpdater.o \
 			NFlavorFermionAction.o NFlavorQCDAction.o NFlavorQCDUpdater.o MultiStepNFlavorQCDUpdater.o TwistedMultiStepNFlavorQCDUpdater.o NFlavorBlockUpdater.o \
 			DiracEigenSolver.o Eigenvalues.o \
-			TestCommunication.o TestLinearAlgebra.o \
+			TestCommunication.o TestLinearAlgebra.o TestSpeedDiracOperators.o \
 			StartGaugeConfiguration.o ReadStartGaugeConfiguration.o HotStartGaugeConfiguration.o ColdStartGaugeConfiguration.o \
 			ReadGaugeConfiguration.o \
 			LatticeSweep.o Simulation.o \

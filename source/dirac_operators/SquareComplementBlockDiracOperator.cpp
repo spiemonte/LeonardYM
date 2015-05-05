@@ -6,8 +6,8 @@
  */
 
 #include "SquareComplementBlockDiracOperator.h"
-#include "../DiracWilsonFermionForce.h"
-#include "../AlgebraUtils.h"
+#include "hmc_forces/DiracWilsonFermionForce.h"
+#include "algebra_utils/AlgebraUtils.h"
 
 namespace Update {
 

@@ -26,7 +26,7 @@ int RandomSeed::randomSeed() {
 #ifdef ENABLE_MPI
 	int world_rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-	return abs(seed[counter % 23]+mpiseed[world_rank % 23]+((12*world_rank + 13) % (512 - 1))+time(NULL)+randomInteger());
+	return abs(seed[counter % 128]+mpiseed[world_rank % 512]+((12*world_rank + 13) % (512 - 1))+time(NULL)+randomInteger());
 #endif
 }
 

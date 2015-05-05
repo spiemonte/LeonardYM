@@ -10,8 +10,8 @@
 
 #include "FermionHMCUpdater.h"
 #include "LatticeSweep.h"
-#include "TwoFlavorQCDAction.h"
-#include "BiConjugateGradient.h"
+#include "actions/TwoFlavorQCDAction.h"
+#include "inverters/BiConjugateGradient.h"
 
 namespace Update {
 

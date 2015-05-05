@@ -1,7 +1,7 @@
 #ifndef ALGEBRAUTILS_QPX_H_
 #define ALGEBRAUTILS_QPX_H_
 #include "Environment.h"
-#include "RandomSeed.h"
+#include "utils/RandomSeed.h"
 
 #ifdef QPX
 

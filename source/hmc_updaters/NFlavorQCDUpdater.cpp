@@ -6,16 +6,14 @@
  */
 
 #include "NFlavorQCDUpdater.h"
-#include "NFlavorQCDAction.h"
-#include "AlgebraUtils.h"
-#include "MultishiftSolver.h"
-#include "RationalApproximation.h"
-#include "BiConjugateGradient.h"
-#include "DiracEigenSolver.h"
-#include "GaugeAction.h"
-#include "Integrate.h"
-#include "ToString.h"
-#include "GlobalOutput.h"
+#include "actions/NFlavorQCDAction.h"
+#include "algebra_utils/AlgebraUtils.h"
+#include "inverters/MultishiftSolver.h"
+#include "dirac_functions/RationalApproximation.h"
+#include "actions/GaugeAction.h"
+#include "hmc_integrators/Integrate.h"
+#include "utils/ToString.h"
+#include "io/GlobalOutput.h"
 #include <iomanip>
 
 //#define DEBUGFORCE

@@ -1,7 +1,7 @@
 #ifndef ALGEBRAUTILS_AVX_H_
 #define ALGEBRAUTILS_AVX_H_
 #include "Environment.h"
-#include "RandomSeed.h"
+#include "utils/RandomSeed.h"
 
 #ifdef AVX
 //avxintrin.h

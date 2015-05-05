@@ -6,7 +6,7 @@
  */
 
 #include "ChronologicalMultishiftSolver.h"
-#include "AlgebraUtils.h"
+#include "algebra_utils/AlgebraUtils.h"
 #define FULLLOG
 
 namespace Update {

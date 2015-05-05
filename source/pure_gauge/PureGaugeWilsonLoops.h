@@ -9,7 +9,7 @@
 #define PUREGAUGEWILSONLOOPS_H_
 
 #include "LatticeSweep.h"
-#include "GaugeAction.h"
+#include "actions/GaugeAction.h"
 #include "PureGaugeUpdater.h"
 #include "PureGaugeOverrelaxation.h"
 

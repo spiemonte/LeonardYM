@@ -10,8 +10,8 @@
 
 #include "LatticeSweep.h"
 #include "FermionHMCUpdater.h"
-#include "BandAction.h"
-#include "TwoFlavorQCDAction.h"
+#include "actions/BandAction.h"
+#include "actions/TwoFlavorQCDAction.h"
 
 namespace Update {
 

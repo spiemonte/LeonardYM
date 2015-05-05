@@ -6,17 +6,17 @@
  */
 
 #include "./source/Environment.h"
-#include "./source/StorageParameters.h"
+#include "./source/io/StorageParameters.h"
 #include "./source/MatrixTypedef.h"
-#include "./source/RandomSeed.h"
+#include "./source/utils/RandomSeed.h"
 #include "./source/Simulation.h"
-#include "./source/GlobalOutput.h"
+#include "./source/io/GlobalOutput.h"
 #include "./source/MPILattice/ReducedStencil.h"
 #include "./source/MPILattice/StandardStencil.h"
 #include "./source/MPILattice/ExtendedStencil.h"
 #include "./source/MPILattice/LocalLayout.h"
-#include "source/LieGenerators.h"
-#include "./source/ToString.h"
+#include "./source/utils/LieGenerators.h"
+#include "./source/utils/ToString.h"
 #include <iostream>
 
 int Update::RandomSeed::counter = -1;

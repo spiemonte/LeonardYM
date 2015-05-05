@@ -9,9 +9,9 @@
 #define MESONCORRELATOR_H_
 
 #include "LatticeSweep.h"
-#include "StochasticEstimator.h"
+#include "fermion_measurements/StochasticEstimator.h"
 #include "dirac_operators/DiracOperator.h"
-#include "BiConjugateGradient.h"
+#include "inverters/BiConjugateGradient.h"
 
 namespace Update {
 

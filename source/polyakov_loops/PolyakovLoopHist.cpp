@@ -6,7 +6,7 @@
  */
 
 #include "PolyakovLoop.h"
-#include "GlobalOutput.h"
+#include "io/GlobalOutput.h"
 
 namespace Update {
 

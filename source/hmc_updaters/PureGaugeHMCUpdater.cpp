@@ -6,9 +6,9 @@
  */
 
 #include "PureGaugeHMCUpdater.h"
-#include "Integrate.h"
-#include "GaugeAction.h"
-#include "TestForce.h"
+#include "hmc_integrators/Integrate.h"
+#include "actions/GaugeAction.h"
+#include "hmc_forces/TestForce.h"
 #include <string>
 //#define REVERSIBILITY_CHECK
 

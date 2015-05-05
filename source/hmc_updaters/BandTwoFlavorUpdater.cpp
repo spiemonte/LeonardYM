@@ -6,10 +6,10 @@
  */
 
 #include "BandTwoFlavorUpdater.h"
-#include "BandAction.h"
-#include "BiConjugateGradient.h"
-#include "AlgebraUtils.h"
-#include "Integrate.h"
+#include "actions/BandAction.h"
+#include "inverters/BiConjugateGradient.h"
+#include "algebra_utils/AlgebraUtils.h"
+#include "hmc_integrators/Integrate.h"
 
 namespace Update {
 

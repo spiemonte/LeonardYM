@@ -10,10 +10,9 @@
 
 #include "LatticeSweep.h"
 #include "FermionHMCUpdater.h"
-#include "Polynomial.h"
-#include "RationalApproximation.h"
+#include "dirac_functions/RationalApproximation.h"
 #include "MultiStepNFlavorQCDUpdater.h"
-#include "GaugeAction.h"
+#include "actions/GaugeAction.h"
 
 #include <vector>
 

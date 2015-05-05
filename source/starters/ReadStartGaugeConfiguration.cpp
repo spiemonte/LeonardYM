@@ -6,11 +6,11 @@
  */
 
 #include "ReadStartGaugeConfiguration.h"
-#include "Plaquette.h"
+#include "wilson_loops/Plaquette.h"
 #include <string>
 #include <fstream>
 #include <rpc/xdr.h>
-#include "ToString.h"
+#include "utils/ToString.h"
 
 namespace Update {
 

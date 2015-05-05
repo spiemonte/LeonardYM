@@ -6,33 +6,34 @@
  */
 
 #include "LatticeSweep.h"
-#include "PureGaugeUpdater.h"
-#include "Plaquette.h"
-#include "FromString.h"
-#include "PureGaugeHMCUpdater.h"
-#include "TwoFlavorHMCUpdater.h"
-#include "NFlavorQCDUpdater.h"
-#include "NFlavorBlockUpdater.h"
-#include "PureGaugeOverrelaxation.h"
-#include "OutputSweep.h"
-#include "TestLinearAlgebra.h"
-#include "Eigenvalues.h"
-#include "MesonCorrelator.h"
-#include "ChiralCondensate.h"
-#include "PolyakovLoop.h"
-#include "Glueball.h"
-#include "ReUnit.h"
-#include "BandTwoFlavorUpdater.h"
-#include "PureGaugeWilsonLoops.h"
-#include "TestCommunication.h"
-#include "GluinoGlue.h"
-#include "WilsonLoop.h"
-#include "ReadGaugeConfiguration.h"
-#include "WilsonFlow.h"
-#include "GaugeEnergy.h"
-#include "AdjointPolyakovLoop.h"
-#include "MultiStepNFlavorQCDUpdater.h"
-#include "TwistedMultiStepNFlavorQCDUpdater.h"
+#include "pure_gauge/PureGaugeUpdater.h"
+#include "wilson_loops/Plaquette.h"
+#include "utils/FromString.h"
+#include "hmc_updaters/PureGaugeHMCUpdater.h"
+#include "hmc_updaters/TwoFlavorHMCUpdater.h"
+#include "hmc_updaters/NFlavorQCDUpdater.h"
+#include "hmc_updaters/NFlavorBlockUpdater.h"
+#include "pure_gauge/PureGaugeOverrelaxation.h"
+#include "io/OutputSweep.h"
+#include "tests/TestLinearAlgebra.h"
+#include "tests/TestSpeedDiracOperators.h"
+#include "fermion_measurements/Eigenvalues.h"
+#include "correlators/MesonCorrelator.h"
+#include "fermion_measurements/ChiralCondensate.h"
+#include "polyakov_loops/PolyakovLoop.h"
+#include "correlators/Glueball.h"
+#include "utils/ReUnit.h"
+#include "hmc_updaters/BandTwoFlavorUpdater.h"
+#include "pure_gauge/PureGaugeWilsonLoops.h"
+#include "tests/TestCommunication.h"
+#include "correlators/GluinoGlue.h"
+#include "wilson_loops/WilsonLoop.h"
+#include "io/ReadGaugeConfiguration.h"
+#include "wilson_flow/WilsonFlow.h"
+#include "actions/GaugeEnergy.h"
+#include "polyakov_loops/AdjointPolyakovLoop.h"
+#include "hmc_updaters/MultiStepNFlavorQCDUpdater.h"
+#include "hmc_updaters/TwistedMultiStepNFlavorQCDUpdater.h"
 
 namespace Update {
 
@@ -61,6 +62,8 @@ LatticeSweep* LatticeSweep::getInstance(const std::string& name) {
 		return new OutputSweep();
 	} else if (name == "TestLinearAlgebra") {
 		return new TestLinearAlgebra();
+	} else if (name == "TestSpeedDiracOperators") {
+			return new TestSpeedDiracOperators();
 	} else if (name == "Eigenvalues") {
 		return new Eigenvalues();
 	} else if (name == "MesonCorrelator") {

@@ -8,8 +8,8 @@
 #ifndef DIRACEIGENSOLVER_H_
 #define DIRACEIGENSOLVER_H_
 #include "dirac_operators/DiracOperator.h"
-#include "BiConjugateGradient.h"
-#include "Polynomial.h"
+#include "inverters/BiConjugateGradient.h"
+#include "dirac_functions/Polynomial.h"
 
 namespace Update {
 

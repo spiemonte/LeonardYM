@@ -9,9 +9,9 @@ endif
 CC       = gcc
 CPP      = g++
 OPTIMIZE = -O2 -mavx -fabi-version=6 -march=native -Wall -Wextra -pipe -fopenmp 
-INC	= -I./extra_libs/Eigen -I./extra_libs/
+INC	= -I./extra_libs/Eigen -I./extra_libs/ -I./source/
 CFLAGS   = $(OPTIMIZE) $(INC)
-CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/MatrixBaseExtension.h\"" -DNUMCOLORS=$(nc) -DMULTITHREADING $(adj) -DEIGEN
+CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/utils/MatrixBaseExtension.h\"" -DNUMCOLORS=$(nc) -DMULTITHREADING $(adj) -DEIGEN
 
 include Makefile.obj.mk
 

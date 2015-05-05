@@ -8,7 +8,7 @@
 #ifndef WILSONFLOW_H_
 #define WILSONFLOW_H_
 #include "LatticeSweep.h"
-#include "GaugeAction.h"
+#include "actions/GaugeAction.h"
 #include <utility>
 
 namespace Update {

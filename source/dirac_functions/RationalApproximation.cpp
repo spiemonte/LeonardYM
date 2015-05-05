@@ -6,9 +6,9 @@
  */
 
 #include "RationalApproximation.h"
-#include "MEMultishiftSolver.h"
-#include "MMMRMultishiftSolver.h"
-#include "AlgebraUtils.h"
+#include "inverters/MEMultishiftSolver.h"
+#include "inverters/MMMRMultishiftSolver.h"
+#include "algebra_utils/AlgebraUtils.h"
 
 namespace Update {
 

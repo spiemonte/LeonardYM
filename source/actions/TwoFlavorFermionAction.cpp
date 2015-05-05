@@ -6,9 +6,9 @@
  */
 
 #include "TwoFlavorFermionAction.h"
-#include "BiConjugateGradient.h"
-#include "ConjugateGradient.h"
-#include "AlgebraUtils.h"
+#include "inverters/BiConjugateGradient.h"
+#include "inverters/ConjugateGradient.h"
+#include "algebra_utils/AlgebraUtils.h"
 
 namespace Update {
 

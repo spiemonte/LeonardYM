@@ -8,7 +8,7 @@
 #include "PureGaugeUpdater.h"
 #include "MatrixTypedef.h"
 #include "Checkerboard.h"
-#include "RandomSeed.h"
+#include "utils/RandomSeed.h"
 #ifndef PI
 #define PI 3.14159265358979323846264338327950288419
 #endif

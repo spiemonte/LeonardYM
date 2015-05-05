@@ -7,7 +7,7 @@
 
 #include "GaugeEnergy.h"
 #include "GaugeAction.h"
-#include "GlobalOutput.h"
+#include "io/GlobalOutput.h"
 
 namespace Update {
 

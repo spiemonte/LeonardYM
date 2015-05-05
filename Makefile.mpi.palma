@@ -11,7 +11,7 @@ CPP      = $(MPICXX)
 OPTIMIZE = -O2 -pipe -openmp  
 INC	= -I./extra_libs/Eigen
 CFLAGS   = $(OPTIMIZE) $(INC)
-CPPFLAGS = $(OPTIMIZE) $(INC) $(adj) -DENABLE_MPI -DNUMCOLORS=$(nc) -DMULTITHREADING -DMBE="\"$(PWD)/source/MatrixBaseExtension.h\"" -I/share/Applic.PALMA/boost/boost-trunk/ -DEIGEN
+CPPFLAGS = $(OPTIMIZE) $(INC) $(adj) -DENABLE_MPI -DNUMCOLORS=$(nc) -DMULTITHREADING -DMBE="\"$(PWD)/source/utils/MatrixBaseExtension.h\"" -I/share/Applic.PALMA/boost/boost-trunk/ -DEIGEN
 
 include Makefile.obj.mk
 

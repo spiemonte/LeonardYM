@@ -7,7 +7,7 @@
 
 #ifndef BANDACTION_H_
 #define BANDACTION_H_
-#include "Force.h"
+#include "hmc_forces/Force.h"
 
 #include <vector>
 #include <utility>

@@ -8,8 +8,8 @@
 #ifndef ALGEBRAUTILS_H_
 #define ALGEBRAUTILS_H_
 #include "Environment.h"
-#include "RandomSeed.h"
-#include "./vectorclass/complexvec.h"
+#include "utils/RandomSeed.h"
+//#include "./vectorclass/complexvec.h"
 
 #ifdef QPX
 #include "AlgebraUtils_QPX.h"

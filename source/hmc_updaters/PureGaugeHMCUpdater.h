@@ -9,7 +9,7 @@
 #define PUREGAUGEHMCUPDATER_H_
 
 #include "LatticeSweep.h"
-#include "Integrate.h"
+#include "hmc_integrators/Integrate.h"
 #include "HMCUpdater.h"
 
 namespace Update {

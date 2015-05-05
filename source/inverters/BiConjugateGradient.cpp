@@ -6,7 +6,7 @@
  */
 
 #include "BiConjugateGradient.h"
-#include "AlgebraUtils.h"
+#include "algebra_utils/AlgebraUtils.h"
 //#define BICGLOG
 
 namespace Update {

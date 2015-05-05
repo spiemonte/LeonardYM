@@ -9,8 +9,8 @@
 #define PUREGAUGEUPDATER_H_
 
 #include "LatticeSweep.h"
-#include "RandomSeed.h"
-#include "GaugeAction.h"
+#include "utils/RandomSeed.h"
+#include "actions/GaugeAction.h"
 
 namespace Update {
 

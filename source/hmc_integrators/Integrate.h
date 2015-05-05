@@ -8,7 +8,7 @@
 #ifndef INTEGRATE_H_
 #define INTEGRATE_H_
 
-#include "Force.h"
+#include "hmc_forces/Force.h"
 #include <string>
 
 namespace Update {

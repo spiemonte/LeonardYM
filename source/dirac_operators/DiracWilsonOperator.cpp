@@ -6,7 +6,7 @@
  */
 
 #include "DiracWilsonOperator.h"
-#include "../DiracWilsonFermionForce.h"
+#include "hmc_forces/DiracWilsonFermionForce.h"
 /*#include <x86intrin.h>
 #include <immintrin.h>
 #include <malloc.h>*/

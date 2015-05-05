@@ -8,7 +8,7 @@
 #ifndef TWOFLAVORACTION_H_
 #define TWOFLAVORACTION_H_
 
-#include "GaugeForce.h"
+#include "hmc_forces/GaugeForce.h"
 #include "TwoFlavorFermionAction.h"
 #include "GaugeAction.h"
 

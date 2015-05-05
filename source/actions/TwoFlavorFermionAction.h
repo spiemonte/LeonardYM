@@ -8,7 +8,7 @@
 #ifndef TWOFLAVORFERMIONACTION_H_
 #define TWOFLAVORFERMIONACTION_H_
 
-#include "FermionForce.h"
+#include "hmc_forces/FermionForce.h"
 #include "GaugeAction.h"
 #include "dirac_operators/DiracOperator.h"
 #include "Energy.h"

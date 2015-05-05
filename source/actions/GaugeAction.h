@@ -9,7 +9,7 @@
 #define GAUGEACTION_H_
 
 #include "Environment.h"
-#include "GaugeForce.h"
+#include "hmc_forces/GaugeForce.h"
 #include "Energy.h"
 #include <string>
 

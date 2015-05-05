@@ -11,7 +11,7 @@ CPP      = mpixlcxx_r
 OPTIMIZE = -O2 -qarch=qp -qtune=qp -qsmp=omp -qthreaded -qmaxmem=-1
 INC	     = -I./extra_libs/Eigen -I/bgsys/local/boost/1.47.0/
 CFLAGS   = $(OPTIMIZE) $(INC)
-CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/MatrixBaseExtension.h\"" $(adj) -DENABLE_MPI -DNUMCOLORS=$(nc) -DMULTITHREADING -DMATRIXTOOLKIT
+CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/utils/MatrixBaseExtension.h\"" $(adj) -DENABLE_MPI -DNUMCOLORS=$(nc) -DMULTITHREADING -DMATRIXTOOLKIT
 
 include Makefile.obj.mk
 

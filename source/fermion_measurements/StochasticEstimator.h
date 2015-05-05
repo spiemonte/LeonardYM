@@ -8,7 +8,7 @@
 #ifndef STOCHASTICESTIMATOR_H_
 #define STOCHASTICESTIMATOR_H_
 #include "Environment.h"
-#include "RandomSeed.h"
+#include "utils/RandomSeed.h"
 
 
 namespace Update {

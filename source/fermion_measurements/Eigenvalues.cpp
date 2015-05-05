@@ -7,10 +7,10 @@
 
 #include "Eigenvalues.h"
 #include "DiracEigenSolver.h"
-#include "GlobalOutput.h"
-#include "AlgebraUtils.h"
-#include "Polynomial.h"
-#include "ToString.h"
+#include "io/GlobalOutput.h"
+#include "algebra_utils/AlgebraUtils.h"
+#include "dirac_functions/Polynomial.h"
+#include "utils/ToString.h"
 
 namespace Update {
 

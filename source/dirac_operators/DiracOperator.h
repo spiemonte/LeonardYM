@@ -8,9 +8,8 @@
 #ifndef DIRACOPERATOR_H_
 #define DIRACOPERATOR_H_
 
-#include "../Force.h"
-#include "../Environment.h"
-#include "../FermionForce.h"
+#include "Environment.h"
+#include "hmc_forces/FermionForce.h"
 
 #include <string>
 

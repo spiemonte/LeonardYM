@@ -6,7 +6,7 @@
  */
 
 #include "ImprovedFermionForce.h"
-#include "Gamma.h"
+#include "utils/Gamma.h"
 
 namespace Update {
 

@@ -6,11 +6,8 @@
  */
 
 #include "NFlavorFermionAction.h"
-#include "MultishiftSolver.h"
-#include "AlgebraUtils.h"
-#include "ChronologicalMultishiftSolver.h"
-#include "MMMRMultishiftSolver.h"
-#include "MEMultishiftSolver.h"
+#include "inverters/MultishiftSolver.h"
+#include "algebra_utils/AlgebraUtils.h"
 
 namespace Update {
 
@@ -43,7 +40,7 @@ NFlavorFermionAction::NFlavorFermionAction(DiracOperator* _squareDiracOperator, 
 	}
 	if (tmp_pseudofermion == 0) tmp_pseudofermion = new extended_dirac_vector_t;
 
-	multishiftSolver = new MMMRMultishiftSolver();
+	multishiftSolver = MultishiftSolver::getInstance("minimal_residual");
 }
 
 NFlavorFermionAction::~NFlavorFermionAction() {

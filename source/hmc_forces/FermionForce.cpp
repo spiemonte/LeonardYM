@@ -6,7 +6,7 @@
  */
 
 #include "FermionForce.h"
-#include "ConvertLattice.h"
+#include "utils/ConvertLattice.h"
 
 namespace Update {
 

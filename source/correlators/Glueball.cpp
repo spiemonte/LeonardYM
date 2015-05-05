@@ -6,9 +6,9 @@
  */
 
 #include "Glueball.h"
-#include "GlobalOutput.h"
-#include "ToString.h"
-#include "StoutSmearing.h"
+#include "io/GlobalOutput.h"
+#include "utils/ToString.h"
+#include "utils/StoutSmearing.h"
 #ifndef PI
 #define PI 3.14159265358979323846264338327950288419
 #endif

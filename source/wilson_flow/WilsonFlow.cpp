@@ -6,10 +6,10 @@
  */
 
 #include "WilsonFlow.h"
-#include "ImprovedGaugeAction.h"
-#include "WilsonGaugeAction.h"
-#include "GlobalOutput.h"
-#include "Plaquette.h"
+#include "actions/ImprovedGaugeAction.h"
+#include "actions/WilsonGaugeAction.h"
+#include "io/GlobalOutput.h"
+#include "wilson_loops/Plaquette.h"
 #define PI 3.14159265358979323846264338328
 
 namespace Update {
@@ -55,9 +55,9 @@ void WilsonFlow::execute(environment_t& environment) {
 		this->measureEnergy(initialLattice);
 		if (isOutputProcess()) std::cout << "WilsonFlow::t*t*Energy at t " << t << ": " << t*t*gaugeEnergy << std::endl;
 		if (isOutputProcess()) std::cout << "WilsonFlow::Topological charge at t " << t << ": " << topologicalCharge << std::endl;
-		if (fabs(t - Layout::glob_x*Layout::glob_x/(8.*9.)) < step/2.) {
+		/*if (fabs(t - Layout::glob_x*Layout::glob_x/(8.*9.)) < step/2.) {
 			this->threeDimensionalEnergyTopologicalPlot(initialLattice,environment);
-		}
+		}*/
 		
 		this->integrate(initialLattice, finalLattice, action, step, integration_intervals);
 		initialLattice = finalLattice;

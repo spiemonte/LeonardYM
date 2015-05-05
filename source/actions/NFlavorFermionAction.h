@@ -8,7 +8,7 @@
 #ifndef NFLAVORFERMIONACTION_H_
 #define NFLAVORFERMIONACTION_H_
 
-#include "RationalApproximation.h"
+#include "dirac_functions/RationalApproximation.h"
 #include "dirac_operators/DiracOperator.h"
 #include "FermionicAction.h"
 

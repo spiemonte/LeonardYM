@@ -8,7 +8,7 @@
 #ifndef FERMIONFORCE_H_
 #define FERMIONFORCE_H_
 #include "Environment.h"
-#include "LieGenerators.h"
+#include "utils/LieGenerators.h"
 
 namespace Update {
 

@@ -10,8 +10,8 @@
 
 #include "LatticeSweep.h"
 #include "Environment.h"
-#include "RandomSeed.h"
-#include "GaugeAction.h"
+#include "utils/RandomSeed.h"
+#include "actions/GaugeAction.h"
 
 namespace Update {
 

@@ -9,7 +9,7 @@
 #define COMPLEMENTBLOCKDIRACWILSONOPERATOR_H_
 #include "BlockDiracWilsonOperator.h"
 #include "BlockDiracOperator.h"
-#include "../BiConjugateGradient.h"
+#include "inverters/BiConjugateGradient.h"
 
 namespace Update {
 

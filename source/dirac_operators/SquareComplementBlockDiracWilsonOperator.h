@@ -10,7 +10,7 @@
 #include "DiracWilsonOperator.h"
 #include "ComplementBlockDiracWilsonOperator.h"
 #include "SquareBlockDiracWilsonOperator.h"
-#include "../BiConjugateGradient.h"
+#include "inverters/BiConjugateGradient.h"
 
 namespace Update {
 

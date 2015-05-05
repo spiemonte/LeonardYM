@@ -9,8 +9,8 @@
 #define RATIONALAPPROXIMATION_H_
 #include "Environment.h"
 #include "dirac_operators/DiracOperator.h"
-#include "MultishiftSolver.h"
-#include "BiConjugateGradient.h"
+#include "inverters/MultishiftSolver.h"
+#include "inverters/BiConjugateGradient.h"
 #include <vector>
 
 namespace Update {

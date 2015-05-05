@@ -6,7 +6,7 @@
  */
 
 #include "MEMultishiftSolver.h"
-#include "AlgebraUtils.h"
+#include "algebra_utils/AlgebraUtils.h"
 
 namespace Update {
 
