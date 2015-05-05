@@ -178,24 +178,32 @@ void LatticeSweep::printSweepsName() {
 		std::cout << "List of the possible Sweeps name:" << std::endl;
 		std::cout
 		<< " PureGaugeCM" << std::endl
-		<< " Plaquette" << std::endl
-		<< " PureGaugeHMC" << std::endl
-		<< " TwoFlavorQCD" << std::endl
-		<< " NFlavorQCD" << std::endl
-		<< " NFlavorBlock" << std::endl
-		<< " PureGaugeOverrelaxation" << std::endl
-		<< " Output" << std::endl
-		<< " TestLinearAlgebra" << std::endl
-		<< " Eigenvalues" << std::endl
-		<< " MesonCorrelator" << std::endl
-		<< " ChiralCondensate" << std::endl
-		<< " PolyakovLoop" << std::endl
-		<< " Glueball" << std::endl
-		<< " ReUnit" << std::endl
-		<< " BandTwoFlavorHMCUpdater" << std::endl
-		<< " PureGaugeWilsonLoops" << std::endl
-		<< " WilsonLoop" << std::endl
-		<< " TestCommunication" << std::endl;
+		<< "Plaquette" << std::endl
+		<< "PureGaugeHMC" << std::endl
+		<< "TwoFlavorQCD" << std::endl
+		<< "NFlavorQCD" << std::endl
+		<< "NFlavorBlock" << std::endl
+		<< "PureGaugeOverrelaxation" << std::endl
+		<< "Output" << std::endl
+		<< "TestLinearAlgebra" << std::endl
+		<< "TestSpeedDiracOperators" << std::endl
+		<< "Eigenvalues" << std::endl
+		<< "MesonCorrelator" << std::endl
+		<< "ChiralCondensate" << std::endl
+		<< "PolyakovLoop" << std::endl
+		<< "AdjointPolyakovLoop" << std::endl
+		<< "Glueball" << std::endl
+		<< "GluinoGlue" << std::endl
+		<< "ReUnit" << std::endl
+		<< "BandTwoFlavorHMCUpdater" << std::endl
+		<< "PureGaugeWilsonLoops" << std::endl
+		<< "WilsonLoop" << std::endl
+		<< "TestCommunication" << std::endl
+		<< "ReadGaugeConfiguration" << std::endl
+		<< "WilsonFlow" << std::endl
+		<< "GaugeEnergy" << std::endl
+		<< "MultiStepNFlavorQCD" << std::endl
+		<< "TwistedMultiStepNFlavorQCD" << std::endl;
 	}
 
 }
