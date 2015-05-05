@@ -42,6 +42,8 @@ typedef Lattice::Lattice<Update::GaugeGroup, Lattice::MpiLayout<Lattice::Extende
 typedef Lattice::Lattice<Update::GaugeGroup, Lattice::MpiLayout<Lattice::StandardStencil> > standard_matrix_lattice_t;
 typedef Lattice::Lattice<Update::GaugeGroup, Lattice::MpiLayout<Lattice::ReducedStencil> > reduced_matrix_lattice_t;
 
+typedef Lattice::Lattice<int[4], Lattice::MpiLayout<Lattice::ExtendedStencil> > extended_index_lattice_t;
+
 #endif
 #ifndef ENABLE_MPI
 #include "./MPILattice/LocalLayout.h"
@@ -58,6 +60,10 @@ typedef Lattice::Lattice<Update::GaugeVector[4], Lattice::LocalLayout > extended
 typedef Lattice::Lattice<Update::GaugeVector[4], Lattice::LocalLayout > standard_dirac_vector_t;
 typedef Lattice::Lattice<Update::GaugeVector[4], Lattice::LocalLayout > reduced_dirac_vector_t;
 
+typedef Lattice::Lattice<Update::single_GaugeVector[4], Lattice::LocalLayout > single_extended_dirac_vector_t;
+typedef Lattice::Lattice<Update::single_GaugeVector[4], Lattice::LocalLayout > single_standard_dirac_vector_t;
+typedef Lattice::Lattice<Update::single_GaugeVector[4], Lattice::LocalLayout > single_reduced_dirac_vector_t;
+
 typedef Lattice::Lattice<Update::GaugeVector[2], Lattice::LocalLayout > half_spinor_up_vector_t;
 typedef Lattice::Lattice<Update::GaugeVector[2], Lattice::LocalLayout > half_spinor_down_vector_t;
 
@@ -69,6 +75,15 @@ typedef Lattice::Lattice<Update::GaugeGroup, Lattice::LocalLayout > extended_mat
 typedef Lattice::Lattice<Update::GaugeGroup, Lattice::LocalLayout > standard_matrix_lattice_t;
 typedef Lattice::Lattice<Update::GaugeGroup, Lattice::LocalLayout > reduced_matrix_lattice_t;
 
+typedef Lattice::Lattice<int[4], Lattice::LocalLayout > extended_index_lattice_t;
+
+#endif
+
+#ifdef ENABLE_MPI
+typedef Lattice::Lattice<int, Lattice::MpiLayout<Lattice::ReducedStencil> > reduced_index_lattice_t;
+#endif
+#ifndef ENABLE_MPI
+typedef Lattice::Lattice<int, Lattice::LocalLayout > reduced_index_lattice_t;
 #endif
 
 inline void switchAntiperiodicBc(extended_fermion_lattice_t& lattice) {
@@ -159,7 +174,7 @@ public:
 			if (bc == "fermion_antiperiodic") {
 				switchAntiperiodicBc(fermionicLinkConfiguration);
 			}
-			if (bc == "fermion_spatial_antiperiodic") {
+			else if (bc == "fermion_spatial_antiperiodic") {
 				switchSpatialAntiperiodicBc(fermionicLinkConfiguration);
 			}
 			else if (bc == "fermion_periodic") {
@@ -168,6 +183,14 @@ public:
 			else if (bc == "open") {
 				switchOpenBc(fermionicLinkConfiguration);
 				switchOpenBc(gaugeLinkConfiguration);
+			}
+			else {
+				static int count = 0;
+				if (count == 0 && isOutputProcess()) {
+					std::cout << "Warning, boundary conditions not or badly set, using antiperiodic!" << std::endl;
+					count = count + 1;
+				}
+				switchAntiperiodicBc(fermionicLinkConfiguration);
 			}
 		}
 		catch (NotFoundOption& ex) {
@@ -186,7 +209,7 @@ public:
 			if (bc == "fermion_antiperiodic") {
 				switchAntiperiodicBc(lattice);
 			}
-			if (bc == "fermion_spatial_antiperiodic") {
+			else if (bc == "fermion_spatial_antiperiodic") {
 				switchSpatialAntiperiodicBc(lattice);
 			}
 			else if (bc == "fermion_periodic") {
@@ -194,6 +217,14 @@ public:
 			}
 			else if (bc == "open") {
 				switchOpenBc(lattice);
+			}
+			else {
+				static int count = 0;
+				if (count == 0 && isOutputProcess()) {
+					std::cout << "Warning, boundary conditions not or badly set, using antiperiodic!" << std::endl;
+					count = count + 1;
+				}
+				switchAntiperiodicBc(lattice);
 			}
 		}
 		catch (NotFoundOption& ex) {
@@ -244,6 +275,52 @@ inline void reduceAllSum(double& value) {
 #endif
 #ifndef ENABLE_MPI
 inline void reduceAllSum(double&) { }
+#endif
+
+#ifdef ENABLE_MPI
+inline void reduceAllSum(float& value) {
+	float result = value;
+	MPI_Allreduce(&value, &result, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+	value = result;
+}
+#endif
+#ifndef ENABLE_MPI
+inline void reduceAllSum(float&) { }
+#endif
+
+#ifdef ENABLE_MPI
+inline void reduceAllSum(int& value) {
+	int result = value;
+	MPI_Allreduce(&value, &result, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+	value = result;
+}
+#endif
+#ifndef ENABLE_MPI
+inline void reduceAllSum(int&) { }
+#endif
+
+#ifdef ENABLE_MPI
+inline void reduceAllSum(std::complex<double>& value) {
+	std::complex<double> result = value;
+	MPI_Allreduce(&value.real(), &result.real(), 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+	MPI_Allreduce(&value.imag(), &result.imag(), 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+	value = result;
+}
+#endif
+#ifndef ENABLE_MPI
+inline void reduceAllSum(std::complex<double>&) { }
+#endif
+
+#ifdef ENABLE_MPI
+inline void reduceAllSum(std::complex<float>& value) {
+	std::complex<float> result = value;
+	MPI_Allreduce(&value.real(), &result.real(), 1, MPI_FLOAT, MPI_SUM, MPI_COMM_WORLD);
+	MPI_Allreduce(&value.imag(), &result.imag(), 1, MPI_FLOAT, MPI_SUM, MPI_COMM_WORLD);
+	value = result;
+}
+#endif
+#ifndef ENABLE_MPI
+inline void reduceAllSum(std::complex<float>&) { }
 #endif
 
 #ifdef ENABLE_MPI

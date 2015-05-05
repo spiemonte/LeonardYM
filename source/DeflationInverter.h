@@ -8,13 +8,24 @@
 #ifndef DEFLATIONINVERTER_H_
 #define DEFLATIONINVERTER_H_
 #include "./dirac_operators/DiracOperator.h"
-#include "BiConjugateGradient.h"
+#include "ConjugateGradient.h"
 
 namespace Update {
 
+#ifdef ENABLE_MPI
+typedef Lattice::Lattice<short int, Lattice::MpiLayout<Lattice::ReducedStencil> > reduced_index_lattice_t;
+#endif
+#ifndef ENABLE_MPI
+typedef Lattice::Lattice<short int, Lattice::LocalLayout > reduced_index_lattice_t;
+#endif
+
+class LeftProjector;
+class RightProjector;
+class InverseLittleOperator;
+
 class DeflationInverter {
 public:
-	DeflationInverter();
+	DeflationInverter(int _recursion = 1);
 	DeflationInverter(const DeflationInverter& snd);
 	~DeflationInverter();
 
@@ -28,20 +39,38 @@ public:
 	void setBasisDimension(int _basisDimension);
 	int getBasisDimension() const;
 
-	void setBlockDivision(int _blockDivision);
-	int getBlockDivision() const;
+	void setBlockSize(int _blockSize);
+	int getBlockVolume() const;
+	void setBlockSizeX(int _blockSizeX);
+	void setBlockSizeY(int _blockSizeY);
+	void setBlockSizeZ(int _blockSizeZ);
+	void setBlockSizeT(int _blockSizeT);
+
+	void setRecursion(int _recursion);
+
+	void generateBasis(DiracOperator* dirac, LeftProjector* upperLeftProjector = 0);
 private:
 	reduced_dirac_vector_t* localBasis;
-	BiConjugateGradient* biConjugateGradient;
+	ConjugateGradient* conjugateGradient;
+	DeflationInverter* subDeflationInverter;
+
+	LeftProjector* leftProjector;
+	RightProjector* rightProjector;
+	InverseLittleOperator* inverseLittleOperator;
+	
 
 	unsigned int lastStep;
 	int basisDimension;
-	int blockDivision;
-	int totalNumberOfVectors;
-	int totalBlocks;
+	int totalNumberOfVectors;//TODO
+	int totalNumberOfBlocks;
+	int blockSizeX;
+	int blockSizeY;
+	int blockSizeZ;
+	int blockSizeT;
+	int recursion;
 	double precision;
 
-	void generateBasis(DiracOperator* dirac);
+	reduced_index_lattice_t blockIndex;
 };
 
 } /* namespace Update */

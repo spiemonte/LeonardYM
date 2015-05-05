@@ -14,8 +14,8 @@ namespace Update {
 
 class BlockDiracWilsonOperator : public BlockDiracOperator {
 public:
-	BlockDiracWilsonOperator();
-	BlockDiracWilsonOperator(const extended_fermion_lattice_t& _lattice, real_t _kappa = 0.);
+	BlockDiracWilsonOperator(Color _color = Black);
+	BlockDiracWilsonOperator(const extended_fermion_lattice_t& _lattice, real_t _kappa = 0., Color _color = Black);
 	~BlockDiracWilsonOperator();
 
 	virtual void multiply(reduced_dirac_vector_t& output, const reduced_dirac_vector_t& input);
@@ -24,8 +24,9 @@ public:
 
 	virtual FermionForce* getForce() const;
 
-	virtual void setLattice(const extended_fermion_lattice_t& _lattice);
-
+	//virtual void setLattice(const extended_fermion_lattice_t& _lattice);
+private:
+	Color color;
 };
 
 } /* namespace Update */

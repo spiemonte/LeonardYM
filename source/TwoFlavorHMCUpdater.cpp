@@ -21,9 +21,9 @@
 
 namespace Update {
 
-TwoFlavorHMCUpdater::TwoFlavorHMCUpdater() : action(0), gaugeAction(0), fermionAction(0), diracOperator(0), solver(0) { }
+TwoFlavorHMCUpdater::TwoFlavorHMCUpdater() : LatticeSweep(), action(0), gaugeAction(0), fermionAction(0), diracOperator(0), solver(0) { }
 
-TwoFlavorHMCUpdater::TwoFlavorHMCUpdater(const TwoFlavorHMCUpdater& toCopy) : action(0), gaugeAction(0), fermionAction(0), diracOperator(0), solver(0) { }
+TwoFlavorHMCUpdater::TwoFlavorHMCUpdater(const TwoFlavorHMCUpdater& toCopy) : LatticeSweep(toCopy), action(0), gaugeAction(0), fermionAction(0), diracOperator(0), solver(0) { }
 
 TwoFlavorHMCUpdater::~TwoFlavorHMCUpdater() {
 	delete action;

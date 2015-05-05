@@ -26,25 +26,18 @@ void GluinoGlue::execute(environment_t& environment) {
 		diracOperator = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations);
 	}
 
-	extended_fermion_lattice_t lattice;
+	extended_gauge_lattice_t lattice;
 
 	try {
 		unsigned int numberLevelSmearing = environment.configurations.get<unsigned int>("level_stout_smearing_gluinoglue");
 		double smearingRho = environment.configurations.get<double>("rho_stout_smearing");
 		StoutSmearing stoutSmearing;
-#ifdef ADJOINT
-		extended_gauge_lattice_t smearedConfiguration;
-		stoutSmearing.spatialSmearing(environment.gaugeLinkConfiguration, smearedConfiguration, numberLevelSmearing, smearingRho);
-		ConvertLattice<extended_fermion_lattice_t,extended_gauge_lattice_t>::convert(lattice, smearedConfiguration);//TODO
-#endif
-#ifndef ADJOINT
 		stoutSmearing.spatialSmearing(environment.gaugeLinkConfiguration, lattice, numberLevelSmearing, smearingRho);
-#endif
-		environment.setFermionBc(lattice);
 	} catch (NotFoundOption& ex) {
-		lattice = environment.getFermionLattice();
 		if (isOutputProcess()) std::cout << "GluinoGlue::No smearing options found, proceeding without!" << std::endl;
 	}
+
+	extended_fermion_lattice_t result = environment.getFermionLattice();
 
 	try {
 		unsigned int t = environment.configurations.get<unsigned int>("t_source_origin");
@@ -53,22 +46,21 @@ void GluinoGlue::execute(environment_t& environment) {
 		if (t != 0) {
 			for (unsigned int n = 0; n < t; ++n) {
 				//We do a swap
-				for(int site = 0; site < (lattice.localsize); ++site){
-					for (unsigned int mu = 0; mu < 4; ++mu) swaplinkconfig[site][mu] = lattice[site][mu];
+				for(int site = 0; site < (result.localsize); ++site){
+					for (unsigned int mu = 0; mu < 4; ++mu) swaplinkconfig[site][mu] = result[site][mu];
 				}
 				swaplinkconfig.updateHalo();
 				//We wrap
-				for(int site = 0; site < (lattice.localsize); ++site){
-					for (unsigned int mu = 0; mu < 4; ++mu) lattice[site][mu] = swaplinkconfig[LT::sup(site,3)][mu];
+				for(int site = 0; site < (result.localsize); ++site){
+					for (unsigned int mu = 0; mu < 4; ++mu) result[site][mu] = swaplinkconfig[LT::sup(site,3)][mu];
 				}
-				lattice.updateHalo();
+				result.updateHalo();
 			}
 		}
 	} catch (NotFoundOption& ex) {
-
 	}
 
-	diracOperator->setLattice(lattice);
+	diracOperator->setLattice(result);
 	diracOperator->setGamma5(false);
 
 	if (biConjugateGradient == 0) biConjugateGradient = new BiConjugateGradient();
@@ -92,14 +84,14 @@ void GluinoGlue::execute(environment_t& environment) {
 						if (Layout::globalIndexT(site) == 0) {
 							for (unsigned int i = 0; i < 3; ++i) {
 								for (unsigned int j = 0; j < 3; ++j) {
-									if (Sigma::sigma(i,j,alpha,mu) != 0.) eta[site][mu][c] += Sigma::sigma(i,j,alpha,mu)*trace(cloverPlaquette(environment.gaugeLinkConfiguration,site,i,j)*tau.get(c));
+									if (Sigma::sigma(i,j,alpha,mu) != static_cast<real_t>(0.)) eta[site][mu][c] += Sigma::sigma(i,j,alpha,mu)*trace(cloverPlaquette(lattice,site,i,j)*tau.get(c));
 								}
 							}
 						}
 						if (Layout::globalIndexT(site) == t) {
 							for (unsigned int i = 0; i < 3; ++i) {
 								for (unsigned int j = 0; j < 3; ++j) {
-									if (Sigma::sigma(i,j,alpha,mu) != 0.) source[site][mu][c] += Sigma::sigma(i,j,alpha,mu)*trace(cloverPlaquette(environment.gaugeLinkConfiguration,site,i,j)*tau.get(c));
+									if (Sigma::sigma(i,j,alpha,mu) != static_cast<real_t>(0.)) source[site][mu][c] += Sigma::sigma(i,j,alpha,mu)*trace(cloverPlaquette(lattice,site,i,j)*tau.get(c));
 								}
 							}
 						}

@@ -273,9 +273,16 @@ void MultiStepNFlavorQCDUpdater::execute(environment_t& environment) {
 		forces.push_back(fermionAction[1]);
 		forces.push_back(fermionAction[0]);
 		forces.push_back(gaugeAction);
+	} else if (numbers_steps.size() == 4) {
+		int numberLevels = environment.configurations.get< unsigned int >("number_force_levels");
+		if (isOutputProcess() && numberLevels != 3) std::cout << "MultiStepNFlavorHMCUpdater::Warning, with only four time integration only the first two levels of the force is used!" << std::endl;
+		forces.push_back(fermionAction[2]);
+		forces.push_back(fermionAction[1]);
+		forces.push_back(fermionAction[0]);
+		forces.push_back(gaugeAction);
 	}
 	else {
-		if (isOutputProcess()) std::cout << "MultiStepNFlavorHMCUpdater::Warning, NFlavor does not support more than three time integrations!" << std::endl;
+		if (isOutputProcess()) std::cout << "MultiStepNFlavorHMCUpdater::Warning, NFlavor does not support more than four time integrations!" << std::endl;
 		numbers_steps.resize(1);
 		forces.push_back(nFlavorQCDAction);
 	}

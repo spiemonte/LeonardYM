@@ -17,7 +17,7 @@ public:
 	ConjugateGradient();
 	~ConjugateGradient();
 
-	bool solvev(DiracOperator* dirac, const extended_dirac_vector_t& source, extended_dirac_vector_t& solution);
+	bool solve(DiracOperator* dirac, const reduced_dirac_vector_t& source, reduced_dirac_vector_t& solution, reduced_dirac_vector_t const* initial_guess = 0);
 
 	void setPrecision(double _epsilon);
 	double getPrecision() const;

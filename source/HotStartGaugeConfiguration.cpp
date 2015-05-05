@@ -7,6 +7,7 @@
 
 #include "HotStartGaugeConfiguration.h"
 #include "MatrixTypedef.h"
+#include "ReUnit.h"
 #ifndef PI
 #define PI 3.14159265358979323846264338327950288419
 #endif
@@ -28,6 +29,7 @@ void HotStartGaugeConfiguration::execute(environment_t& environment) {
 	for (int site = 0; site < environment.gaugeLinkConfiguration.localsize; ++site) {
 		for (unsigned int mu = 0; mu < 4; ++mu) {
 #if NUMCOLORS > 2
+#ifdef EIGEN
 			GaugeGroup random;
 			//Fill the matrix with element from gaussian distribution (mu = 0, sigma = 1)
 			for (int i = 0; i < numberColors; ++i) {
@@ -44,6 +46,16 @@ void HotStartGaugeConfiguration::execute(environment_t& environment) {
 				environment.gaugeLinkConfiguration[site][mu].at(0,i) *= determinant;
 			}
 #endif
+#ifdef ARMADILLO
+			GaugeGroup random;
+			//Fill the matrix with element from gaussian distribution (mu = 0, sigma = 1)
+			for (int i = 0; i < numberColors; ++i) {
+				for (int j = 0; j < numberColors; ++j) {
+					random(i,j) = std::complex<real_t>(randomNormal(),randomNormal()); //call the operator()
+				}
+			}
+#endif
+#endif
 #if NUMCOLORS == 2
 			real_t chi12 = (2*PI*randomUniform());
 			real_t psi12 = (2*PI*randomUniform());
@@ -58,6 +70,8 @@ void HotStartGaugeConfiguration::execute(environment_t& environment) {
 	environment.gaugeLinkConfiguration.updateHalo();
 	//Synchronize the eventual adjoint lattice
 	environment.synchronize();
+	ReUnit reunit;
+	reunit.execute(environment);
 }
 
 } /* namespace Update */

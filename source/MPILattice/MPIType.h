@@ -7,11 +7,24 @@
 
 template<typename T> class MpiType { };
 
-template<> class MpiType<int> {
+template<> class MpiType<short int> {
 	public:
-		static const int size = 4;
+		static const int size = sizeof(short int);
 		static MPI_Datatype type;
 };
+
+template<> class MpiType<int> {
+	public:
+		static const int size = sizeof(int);
+		static MPI_Datatype type;
+};
+
+template<> class MpiType<int[4]> {
+	public:
+		static const int size = sizeof(int);
+		static MPI_Datatype type;
+};
+
 
 template<> class MpiType<double> {
 	public:
@@ -58,6 +71,18 @@ template<> class MpiType<Update::FundamentalVector[4]> {
 template<> class MpiType<Update::AdjointVector[4]> {
 	public:
 		static const int size = 8;
+		static MPI_Datatype type;
+};
+
+template<> class MpiType<Update::single_FundamentalVector[4]> {
+	public:
+		static const int size = sizeof(float);
+		static MPI_Datatype type;
+};
+
+template<> class MpiType<Update::single_AdjointVector[4]> {
+	public:
+		static const int size = sizeof(float);
 		static MPI_Datatype type;
 };
 

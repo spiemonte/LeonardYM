@@ -22,6 +22,16 @@ public:
 	static std::complex<real_t> g5idmg(unsigned int mu, unsigned int alpha, unsigned int beta) {
 		return gamma5_id_minus_gamma[mu][alpha][beta];
 	}
+	
+	//This function returns the value of (\gamma_5\gamma_\mu)_{\alpha,\beta}
+	static std::complex<real_t> gamma5_gamma(unsigned int mu, unsigned int alpha, unsigned int beta) {
+		return gamma5gammamu[mu][alpha][beta];
+	}
+	
+	//This function returns the value of (\gamma_\mu)_{\alpha,\beta}
+	static std::complex<real_t> gamma(unsigned int mu, unsigned int alpha, unsigned int beta) {
+		return gammamu[mu][alpha][beta];
+	}
 
 	static std::complex<real_t> gamma5(unsigned int alpha, unsigned int beta) {
 		return _gamma5[alpha][beta];
@@ -30,6 +40,8 @@ private:
 	const static std::complex<real_t> gamma5_id_plus_gamma[4][4][4];
 	const static std::complex<real_t> gamma5_id_minus_gamma[4][4][4];
 	const static std::complex<real_t> _gamma5[4][4];
+	const static std::complex<real_t> gamma5gammamu[4][4][4];
+	const static std::complex<real_t> gammamu[4][4][4];
 };
 
 class Sigma {

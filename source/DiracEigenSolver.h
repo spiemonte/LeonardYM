@@ -13,6 +13,8 @@
 
 namespace Update {
 
+enum EigevaluesMode {LargestReal = 0, SmallestReal, LargestImaginary, SmallestImaginary};
+
 class DiracEigenSolver {
 	double epsilon;
 	unsigned int extra_steps;
@@ -26,8 +28,8 @@ public:
 	void setExtraSteps(unsigned int _extra_steps);
 	unsigned int getExtraSteps() const;
 
-	void maximumEigenvalues(DiracOperator* diracOperator, std::vector< std::complex<real_t> >& eigenvalues, std::vector<reduced_dirac_vector_t>& eigenvectors, unsigned int n);
-	void minimumEigenvalues(DiracOperator* diracOperator, std::vector< std::complex<real_t> >& eigenvalues, std::vector<reduced_dirac_vector_t>& eigenvectors, Polynomial& map, unsigned int n, int nmode);
+	void maximumEigenvalues(DiracOperator* diracOperator, std::vector< std::complex<real_t> >& eigenvalues, std::vector<reduced_dirac_vector_t>& eigenvectors, unsigned int n, EigevaluesMode mode = LargestReal);
+	void minimumEigenvalues(DiracOperator* diracOperator, std::vector< std::complex<real_t> >& eigenvalues, std::vector<reduced_dirac_vector_t>& eigenvectors/*, Polynomial& map*/, unsigned int n/*, int nmode*/);
 
 	BiConjugateGradient* biConjugateGradient;
 };

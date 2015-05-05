@@ -21,6 +21,8 @@ public:
 
 	void evaluate(DiracOperator* diracOperator, extended_dirac_vector_t& output, const extended_dirac_vector_t& input);
 
+	void evaluate(DiracOperator* diracOperator, extended_dirac_vector_t& output, const extended_dirac_vector_t& input, DiracOperator* preconditioner);
+
 	complex evaluate(const complex& x) const;
 
 	void setScaling(const complex& _scaling);

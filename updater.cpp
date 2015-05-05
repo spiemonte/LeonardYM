@@ -15,6 +15,7 @@
 #include "./source/MPILattice/StandardStencil.h"
 #include "./source/MPILattice/ExtendedStencil.h"
 #include "./source/MPILattice/LocalLayout.h"
+#include "source/LieGenerators.h"
 #include "./source/ToString.h"
 #include <iostream>
 
@@ -23,7 +24,9 @@ boost::mt19937 Update::RandomSeed::rng;
 boost::uniform_int<> Update::RandomSeed::dist = boost::uniform_int<>(-1000000,1000000);//TODO
 
 #ifdef ENABLE_MPI
+MPI_Datatype MpiType<short int>::type = MPI_SHORT;
 MPI_Datatype MpiType<int>::type = MPI_INT;
+MPI_Datatype MpiType<int[4]>::type = MPI_INT;
 MPI_Datatype MpiType<double>::type = MPI_DOUBLE;
 MPI_Datatype MpiType<double[4]>::type = MPI_DOUBLE;
 MPI_Datatype MpiType<Update::FundamentalGroup[4]>::type = MPI_DOUBLE;
@@ -40,6 +43,11 @@ MPI_Datatype MpiType<Update::AdjointGroup>::type = MPI_DOUBLE;
 namespace po = boost::program_options;
 
 int main(int ac, char* av[]) {
+	/*Update::LieGenerator<Update::GaugeGroup> lieGenerator;
+	Update::LieGenerator<Update::AdjointGroup> adjointLieGenerator;
+	for (unsigned int t = 0; t < Update::numberColors*Update::numberColors - 1; ++t) std::cout << lieGenerator.get(t) << std::endl << std::endl;
+	std::cout << std::endl << std::endl;
+	for (unsigned int t = 0; t < Update::numberColors*Update::numberColors - 1; ++t) std::cout << adjointLieGenerator.get(t) << std::endl << std::endl;*/
 	/*Update::AdjointGroup* test = new Update::AdjointGroup[3];
 	test[0] = Update::AdjointGroup::Identity();
 	set_to_zero(test[1]);
@@ -103,6 +111,8 @@ int main(int ac, char* av[]) {
 		("preconditioner_recursions", po::value<unsigned int>(), "Number of preconditioner recursions used for evaluating the rational approximations")
 		("preconditioner_precision", po::value<double>(), "The precision for the inversion of the preconditioner used for evaluating the rational approximations")
 		("boundary_conditions", po::value<std::string>(), "Boundary conditions to use: periodic (fermions), antiperiodic (fermions), spatialantiperiodic (fermion), open")
+		("number_extra_vectors_eigensolver", po::value<unsigned int>(), "Number of extra vectors for the Arnoldi algorithm, increase this number to increase precision")
+		("number_eigenvalues", po::value<unsigned int>(), "Number of eigenvalues ofthe dirac wilson operator to be computed")
 
 /*	    ("heatbath_rational_fraction_1", po::value<std::string>(), "the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
 	    ("metropolis_rational_fraction_1", po::value<std::string>(), "the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
@@ -243,6 +253,8 @@ int main(int ac, char* av[]) {
 		("load_layout", "If the layout should be loaded from the disk")
 		("print_report_layout", "If the full report of the layout should be printed")
 		("format_name", po::value<std::string>(), "leonard_format/muenster_format for reading and writing configurations")
+		("input_format_name", po::value<std::string>(), "leonard_format/muenster_format only for reading configurations")
+		("output_format_name", po::value<std::string>(), "leonard_format/muenster_format only for writing configurations")
 		("correction_step_breakup_level", po::value<unsigned int>(), "The level of breakup \"lb\" for the correction factors")
 		("correction_approximation_direct_1", po::value<std::string>(), "Approximation of x^(nf/(2lb)) used for the correction step (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})")
 		("correction_approximation_inverse_1", po::value<std::string>(), "Approximation of x^(-nf/(2lb)) used for the correction step (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})")

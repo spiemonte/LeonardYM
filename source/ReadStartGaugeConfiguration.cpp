@@ -26,7 +26,14 @@ void ReadStartGaugeConfiguration::execute(environment_t& environment) {
 }
 
 void ReadStartGaugeConfiguration::readConfiguration(environment_t& environment, int numberfile) {
-	std::string format_name = environment.configurations.get<std::string>("format_name");
+	std::string format_name;
+	try {
+		format_name = environment.configurations.get<std::string>("input_format_name");
+	}
+	catch (NotFoundOption& ex) {
+		format_name = environment.configurations.get<std::string>("format_name");
+	}
+	
 	typedef extended_gauge_lattice_t::Layout LT;
 	typedef extended_gauge_lattice_t::Layout Layout;
 	double read_plaquette;
@@ -34,6 +41,8 @@ void ReadStartGaugeConfiguration::readConfiguration(environment_t& environment, 
 	if (format_name == "leonard_format") {
 		std::string directory = environment.configurations.get<std::string>("input_directory_configurations");
 		std::string input_name = environment.configurations.get<std::string>("input_name");
+		
+		if (isOutputProcess()) std::cout << "ReadStartGaugeConfiguration::Reading configuration from file " << directory << input_name << "_" << toString(numberfile) << std::endl;
 
 		int read_glob_x, read_glob_y, read_glob_z, read_glob_t;
 		int read_pgrid_x, read_pgrid_y, read_pgrid_z, read_pgrid_t;
@@ -48,6 +57,7 @@ void ReadStartGaugeConfiguration::readConfiguration(environment_t& environment, 
 		descriptor >> numberProcessors;
 		descriptor >> read_localsize;
 		descriptor >> read_plaquette;
+		descriptor.close();
 
 		if (read_glob_x != LT::glob_x || read_glob_y != LT::glob_y || read_glob_z != LT::glob_z || read_glob_t != LT::glob_t) {
 			std::cout << "Different lattice size in reading configuration!" << std::endl;
@@ -81,8 +91,11 @@ void ReadStartGaugeConfiguration::readConfiguration(environment_t& environment, 
 					for (unsigned int mu = 0; mu < 4; ++mu) {
 						for (int i = 0; i < numberColors; ++i) {
 							for (int j = 0; j < numberColors; ++j) {
-								xdr_double(&xin,&environment.gaugeLinkConfiguration[site][mu].at(i,j).real());
-								xdr_double(&xin,&environment.gaugeLinkConfiguration[site][mu].at(i,j).imag());
+								double re;
+								double im;
+								xdr_double(&xin,&re);
+								xdr_double(&xin,&im);
+								environment.gaugeLinkConfiguration[site][mu].at(i,j) = std::complex<real_t>(re,im);
 							}
 						}
 					}
@@ -186,6 +199,7 @@ void ReadStartGaugeConfiguration::readConfiguration(environment_t& environment, 
 			}
 			else {
 				std::cout << "ReadStartGaugeConfiguration::Finished reading " << red / 4 << " gauge fields" << std::endl;
+				std::cout << "ReadStartGaugeConfiguration::From file " << filename << std::endl;
 			}
 
 			// - read Plaquette value, correction factor and smallest eigenvalue, beta

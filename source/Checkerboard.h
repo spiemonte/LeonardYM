@@ -22,28 +22,30 @@ class Checkerboard {
 	Checkerboard();
 	void statistics();
 	
-	unsigned int (*checkerboard)[4];
+	extended_index_lattice_t checkerboard;
 
 	std::vector<Site>* siteColorList;
 
 	static Checkerboard* ptr;
-	unsigned int numberLoops;
+	int numberLoops;
 	int* numberElementLoops;
 public:
 	~Checkerboard();
 
 	static Checkerboard* getInstance();
 	
-	unsigned int getNumberLoops() const;
-	unsigned int getColor(int site, int mu) const;
+	int getNumberLoops() const;
+	int getColor(int site, int mu) const;
 
 	std::vector<Site>* getSiteColorList() const;
 
 private:
-	void addValue(std::list<unsigned int>& l, unsigned int value) const;
-	unsigned int getValue(std::list<unsigned int>& l) const;
-	void updateEqual(std::list<unsigned int>& l1, std::list<unsigned int>& l2, unsigned int value1, unsigned int& value2);
-	void updateDifferent(std::list<unsigned int>& l1, std::list<unsigned int>& l2, unsigned int value1, unsigned int value2);
+	void addValue(std::list<int>& l, int value) const;
+	int getValue(std::list<int>& l) const;
+	void updateEqual(std::list<int>& l1, std::list<int>& l2, int& value1, int& value2);
+	void updateDifferent(std::list<int>& l1, std::list<int>& l2, int value1, int value2);
+
+	int checkCorrectness() const;
 };
 
 } /* namespace Update */

@@ -24,14 +24,21 @@ class BiConjugateGradient {
 	reduced_dirac_vector_t nu;
 	reduced_dirac_vector_t s;
 	reduced_dirac_vector_t t;
+	
+	//Vectors needed for preconditioning
+	reduced_dirac_vector_t p_tilde;
+	reduced_dirac_vector_t s_tilde;
 public:
 	BiConjugateGradient();
 	~BiConjugateGradient();
 
-	bool solve(DiracOperator* dirac, const reduced_dirac_vector_t& source, reduced_dirac_vector_t& solution);
+	bool solve(DiracOperator* dirac, const reduced_dirac_vector_t& source, reduced_dirac_vector_t& solution, DiracOperator* preconditioner, reduced_dirac_vector_t const* initial_guess = 0);
+	bool solve(DiracOperator* dirac, const reduced_dirac_vector_t& source, reduced_dirac_vector_t& solution, reduced_dirac_vector_t const* initial_guess = 0);
+	bool solve(DiracOperator* dirac, const reduced_dirac_vector_t& source, reduced_dirac_vector_t& solution, const std::complex<real_t>& alpha, reduced_dirac_vector_t const* initial_guess = 0);
+	bool solve(DiracOperator* dirac, const reduced_dirac_vector_t& source, reduced_dirac_vector_t& solution, int l, reduced_dirac_vector_t const* initial_guess = 0);
 
 #ifdef ENABLE_MPI
-	bool solve(DiracOperator* dirac, const extended_dirac_vector_t& source, extended_dirac_vector_t& solution);
+	bool solve(DiracOperator* dirac, const extended_dirac_vector_t& source, extended_dirac_vector_t& solution, extended_dirac_vector_t const* initial_guess = 0);
 #endif
 
 	void setPrecision(double _epsilon);

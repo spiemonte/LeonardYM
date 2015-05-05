@@ -10,39 +10,9 @@
 #include "GlobalOutput.h"
 #include "AlgebraUtils.h"
 #include "Polynomial.h"
-#ifdef HAVE_ARPACK
-#include "../math/diracvect/arnoldidiracoperator.h"
-#include "../math/diracvect/eigenspacediracoperator.h"
-#include "../math/linalg/bindings/arpack/basicarnoldi.h"
-#endif
+#include "ToString.h"
 
 namespace Update {
-
-#ifdef HAVE_ARPACK
-class DiracOperatorWrapper : public ::Math::DiracVect::VectorOperator< Update::dirac_vector_t > {
-public:
-	DiracOperatorWrapper(DiracOperator* _dirac): dirac(_dirac) { }
-
-	virtual void multiply(Vector& In, Vector& Out) {
-		dirac->multiply(Out,In);
-	}
-
-	virtual void multiplyAdd(dirac_vector_t& In, dirac_vector_t& Out, const dirac_vector_t& Add, const VectorElement& fakt) {
-		dirac->multiplyAdd(Out,In,Add,fakt);
-	}
-
-	virtual size_t offset() const {
-		return 0;
-	}
-
-	virtual size_t vectorSize() const {
-		return dirac_vector_t::completesize;
-	}
-
-private:
-	DiracOperator* dirac;
-};
-#endif
 
 Eigenvalues::Eigenvalues() : LatticeSweep(), diracEigenSolver(0) { }
 
@@ -53,29 +23,30 @@ Eigenvalues::~Eigenvalues() {
 }
 
 void Eigenvalues::execute(environment_t& environment) {
+	typedef reduced_dirac_vector_t::Layout Layout;
 	//Take the Dirac Operator
-	DiracOperator* diracOperator = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 2, environment.configurations);
-	diracOperator->setLattice(environment.getFermionLattice());
+	DiracOperator* squareDiracOperator = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 2, environment.configurations);
+	squareDiracOperator->setLattice(environment.getFermionLattice());
 
 	if (diracEigenSolver == 0)  diracEigenSolver = new DiracEigenSolver();
 	diracEigenSolver->setPrecision(environment.configurations.get<double>("generic_inverter_precision"));
-	diracEigenSolver->setExtraSteps(50);
+	diracEigenSolver->setExtraSteps(environment.configurations.get<unsigned int>("number_extra_vectors_eigensolver"));
 
 	std::vector< std::complex<real_t> > computed_eigenvalues;
 	std::vector< reduced_dirac_vector_t > computed_eigenvectors;
 
-	diracEigenSolver->maximumEigenvalues(diracOperator, computed_eigenvalues, computed_eigenvectors, 10);
+	diracEigenSolver->maximumEigenvalues(squareDiracOperator, computed_eigenvalues, computed_eigenvectors, environment.configurations.get<unsigned int>("number_eigenvalues"), LargestReal);
 	if (isOutputProcess()) std::cout << "Eigenvalues::Maximal Eigenvalue of square hermitian: " << computed_eigenvalues.front() << std::endl;
 
 	if (isOutputProcess()) {
 		GlobalOutput* output = GlobalOutput::getInstance();
-		output->push("maximal_eigenvalues");
+		output->push("maximal_eigenvalues_square_dirac_operator");
 
-		for (int i = 0; i < computed_eigenvalues.size(); ++i) {
-			output->write("maximal_eigenvalues", computed_eigenvalues[i]);
+		for (unsigned int i = 0; i < computed_eigenvalues.size(); ++i) {
+			output->write("maximal_eigenvalues_square_dirac_operator", real(computed_eigenvalues[i]));
 		}
 
-		output->pop("maximal_eigenvalues");
+		output->pop("maximal_eigenvalues_square_dirac_operator");
 	}
 /*
 	std::vector< std::complex<real_t> > coeff = environment.configurations.get< std::vector< std::complex<real_t> > >("eigenvalues_map");
@@ -97,70 +68,51 @@ void Eigenvalues::execute(environment_t& environment) {
 		output->pop("minimal_eigenvalues");
 	}
 	*/
-	/*std::vector< std::complex<real_t> > min_eigenvalues = diracEigenSolver->minimumEigenvalues(diracOperator, 100);
-	if (isOutputProcess()) std::cout << "Minimal Eigenvalue of square hermitian: " << min_eigenvalues.front() << std::endl;*/
-
-	/*if (isOutputProcess()) {
-		GlobalOutput* output = GlobalOutput::getInstance();
-		output->push("minimal_eigenvalues");
-
-		std::vector< std::complex<real_t> >::iterator it;
-
-		for (it = min_eigenvalues.begin(); it != min_eigenvalues.end(); ++it) {
-			output->write("minimal_eigenvalues", *it);
-		}
-
-		output->pop("minimal_eigenvalues");
-	}*/
-
-#ifdef HAVE_ARPACK
-	Math::LinAlg::Bind::Arpack::ArnoldiParameter< real_t > arnoldiparameters; // take the default Arnoldi paramters
-
-	arnoldiparameters.eigenvalueRegion = Math::LinAlg::Bind::Arpack::SR;
-	//SR : smallest real
-	//LM : largest magnitude
-	//SM : smallest magnitude
-	arnoldiparameters.numberEigenvalues = 20;
-	arnoldiparameters.numberDummyEigenvalues = 10;
-	arnoldiparameters.tolerance = 0.000002; // to see the agreement of the methods you have to use a high precision.
-
-	Math::LinAlg::Bind::Arpack::BasicArnoldi<std::complex<real_t>,std::complex<real_t> > barno(arnoldiparameters); // Basic arnoldi method
-
-	DiracOperatorWrapper diracop(diracOperator);
-
-	/*dirac_vector_t test1, test2, test3, test4;
-	AlgebraUtils::generateRandomVector(test1);
-	diracop.multiply(test1,test2);
-	diracOperator->multiply(test3,test1);*/
-
-	//std::cout << "Test: " << AlgebraUtils::differenceNorm(test2,test3) << std::endl;
-
-	Math::DiracVect::ArnoldiDiracInterface< dirac_vector_t > arnoldioperator(&diracop,false);
-
-	//arnoldioperator.multiply(reinterpret_cast<std::complex<real_t>*>(test1.getRaw()),reinterpret_cast<std::complex<real_t>*>(test4.getRaw()));
-
-	//std::cout << "Test: " << AlgebraUtils::differenceNorm(test2,test4) << std::endl;
-
-	Math::DiracVect::VectorEigenspace< dirac_vector_t > eigen1(arnoldiparameters.numberEigenvalues);
-
-	barno(arnoldioperator, eigen1); // determine the smallest Eigenvalues of the Hermitian Dirac operator
-
-	if (isOutputProcess()) std::cout << "Minimal eigenvalue: " << eigen1.getEigenvalue(0) << std::endl;
+	//std::vector< std::complex<real_t> > computed_eigenvalues;
+	//std::vector< reduced_dirac_vector_t > computed_eigenvectors;
+	diracEigenSolver->setExtraSteps(30);//TODO TODO TODO
+	diracEigenSolver->minimumEigenvalues(squareDiracOperator, computed_eigenvalues, computed_eigenvectors, environment.configurations.get<unsigned int>("number_eigenvalues"));
+	if (isOutputProcess()) std::cout << "Minimal Eigenvalue of square hermitian: " << computed_eigenvalues.front() << std::endl;
 
 	if (isOutputProcess()) {
 		GlobalOutput* output = GlobalOutput::getInstance();
-		output->push("minimal_eigenvalues");
+		output->push("minimal_eigenvalues_square_dirac_operator");
 
-		for (int i = 0; i < 20; ++i) {
-			output->write("minimal_eigenvalues", eigen1.getEigenvalue(i));
+		std::vector< std::complex<real_t> >::iterator it;
+
+		for (it = computed_eigenvalues.begin(); it != computed_eigenvalues.end(); ++it) {
+			output->write("minimal_eigenvalues_square_dirac_operator", real(*it));
 		}
 
-		output->pop("minimal_eigenvalues");
+		output->pop("minimal_eigenvalues_square_dirac_operator");
 	}
 
-#endif
+	DiracOperator* diracOperator = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations);
+	diracOperator->setLattice(environment.getFermionLattice());
+	
+	if (isOutputProcess()) {
+		GlobalOutput* output = GlobalOutput::getInstance();
+		output->push("minimal_eigenvalues_dirac_operator");
+	}
+
+	reduced_dirac_vector_t tmp;
+	for (unsigned int i = 0; i < computed_eigenvectors.size(); ++i) {
+		diracOperator->multiply(tmp, computed_eigenvectors[i]);
+		std::complex<real_t> eigenvalue = static_cast< std::complex<real_t> >(AlgebraUtils::dot(computed_eigenvectors[i],tmp));
+
+		if (isOutputProcess()) {
+			GlobalOutput* output = GlobalOutput::getInstance();
+			output->write("minimal_eigenvalues_dirac_operator", real(eigenvalue));
+		}
+	}
+
+	if (isOutputProcess()) {
+		GlobalOutput* output = GlobalOutput::getInstance();
+		output->pop("minimal_eigenvalues_dirac_operator");
+	}
 
 	delete diracOperator;
+	delete squareDiracOperator;
 
 }
 

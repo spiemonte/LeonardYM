@@ -55,6 +55,10 @@ void WilsonFlow::execute(environment_t& environment) {
 		this->measureEnergy(initialLattice);
 		if (isOutputProcess()) std::cout << "WilsonFlow::t*t*Energy at t " << t << ": " << t*t*gaugeEnergy << std::endl;
 		if (isOutputProcess()) std::cout << "WilsonFlow::Topological charge at t " << t << ": " << topologicalCharge << std::endl;
+		if (fabs(t - Layout::glob_x*Layout::glob_x/(8.*9.)) < step/2.) {
+			this->threeDimensionalEnergyTopologicalPlot(initialLattice,environment);
+		}
+		
 		this->integrate(initialLattice, finalLattice, action, step, integration_intervals);
 		initialLattice = finalLattice;
 
@@ -178,6 +182,28 @@ GaugeGroup WilsonFlow::exponential(const GaugeGroup& link, const GaugeGroup& for
 	return updatenew*link;
 }
 
+std::pair<long_real_t,long_real_t> WilsonFlow::measureEnergyAndTopologicalCharge(const extended_gauge_lattice_t& _lattice, int site) {
+	typedef extended_fermion_lattice_t LT;
+	GaugeGroup tmpF[6];
+	long_real_t site_energy = 0.;
+	long_real_t site_topological = 0.;
+	tmpF[0] = htrans(_lattice[LT::sdn(site, 0)][0])*htrans(_lattice[LT::sdn(LT::sdn(site, 0), 1)][1])*(_lattice[LT::sdn(LT::sdn(site, 0), 1)][0])*(_lattice[LT::sdn(site, 1)][1]) + htrans(_lattice[LT::sdn(site, 1)][1])*(_lattice[LT::sdn(site, 1)][0])*(_lattice[LT::sup(LT::sdn(site, 1), 0)][1])*htrans(_lattice[site][0]) + (_lattice[site][0])*(_lattice[LT::sup(site, 0)][1])*htrans(_lattice[LT::sup(site, 1)][0])*htrans(_lattice[site][1]) + (_lattice[site][1])*htrans(_lattice[LT::sup(LT::sdn(site, 0), 1)][0])*htrans(_lattice[LT::sdn(site, 0)][1])*(_lattice[LT::sdn(site, 0)][0]);
+	tmpF[1] = htrans(_lattice[LT::sdn(site, 0)][0])*htrans(_lattice[LT::sdn(LT::sdn(site, 0), 2)][2])*(_lattice[LT::sdn(LT::sdn(site, 0), 2)][0])*(_lattice[LT::sdn(site, 2)][2]) + htrans(_lattice[LT::sdn(site, 2)][2])*(_lattice[LT::sdn(site, 2)][0])*(_lattice[LT::sup(LT::sdn(site, 2), 0)][2])*htrans(_lattice[site][0]) + (_lattice[site][0])*(_lattice[LT::sup(site, 0)][2])*htrans(_lattice[LT::sup(site, 2)][0])*htrans(_lattice[site][2]) + (_lattice[site][2])*htrans(_lattice[LT::sup(LT::sdn(site, 0), 2)][0])*htrans(_lattice[LT::sdn(site, 0)][2])*(_lattice[LT::sdn(site, 0)][0]);
+	tmpF[2] = htrans(_lattice[LT::sdn(site, 0)][0])*htrans(_lattice[LT::sdn(LT::sdn(site, 0), 3)][3])*(_lattice[LT::sdn(LT::sdn(site, 0), 3)][0])*(_lattice[LT::sdn(site, 3)][3]) + htrans(_lattice[LT::sdn(site, 3)][3])*(_lattice[LT::sdn(site, 3)][0])*(_lattice[LT::sup(LT::sdn(site, 3), 0)][3])*htrans(_lattice[site][0]) + (_lattice[site][0])*(_lattice[LT::sup(site, 0)][3])*htrans(_lattice[LT::sup(site, 3)][0])*htrans(_lattice[site][3]) + (_lattice[site][3])*htrans(_lattice[LT::sup(LT::sdn(site, 0), 3)][0])*htrans(_lattice[LT::sdn(site, 0)][3])*(_lattice[LT::sdn(site, 0)][0]);
+	tmpF[3] = htrans(_lattice[LT::sdn(site, 1)][1])*htrans(_lattice[LT::sdn(LT::sdn(site, 1), 2)][2])*(_lattice[LT::sdn(LT::sdn(site, 1), 2)][1])*(_lattice[LT::sdn(site, 2)][2]) + htrans(_lattice[LT::sdn(site, 2)][2])*(_lattice[LT::sdn(site, 2)][1])*(_lattice[LT::sup(LT::sdn(site, 2), 1)][2])*htrans(_lattice[site][1]) + (_lattice[site][1])*(_lattice[LT::sup(site, 1)][2])*htrans(_lattice[LT::sup(site, 2)][1])*htrans(_lattice[site][2]) + (_lattice[site][2])*htrans(_lattice[LT::sup(LT::sdn(site, 1), 2)][1])*htrans(_lattice[LT::sdn(site, 1)][2])*(_lattice[LT::sdn(site, 1)][1]);
+	tmpF[4] = htrans(_lattice[LT::sdn(site, 1)][1])*htrans(_lattice[LT::sdn(LT::sdn(site, 1), 3)][3])*(_lattice[LT::sdn(LT::sdn(site, 1), 3)][1])*(_lattice[LT::sdn(site, 3)][3]) + htrans(_lattice[LT::sdn(site, 3)][3])*(_lattice[LT::sdn(site, 3)][1])*(_lattice[LT::sup(LT::sdn(site, 3), 1)][3])*htrans(_lattice[site][1]) + (_lattice[site][1])*(_lattice[LT::sup(site, 1)][3])*htrans(_lattice[LT::sup(site, 3)][1])*htrans(_lattice[site][3]) + (_lattice[site][3])*htrans(_lattice[LT::sup(LT::sdn(site, 1), 3)][1])*htrans(_lattice[LT::sdn(site, 1)][3])*(_lattice[LT::sdn(site, 1)][1]);
+	tmpF[5] = htrans(_lattice[LT::sdn(site, 2)][2])*htrans(_lattice[LT::sdn(LT::sdn(site, 2), 3)][3])*(_lattice[LT::sdn(LT::sdn(site, 2), 3)][2])*(_lattice[LT::sdn(site, 3)][3]) + htrans(_lattice[LT::sdn(site, 3)][3])*(_lattice[LT::sdn(site, 3)][2])*(_lattice[LT::sup(LT::sdn(site, 3), 2)][3])*htrans(_lattice[site][2]) + (_lattice[site][2])*(_lattice[LT::sup(site, 2)][3])*htrans(_lattice[LT::sup(site, 3)][2])*htrans(_lattice[site][3]) + (_lattice[site][3])*htrans(_lattice[LT::sup(LT::sdn(site, 2), 3)][2])*htrans(_lattice[LT::sdn(site, 2)][3])*(_lattice[LT::sdn(site, 2)][2]);
+	for (unsigned int i = 0; i < 6; ++i) {
+		//Manual antialiasing, error of eigen!
+		GaugeGroup antialias = tmpF[i];
+		tmpF[i] = (1./8.)*(antialias - htrans(antialias));
+		site_energy += real(trace(tmpF[i]*tmpF[i]));
+	}
+	site_topological = real(trace(tmpF[2]*tmpF[3]) - trace(tmpF[1]*tmpF[4]) + trace(tmpF[0]*tmpF[5]))/(4.*PI*PI);
+	
+	return std::pair<long_real_t,long_real_t>(site_energy, site_topological);
+}
+
 void WilsonFlow::measureEnergy(const extended_gauge_lattice_t& _lattice) {
 	typedef extended_fermion_lattice_t LT;
 	typedef extended_fermion_lattice_t::Layout Layout;
@@ -205,37 +231,20 @@ void WilsonFlow::measureEnergy(const extended_gauge_lattice_t& _lattice) {
 
 #pragma omp parallel for reduction(+:energy,topological)
 	for (int site = 0; site < _lattice.localsize; ++site) {
-		GaugeGroup *tmpF = new GaugeGroup[6];
-		long_real_t site_energy = 0.;
-		long_real_t site_topological = 0.;
-		tmpF[0] = htrans(_lattice[LT::sdn(site, 0)][0])*htrans(_lattice[LT::sdn(LT::sdn(site, 0), 1)][1])*(_lattice[LT::sdn(LT::sdn(site, 0), 1)][0])*(_lattice[LT::sdn(site, 1)][1]) + htrans(_lattice[LT::sdn(site, 1)][1])*(_lattice[LT::sdn(site, 1)][0])*(_lattice[LT::sup(LT::sdn(site, 1), 0)][1])*htrans(_lattice[site][0]) + (_lattice[site][0])*(_lattice[LT::sup(site, 0)][1])*htrans(_lattice[LT::sup(site, 1)][0])*htrans(_lattice[site][1]) + (_lattice[site][1])*htrans(_lattice[LT::sup(LT::sdn(site, 0), 1)][0])*htrans(_lattice[LT::sdn(site, 0)][1])*(_lattice[LT::sdn(site, 0)][0]);
-		tmpF[1] = htrans(_lattice[LT::sdn(site, 0)][0])*htrans(_lattice[LT::sdn(LT::sdn(site, 0), 2)][2])*(_lattice[LT::sdn(LT::sdn(site, 0), 2)][0])*(_lattice[LT::sdn(site, 2)][2]) + htrans(_lattice[LT::sdn(site, 2)][2])*(_lattice[LT::sdn(site, 2)][0])*(_lattice[LT::sup(LT::sdn(site, 2), 0)][2])*htrans(_lattice[site][0]) + (_lattice[site][0])*(_lattice[LT::sup(site, 0)][2])*htrans(_lattice[LT::sup(site, 2)][0])*htrans(_lattice[site][2]) + (_lattice[site][2])*htrans(_lattice[LT::sup(LT::sdn(site, 0), 2)][0])*htrans(_lattice[LT::sdn(site, 0)][2])*(_lattice[LT::sdn(site, 0)][0]);
-		tmpF[2] = htrans(_lattice[LT::sdn(site, 0)][0])*htrans(_lattice[LT::sdn(LT::sdn(site, 0), 3)][3])*(_lattice[LT::sdn(LT::sdn(site, 0), 3)][0])*(_lattice[LT::sdn(site, 3)][3]) + htrans(_lattice[LT::sdn(site, 3)][3])*(_lattice[LT::sdn(site, 3)][0])*(_lattice[LT::sup(LT::sdn(site, 3), 0)][3])*htrans(_lattice[site][0]) + (_lattice[site][0])*(_lattice[LT::sup(site, 0)][3])*htrans(_lattice[LT::sup(site, 3)][0])*htrans(_lattice[site][3]) + (_lattice[site][3])*htrans(_lattice[LT::sup(LT::sdn(site, 0), 3)][0])*htrans(_lattice[LT::sdn(site, 0)][3])*(_lattice[LT::sdn(site, 0)][0]);
-		tmpF[3] = htrans(_lattice[LT::sdn(site, 1)][1])*htrans(_lattice[LT::sdn(LT::sdn(site, 1), 2)][2])*(_lattice[LT::sdn(LT::sdn(site, 1), 2)][1])*(_lattice[LT::sdn(site, 2)][2]) + htrans(_lattice[LT::sdn(site, 2)][2])*(_lattice[LT::sdn(site, 2)][1])*(_lattice[LT::sup(LT::sdn(site, 2), 1)][2])*htrans(_lattice[site][1]) + (_lattice[site][1])*(_lattice[LT::sup(site, 1)][2])*htrans(_lattice[LT::sup(site, 2)][1])*htrans(_lattice[site][2]) + (_lattice[site][2])*htrans(_lattice[LT::sup(LT::sdn(site, 1), 2)][1])*htrans(_lattice[LT::sdn(site, 1)][2])*(_lattice[LT::sdn(site, 1)][1]);
-		tmpF[4] = htrans(_lattice[LT::sdn(site, 1)][1])*htrans(_lattice[LT::sdn(LT::sdn(site, 1), 3)][3])*(_lattice[LT::sdn(LT::sdn(site, 1), 3)][1])*(_lattice[LT::sdn(site, 3)][3]) + htrans(_lattice[LT::sdn(site, 3)][3])*(_lattice[LT::sdn(site, 3)][1])*(_lattice[LT::sup(LT::sdn(site, 3), 1)][3])*htrans(_lattice[site][1]) + (_lattice[site][1])*(_lattice[LT::sup(site, 1)][3])*htrans(_lattice[LT::sup(site, 3)][1])*htrans(_lattice[site][3]) + (_lattice[site][3])*htrans(_lattice[LT::sup(LT::sdn(site, 1), 3)][1])*htrans(_lattice[LT::sdn(site, 1)][3])*(_lattice[LT::sdn(site, 1)][1]);
-		tmpF[5] = htrans(_lattice[LT::sdn(site, 2)][2])*htrans(_lattice[LT::sdn(LT::sdn(site, 2), 3)][3])*(_lattice[LT::sdn(LT::sdn(site, 2), 3)][2])*(_lattice[LT::sdn(site, 3)][3]) + htrans(_lattice[LT::sdn(site, 3)][3])*(_lattice[LT::sdn(site, 3)][2])*(_lattice[LT::sup(LT::sdn(site, 3), 2)][3])*htrans(_lattice[site][2]) + (_lattice[site][2])*(_lattice[LT::sup(site, 2)][3])*htrans(_lattice[LT::sup(site, 3)][2])*htrans(_lattice[site][3]) + (_lattice[site][3])*htrans(_lattice[LT::sup(LT::sdn(site, 2), 3)][2])*htrans(_lattice[LT::sdn(site, 2)][3])*(_lattice[LT::sdn(site, 2)][2]);
-		for (unsigned int i = 0; i < 6; ++i) {
-			//Manual antialiasing, error of eigen!
-			GaugeGroup antialias = tmpF[i];
-			tmpF[i] = (1./8.)*(antialias - htrans(antialias));
-			site_energy += real(trace(tmpF[i]*tmpF[i]));
-		}
-		site_topological = real(trace(tmpF[2]*tmpF[3]) - trace(tmpF[1]*tmpF[4]) + trace(tmpF[0]*tmpF[5]))/(4.*PI*PI);
-
-		energy += site_energy;
-		topological += site_topological;
+		std::pair<long_real_t,long_real_t> result = measureEnergyAndTopologicalCharge(_lattice,site);
 
 #ifndef MULTITHREADING
-		result_energy[Layout::globalIndexT(site)] += site_energy;
-		result_topological[Layout::globalIndexT(site)] += site_topological;
+		result_energy[Layout::globalIndexT(site)] += result.first;
+		result_topological[Layout::globalIndexT(site)] += result.second;
 #endif
 #ifdef MULTITHREADING
-		result_energy[Layout::globalIndexT(site)][omp_get_thread_num()] += site_energy;
-		result_topological[Layout::globalIndexT(site)][omp_get_thread_num()] += site_topological;
+		result_energy[Layout::globalIndexT(site)][omp_get_thread_num()] += result.first;
+		result_topological[Layout::globalIndexT(site)][omp_get_thread_num()] += result.second;
 #endif
-
-		delete[] tmpF;
+		energy += result.first;
+		topological += result.second;
 	}
+	
 	reduceAllSum(energy);
 	reduceAllSum(topological);
 	topologicalCharge = topological;
@@ -260,6 +269,53 @@ void WilsonFlow::measureEnergy(const extended_gauge_lattice_t& _lattice) {
 	for (int t = 0; t < Layout::glob_t; ++t) {
 		reduceAllSum(energy_correlator[t]);
 		reduceAllSum(topological_correlator[t]);
+	}
+}
+
+void WilsonFlow::threeDimensionalEnergyTopologicalPlot(const extended_gauge_lattice_t& lattice, environment_t& environment) {
+	typedef extended_fermion_lattice_t::Layout Layout;
+	
+	if (environment.measurement && isOutputProcess()) {
+		GlobalOutput* output = GlobalOutput::getInstance();
+
+		output->push("energy_plot");
+		output->push("topological_plot");
+		for (int t = 0; t < Layout::glob_t; ++t) {
+			output->push("energy_plot");
+			output->push("topological_plot");
+
+			for (int site = 0; site < lattice.localsize; ++site) {
+				if (Layout::globalIndexT(site) == t) {
+					output->push("energy_plot");
+					output->push("topological_plot");
+
+					output->push("energy_plot");
+					output->push("topological_plot");
+					output->write("topological_plot", Layout::globalIndexX(site));
+					output->write("topological_plot", Layout::globalIndexY(site));
+					output->write("topological_plot", Layout::globalIndexZ(site));
+
+					output->write("energy_plot", Layout::globalIndexX(site));
+					output->write("energy_plot", Layout::globalIndexY(site));
+					output->write("energy_plot", Layout::globalIndexZ(site));
+					
+					output->pop("energy_plot");
+					output->pop("topological_plot");
+
+					std::pair<long_real_t,long_real_t> result = measureEnergyAndTopologicalCharge(lattice,site);
+					output->write("topological_plot", result.second);
+					output->write("energy_plot", result.first);
+					
+					output->pop("energy_plot");
+					output->pop("topological_plot");
+				}
+			}
+			
+			output->pop("energy_plot");
+			output->pop("topological_plot");
+		}
+		output->pop("energy_plot");
+		output->pop("topological_plot");
 	}
 }
 

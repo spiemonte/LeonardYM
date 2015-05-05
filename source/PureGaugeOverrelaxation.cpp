@@ -71,6 +71,7 @@ PureGaugeOverrelaxation::~PureGaugeOverrelaxation() {
 #endif
 
 void PureGaugeOverrelaxation::execute(environment_t& environment) {
+	typedef extended_gauge_lattice_t::Layout Layout;
 	//Get the gauge action
 	GaugeAction* gaugeAction = GaugeAction::getInstance(environment.configurations.get<std::string>("name_action"),environment.configurations.get<double>("beta"));
 
@@ -78,10 +79,11 @@ void PureGaugeOverrelaxation::execute(environment_t& environment) {
 	Checkerboard* checkerboard = Checkerboard::getInstance();
 #endif
 
+#ifndef ENABLE_MPI
 #ifdef MULTITHREADING
-	for (unsigned int color = 0; color < checkerboard->getNumberLoops(); ++color) {
-		#pragma omp parallel for //shared(environment, color) firstprivate(gaugeAction, checkerboard) default(none) schedule(dynamic)
+	for (int color = 0; color < checkerboard->getNumberLoops(); ++color) {
 #endif
+#pragma omp parallel for //shared(environment, color) firstprivate(gaugeAction, checkerboard) default(none) schedule(dynamic)
 		for (int site = 0; site < environment.gaugeLinkConfiguration.localsize; ++site) {
 			for (unsigned int mu = 0; mu < 4; ++mu) {
 #ifdef MULTITHREADING
@@ -97,6 +99,37 @@ void PureGaugeOverrelaxation::execute(environment_t& environment) {
 #ifdef MULTITHREADING
 	}
 #endif
+#endif
+
+	//We suppose that always MPI+MTH
+#ifdef ENABLE_MPI
+	for (int processor = 0; processor < Layout::numberProcessors; ++processor) {
+		for (int color = 0; color < checkerboard->getNumberLoops(); ++color) {
+			if (processor == Layout::this_processor) {
+#pragma omp parallel for //shared(beta, color, environment) firstprivate(action, checkerboard) default(none) schedule(dynamic)
+				for (int site = 0; site < environment.gaugeLinkConfiguration.localsize; ++site) {
+					for (unsigned int mu = 0; mu < 4; ++mu) {
+						if (checkerboard->getColor(site,mu) == color) {
+							this->updateLink(environment.gaugeLinkConfiguration, site, mu, gaugeAction);
+						}
+					}
+				}
+			}
+			else {
+#pragma omp parallel for //shared(beta, color, environment) firstprivate(action, checkerboard) default(none) schedule(dynamic)
+				for (int site = environment.gaugeLinkConfiguration.sharedsize; site < environment.gaugeLinkConfiguration.localsize; ++site) {
+					for (unsigned int mu = 0; mu < 4; ++mu) {
+						if (checkerboard->getColor(site,mu) == color) {
+							this->updateLink(environment.gaugeLinkConfiguration, site, mu, gaugeAction);
+						}
+					}
+				}
+			}
+		}
+		environment.gaugeLinkConfiguration.updateHalo();
+	}
+#endif
+	
 	environment.synchronize();
 	delete gaugeAction;
 

@@ -404,7 +404,7 @@ long_real_t TwistedMultiStepNFlavorQCDUpdater::determinant(const environment_t& 
 	delete twistedSquareDiracOperator1;
 	delete twistedSquareDiracOperator2;
 
-	return pow(average/stochastic_estimates.size(),alpha);
+	return pow(static_cast<long_real_t>(average/stochastic_estimates.size()),static_cast<long_real_t>(alpha));
 }
 
 } /* namespace Update */

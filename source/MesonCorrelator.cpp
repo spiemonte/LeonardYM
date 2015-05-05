@@ -10,15 +10,16 @@
 #include "GlobalOutput.h"
 #include "AlgebraUtils.h"
 #include "StoutSmearing.h"
+#include "Gamma.h"
 #ifndef PI
 #define PI 3.141592653589793238462643
 #endif
 
 namespace Update {
 
-MesonCorrelator::MesonCorrelator() : diracOperator(0), biConjugateGradient(0) { }
+MesonCorrelator::MesonCorrelator() : diracOperator(0), squareDiracOperator(0), biConjugateGradient(0) { }
 
-MesonCorrelator::MesonCorrelator(const MesonCorrelator& toCopy) : LatticeSweep(toCopy), StochasticEstimator(toCopy), diracOperator(0), biConjugateGradient(0) { }
+MesonCorrelator::MesonCorrelator(const MesonCorrelator& toCopy) : LatticeSweep(toCopy), StochasticEstimator(toCopy), diracOperator(0), squareDiracOperator(0), biConjugateGradient(0) { }
 
 MesonCorrelator::~MesonCorrelator() {
 	if (diracOperator) delete diracOperator;
@@ -29,9 +30,11 @@ void MesonCorrelator::execute(environment_t& environment) {
 	typedef extended_dirac_vector_t::Layout Layout;//TODO: only vector operations?
 
 	//unsigned int max_step = environment.configurations.get<unsigned int>("number_stochastic_estimators");
-
 	if (diracOperator == 0) {
 		diracOperator = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations);
+	}
+	if (squareDiracOperator == 0) {
+		squareDiracOperator = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 2, environment.configurations);
 	}
 
 	extended_fermion_lattice_t lattice;
@@ -77,179 +80,159 @@ void MesonCorrelator::execute(environment_t& environment) {
 	}
 
 	diracOperator->setLattice(lattice);
-	diracOperator->setGamma5(false);
+	squareDiracOperator->setLattice(lattice);
 	
 	if (biConjugateGradient == 0) biConjugateGradient = new BiConjugateGradient();
 	biConjugateGradient->setPrecision(environment.configurations.get<double>("generic_inverter_precision"));
 	biConjugateGradient->setMaximumSteps(environment.configurations.get<unsigned int>("generic_inverter_max_steps"));
 
 	std::vector< long_real_t > pionNorm;
-	//std::vector< long_real_t >* pionOperator = new std::vector< long_real_t >[Layout::pgrid_t*Layout::loc_t];
-	std::vector< long_real_t >* etaOperatorRe = new std::vector< long_real_t >[Layout::pgrid_t*Layout::loc_t];
-	std::vector< long_real_t >* etaOperatorIm = new std::vector< long_real_t >[Layout::pgrid_t*Layout::loc_t];
 
 	extended_dirac_vector_t source;
-	extended_dirac_vector_t tmp, tmpb;
 
-	real_t momenta[Layout::glob_t];
+	long_real_t pionOperator[Layout::glob_t];
+	long_real_t scalarOperator[Layout::glob_t];
+	long_real_t PSOperator[Layout::glob_t];
 	for (int t = 0; t < Layout::glob_t; ++t) {
-		momenta[t] = 2.*PI*(1.-0.5*Layout::glob_t+static_cast<real_t>(t))/static_cast<real_t>(Layout::glob_t);
+		pionOperator[t] = 0.;
+		scalarOperator[t] = 0.;
+		PSOperator[t] = 0.;
 	}
 
-	real_t momenta_x1 = 2.*PI*(static_cast<real_t>(4))/static_cast<real_t>(Layout::glob_t);
-	real_t momenta_y1 = 2.*PI*(static_cast<real_t>(3))/static_cast<real_t>(Layout::glob_t);
-
-	real_t momenta_x2 = 2.*PI*(static_cast<real_t>(5))/static_cast<real_t>(Layout::glob_t);
-	real_t momenta_y2 = 2.*PI*(static_cast<real_t>(0))/static_cast<real_t>(Layout::glob_t);
+	int inversionSteps = 0;
 	
-	long_real_t pionOperatorZero[Layout::glob_t];
-	long_real_t vectorOperatorZero[Layout::glob_t];
-	for (int t = 0; t < Layout::glob_t; ++t) {
-		pionOperatorZero[t] = 0.;
-		vectorOperatorZero[t] = 0.;
-	}
-
-	long_real_t pionOperatorMomentaAsymmetry1[Layout::glob_t];
-	long_real_t pionOperatorMomentaAsymmetry2[Layout::glob_t];
-	for (int t = 0; t < Layout::glob_t; ++t) {
-		pionOperatorMomentaAsymmetry1[t] = 0.;
-		pionOperatorMomentaAsymmetry2[t] = 0.;
-	}
-
-	long_real_t pionOperatorMomenta[Layout::glob_t][Layout::glob_t];
-	for (int m = 0; m < Layout::glob_t; ++m) {
-		for (int t = 0; t < Layout::glob_t; ++t) pionOperatorMomenta[m][t] = 0.;
-	}
-
-	double check1 = 0., check2 = 0.;
-
 	for (unsigned int alpha = 0; alpha < 4; ++alpha) {
-		for (int c = 0; c < numberColors; ++c) {
+		for (int c = 0; c < diracVectorLength; ++c) {
 			this->generateSource(source, alpha, c);
-			biConjugateGradient->solve(diracOperator, source, tmp);
-			
+			biConjugateGradient->solve(squareDiracOperator, source, eta);
+			diracOperator->multiply(tmp[c*4 + alpha],eta);
+			inversionSteps += biConjugateGradient->getLastSteps();
+		}
+	}
+	
+	if (isOutputProcess()) std::cout << "MesonCorrelator::Correlators computed with " << inversionSteps << " inversion steps" << std::endl;
+	
+	//Ugly initialization to zero
 #ifdef MULTITHREADING
-			long_real_t resultZero[Layout::glob_t][omp_get_max_threads()];
-			long_real_t resultVector[Layout::glob_t][omp_get_max_threads()];
-			long_real_t resultMomentaAsymmetry1[Layout::glob_t][omp_get_max_threads()];
-			long_real_t resultMomentaAsymmetry2[Layout::glob_t][omp_get_max_threads()];
-			long_real_t resultMomenta[Layout::glob_t][Layout::glob_t][omp_get_max_threads()];
-			for (int i = 0; i < Layout::glob_t; ++i) {
-				for (int j = 0; j < omp_get_max_threads(); ++j) {
-					resultZero[i][j] = 0.;
-					resultVector[i][j] = 0.;
-					resultMomentaAsymmetry1[i][j] = 0.;
-					resultMomentaAsymmetry2[i][j] = 0.;
-					for (int m = 0; m < Layout::glob_t; ++m) {
-						resultMomenta[m][i][j] = 0.;
-					}
-				}
-			}
+	long_real_t resultPion[Layout::glob_t][omp_get_max_threads()];
+	long_real_t resultScalar[Layout::glob_t][omp_get_max_threads()];
+	long_real_t resultPS[Layout::glob_t][omp_get_max_threads()];
+	for (int i = 0; i < Layout::glob_t; ++i) {
+		for (int j = 0; j < omp_get_max_threads(); ++j) {
+			resultPion[i][j] = 0.;
+			resultScalar[i][j] = 0.;
+			resultPS[i][j] = 0.;
+		}
+	}
 #endif
 #ifndef MULTITHREADING
-			long_real_t resultZero[Layout::glob_t];
-			long_real_t resultVector[Layout::glob_t];
-			long_real_t resultMomentaAsymmetry1[Layout::glob_t];
-			long_real_t resultMomentaAsymmetry2[Layout::glob_t];
-			long_real_t resultMomenta[Layout::glob_t][Layout::glob_t];
-			for (int i = 0; i < Layout::glob_t; ++i) {
-				resultZero[i] = 0.;
-				resultVector[i] = 0.;
-				resultMomentaAsymmetry1[i] = 0.;
-				resultMomentaAsymmetry2[i] = 0.;
-				for (int m = 0; m < Layout::glob_t; ++m) {
-					resultMomenta[m][i] = 0.;
-				}
-			}
+	long_real_t resultPion[Layout::glob_t];
+	long_real_t resultScalar[Layout::glob_t];
+	long_real_t resultPS[Layout::glob_t];
+	for (int i = 0; i < Layout::glob_t; ++i) {
+		resultPion[i] = 0.;
+		resultScalar[i] = 0.;
+		resultPS[i] = 0.;
+	}
 #endif
-			
+	
+	//The core of the computation of the connected correlators
+	//Pion correlator first
+	for (unsigned int alpha = 0; alpha < 4; ++alpha) {
+		for (int c = 0; c < diracVectorLength; ++c) {
 #pragma omp parallel for
 			for (int site = 0; site < Layout::localsize; ++site) {
-				//Pion correlator first
 				for (unsigned int mu = 0; mu < 4; ++mu) {
-					std::complex<real_t> dottmp = vector_dot(tmp[site][mu],tmp[site][mu]);
+					for (int d = 0; d < diracVectorLength; ++d) {
+						std::complex<real_t> dottmp = conj(tmp[c*4+alpha][site][mu][d])*tmp[c*4+alpha][site][mu][d];
 #ifdef MULTITHREADING
-					resultZero[Layout::globalIndexT(site)][omp_get_thread_num()] += real(dottmp);
-					resultMomentaAsymmetry1[Layout::globalIndexT(site)][omp_get_thread_num()] += real(std::complex<real_t>(cos(momenta_x1*Layout::globalIndexX(site)+momenta_y1*Layout::globalIndexY(site)),sin(momenta_x1*Layout::globalIndexX(site)+momenta_y1*Layout::globalIndexY(site)))*dottmp);
-					resultMomentaAsymmetry2[Layout::globalIndexT(site)][omp_get_thread_num()] += real(std::complex<real_t>(cos(momenta_x2*Layout::globalIndexX(site)+momenta_y2*Layout::globalIndexY(site)),sin(momenta_x2*Layout::globalIndexX(site)+momenta_y2*Layout::globalIndexY(site)))*dottmp);
-					for (int m = 0; m < Layout::glob_t; ++m) {
-						resultMomenta[m][Layout::globalIndexT(site)][omp_get_thread_num()] += real(std::complex<real_t>(cos(momenta[m]*Layout::globalIndexX(site)),sin(momenta[m]*Layout::globalIndexX(site)))*dottmp);
-					}
+						resultPion[Layout::globalIndexT(site)][omp_get_thread_num()] += real(dottmp);
 #endif
 #ifndef MULTITHREADING
-					resultZero[Layout::globalIndexT(site)] += real(dottmp);
-					resultMomentaAsymmetry1[Layout::globalIndexT(site)] += real(std::complex<real_t>(cos(momenta_x1*Layout::globalIndexX(site)+momenta_y1*Layout::globalIndexY(site)),sin(momenta_x1*Layout::globalIndexX(site)+momenta_y1*Layout::globalIndexY(site)))*dottmp);
-					resultMomentaAsymmetry2[Layout::globalIndexT(site)] += real(std::complex<real_t>(cos(momenta_x2*Layout::globalIndexX(site)+momenta_y2*Layout::globalIndexY(site)),sin(momenta_x2*Layout::globalIndexX(site)+momenta_y2*Layout::globalIndexY(site)))*dottmp);
-					for (int m = 0; m < Layout::glob_t; ++m) {
-						resultMomenta[m][Layout::globalIndexT(site)] += real(std::complex<real_t>(cos(momenta[m]*Layout::globalIndexX(site)),sin(momenta[m]*Layout::globalIndexX(site)))*dottmp);
-					}
+						resultPion[Layout::globalIndexT(site)] += real(dottmp);
 #endif					
-				}
-				//Vector correlator then
-				for (unsigned int mu = 0; mu < 4; ++mu) {
-					std::complex<real_t> dottmp = (alpha < 2 ? 1.0 : -1.0)*(mu < 2 ? 1.0 : -1.0)*vector_dot(tmp[site][mu],tmp[site][mu]);
-#ifdef MULTITHREADING
-					resultVector[Layout::globalIndexT(site)][omp_get_thread_num()] += real(dottmp);
-#endif
-#ifndef MULTITHREADING
-					resultVector[Layout::globalIndexT(site)] += real(dottmp);
-#endif
-				}
-			}
-			
-			for (int t = 0; t < Layout::glob_t; ++t) {
-#ifdef MULTITHREADING
-				for (int thread = 0; thread < omp_get_max_threads(); ++thread) {
-					pionOperatorZero[t] += resultZero[t][thread];
-					vectorOperatorZero[t] += resultVector[t][thread];
-					pionOperatorMomentaAsymmetry1[t] += resultMomentaAsymmetry1[t][thread];
-					pionOperatorMomentaAsymmetry2[t] += resultMomentaAsymmetry2[t][thread];
-					for (int m = 0; m < Layout::glob_t; ++m) {
-						pionOperatorMomenta[m][t] += resultMomenta[m][t][thread];
 					}
-				}
-#endif
-#ifndef MULTITHREADING
-				pionOperatorZero[t] += resultZero[t];
-				vectorOperatorZero[t] += resultVector[t];
-				pionOperatorMomentaAsymmetry1[t] += resultMomentaAsymmetry1[t];
-				pionOperatorMomentaAsymmetry2[t] += resultMomentaAsymmetry2[t];
-				for (int m = 0; m < Layout::glob_t; ++m) {
-					pionOperatorMomenta[m][t] += resultMomenta[m][t];
-				}
-#endif
-			}
-
-			Lattice::Site site1(0,0,0,5);
-			Lattice::Site site2(3,0,0,4);
-
-			if (Layout::localIndex[Layout::getGlobalCoordinate(site1)] != -1) {
-				int site = Layout::localIndex[Layout::getGlobalCoordinate(site1)];
-				for (unsigned int mu = 0; mu < 4; ++mu) {
-					check1 += real(vector_dot(tmp[site][mu],tmp[site][mu]));
-				}
-			}
-
-			if (Layout::localIndex[Layout::getGlobalCoordinate(site2)] != -1) {
-				int site = Layout::localIndex[Layout::getGlobalCoordinate(site2)];
-				for (unsigned int mu = 0; mu < 4; ++mu) {
-					check2 += real(vector_dot(tmp[site][mu],tmp[site][mu]));
 				}
 			}
 		}
 	}
-
-	reduceAllSum(check1);
-	reduceAllSum(check2);
 	
-	for (int t = 0; t < Layout::glob_t; ++t) {
-		reduceAllSum(pionOperatorZero[t]);
-		reduceAllSum(vectorOperatorZero[t]);
-		reduceAllSum(pionOperatorMomentaAsymmetry1[t]);
-		reduceAllSum(pionOperatorMomentaAsymmetry2[t]);
-		for (int m = 0; m < Layout::glob_t; ++m) {
-			reduceAllSum(pionOperatorMomenta[m][t]);
+	//Scalar connected correlator then
+	for (unsigned int alpha = 0; alpha < 4; ++alpha) {
+		for (unsigned int beta = 0; beta < 4; ++beta) {
+			for (int c = 0; c < diracVectorLength; ++c) {
+#pragma omp parallel for
+				for (int site = 0; site < Layout::localsize; ++site) {
+					for (unsigned int mu = 0; mu < 4; ++mu) {
+						for (unsigned int nu = 0; nu < 4; ++nu) {
+							for (int d = 0; d < diracVectorLength; ++d) {
+								std::complex<real_t> dottmp = Gamma::gamma5_gamma(3,mu,nu)*Gamma::gamma5_gamma(3,alpha,beta)*conj(tmp[c*4+alpha][site][mu][d])*tmp[c*4+beta][site][nu][d];
+#ifdef MULTITHREADING
+								resultScalar[Layout::globalIndexT(site)][omp_get_thread_num()] += real(dottmp);
+#endif
+#ifndef MULTITHREADING
+								resultScalar[Layout::globalIndexT(site)] += real(dottmp);
+#endif						
+							}
+						}
+					}
+				}
+			}
 		}
+	}
+	
+	//PseudoScalar-PseudoVector connected correlator then
+	for (unsigned int alpha = 0; alpha < 4; ++alpha) {
+	for (unsigned int beta = 0; beta < 4; ++beta) {
+		for (int c = 0; c < diracVectorLength; ++c) {
+#pragma omp parallel for
+			for (int site = 0; site < Layout::localsize; ++site) {
+				for (unsigned int mu = 0; mu < 4; ++mu) {
+					
+						for (int d = 0; d < diracVectorLength; ++d) {
+							std::complex<real_t> dottmp(0.,0.);
+							dottmp -= Gamma::gamma(3,alpha,beta)*conj(tmp[c*4+alpha][site][mu][d])*tmp[c*4+beta][site][mu][d];
+							dottmp += Gamma::gamma(3,alpha,beta)*conj(tmp[c*4+mu][site][alpha][d])*tmp[c*4+mu][site][beta][d];
+#ifdef MULTITHREADING
+							resultPS[Layout::globalIndexT(site)][omp_get_thread_num()] += real(dottmp);
+#endif
+#ifndef MULTITHREADING
+							resultPS[Layout::globalIndexT(site)] += real(dottmp);
+#endif						
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	//Now we collect all the results
+	for (int t = 0; t < Layout::glob_t; ++t) {
+		//... from the threads
+#ifdef MULTITHREADING
+		for (int thread = 0; thread < omp_get_max_threads(); ++thread) {
+			pionOperator[t] += resultPion[t][thread];
+			scalarOperator[t] += resultScalar[t][thread];
+			PSOperator[t] += resultPS[t][thread];
+		}
+#endif
+#ifndef MULTITHREADING
+		pionOperator[t] += resultPion[t];
+		scalarOperator[t] += resultScalar[t];
+		PSOperator[t] += resultPS[t];
+#endif
+	}
+	
+	//... from the MPI processes
+	for (int t = 0; t < Layout::glob_t; ++t) {
+		reduceAllSum(pionOperator[t]);
+		reduceAllSum(scalarOperator[t]);
+		reduceAllSum(PSOperator[t]);
+		//Correct normalization
+		real_t factor = 4.*diracOperator->getKappa()*diracOperator->getKappa();
+		pionOperator[t] = factor*pionOperator[t];
+		scalarOperator[t] = factor*scalarOperator[t];
+		PSOperator[t] = factor*PSOperator[t];
 	}
 
 	
@@ -258,45 +241,37 @@ void MesonCorrelator::execute(environment_t& environment) {
 
 		output->push("pion_exact");
 		for (int t = 0; t < Layout::pgrid_t*Layout::loc_t; ++t) {
-			std::cout << "MesonCorrelator::Pion Exact Correlator at t " << t << " is " << pionOperatorZero[t] << std::endl;
+			std::cout << "MesonCorrelator::Pion Exact Correlator at t " << t << " is " << pionOperator[t] << std::endl;
 
-			output->write("pion_exact", pionOperatorZero[t]);
+			output->write("pion_exact", pionOperator[t]);
 		}
 		output->pop("pion_exact");
 
-		output->push("vector_exact");
+		output->push("scalar_exact");
 		for (int t = 0; t < Layout::pgrid_t*Layout::loc_t; ++t) {
-			std::cout << "MesonCorrelator::Vector Exact Correlator at t " << t << " is " << vectorOperatorZero[t] << std::endl;
+			std::cout << "MesonCorrelator::Scalar Exact Correlator at t " << t << " is " << scalarOperator[t] << std::endl;
 
-			output->write("vector_exact", vectorOperatorZero[t]);
+			output->write("scalar_exact", scalarOperator[t]);
 		}
-		output->pop("vector_exact");
+		output->pop("scalar_exact");
+		
+		output->push("ps_exact");
+		for (int t = 0; t < Layout::pgrid_t*Layout::loc_t; ++t) {
+			std::cout << "MesonCorrelator::PS Exact Correlator at t " << t << " is " << PSOperator[t] << std::endl;
 
-		output->push("pion_momenta");
-		for (int m = 0; m < Layout::glob_t; ++m) {
-			output->push("pion_momenta");
-			for (int t = 0; t < Layout::glob_t; ++t) {
-				output->write("pion_momenta", pionOperatorMomenta[m][t]);
-			}
-			output->pop("pion_momenta");
+			output->write("ps_exact", PSOperator[t]);
 		}
-		output->pop("pion_momenta");
-
-		output->push("pion_momenta_asymmetry1");
+		output->pop("ps_exact");
+		
+		output->push("pcac_mass");
 		for (int t = 0; t < Layout::glob_t; ++t) {
-			output->write("pion_momenta_asymmetry1", pionOperatorMomentaAsymmetry1[t]);
+			int mindex = (t == 0) ? Layout::glob_t - 1 : t - 1;
+			int pindex = (t == Layout::glob_t -1) ? 0 : t + 1;
+			std::cout << "MesonCorrelator::PCAC mass at t " << t << " is " << (PSOperator[mindex] - PSOperator[pindex])/(4.*pionOperator[t]) << std::endl;
+			
+			output->write("pcac_mass", (PSOperator[mindex] - PSOperator[pindex])/(4.*pionOperator[t]));
 		}
-		output->pop("pion_momenta_asymmetry1");
-		output->push("pion_momenta_asymmetry2");
-		for (int t = 0; t < Layout::glob_t; ++t) {
-			output->write("pion_momenta_asymmetry2", pionOperatorMomentaAsymmetry2[t]);
-		}
-		output->pop("pion_momenta_asymmetry2");
-
-		output->push("pion_asymmetry");
-		output->write("pion_asymmetry", check1);
-		output->write("pion_asymmetry", check2);
-		output->pop("pion_asymmetry");
+		output->pop("pcac_mass");
 	}
 
 
@@ -438,8 +413,8 @@ void MesonCorrelator::execute(environment_t& environment) {
 		}
 	}*/
 	//delete[] pionOperator;
-	delete[] etaOperatorRe;
-	delete[] etaOperatorIm;
+	//delete[] etaOperatorRe;
+	//delete[] etaOperatorIm;
 }
 
 } /* namespace Update */

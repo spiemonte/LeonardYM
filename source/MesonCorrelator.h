@@ -25,10 +25,10 @@ public:
 
 private:
 	extended_dirac_vector_t randomNoise;
-	extended_dirac_vector_t randomNoiseD[4];
-	extended_dirac_vector_t tmp;
-	extended_dirac_vector_t tmpD[4];
+	extended_dirac_vector_t eta;
+	extended_dirac_vector_t tmp[4*diracVectorLength];
 	DiracOperator* diracOperator;
+	DiracOperator* squareDiracOperator;
 	BiConjugateGradient* biConjugateGradient;
 };
 

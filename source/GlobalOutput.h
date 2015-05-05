@@ -50,7 +50,7 @@ public:
 	void pop(const std::string& name) {
 		std::map<std::string, std::string>::iterator it = output_streams.find(name);
 		if (it != output_streams.end()) {
-			output_status[name] = true;
+			output_status[name] = false;
 			it->second.append("},\n");
 		}
 		else {

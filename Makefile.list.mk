@@ -1,4 +1,5 @@
 updater.o: updater.cpp
+
 	$(CPP) $(CPPFLAGS) -c -o updater.o updater.cpp
 
 LocalLayout.o: ./source/MPILattice/LocalLayout.h ./source/MPILattice/LocalLayout.cpp
@@ -49,17 +50,26 @@ BlockDiracOperator.o: ./source/dirac_operators/BlockDiracOperator.h ./source/dir
 BlockDiracWilsonOperator.o: ./source/dirac_operators/BlockDiracWilsonOperator.h ./source/dirac_operators/BlockDiracWilsonOperator.cpp
 	$(CPP) $(CPPFLAGS) -c -o BlockDiracWilsonOperator.o ./source/dirac_operators/BlockDiracWilsonOperator.cpp
 
+BlockImprovedDiracWilsonOperator.o: ./source/dirac_operators/BlockImprovedDiracWilsonOperator.h ./source/dirac_operators/BlockImprovedDiracWilsonOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o BlockImprovedDiracWilsonOperator.o ./source/dirac_operators/BlockImprovedDiracWilsonOperator.cpp
+
 SquareBlockDiracWilsonOperator.o: ./source/dirac_operators/SquareBlockDiracWilsonOperator.h ./source/dirac_operators/SquareBlockDiracWilsonOperator.cpp
 	$(CPP) $(CPPFLAGS) -c -o SquareBlockDiracWilsonOperator.o ./source/dirac_operators/SquareBlockDiracWilsonOperator.cpp
 
 SquareTwistedDiracOperator.o: ./source/dirac_operators/SquareTwistedDiracOperator.h ./source/dirac_operators/SquareTwistedDiracOperator.cpp
 	$(CPP) $(CPPFLAGS) -c -o SquareTwistedDiracOperator.o ./source/dirac_operators/SquareTwistedDiracOperator.cpp
 
+TwistedDiracOperator.o: ./source/dirac_operators/TwistedDiracOperator.h ./source/dirac_operators/TwistedDiracOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o TwistedDiracOperator.o ./source/dirac_operators/TwistedDiracOperator.cpp
+
 ComplementBlockDiracWilsonOperator.o: ./source/dirac_operators/ComplementBlockDiracWilsonOperator.h ./source/dirac_operators/ComplementBlockDiracWilsonOperator.cpp
 	$(CPP) $(CPPFLAGS) -c -o ComplementBlockDiracWilsonOperator.o ./source/dirac_operators/ComplementBlockDiracWilsonOperator.cpp
 
 SquareComplementBlockDiracWilsonOperator.o: ./source/dirac_operators/SquareComplementBlockDiracWilsonOperator.h ./source/dirac_operators/SquareComplementBlockDiracWilsonOperator.cpp
 	$(CPP) $(CPPFLAGS) -c -o SquareComplementBlockDiracWilsonOperator.o ./source/dirac_operators/SquareComplementBlockDiracWilsonOperator.cpp
+
+SquareComplementBlockDiracOperator.o: ./source/dirac_operators/SquareComplementBlockDiracOperator.h ./source/dirac_operators/SquareComplementBlockDiracOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o SquareComplementBlockDiracOperator.o ./source/dirac_operators/SquareComplementBlockDiracOperator.cpp
 
 ImprovedDiracWilsonOperator.o: ./source/dirac_operators/ImprovedDiracWilsonOperator.h ./source/dirac_operators/ImprovedDiracWilsonOperator.cpp
 	$(CPP) $(CPPFLAGS) -c -o ImprovedDiracWilsonOperator.o ./source/dirac_operators/ImprovedDiracWilsonOperator.cpp
@@ -282,4 +292,10 @@ MultiGridDiracOperator.o: ./source/multigrid_solver/MultiGridDiracOperator.h ./s
 
 MultiGridSolver.o: ./source/multigrid_solver/MultiGridSolver.h ./source/multigrid_solver/MultiGridSolver.cpp
 	$(CPP) $(CPPFLAGS) -c -o MultiGridSolver.o ./source/multigrid_solver/MultiGridSolver.cpp
+
+SAPPreconditioner.o: ./source/dirac_operators/SAPPreconditioner.h ./source/dirac_operators/SAPPreconditioner.cpp
+	$(CPP) $(CPPFLAGS) -c -o SAPPreconditioner.o ./source/dirac_operators/SAPPreconditioner.cpp
+	
+MultiGridOperator.o: ./source/dirac_operators/MultiGridOperator.h ./source/dirac_operators/MultiGridOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o MultiGridOperator.o ./source/dirac_operators/MultiGridOperator.cpp
 

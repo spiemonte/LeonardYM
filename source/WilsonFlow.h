@@ -9,6 +9,7 @@
 #define WILSONFLOW_H_
 #include "LatticeSweep.h"
 #include "GaugeAction.h"
+#include <utility>
 
 namespace Update {
 
@@ -26,6 +27,10 @@ protected:
 	GaugeGroup exponential(const GaugeGroup& link, const GaugeGroup& force, real_t epsilon);
 
 	void measureEnergy(const extended_gauge_lattice_t& lattice);
+
+	void threeDimensionalEnergyTopologicalPlot(const extended_gauge_lattice_t& lattice, environment_t& environment);
+
+	std::pair<long_real_t,long_real_t> measureEnergyAndTopologicalCharge(const extended_gauge_lattice_t& lattice, int site);
 
 private:
 	real_t gaugeEnergy;

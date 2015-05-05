@@ -121,9 +121,9 @@ private:
 	FermionicForceMatrix gen[3];
 };
 
-#endif
+//#endif
 
-#if NUMCOLORS == 3
+#elif NUMCOLORS == 3
 
 template<> class LieGenerator<GaugeGroup> {
 public:
@@ -174,8 +174,86 @@ private:
 	FermionicForceMatrix gen[8];
 };
 
-#endif
+#else
 
+template<> class LieGenerator<GaugeGroup> {
+public:
+	LieGenerator() {
+		int index = 0;
+		for (int i = 0; i < numberColors; ++i) {
+			for (int j = 0; j < i; ++j) {
+				for (int m = 0; m < numberColors; ++m) {
+					for (int n = 0; n < numberColors; ++n) {
+						if (i == m && j == n) gen[index].at(m,n) = 1;
+						else gen[index].at(m,n) = 0;
+						if (i == n && j == m) gen[index].at(m,n) += 1;
+					}
+				}
+				++index;
+			}
+		}
+		for (int i = 0; i < numberColors; ++i) {
+			for (int j = 0; j < i; ++j) {
+				for (int m = 0; m < numberColors; ++m) {
+					for (int n = 0; n < numberColors; ++n) {
+						if (i == m && j == n) gen[index].at(m,n) = I;
+						else gen[index].at(m,n) = 0;
+						if (i == n && j == m) gen[index].at(m,n) -= I;
+					}
+				}
+				++index;
+			}
+		}
+		for (int i = 1; i < numberColors; ++i) {
+			for (int m = 0; m < numberColors; ++m) {
+				for (int n = 0; n < numberColors; ++n) {
+					if (m == n && m <= i) gen[index].at(m,n) = sqrt(2./static_cast<real_t>((i+1)*i));
+					else gen[index].at(m,n) = 0;
+					if (m == n && m == i) gen[index].at(m,n) -= (i+1)*sqrt(2./static_cast<real_t>((i+1)*i));
+				}
+			}
+			++index;
+		}
+		for (unsigned int i = 0; i < numberColors*numberColors - 1; ++i) gen[i] = gen[i]/2.;
+	}
+
+	const GaugeGroup& get(unsigned int c) const {
+		return gen[c];
+	}
+
+	unsigned int numberGenerators() const {
+		return numberColors*numberColors-1;
+	}
+private:
+	GaugeGroup gen[numberColors*numberColors-1];
+};
+
+template<> class LieGenerator<AdjointGroup> {
+public:
+	LieGenerator() {
+		LieGenerator<GaugeGroup> fundamentalGenerators;
+		for (unsigned int i = 0; i < numberColors*numberColors - 1; ++i) {
+			for (int m = 0; m < numberColors*numberColors - 1; ++m) {
+				for (int n = 0; n < numberColors*numberColors - 1; ++n) {
+					if (m != n) gen[i].at(m,n) = -2.*trace((fundamentalGenerators.get(m)*fundamentalGenerators.get(n) - fundamentalGenerators.get(n)*fundamentalGenerators.get(m))*fundamentalGenerators.get(i));
+					else gen[i].at(m,n) = 0;
+				}
+			}
+		}
+	}
+
+	const FermionicForceMatrix& get(unsigned int c) const {
+		return gen[c];
+	}
+
+	unsigned int numberGenerators() const {
+		return numberColors*numberColors-1;
+	}
+private:
+	FermionicForceMatrix gen[numberColors*numberColors-1];
+};
+
+#endif
 
 }
 

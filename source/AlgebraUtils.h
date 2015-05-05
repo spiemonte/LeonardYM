@@ -9,6 +9,7 @@
 #define ALGEBRAUTILS_H_
 #include "Environment.h"
 #include "RandomSeed.h"
+#include "./vectorclass/complexvec.h"
 
 #ifdef QPX
 #include "AlgebraUtils_QPX.h"
@@ -196,6 +197,40 @@ public:
 		reduceAllSum(result_re);
 		reduceAllSum(result_im);
 		return std::complex<long_real_t>(result_re, result_im);
+
+		/*long_real_t result_re = 0.;
+		long_real_t result_im = 0.;
+#pragma omp parallel for reduction(+:result_re, result_im)
+		for (int site = 0; site < vector1.localsize; ++site) {
+			Complex4d a;
+			Complex4d b;
+			Complex4d result(0.,0.);
+			a.load(reinterpret_cast<double const*>(&vector1[site][0][0]));
+			b.load(reinterpret_cast<double const*>(&vector2[site][0][0]));
+			result += (~a)*b;
+			a.load(reinterpret_cast<double const*>(&vector1[site][0][2]));
+			b.load(reinterpret_cast<double const*>(&vector2[site][0][2]));
+			result += (~a)*b;
+			a.load(reinterpret_cast<double const*>(&vector1[site][1][1]));
+			b.load(reinterpret_cast<double const*>(&vector2[site][1][1]));
+			result += (~a)*b;
+			a.load(reinterpret_cast<double const*>(&vector1[site][2][0]));
+			b.load(reinterpret_cast<double const*>(&vector2[site][2][0]));
+			result += (~a)*b;
+			a.load(reinterpret_cast<double const*>(&vector1[site][2][2]));
+			b.load(reinterpret_cast<double const*>(&vector2[site][2][2]));
+			result += (~a)*b;
+			a.load(reinterpret_cast<double const*>(&vector1[site][3][1]));
+			b.load(reinterpret_cast<double const*>(&vector2[site][3][1]));
+			result += (~a)*b;
+			double final[4];
+			result.store(&final[0]);
+			result_re += final[0]+final[2];
+			result_im += final[1]+final[3];
+		}
+		reduceAllSum(result_re);
+		reduceAllSum(result_im);
+		return std::complex<long_real_t>(result_re, result_im);*/
 	}
 
 	/**
@@ -244,6 +279,18 @@ public:
 		for (int site = 0; site < vector.completesize; ++site) {
 			for (unsigned int mu = 0; mu < 4; ++mu) {
 				set_to_zero(vector[site][mu]);
+			}
+		}
+	}
+
+	/**
+	 * This function multiplies the vector by gamma5
+	 */
+	template<typename dirac_vector_t> static void gamma5(dirac_vector_t& vector) {
+#pragma omp parallel for
+		for (int site = 0; site < vector.completesize; ++site) {
+			for (unsigned int mu = 2; mu < 4; ++mu) {
+				vector[site][mu] = - vector[site][mu];
 			}
 		}
 	}

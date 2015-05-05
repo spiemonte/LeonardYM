@@ -27,6 +27,7 @@ private:
 	extended_dirac_vector_t randomNoise;
 	extended_dirac_vector_t tmp_square;
 	extended_dirac_vector_t tmp;
+	DiracOperator* squareDiracOperator;
 	DiracOperator* diracOperator;
 	BiConjugateGradient* biConjugateGradient;
 };

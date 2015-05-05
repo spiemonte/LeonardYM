@@ -37,7 +37,7 @@ FermionicForceMatrix BlockDiracWilsonFermionForce::derivative(const extended_fer
 			GaugeVector tmp;
 			set_to_zero(tmp);
 			for (unsigned int beta = 0; beta < 4; ++beta) {
-				if (Gamma::g5idmg(mu,alpha,beta) != 0.) tmp += -(kappa)*Gamma::g5idmg(mu,alpha,beta)*Y[Vector::sup(site,mu)][beta];
+				if (Gamma::g5idmg(mu,alpha,beta) != static_cast<real_t>(0.)) tmp += -(kappa)*Gamma::g5idmg(mu,alpha,beta)*Y[Vector::sup(site,mu)][beta];
 			}
 			force += tensor(X[site][alpha],tmp);
 		}
@@ -46,7 +46,7 @@ FermionicForceMatrix BlockDiracWilsonFermionForce::derivative(const extended_fer
 			GaugeVector tmp;
 			set_to_zero(tmp);
 			for (unsigned int beta = 0; beta < 4; ++beta) {
-				if (Gamma::g5idpg(mu,alpha,beta) != 0.) tmp += -(kappa)*Gamma::g5idpg(mu,alpha,beta)*htrans(lattice[site][mu])*Y[site][beta];
+				if (Gamma::g5idpg(mu,alpha,beta) != static_cast<real_t>(0.)) tmp += -(kappa)*Gamma::g5idpg(mu,alpha,beta)*htrans(lattice[site][mu])*Y[site][beta];
 			}
 			force -= tensor(lattice[site][mu]*X[Vector::sup(site,mu)][alpha],tmp);
 		}
@@ -57,7 +57,7 @@ FermionicForceMatrix BlockDiracWilsonFermionForce::derivative(const extended_fer
 			GaugeVector tmp;
 			set_to_zero(tmp);
 			for (unsigned int beta = 0; beta < 4; ++beta) {
-				if (Gamma::g5idmg(mu,alpha,beta) != 0.) tmp += -(kappa)*Gamma::g5idmg(mu,alpha,beta)*X[Vector::sup(site,mu)][beta];
+				if (Gamma::g5idmg(mu,alpha,beta) != static_cast<real_t>(0.)) tmp += -(kappa)*Gamma::g5idmg(mu,alpha,beta)*X[Vector::sup(site,mu)][beta];
 			}
 			force += tensor(Y[site][alpha],tmp);
 		}
@@ -66,7 +66,7 @@ FermionicForceMatrix BlockDiracWilsonFermionForce::derivative(const extended_fer
 			GaugeVector tmp;
 			set_to_zero(tmp);
 			for (unsigned int beta = 0; beta < 4; ++beta) {
-				if (Gamma::g5idpg(mu,alpha,beta) != 0.) tmp += -(kappa)*Gamma::g5idpg(mu,alpha,beta)*htrans(lattice[site][mu])*X[site][beta];
+				if (Gamma::g5idpg(mu,alpha,beta) != static_cast<real_t>(0.)) tmp += -(kappa)*Gamma::g5idpg(mu,alpha,beta)*htrans(lattice[site][mu])*X[site][beta];
 			}
 			force -= tensor(lattice[site][mu]*Y[Vector::sup(site,mu)][alpha],tmp);
 		}

@@ -19,8 +19,6 @@ void Polynomial::evaluate(DiracOperator* diracOperator, extended_dirac_vector_t&
 	//We work with reduced halos
 	reduced_dirac_vector_t output;
 	reduced_dirac_vector_t input = original_input;
-
-	std::cout << "Non so piu' dove sbattere la testa: " << fabs(real(scaling)) << std::endl;
 	
 	if (roots.size() % 2 == 0) {//TODO minus sign
 		std::vector<complex>::iterator i = roots.begin();
@@ -103,6 +101,103 @@ void Polynomial::evaluate(DiracOperator* diracOperator, extended_dirac_vector_t&
 		}
 		else {
 			output = tmp1;
+		}
+	}
+	original_output = output;
+}
+
+void Polynomial::evaluate(DiracOperator* diracOperator, extended_dirac_vector_t& original_output, const extended_dirac_vector_t& original_input, DiracOperator* preconditioner) {
+	//We work with reduced halos
+	reduced_dirac_vector_t output;
+	reduced_dirac_vector_t input = original_input;
+	
+	if (roots.size() % 2 == 0) {//TODO minus sign
+		std::vector<complex>::iterator i = roots.begin();
+
+		//First step
+		diracOperator->multiply(tmp2, input);
+		preconditioner->multiplyAdd(tmp1, tmp2, input, -*i);
+#pragma omp parallel for
+		for (int site = 0; site < tmp1.completesize; ++site) {
+			for (unsigned int mu = 0; mu < 4; ++mu) tmp1[site][mu] = fabs(real(scaling))*tmp1[site][mu];
+		}
+		
+		++i;
+		
+		while (i != roots.end()) {
+			diracOperator->multiply(output, tmp1);
+			preconditioner->multiplyAdd(tmp2, output, tmp1, -*i);
+#pragma omp parallel for
+			for (int site = 0; site < tmp2.completesize; ++site) {
+				for (unsigned int mu = 0; mu < 4; ++mu) tmp2[site][mu] = fabs(real(scaling))*tmp2[site][mu];
+			}
+			
+			++i;
+			if (i != roots.end()) {
+				diracOperator->multiply(output, tmp2);
+				preconditioner->multiplyAdd(tmp1, output, tmp2, -*i);
+#pragma omp parallel for
+				for (int site = 0; site < tmp1.completesize; ++site) {
+					for (unsigned int mu = 0; mu < 4; ++mu) tmp1[site][mu] = fabs(real(scaling))*tmp1[site][mu];
+				}
+				
+				++i;
+			}
+		}
+		
+		if (real(scaling) < 0) {
+			preconditioner->multiply(output, tmp2);
+			for (int site = 0; site < input.completesize; ++site) {
+				for (unsigned int mu = 0; mu < 4; ++mu) {
+					output[site][mu] = -output[site][mu];
+				}
+			}
+		}
+		else {
+			preconditioner->multiply(output, tmp2);
+		}
+	} else {
+		std::vector<complex>::iterator i = roots.begin();
+
+		diracOperator->multiply(tmp2, input);
+		preconditioner->multiplyAdd(tmp1, tmp2, input, -*i);
+#pragma omp parallel for
+		for (int site = 0; site < tmp1.completesize; ++site) {
+			for (unsigned int mu = 0; mu < 4; ++mu) tmp1[site][mu] = tmp1[site][mu]*fabs(real(scaling));
+		}
+		
+		++i;
+		while (i != roots.end()) {
+			diracOperator->multiply(output, tmp1);
+			preconditioner->multiplyAdd(tmp2, output, tmp1, -*i);
+#pragma omp parallel for
+			for (int site = 0; site < tmp2.completesize; ++site) {
+				for (unsigned int mu = 0; mu < 4; ++mu) tmp2[site][mu] = tmp2[site][mu]*fabs(real(scaling));
+			}
+			
+			++i;
+			if (i != roots.end()) {
+				diracOperator->multiply(output, tmp2);
+				preconditioner->multiplyAdd(tmp1, output, tmp2, -*i);
+#pragma omp parallel for
+				for (int site = 0; site < tmp1.completesize; ++site) {
+					for (unsigned int mu = 0; mu < 4; ++mu) tmp1[site][mu] = tmp1[site][mu]*fabs(real(scaling));
+				}
+				
+				++i;
+			}
+		}
+
+		if (real(scaling) < 0) {
+			preconditioner->multiply(output, tmp1);
+			for (int site = 0; site < input.completesize; ++site) {
+				for (unsigned int mu = 0; mu < 4; ++mu) {
+					output[site][mu] = -output[site][mu];
+				}
+			}
+		}
+		else {
+			preconditioner->multiply(output, tmp1);
 		}
 	}
 	original_output = output;

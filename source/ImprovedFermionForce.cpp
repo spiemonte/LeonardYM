@@ -34,7 +34,7 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 				set_to_zero(projSpinorX[nu][alpha]);
 				set_to_zero(projSpinorY[nu][alpha]);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) {
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != static_cast<real_t>(0.)) {
 						projSpinorX[nu][alpha] += ikc*Sigma::g5sigma(mu,nu,alpha,beta)*X[site][beta];
 						projSpinorY[nu][alpha] += ikc*Sigma::g5sigma(mu,nu,alpha,beta)*Y[site][beta];
 					}
@@ -98,7 +98,7 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 				set_to_zero(projSpinorX[nu][alpha]);
 				set_to_zero(projSpinorY[nu][alpha]);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) {
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != static_cast<real_t>(0.)) {
 						projSpinorX[nu][alpha] += ikc*Sigma::g5sigma(mu,nu,alpha,beta)*X[Vector::sup(site,nu)][beta];
 						projSpinorY[nu][alpha] += ikc*Sigma::g5sigma(mu,nu,alpha,beta)*Y[Vector::sup(site,nu)][beta];
 					}
@@ -139,7 +139,7 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 				set_to_zero(projSpinorX[nu][alpha]);
 				set_to_zero(projSpinorY[nu][alpha]);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) {
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != static_cast<real_t>(0.)) {
 						projSpinorX[nu][alpha] += ikc*Sigma::g5sigma(mu,nu,alpha,beta)*X[Vector::sdn(site,nu)][beta];
 						projSpinorY[nu][alpha] += ikc*Sigma::g5sigma(mu,nu,alpha,beta)*Y[Vector::sdn(site,nu)][beta];
 					}
@@ -181,7 +181,7 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 				set_to_zero(projSpinorX[nu][alpha]);
 				set_to_zero(projSpinorY[nu][alpha]);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) {
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != static_cast<real_t>(0.)) {
 						projSpinorX[nu][alpha] += ikc*Sigma::g5sigma(mu,nu,alpha,beta)*X[Vector::sup(site,mu)][beta];
 						projSpinorY[nu][alpha] += ikc*Sigma::g5sigma(mu,nu,alpha,beta)*Y[Vector::sup(site,mu)][beta];
 					}
@@ -244,7 +244,7 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 				set_to_zero(projSpinorX[nu][alpha]);
 				set_to_zero(projSpinorY[nu][alpha]);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) {
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != static_cast<real_t>(0.)) {
 						projSpinorX[nu][alpha] += ikc*Sigma::g5sigma(mu,nu,alpha,beta)*X[Vector::sup(Vector::sup(site,mu),nu)][beta];
 						projSpinorY[nu][alpha] += ikc*Sigma::g5sigma(mu,nu,alpha,beta)*Y[Vector::sup(Vector::sup(site,mu),nu)][beta];
 					}
@@ -285,7 +285,7 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 				set_to_zero(projSpinorX[nu][alpha]);
 				set_to_zero(projSpinorY[nu][alpha]);
 				for (unsigned int beta = 0; beta < 4; ++beta) {
-					if (Sigma::g5sigma(mu,nu,alpha,beta) != 0.) {
+					if (Sigma::g5sigma(mu,nu,alpha,beta) != static_cast<real_t>(0.)) {
 						projSpinorX[nu][alpha] += ikc*Sigma::g5sigma(mu,nu,alpha,beta)*X[Vector::sdn(Vector::sup(site,mu),nu)][beta];
 						projSpinorY[nu][alpha] += ikc*Sigma::g5sigma(mu,nu,alpha,beta)*Y[Vector::sdn(Vector::sup(site,mu),nu)][beta];
 					}

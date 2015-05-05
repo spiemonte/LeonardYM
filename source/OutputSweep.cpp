@@ -22,7 +22,14 @@ OutputSweep::OutputSweep() : LatticeSweep() { }
 OutputSweep::~OutputSweep() { }
 
 void OutputSweep::execute(environment_t& environment) {
-	std::string format_name = environment.configurations.get<std::string>("format_name");
+	std::string format_name;
+	try {
+		format_name = environment.configurations.get<std::string>("output_format_name");
+	}
+	catch (NotFoundOption& ex) {
+		format_name = environment.configurations.get<std::string>("format_name");
+	}
+	
 	typedef extended_gauge_lattice_t::Layout LT;
 	typedef extended_gauge_lattice_t::Layout Layout;
 	
@@ -31,7 +38,7 @@ void OutputSweep::execute(environment_t& environment) {
 		std::string output_directory = environment.configurations.get<std::string>("output_directory_configurations");
 		int offset = environment.configurations.get<unsigned int>("output_offset");
 
-		
+		if (isOutputProcess()) std::cout << "OutputSweep::Writing configuration to file " << output_directory << output_name << "_" << toString(environment.sweep+offset) << std::endl;		
 
 		FILE* fout(NULL);
 		std::string output_file = output_directory+output_name+"_"+toString(environment.sweep+offset)+"_"+toString(LT::this_processor)+".txt";
@@ -54,8 +61,10 @@ void OutputSweep::execute(environment_t& environment) {
 			for (unsigned int mu = 0; mu < 4; ++mu) {
 				for (int i = 0; i < numberColors; ++i) {
 					for (int j = 0; j < numberColors; ++j) {
-						xdr_double(&xout,&real(environment.gaugeLinkConfiguration[site][mu].at(i,j)));
-						xdr_double(&xout,&imag(environment.gaugeLinkConfiguration[site][mu].at(i,j)));
+						double re = environment.gaugeLinkConfiguration[site][mu].at(i,j).real();
+						double im = environment.gaugeLinkConfiguration[site][mu].at(i,j).imag();
+						xdr_double(&xout,&re);
+						xdr_double(&xout,&im);
 					}
 				}
 			}
@@ -75,6 +84,7 @@ void OutputSweep::execute(environment_t& environment) {
 			descriptor << LT::numberProcessors << std::endl;
 			descriptor << LT::localsize << std::endl;
 			descriptor << std::setprecision(13) << plaquette << std::endl;
+			descriptor.close();
 		}
 
 	}
@@ -94,6 +104,7 @@ void OutputSweep::execute(environment_t& environment) {
 
 			if (!fout) {
 				if (isOutputProcess()) std::cout << "OutputSweep::File not writable!" << std::endl;
+				exit(19);
 				return;
 			}
 		}
@@ -260,6 +271,7 @@ void OutputSweep::execute(environment_t& environment) {
 
 		if (isOutputProcess()) {
 			xdr_destroy(&xout);
+			fclose(fout);
 		}
 #endif
 #if NUMCOLORS > 2
@@ -267,6 +279,49 @@ void OutputSweep::execute(environment_t& environment) {
 			std::cout << "OuputSweep::munster_format not implemented for NC>2!" << std::endl;
 		}
 #endif
+	}
+	else if (format_name == "mathematica_format") {
+		std::string output_name = environment.configurations.get<std::string>("output_configuration_name");
+		std::string output_directory = environment.configurations.get<std::string>("output_directory_configurations");
+		int offset = environment.configurations.get<unsigned int>("output_offset");
+
+		
+
+		//FILE* fout(NULL);
+		std::string output_file = output_directory+output_name+"_"+toString(environment.sweep+offset)+"_"+toString(LT::this_processor)+".txt";
+		std::fstream fout(output_file.c_str(),std::fstream::out);
+
+		//fout.open(output_file.c_str(), "w");
+
+		/*if (!fout) {
+			std::cout << "File not writeble!" << std::endl;
+			return;
+		}*/
+		
+		fout << "{";
+		for (int site = 0; site < environment.gaugeLinkConfiguration.localsize-1; ++site) {
+			fout << "{{" << LT::globalCoordinate[site].x << ",";
+			fout << LT::globalCoordinate[site].y << ",";
+			fout << LT::globalCoordinate[site].z << ",";
+			fout << LT::globalCoordinate[site].t << "},";
+			fout << toString(environment.gaugeLinkConfiguration[site][0]) << ",";
+			fout << toString(environment.gaugeLinkConfiguration[site][1]) << ",";
+			fout << toString(environment.gaugeLinkConfiguration[site][2]) << ",";
+			fout << toString(environment.gaugeLinkConfiguration[site][3]) << "},";
+		}
+		{
+			int site = environment.gaugeLinkConfiguration.localsize-1;
+			fout << "{{" << LT::globalCoordinate[site].x << ",";
+			fout << LT::globalCoordinate[site].y << ",";
+			fout << LT::globalCoordinate[site].z << ",";
+			fout << LT::globalCoordinate[site].t << "},";
+			fout << toString(environment.gaugeLinkConfiguration[site][0]) << ",";
+			fout << toString(environment.gaugeLinkConfiguration[site][1]) << ",";
+			fout << toString(environment.gaugeLinkConfiguration[site][2]) << ",";
+			fout << toString(environment.gaugeLinkConfiguration[site][3]) << "}";
+		}
+		fout << "}";
+		fout.close();
 	}
 	/*
 	
