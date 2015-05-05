@@ -11,7 +11,7 @@
 #include <string>
 #include <utility>
 #include <rpc/xdr.h>
-#include "../ToString.h"
+#include "utils/ToString.h"
 #include "LatticeChunk.h"
 
 namespace Lattice {
