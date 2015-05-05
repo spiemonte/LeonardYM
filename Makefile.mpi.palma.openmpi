@@ -9,7 +9,7 @@ endif
 CC       = mpigcc
 CPP      = mpicxx
 OPTIMIZE = -O2 -pipe -fopenmp -march=native 
-INC	= -I./extra_libs/Eigen
+INC	= -I./extra_libs/Eigen -I./source/
 CFLAGS   = $(OPTIMIZE) $(INC)
 CPPFLAGS = $(OPTIMIZE) $(INC) $(adj) -DENABLE_MPI -DNUMCOLORS=$(nc) -DMULTITHREADING -DMBE="\"$(PWD)/source/utils/MatrixBaseExtension.h\"" -I/share/Applic.PALMA/boost/boost-trunk/ -DEIGEN
 

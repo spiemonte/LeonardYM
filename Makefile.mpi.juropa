@@ -9,7 +9,7 @@ endif
 CC       = mpicc
 CPP      = mpicxx
 OPTIMIZE = -O3 -pipe -axSSE4.2 -openmp
-INC	= -I./extra_libs/Eigen
+INC	= -I./extra_libs/Eigen -I./source/
 CFLAGS   = $(OPTIMIZE) $(INC)
 CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/utils/MatrixBaseExtension.h\"" -I/usr/local/boost/boost_1_49_0 $(adj) -DENABLE_MPI -DNUMCOLORS=$(nc) -DMULTITHREADING -DEIGEN
 

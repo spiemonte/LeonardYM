@@ -9,7 +9,7 @@ endif
 CC       = mpigcc.mpich2
 CPP      = mpicxx.mpich2
 OPTIMIZE = -O2 -pipe -march=native -fopenmp #-Wall -Wextra
-INC	= -I./extra_libs/Eigen -I./extra_libs/
+INC	= -I./extra_libs/Eigen -I./extra_libs/ -I./source/
 CFLAGS   = $(OPTIMIZE) $(INC)
 CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/utils/MatrixBaseExtension.h\"" $(adj) -DENABLE_MPI -DNUMCOLORS=$(nc) -DMULTITHREADING -DEIGEN
 
