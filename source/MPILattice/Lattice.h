@@ -6,7 +6,7 @@
 #include <mpi.h>
 #include <vector>
 #include <fstream>
-#include "../ToString.h"
+#include "utils/ToString.h"
 #endif
 #include <iostream>
 #include <typeinfo>
