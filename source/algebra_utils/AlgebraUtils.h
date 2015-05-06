@@ -7,7 +7,7 @@
 
 #ifndef ALGEBRAUTILS_H_
 #define ALGEBRAUTILS_H_
-#include "Environment.h"
+#include "../Environment.h"
 #include "utils/RandomSeed.h"
 //#include "./vectorclass/complexvec.h"
 
