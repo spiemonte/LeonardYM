@@ -8,6 +8,9 @@
 #ifndef ENVIRONMENT_H_
 #define ENVIRONMENT_H_
 
+#include <boost/multi_array.hpp>
+#include <boost/array.hpp>
+
 #include "MatrixTypedef.h"
 #include "./MPILattice/Lattice.h"
 

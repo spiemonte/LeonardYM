@@ -162,7 +162,8 @@ void PureGaugeWilsonLoops::execute(environment_t& environment) {
 
 	typedef GaugeGroup WilsonLineField[LT::glob_x][LT::glob_z][LT::glob_t][LT::glob_y/sliceSize];
 
-	WilsonLineField *wilsonLineT = new WilsonLineField[numberSubSweeps];
+	//boost::array<boost::multi_array<GaugeGroup,5>, 5> shape = {{ numberSubSweeps, LT::glob_x, LT::glob_y, LT::glob_t, LT::glob_y/sliceSize }};
+	boost::multi_array<GaugeGroup,5> wilsonLineT(boost::extents[numberSubSweeps][LT::glob_x][LT::glob_y][LT::glob_t][LT::glob_y/sliceSize]);
 
 	for (int numSweep = 0; numSweep < numberSubSweeps; ++numSweep) {
 #pragma omp parallel for
@@ -236,7 +237,6 @@ void PureGaugeWilsonLoops::execute(environment_t& environment) {
 		output->pop("polyakov_loop_correlator");
 	}
 
-	delete[] wilsonLineT;
 	delete action;
 
 	environment.synchronize();

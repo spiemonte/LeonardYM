@@ -77,7 +77,7 @@ int main(int ac, char* av[]) {
 	desc.add_options()
 	    ("help", "produce help message")
 	    ("list_sweeps", "produce the list of all the available sweeps")
-	  ("configfile", po::value<std::string>()->required(), "set the configuration file")
+	    ("configfile", po::value<std::string>()->required(), "set the configuration file")
 	    ("beta", po::value<double>(), "set the \\beta parameter of the simulations")
 	    ("kappa", po::value<double>(), "set the \\kappa parameter of the simulations")
 		("glob_x", po::value<unsigned int>(), "The x lattice size")
