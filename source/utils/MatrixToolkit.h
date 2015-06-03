@@ -54,11 +54,12 @@ public:
 		return *this;
 	}
 
-	Vector& operator-() {
+	Vector operator-() const {
+		Vector result;
 		for (int i = 0; i < NN; ++i) {
-			data[i] = -data[i];
+			result.data[i] = -result.data[i];
 		}
-		return *this;
+		return result;
 	}
 
 	Vector operator+(const Vector& snd) const {
@@ -125,6 +126,107 @@ public:
 	
 private:
 	T data[NN];
+};
+
+template<typename T>
+class Vector<T,-1> {
+public:
+	Vector(): size(0), data(0) {}
+	Vector(int _size): size(_size), data(new T[size]) {}
+	Vector(const Vector& snd) {
+		if (size != snd.size) {
+			size = snd.size;
+			if (size != 0) data = new T[size];
+		}
+		for (int i = 0; i < size; ++i) {
+			data[i] = snd.data[i];
+		}
+	}
+	Vector& operator=(const Vector& snd) {
+		if (size != snd.size) {
+			size = snd.size;
+			if (data) delete[] data;
+			if (size != 0) data = new T[size];
+		}
+		for (int i = 0; i < size; ++i) {
+			data[i] = snd.data[i];
+		}
+		return *this;
+	}
+
+	Vector operator-() const {
+		Vector result(size);
+		for (int i = 0; i < size; ++i) {
+			result.data[i] = -data[i];
+		}
+		return result;
+	}
+
+	Vector operator+(const Vector& snd) const {
+		Vector result(size);
+		for (int i = 0; i < size; ++i) {
+			result.data[i] = data[i] + snd.data[i];
+		}
+		return result;
+	}
+
+	Vector operator-(const Vector& snd) const {
+		Vector result(size);
+		for (int i = 0; i < size; ++i) {
+			result.data[i] = data[i] - snd.data[i];
+		}
+		return result;
+	}
+
+	Vector& operator+=(const Vector& snd) {
+		for (int i = 0; i < size; ++i) {
+			data[i] += snd.data[i];
+		}
+		return *this;
+	}
+
+	Vector& operator-=(const Vector& snd) {
+		for (int i = 0; i < size; ++i) {
+			data[i] -= snd.data[i];
+		}
+		return *this;
+	}
+
+	template<typename U> Vector operator/(const U& snd) const {
+		Vector result(size);
+		for (int i = 0; i < size; ++i) {
+			result.data[i] = data[i]/snd;
+		}
+		return result;
+	}
+
+	T& at(int i) {
+		return data[i];
+	}
+
+	const T& at(int i) const {
+		return data[i];
+	}
+
+	T& operator[](int i) {
+		return data[i];
+	}
+
+	const T& operator[](int i) const {
+		return data[i];
+	}
+
+	T& operator()(int i) {
+		return data[i];
+	}
+
+	const T& operator()(int i) const {
+		return data[i];
+	}
+
+private:
+	int size;
+	T* data;
 };
 
 template<typename T, int NN> T vector_dot(const Vector<T, NN>& a, const Vector<T, NN>& b) {
@@ -608,6 +710,25 @@ public:
 		return n;
 	}
 	
+	void resize(int _m, int _n) {
+		m = _m;
+		n = _n;
+		if (data) {
+			for (int i = 0; i < m; ++i) delete[] data[i];
+			delete[] data;
+		}
+		data = new T*[m];
+		for (int i = 0; i < m; ++i) data[i] = new T[n];
+	}
+
+	void zeros() {
+		for (int i = 0; i < m; ++i) {
+			for (int j = 0; j < n; ++j) {
+				data[i][j] = 0.;
+			}
+		}
+	}
+
 private:
 	T** data;
 	int m;

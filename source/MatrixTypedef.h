@@ -143,7 +143,7 @@ typedef arma::Mat< real_t >::fixed<3,3> AdjointSU2Group;
 #endif
 #ifdef MATRIXTOOLKIT
 
-#include "MatrixToolkit.h"
+#include "utils/MatrixToolkit.h"
 
 namespace Update {
 
@@ -151,9 +151,11 @@ const int numberColors = NUMCOLORS;
 typedef double real_t;
 typedef long double long_real_t;
 typedef std::complex<real_t> complex;
+typedef std::complex<float> single_complex;
 
 typedef matrix_toolkit::Matrix< complex, 2 > matrix2x2_t;
 typedef matrix_toolkit::Matrix< complex, -1 > matrix_t;
+typedef matrix_toolkit::Vector< complex, -1 > vector_t;
 
 typedef matrix_toolkit::Matrix< complex, numberColors > FundamentalGroup;
 typedef matrix_toolkit::Matrix< real_t, numberColors*numberColors - 1 > AdjointGroup;
@@ -166,6 +168,7 @@ typedef matrix_toolkit::Matrix< complex, numberColors > GaugeGroup;
 typedef matrix_toolkit::Matrix< real_t, numberColors*numberColors - 1 > FermionicGroup;
 typedef matrix_toolkit::Matrix< complex, numberColors*numberColors - 1 > FermionicForceMatrix;
 typedef matrix_toolkit::Vector< complex, numberColors*numberColors - 1 > GaugeVector;
+typedef matrix_toolkit::Vector< single_complex, numberColors*numberColors - 1 > single_GaugeVector;
 
 const int diracVectorLength = numberColors*numberColors - 1;
 #endif
@@ -174,6 +177,7 @@ typedef matrix_toolkit::Matrix< complex, numberColors > GaugeGroup;
 typedef matrix_toolkit::Matrix< complex, numberColors > FermionicGroup;
 typedef matrix_toolkit::Matrix< complex, numberColors > FermionicForceMatrix;
 typedef matrix_toolkit::Vector< complex, numberColors > GaugeVector;
+typedef matrix_toolkit::Vector< single_complex, numberColors, 1 > single_GaugeVector;
 
 const int diracVectorLength = numberColors;
 #endif
