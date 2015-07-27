@@ -9,6 +9,7 @@
 #include "./source/io/StorageParameters.h"
 #include "./source/MatrixTypedef.h"
 #include "./source/utils/RandomSeed.h"
+#include "./source/utils/ToString.h"
 #include "./source/Simulation.h"
 #include "./source/io/GlobalOutput.h"
 #include "./source/MPILattice/ReducedStencil.h"
@@ -42,6 +43,17 @@ MPI_Datatype MpiType<Update::AdjointGroup>::type = MPI_DOUBLE;
 
 namespace po = boost::program_options;
 
+template<int N>
+inline bool testBasicMatrixFunctions(){
+    typedef Eigen::Matrix<Update::complex, N, N> TMatrix;
+    TMatrix tmp1(TMatrix::Zero());
+    TMatrix tmp2(TMatrix::Zero());
+    TMatrix tmp3(TMatrix::Zero());
+    std::cout<< trace(tmp1*tmp2) <<std::endl;
+    return true;
+}
+
+
 int main(int ac, char* av[]) {
 	/*Update::LieGenerator<Update::GaugeGroup> lieGenerator;
 	Update::LieGenerator<Update::AdjointGroup> adjointLieGenerator;
@@ -67,7 +79,24 @@ int main(int ac, char* av[]) {
 	//((double (*)[5])test)[1][2]
 	std::cout << ((std::complex<double> (*)[4][3])test2)[7][2][2] << " " << vect[7][2][2] << std::endl;
 
-	exit(0);*/
+	exit(0);
+	Update::GaugeGroup test1, test2;
+	for (int i = 0; i < 2; ++i) {
+		for (int j = 0; j < 2; ++j) {
+			test1.at(i,j) = (static_cast<double>(i+ 2*j +1 ))/7.;
+			test2.at(i,j) = (static_cast<double>(3*i- 2*j +1) )/2.;
+		}
+	}
+	Update::GaugeGroup test3(test1*test2);
+	Update::complex res1 = trace(test1*test2);
+	Update::complex res2 = trace(test3);
+	std::cout << "Test: " << res1 << " " << res2 << std::endl;
+	std::cout << Update::toString(test1) << std::endl;
+	std::cout << Update::toString(test2) << std::endl;
+	std::cout << Update::toString(test3) << std::endl;
+
+	testBasicMatrixFunctions<5>();*/
+
 #ifdef ENABLE_MPI
 	MPI_Init(&ac, &av);
 #endif
@@ -113,6 +142,7 @@ int main(int ac, char* av[]) {
 		("boundary_conditions", po::value<std::string>(), "Boundary conditions to use: periodic (fermions), antiperiodic (fermions), spatialantiperiodic (fermion), open")
 		("number_extra_vectors_eigensolver", po::value<unsigned int>(), "Number of extra vectors for the Arnoldi algorithm, increase this number to increase precision")
 		("number_eigenvalues", po::value<unsigned int>(), "Number of eigenvalues ofthe dirac wilson operator to be computed")
+		("measure_condensate_connected", po::value<bool>(), "Should I measure the connected part of the condensate susceptibility?")
 
 /*	    ("heatbath_rational_fraction_1", po::value<std::string>(), "the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
 	    ("metropolis_rational_fraction_1", po::value<std::string>(), "the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")

@@ -41,6 +41,21 @@ void ChiralCondensate::execute(environment_t& environment) {
 		biConjugateGradient = new BiConjugateGradient();
 		biConjugateGradient->setMaximumSteps(environment.configurations.get<unsigned int>("generic_inverter_max_steps"));
 	}
+	
+	bool connected;
+	
+	try {
+		connected = environment.configurations.get<bool>("measure_condensate_connected");
+	} catch (NotFoundOption& ex) {
+		connected = true;
+	}
+	
+	if (connected && isOutputProcess()) {
+		std::cout << "ChiralCondensate::Measuring also the connected part of the chiral susceptibility" << std::endl;
+	}
+	else if (isOutputProcess()) {
+		std::cout << "ChiralCondensate::No measure of the connected part of the chiral susceptibility" << std::endl;
+	}
 
 	std::vector< long_real_t > chiralCondensateRe;
 	std::vector< long_real_t > chiralCondensateIm;
@@ -70,13 +85,15 @@ void ChiralCondensate::execute(environment_t& environment) {
 		pionNormRe.push_back(real(pionNorm)/volume);
 		pionNormIm.push_back(imag(pionNorm)/volume);
 		
-		AlgebraUtils::gamma5(randomNoise);
-		biConjugateGradient->solve(squareDiracOperator, randomNoise, tmp_square);
-		diracOperator->multiply(randomNoise, tmp_square);
+		if (connected) {
+			AlgebraUtils::gamma5(randomNoise);
+			biConjugateGradient->solve(squareDiracOperator, randomNoise, tmp_square);
+			diracOperator->multiply(randomNoise, tmp_square);
 
-		std::complex<long_real_t> condensateConnected = AlgebraUtils::gamma5dot(randomNoise, tmp);
-		chiralCondensateConnectedRe.push_back(real(condensateConnected)/volume);
-		chiralCondensateConnectedIm.push_back(imag(condensateConnected)/volume);
+			std::complex<long_real_t> condensateConnected = AlgebraUtils::gamma5dot(randomNoise, tmp);
+			chiralCondensateConnectedRe.push_back(real(condensateConnected)/volume);
+			chiralCondensateConnectedIm.push_back(imag(condensateConnected)/volume);
+		}
 	}
 
 	if (isOutputProcess() && environment.measurement) {
@@ -104,8 +121,10 @@ void ChiralCondensate::execute(environment_t& environment) {
 		output->write("pseudocondensate", this->mean(pseudoCondensateRe));
 		output->write("pseudocondensate", this->mean(pseudoCondensateIm));
 
-		output->write("condensate_connected", this->mean(chiralCondensateConnectedRe));
-		output->write("condensate_connected", this->mean(chiralCondensateConnectedIm));
+		if (connected) {
+			output->write("condensate_connected", this->mean(chiralCondensateConnectedRe));
+			output->write("condensate_connected", this->mean(chiralCondensateConnectedIm));
+		}
 
 		output->write("pion_norm", this->mean(pionNormRe));
 		output->write("pion_norm", this->mean(pionNormIm));

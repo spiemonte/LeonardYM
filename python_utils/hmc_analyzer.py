@@ -3,10 +3,6 @@ import os
 import sys
 import re
 import numpy
-import matplotlib as mpl
-mpl.use('Agg')
-import matplotlib.pyplot as plt
-import matplotlib.ticker as plticker
 import getopt
 import random
 import math
@@ -100,29 +96,35 @@ resultstr = "Expected acceptance: "+str(round(expected_acceptance,4))
 print resultstr
 title += "\n"+resultstr
 
-plt.suptitle(title)
+try:
+	import matplotlib as mpl
+	mpl.use('Agg')
+	import matplotlib.pyplot as plt
+	import matplotlib.ticker as plticker
 
-ax = plt.subplot(2,1,1)
-ax.plot(range(init,end),toplot[0][init:end],color='b')
-ax.yaxis.set_label_text("Energy variation")
-ax.yaxis.set_major_locator(plticker.MaxNLocator(6,prune='both'))
-ax.yaxis.set_major_formatter(plticker.FormatStrFormatter('%0.4f'))
-ax.xaxis.set_major_locator(plticker.LinearLocator(5))
+	plt.suptitle(title)
 
-ax.xaxis.set_label_text("T Monte Carlo")
+	ax = plt.subplot(2,1,1)
+	ax.plot(range(init,end),toplot[0][init:end],color='b')
+	ax.yaxis.set_label_text("Energy variation")
+	ax.yaxis.set_major_locator(plticker.MaxNLocator(6,prune='both'))
+	ax.yaxis.set_major_formatter(plticker.FormatStrFormatter('%0.4f'))
+	ax.xaxis.set_major_locator(plticker.LinearLocator(5))
 
-ax = plt.subplot(2,1,2)
-ax.hist(toplot[0][init:end],facecolor='b')
-ax.xaxis.set_major_locator(plticker.LinearLocator(5))
-ax.xaxis.set_major_formatter(plticker.FormatStrFormatter('%0.4f'))
-ax.yaxis.set_label_text("Frequency")
-ax.yaxis.set_major_locator(plticker.MaxNLocator(6,prune='both'))
+	ax.xaxis.set_label_text("T Monte Carlo")
 
-ax.xaxis.set_label_text("Energy variation value")
+	ax = plt.subplot(2,1,2)
+	ax.hist(toplot[0][init:end],facecolor='b')
+	ax.xaxis.set_major_locator(plticker.LinearLocator(5))
+	ax.xaxis.set_major_formatter(plticker.FormatStrFormatter('%0.4f'))
+	ax.yaxis.set_label_text("Frequency")
+	ax.yaxis.set_major_locator(plticker.MaxNLocator(6,prune='both'))
 
-plt.subplots_adjust(wspace=0.3,left=0.2,top=0.83,bottom=0.1)
-plt.savefig(basename+"_hmc_history")
+	ax.xaxis.set_label_text("Energy variation value")
 
-
+	plt.subplots_adjust(wspace=0.3,left=0.2,top=0.83,bottom=0.1)
+	plt.savefig(basename+"_hmc_history")
+except ImportError:
+	print "Matplotlib not present, no plot output will be produced!"
 
 
