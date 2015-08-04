@@ -13,6 +13,7 @@
 #include <fstream>
 #include <rpc/rpc.h>
 #include <rpc/xdr.h>
+#include <sys/time.h>
 #include <iomanip>
 
 namespace Update {
@@ -22,6 +23,10 @@ OutputSweep::OutputSweep() : LatticeSweep() { }
 OutputSweep::~OutputSweep() { }
 
 void OutputSweep::execute(environment_t& environment) {
+
+	timeval start, stop, result;
+	gettimeofday(&start,NULL);	
+	
 	std::string format_name;
 	try {
 		format_name = environment.configurations.get<std::string>("output_format_name");
@@ -323,6 +328,11 @@ void OutputSweep::execute(environment_t& environment) {
 		fout << "}";
 		fout.close();
 	}
+	
+	gettimeofday(&stop,NULL);
+	timersub(&stop,&start,&result);
+	if (isOutputProcess()) std::cout << "OutputSweep::Configuration written in: " << (double)result.tv_sec + result.tv_usec/1000000.0 << " sec" << std::endl;
+	
 	/*
 	
 	
