@@ -8,6 +8,7 @@
 #include "NFlavorFermionAction.h"
 #include "inverters/MultishiftSolver.h"
 #include "algebra_utils/AlgebraUtils.h"
+#include "hmc_forces/SmearingForce.h"
 
 namespace Update {
 
@@ -50,29 +51,36 @@ NFlavorFermionAction::~NFlavorFermionAction() {
 }
 
 GaugeGroup NFlavorFermionAction::force(const environment_t& env, int site, int mu) const {
-	GaugeGroup force;
-	set_to_zero(force);
-	std::vector<RationalApproximation>::const_iterator i;
-	std::vector< std::vector<extended_dirac_vector_t> >::const_iterator X = Xs.begin();
-	std::vector< std::vector<extended_dirac_vector_t> >::const_iterator Y = Ys.begin();
-	for (i = rationalApproximations.begin(); i != rationalApproximations.end(); ++i) {
-		//The vector of the weights (alphas)
-		std::vector< real_t > weights = i->getAlphas();
-		//the pointer to the single weight
-		std::vector< real_t >::const_iterator weight;
-		//Take the list of the solutions for the single fermion action
-		std::vector<extended_dirac_vector_t>::const_iterator x = X->begin();
-		std::vector<extended_dirac_vector_t>::const_iterator y = Y->begin();
-		for (weight = weights.begin(); weight != weights.end(); ++weight) {
-			//Minus sign on the fermion force!
-			force -= (*weight)*fermionForce->force(env, fermionForce->derivative(env.getFermionLattice(), *x, *y, site, mu), site, mu);
-			++x;
-			++y;
+	return fermionForce->force(env, fermionForceLattice[site][mu], site, mu);
+}
+
+void NFlavorFermionAction::derivative(const environment_t& env) {
+#pragma omp parallel for
+	for (int site = 0; site < fermionForceLattice.localsize; ++site) {
+		for (unsigned int mu = 0; mu < 4; ++mu) {
+			set_to_zero(fermionForceLattice[site][mu]);
+			std::vector<RationalApproximation>::const_iterator i;
+			std::vector< std::vector<extended_dirac_vector_t> >::const_iterator X = Xs.begin();
+			std::vector< std::vector<extended_dirac_vector_t> >::const_iterator Y = Ys.begin();
+			for (i = rationalApproximations.begin(); i != rationalApproximations.end(); ++i) {
+				//The vector of the weights (alphas)
+				std::vector< real_t > weights = i->getAlphas();
+				//the pointer to the single weight
+				std::vector< real_t >::const_iterator weight;
+				//Take the list of the solutions for the single fermion action
+				std::vector<extended_dirac_vector_t>::const_iterator x = X->begin();
+				std::vector<extended_dirac_vector_t>::const_iterator y = Y->begin();
+				for (weight = weights.begin(); weight != weights.end(); ++weight) {
+					//Minus sign on the fermion force!
+					fermionForceLattice[site][mu] -= (*weight)*fermionForce->derivative(env.getFermionLattice(), *x, *y, site, mu);
+					++x;
+					++y;
+				}
+				++X;
+				++Y;
+			}
 		}
-		++X;
-		++Y;
 	}
-	return force;
 }
 
 void NFlavorFermionAction::updateForce(extended_gauge_lattice_t& forceLattice, const environment_t& env) {
@@ -99,6 +107,44 @@ void NFlavorFermionAction::updateForce(extended_gauge_lattice_t& forceLattice, c
 		++y;
 		++pseudofermion;//TODO
 	}
+
+	//Compute first the link derivative
+	this->derivative(env);
+	
+	try {
+		int levels = env.configurations.get<int>("stout_smearing_levels");
+		real_t rho = env.configurations.get<real_t>("stout_smearing_rho");
+
+		extended_gauge_lattice_t smeared = env.gaugeLinkConfiguration, tmp;
+		extended_fermion_lattice_t smearedConfs[levels];
+		
+		StoutSmearing stoutSmearing;
+	
+		for (int level = 0; level < levels; ++level) {
+#ifdef ADJOINT
+			ConvertLattice<extended_fermion_lattice_t,extended_gauge_lattice_t>::convert(smearedConfs[level], smeared);
+#endif
+#ifndef ADJOINT
+			smearedConfs[level] = smeared;
+#endif
+			//env.setFermionBc(smearedConfs[level]);
+			stoutSmearing.smearing(smeared, tmp, rho);
+			smeared = tmp;
+		}
+
+		SmearingForce test;
+		for (int level = levels; level > 0; --level) {
+			extended_fermion_force_lattice_t fermionForceLatticeSmear;
+			std::cout << fermionForceLattice[5][2] << std::endl;
+			test.derivative(fermionForceLattice, fermionForceLatticeSmear, smearedConfs[level - 1], rho);
+			fermionForceLattice = fermionForceLatticeSmear;
+			std::cout << fermionForceLattice[5][2] << std::endl;
+		}
+	}
+	catch (NotFoundOption& ex) {
+	}
+
+
 
 	//Calculate the force
 #pragma omp parallel for

@@ -26,13 +26,26 @@ FermionicForceMatrix FermionForce::tensor(const GaugeVector& x, const GaugeVecto
 }
 
 GaugeGroup FermionForce::force(const environment_t& env, const FermionicForceMatrix& derivative, int site, unsigned int mu) {
+#ifdef ADJOINT
+	GaugeGroup result;
+	set_to_zero(result);
+	FermionicGroup link;
+	ConvertLattice<GaugeGroup,FermionicGroup>::toAdjoint(env.gaugeLinkConfiguration[site][mu],link);
+	//For every generator
+	for (unsigned int i = 0; i < fermionLieGenerator.numberGenerators(); ++i) {
+		result += -I*imag(trace(derivative*fermionLieGenerator.get(i)*link))*gaugeLieGenerator.get(i);
+	}
+	return result;
+#endif
+#ifndef ADJOINT
 	GaugeGroup result;
 	set_to_zero(result);
 	//For every generator
 	for (unsigned int i = 0; i < fermionLieGenerator.numberGenerators(); ++i) {
-		result += -I*imag(trace(derivative*fermionLieGenerator.get(i)*(env.getFermionLattice()[site][mu])))*gaugeLieGenerator.get(i);
+		result += -I*imag(trace(derivative*fermionLieGenerator.get(i)*env.gaugeLinkConfiguration[site][mu]))*gaugeLieGenerator.get(i);
 	}
 	return result;
+#endif
 }
 
 } /* namespace Update */

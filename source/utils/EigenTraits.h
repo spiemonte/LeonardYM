@@ -7,10 +7,13 @@
 
 #ifndef EIGENTRAITS_H_
 #define EIGENTRAITS_H_
-#include "../math/grouptraits.h"
-#include "../update_new/MatrixTypedef.h"
+//#include "../math/grouptraits.h"
+#include "MatrixTypedef.h"
 
-namespace Math {
+namespace Update {
+
+template<class T> class Group_Traits {
+};
 
 template<> class Group_Traits<Update::GaugeGroup> {
 public:

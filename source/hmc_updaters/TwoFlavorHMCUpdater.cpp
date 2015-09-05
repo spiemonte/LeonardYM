@@ -15,7 +15,7 @@
 //#define REVERSIBILITY_CHECK
 
 #ifdef DEBUGFORCE
-#include "TestForce.h"
+#include "hmc_forces/TestForce.h"
 #endif
 
 namespace Update {

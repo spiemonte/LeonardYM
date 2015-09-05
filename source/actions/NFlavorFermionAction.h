@@ -25,6 +25,8 @@ public:
 
 	virtual void updateForce(extended_gauge_lattice_t& forceLattice, const environment_t& env);
 
+	void derivative(const environment_t& env);
+
 	virtual long_real_t energy(const environment_t& env);
 
 	void addPseudoFermion(extended_dirac_vector_t* _pseudofermion);
@@ -54,6 +56,8 @@ private:
 	std::vector< std::vector<extended_dirac_vector_t> > Xs;
 	std::vector< std::vector<extended_dirac_vector_t> > Ys;
 	extended_dirac_vector_t* tmp_pseudofermion;
+	//The derivative of the whole action with respect to the link variables
+	extended_fermion_force_lattice_t fermionForceLattice;
 
 	MultishiftSolver* multishiftSolver;
 };

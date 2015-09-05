@@ -1,6 +1,8 @@
 updater.o: updater.cpp
-
 	$(CPP) $(CPPFLAGS) -c -o updater.o updater.cpp
+
+Environment.o: ./source/Environment.cpp ./source/Environment.h
+	$(CPP) $(CPPFLAGS) -c -o Environment.o ./source/Environment.cpp
 
 LocalLayout.o: ./source/MPILattice/LocalLayout.h ./source/MPILattice/LocalLayout.cpp
 	$(CPP) $(CPPFLAGS) -c -o LocalLayout.o ./source/MPILattice/LocalLayout.cpp
@@ -179,6 +181,9 @@ Plaquette.o: ./source/wilson_loops/Plaquette.h ./source/wilson_loops/Plaquette.c
 PolyakovLoop.o: ./source/polyakov_loops/PolyakovLoop.h ./source/polyakov_loops/PolyakovLoop.cpp
 	$(CPP) $(CPPFLAGS) -c -o PolyakovLoop.o ./source/polyakov_loops/PolyakovLoop.cpp
 
+PolyakovLoopCorrelator.o: ./source/polyakov_loops/PolyakovLoopCorrelator.h ./source/polyakov_loops/PolyakovLoopCorrelator.cpp
+	$(CPP) $(CPPFLAGS) -c -o PolyakovLoopCorrelator.o ./source/polyakov_loops/PolyakovLoopCorrelator.cpp
+
 AdjointPolyakovLoop.o: ./source/polyakov_loops/AdjointPolyakovLoop.h ./source/polyakov_loops/AdjointPolyakovLoop.cpp
 	$(CPP) $(CPPFLAGS) -c -o AdjointPolyakovLoop.o ./source/polyakov_loops/AdjointPolyakovLoop.cpp
 
@@ -214,6 +219,9 @@ GluinoGlue.o: ./source/correlators/GluinoGlue.h ./source/correlators/GluinoGlue.
 
 FermionForce.o: ./source/hmc_forces/FermionForce.h ./source/hmc_forces/FermionForce.cpp
 	$(CPP) $(CPPFLAGS) -c -o FermionForce.o ./source/hmc_forces/FermionForce.cpp
+
+SmearingForce.o: ./source/hmc_forces/SmearingForce.h ./source/hmc_forces/SmearingForce.cpp
+	$(CPP) $(CPPFLAGS) -c -o SmearingForce.o ./source/hmc_forces/SmearingForce.cpp
 
 DiracWilsonFermionForce.o: ./source/hmc_forces/DiracWilsonFermionForce.h ./source/hmc_forces/DiracWilsonFermionForce.cpp
 	$(CPP) $(CPPFLAGS) -c -o DiracWilsonFermionForce.o ./source/hmc_forces/DiracWilsonFermionForce.cpp

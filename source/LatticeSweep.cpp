@@ -32,6 +32,7 @@
 #include "wilson_flow/WilsonFlow.h"
 #include "actions/GaugeEnergy.h"
 #include "polyakov_loops/AdjointPolyakovLoop.h"
+#include "polyakov_loops/PolyakovLoopCorrelator.h"
 #include "hmc_updaters/MultiStepNFlavorQCDUpdater.h"
 #include "hmc_updaters/TwistedMultiStepNFlavorQCDUpdater.h"
 
@@ -72,6 +73,8 @@ LatticeSweep* LatticeSweep::getInstance(const std::string& name) {
 		return new ChiralCondensate();
 	} else if (name == "PolyakovLoop") {
 		return new PolyakovLoop();
+	} else if (name == "PolyakovLoopCorrelator") {
+		return new PolyakovLoopCorrelator();
 	} else if (name == "AdjointPolyakovLoop") {
 		return new AdjointPolyakovLoop();
 	} else if (name == "Glueball") {

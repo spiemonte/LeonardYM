@@ -25,8 +25,10 @@ void PureGaugeHMCUpdater::execute(environment_t& environment) {
 	//Copy the lattice and the environment
 	environmentNew = environment;
 
+	real_t beta = environment.configurations.get<double>("beta");
+
 	//Get the gauge action
-	GaugeAction* gaugeAction = GaugeAction::getInstance(environment.configurations.get<std::string>("name_action"),environment.configurations.get<double>("beta"));
+	GaugeAction* gaugeAction = GaugeAction::getInstance(environment.configurations.get<std::string>("name_action"),beta);
 
 	//Get the initial energy of momenta
 	long_real_t oldMomentaEnergy = this->momentaEnergy(momenta);
@@ -50,6 +52,17 @@ void PureGaugeHMCUpdater::execute(environment_t& environment) {
 
 	//Integrate numerically the equation of motion
 	integrate->integrate(environmentNew, momenta, force, numbers_steps, t_length);
+
+	/*gaugeAction->setBeta(beta);
+	integrate->integrate(environmentNew, momenta, force, numbers_steps, t_length/2);
+
+	gaugeAction->setBeta(beta-0.1);
+	integrate->integrate(environmentNew, momenta, force, numbers_steps, t_length);
+
+	gaugeAction->setBeta(beta);
+	integrate->integrate(environmentNew, momenta, force, numbers_steps, t_length/2);
+
+	gaugeAction->setBeta(beta);*/
 #ifdef REVERSIBILITY_CHECK
 	integrate->integrate(environmentNew, momenta, force, numbers_steps, -t_length);
 #endif

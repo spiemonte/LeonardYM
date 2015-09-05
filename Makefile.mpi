@@ -6,8 +6,8 @@ else
 	adj = -DADJOINT
 endif
 
-CC       = mpigcc.mpich2
-CPP      = mpicxx.mpich2
+CC       = mpigcc
+CPP      = mpicxx
 OPTIMIZE = -O2 -pipe -march=native -fopenmp #-Wall -Wextra
 INC	= -I./extra_libs/Eigen -I./extra_libs/ -I./source/
 CFLAGS   = $(OPTIMIZE) $(INC)
@@ -16,7 +16,7 @@ CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/utils/MatrixBaseExtension.h
 include Makefile.obj.mk
 
 all: leonardQCD
-	$(CPP) $(CPPFLAGS) $(OBJECTS) -o leonardQCD.exe /usr/lib64/libboost_program_options-mt.a
+	$(CPP) $(CPPFLAGS) $(OBJECTS) -o leonardQCD.exe -lboost_program_options
 	@echo "Compiled with NUMCOLORS: " $(nc)
 
 leonardQCD: $(OBJECTS)

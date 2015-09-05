@@ -30,6 +30,8 @@ typedef Lattice::Lattice<Update::FermionicGroup[4], Lattice::MpiLayout<Lattice::
 typedef Lattice::Lattice<Update::FermionicGroup[4], Lattice::MpiLayout<Lattice::StandardStencil> > standard_fermion_lattice_t;
 typedef Lattice::Lattice<Update::FermionicGroup[4], Lattice::MpiLayout<Lattice::ReducedStencil> > reduced_fermion_lattice_t;
 
+typedef Lattice::Lattice<Update::FermionicForceMatrix[4], Lattice::MpiLayout<Lattice::ExtendedStencil> > extended_fermion_force_lattice_t;
+
 typedef Lattice::Lattice<Update::GaugeVector[4], Lattice::MpiLayout<Lattice::ExtendedStencil> > extended_dirac_vector_t;
 typedef Lattice::Lattice<Update::GaugeVector[4], Lattice::MpiLayout<Lattice::StandardStencil> > standard_dirac_vector_t;
 typedef Lattice::Lattice<Update::GaugeVector[4], Lattice::MpiLayout<Lattice::ReducedStencil> > reduced_dirac_vector_t;
@@ -58,6 +60,8 @@ typedef Lattice::Lattice<Update::GaugeGroup[4], Lattice::LocalLayout > reduced_g
 typedef Lattice::Lattice<Update::FermionicGroup[4], Lattice::LocalLayout > extended_fermion_lattice_t;
 typedef Lattice::Lattice<Update::FermionicGroup[4], Lattice::LocalLayout > standard_fermion_lattice_t;
 typedef Lattice::Lattice<Update::FermionicGroup[4], Lattice::LocalLayout > reduced_fermion_lattice_t;
+
+typedef Lattice::Lattice<Update::FermionicForceMatrix[4], Lattice::LocalLayout > extended_fermion_force_lattice_t;
 
 typedef Lattice::Lattice<Update::GaugeVector[4], Lattice::LocalLayout > extended_dirac_vector_t;
 typedef Lattice::Lattice<Update::GaugeVector[4], Lattice::LocalLayout > standard_dirac_vector_t;
@@ -165,46 +169,7 @@ public:
 	Environment(const Environment& toCopy) : gaugeLinkConfiguration(toCopy.gaugeLinkConfiguration), fermionicLinkConfiguration(toCopy.fermionicLinkConfiguration), configurations(toCopy.configurations), sweep(toCopy.sweep), iteration(toCopy.iteration), measurement(toCopy.measurement) { }
 	~Environment() { }
 
-	void synchronize() {
-#ifdef ADJOINT
-		ConvertLattice<extended_fermion_lattice_t,extended_gauge_lattice_t>::convert(fermionicLinkConfiguration, gaugeLinkConfiguration);
-#endif
-#ifndef ADJOINT
-		fermionicLinkConfiguration = gaugeLinkConfiguration;
-#endif
-		try {
-			std::string bc = configurations.get<std::string>("boundary_conditions");
-			if (bc == "fermion_antiperiodic") {
-				switchAntiperiodicBc(fermionicLinkConfiguration);
-			}
-			else if (bc == "fermion_spatial_antiperiodic") {
-				switchSpatialAntiperiodicBc(fermionicLinkConfiguration);
-			}
-			else if (bc == "fermion_periodic") {
-
-			}
-			else if (bc == "open") {
-				switchOpenBc(fermionicLinkConfiguration);
-				switchOpenBc(gaugeLinkConfiguration);
-			}
-			else {
-				static int count = 0;
-				if (count == 0 && isOutputProcess()) {
-					std::cout << "Warning, boundary conditions not or badly set, using antiperiodic!" << std::endl;
-					count = count + 1;
-				}
-				switchAntiperiodicBc(fermionicLinkConfiguration);
-			}
-		}
-		catch (NotFoundOption& ex) {
-			static int count = 0;
-			if (count == 0 && isOutputProcess()) {
-				std::cout << "Warning, boundary conditions not or badly set, using antiperiodic!" << std::endl;
-				count = count + 1;
-			}
-			switchAntiperiodicBc(fermionicLinkConfiguration);
-		}
-	}
+	void synchronize();
 
 	void setFermionBc(extended_fermion_lattice_t& lattice) const {
 		try {

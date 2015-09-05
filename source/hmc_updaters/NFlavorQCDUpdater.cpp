@@ -16,11 +16,11 @@
 #include "io/GlobalOutput.h"
 #include <iomanip>
 
-//#define DEBUGFORCE
+#define DEBUGFORCE
 //#define REVERSIBILITY_CHECK
 
 #ifdef DEBUGFORCE
-#include "TestForce.h"
+#include "hmc_forces/TestForce.h"
 #endif
 
 namespace Update {
@@ -218,7 +218,7 @@ void NFlavorQCDUpdater::execute(environment_t& environment) {
 	extended_gauge_lattice_t tmp;
 	//Internal calculations needed
 	nFlavorQCDAction->updateForce(tmp, environment);
-	testForce.genericTestForce(environment, nFlavorQCDAction, tmp[5][2], 5, 2);
+	testForce.testForce(environment, nFlavorQCDAction, tmp[5][2], 5, 2);
 #endif
 
 	Integrate* integrate = Integrate::getInstance(environment.configurations.get<std::string>("name_integrator"));

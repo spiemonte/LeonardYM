@@ -18,11 +18,11 @@
 #include "dirac_operators/SquareTwistedDiracOperator.h"
 #include <iomanip>
 
-//#define DEBUGFORCE
+#define DEBUGFORCE
 //#define REVERSIBILITY_CHECK
 
 #ifdef DEBUGFORCE
-#include "TestForce.h"
+#include "hmc_forces/TestForce.h"
 #endif
 
 namespace Update {

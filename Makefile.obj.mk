@@ -11,9 +11,9 @@ OBJECTS  = ReducedStencil.o StandardStencil.o ExtendedStencil.o LocalLayout.o \
 			ReUnit.o StoutSmearing.o Gamma.o \
 			RandomSeed.o \
 			Glueball.o \
-			Plaquette.o PolyakovLoop.o AdjointPolyakovLoop.o WilsonLoop.o GaugeEnergy.o \
+			Plaquette.o PolyakovLoop.o PolyakovLoopCorrelator.o AdjointPolyakovLoop.o WilsonLoop.o GaugeEnergy.o \
 			GlobalOutput.o OutputSweep.o \
-			FermionForce.o DiracWilsonFermionForce.o BlockDiracWilsonFermionForce.o ImprovedFermionForce.o TestForce.o \
+			FermionForce.o DiracWilsonFermionForce.o BlockDiracWilsonFermionForce.o ImprovedFermionForce.o TestForce.o SmearingForce.o \
 			StochasticEstimator.o MesonCorrelator.o ChiralCondensate.o GluinoGlue.o \
 			PureGaugeUpdater.o PureGaugeOverrelaxation.o PureGaugeHMCUpdater.o Checkerboard.o PureGaugeWilsonLoops.o \
 			TwoFlavorFermionAction.o TwoFlavorQCDAction.o TwoFlavorHMCUpdater.o \
@@ -25,5 +25,5 @@ OBJECTS  = ReducedStencil.o StandardStencil.o ExtendedStencil.o LocalLayout.o \
 			LatticeSweep.o Simulation.o \
 			StorageParameters.o \
 			WilsonFlow.o \
-			updater.o \
+			Environment.o updater.o \
 			#MultiGridDiracOperator.o MultiGridSolver.o \

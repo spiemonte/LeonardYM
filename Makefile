@@ -8,7 +8,7 @@ endif
 
 CC       = gcc
 CPP      = g++
-OPTIMIZE = -O2 -mavx -fabi-version=6 -march=native -Wall -Wextra -pipe -fopenmp 
+OPTIMIZE = -O2 -march=native -Wall -Wextra -pipe -fopenmp 
 INC	= -I./extra_libs/Eigen -I./extra_libs/ -I./source/
 CFLAGS   = $(OPTIMIZE) $(INC)
 CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/utils/MatrixBaseExtension.h\"" -DNUMCOLORS=$(nc) -DMULTITHREADING $(adj) -DEIGEN
