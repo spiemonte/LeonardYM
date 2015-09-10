@@ -7,6 +7,13 @@ void Environment::synchronize() {
 	try {
 		int levels = configurations.get<int>("stout_smearing_levels");
 		real_t rho = configurations.get<real_t>("stout_smearing_rho");
+		if (levels > 1) {
+			if (isOutputProcess()) std::cout << "Warning, number of levels " << levels << " not supported in unquenched mode!" << std::endl;
+		}
+		else if (levels == 0 || rho < 0.00000000001) {
+			if (isOutputProcess()) std::cout << "Warning, comment smearing options if you don't use it!" << std::endl;
+		}
+		
 	
 		extended_gauge_lattice_t tmp = gaugeLinkConfiguration, smeared;
 		StoutSmearing stoutSmearing;

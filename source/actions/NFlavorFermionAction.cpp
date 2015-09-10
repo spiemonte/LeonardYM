@@ -9,7 +9,7 @@
 #include "inverters/MultishiftSolver.h"
 #include "algebra_utils/AlgebraUtils.h"
 #include "hmc_forces/SmearingForce.h"
-
+#include "utils/ToString.h"
 namespace Update {
 
 NFlavorFermionAction::NFlavorFermionAction(DiracOperator* _squareDiracOperator, DiracOperator* _diracOperator, const std::vector<RationalApproximation>& _rationalApproximations) : FermionicAction(_diracOperator), squareDiracOperator(_squareDiracOperator), forcePrecision(0.00000000001), maxIterations(5000), rationalApproximations(_rationalApproximations), tmp_pseudofermion(0) {
@@ -112,46 +112,51 @@ void NFlavorFermionAction::updateForce(extended_gauge_lattice_t& forceLattice, c
 	this->derivative(env);
 	
 	try {
-		int levels = env.configurations.get<int>("stout_smearing_levels");
 		real_t rho = env.configurations.get<real_t>("stout_smearing_rho");
-
-		extended_gauge_lattice_t smeared = env.gaugeLinkConfiguration, tmp;
-		extended_fermion_lattice_t smearedConfs[levels];
+		SmearingForce smearingForce;
 		
-		StoutSmearing stoutSmearing;
-	
-		for (int level = 0; level < levels; ++level) {
-#ifdef ADJOINT
-			ConvertLattice<extended_fermion_lattice_t,extended_gauge_lattice_t>::convert(smearedConfs[level], smeared);
-#endif
-#ifndef ADJOINT
-			smearedConfs[level] = smeared;
-#endif
-			//env.setFermionBc(smearedConfs[level]);
-			stoutSmearing.smearing(smeared, tmp, rho);
-			smeared = tmp;
+		typedef extended_gauge_lattice_t::Layout LT;
+		//Set BC for fermions!
+		try {
+			std::string bc = env.configurations.get<std::string>("boundary_conditions");
+			if (bc == "fermion_antiperiodic") {
+#pragma omp parallel for
+				for (int site = 0; site < fermionForceLattice.completesize; ++site) {
+					if (LT::globalIndexT(site) == (LT::glob_t - 1)) fermionForceLattice[site][3] = -fermionForceLattice[site][3];
+				}
+			}
+			else if (bc == "fermion_spatial_antiperiodic") {
+#pragma omp parallel for
+				for (int site = 0; site < fermionForceLattice.completesize; ++site) {
+					if (LT::globalIndexZ(site) == (LT::glob_z - 1)) fermionForceLattice[site][2] = -fermionForceLattice[site][2];
+				}
+			}
+			else {
+#pragma omp parallel for
+				for (int site = 0; site < fermionForceLattice.completesize; ++site) {
+					if (LT::globalIndexT(site) == (LT::glob_t - 1)) fermionForceLattice[site][3] = -fermionForceLattice[site][3];
+				}
+			}
+		}
+		catch (NotFoundOption& ex) {
+#pragma omp parallel for
+			for (int site = 0; site < fermionForceLattice.completesize; ++site) {
+				if (LT::globalIndexT(site) == (LT::glob_t - 1)) fermionForceLattice[site][3] = -fermionForceLattice[site][3];
+			}
 		}
 
-		SmearingForce test;
-		for (int level = levels; level > 0; --level) {
-			extended_fermion_force_lattice_t fermionForceLatticeSmear;
-			std::cout << fermionForceLattice[5][2] << std::endl;
-			test.derivative(fermionForceLattice, fermionForceLatticeSmear, smearedConfs[level - 1], rho);
-			fermionForceLattice = fermionForceLatticeSmear;
-			std::cout << fermionForceLattice[5][2] << std::endl;
-		}
+		smearingForce.force(fermionForceLattice, env.gaugeLinkConfiguration, forceLattice, rho);
 	}
 	catch (NotFoundOption& ex) {
-	}
-
-
-
-	//Calculate the force
+		//Calculate the force directly
 #pragma omp parallel for
-	for (int site = 0; site < forceLattice.localsize; ++site) {
-		for (unsigned int mu = 0; mu < 4; ++mu) {
-			forceLattice[site][mu] = this->force(env, site, mu);
+		for (int site = 0; site < forceLattice.localsize; ++site) {
+			for (unsigned int mu = 0; mu < 4; ++mu) {
+				forceLattice[site][mu] = this->force(env, site, mu);
+			}
 		}
+		
+		forceLattice.updateHalo();//TODO is needed?
 	}
 
 /*#pragma omp parallel for
@@ -185,8 +190,6 @@ void NFlavorFermionAction::updateForce(extended_gauge_lattice_t& forceLattice, c
 		++X;
 		++Y;
 	}*/
-
-	forceLattice.updateHalo();//TODO is needed?
 }
 
 long_real_t NFlavorFermionAction::energy(const environment_t& env) {

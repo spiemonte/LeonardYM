@@ -169,12 +169,14 @@ void PureGaugeOverrelaxation::updateLink(extended_gauge_lattice_t& lattice, int 
 	//take the staple
 	GaugeGroup staple = gaugeAction->staple(lattice, site, mu);
 	real_t detStaple = abs(det(staple));
-	//U_new = S^\dag U^\dag S^\dag
-	lattice[site][mu] = (htrans(staple)*htrans(lattice[site][mu])*htrans(staple));
-	//normalize the determinant
-	for (unsigned int v = 0; v < 2; ++v) {
-		for (unsigned int u = 0; u < 2; ++u) {
-			lattice[site][mu].at(v,u) /= detStaple;
+	if (fabs(detStaple) > 0.0001) {
+		//U_new = S^\dag U^\dag S^\dag
+		lattice[site][mu] = (htrans(staple)*htrans(lattice[site][mu])*htrans(staple));
+		//normalize the determinant
+		for (unsigned int v = 0; v < 2; ++v) {
+			for (unsigned int u = 0; u < 2; ++u) {
+				lattice[site][mu].at(v,u) /= detStaple;
+			}
 		}
 	}
 #endif

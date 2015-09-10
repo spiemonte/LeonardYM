@@ -16,7 +16,7 @@
 #include "io/GlobalOutput.h"
 #include <iomanip>
 
-#define DEBUGFORCE
+//#define DEBUGFORCE
 //#define REVERSIBILITY_CHECK
 
 #ifdef DEBUGFORCE
@@ -218,7 +218,7 @@ void NFlavorQCDUpdater::execute(environment_t& environment) {
 	extended_gauge_lattice_t tmp;
 	//Internal calculations needed
 	nFlavorQCDAction->updateForce(tmp, environment);
-	testForce.testForce(environment, nFlavorQCDAction, tmp[5][2], 5, 2);
+	testForce.testForce(environment, nFlavorQCDAction, tmp[extended_gauge_lattice_t::Layout::getGlobalCoordinate(1,2,1,2)][3], extended_gauge_lattice_t::Layout::getGlobalCoordinate(1,2,1,2), 3);
 #endif
 
 	Integrate* integrate = Integrate::getInstance(environment.configurations.get<std::string>("name_integrator"));

@@ -9,6 +9,7 @@
 #define SMEARINGFORCE_H_
 #include "utils/StoutSmearing.h"
 #include "utils/EigenTraits.h"
+#include "utils/ExpMap.h"
 
 namespace Update {
 
@@ -17,10 +18,12 @@ public:
 	SmearingForce();
 	~SmearingForce();
 
-	void derivative(const extended_force_lattice_t& smearedDerivative, extended_force_lattice_t& unsmearedDerivative, extended_gauge_lattice_t& unsmearedLattice, real_t rho);
+	void force(const extended_fermion_force_lattice_t& actionDerivative, const extended_gauge_lattice_t& unsmearedLattice, extended_gauge_lattice_t& unsmearedDerivative, real_t rho);
 private:
-	ForceVector ridder(extended_fermion_lattice_t& unsmearedLattice, int sited, unsigned int mud, int color, int site, unsigned int mu, real_t rho, real_t h = 0.05);
+	real_t ridder(const extended_fermion_force_lattice_t& actionDerivative, extended_gauge_lattice_t& unsmearedLattice, int sited, unsigned int mud, int color, int site, unsigned int mu, real_t rho, real_t h = 0.05);
 
+	ExponentialMap expMap;
+	LieGenerator<GaugeGroup> gaugeLieGenerators;
 };
 
 } /* namespace Update */

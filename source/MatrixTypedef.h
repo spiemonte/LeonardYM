@@ -49,6 +49,7 @@ typedef Eigen::Matrix< complex, numberColors*numberColors - 1, 1 > AdjointVector
 
 typedef Eigen::Matrix< single_complex, numberColors, 1 > single_FundamentalVector;
 typedef Eigen::Matrix< single_complex, numberColors*numberColors - 1, 1 > single_AdjointVector;
+typedef Eigen::Matrix< real_t, numberColors*numberColors - 1, 1 > ForceVector;
 
 #ifdef ADJOINT
 typedef Eigen::Matrix< complex, numberColors, numberColors > GaugeGroup;

@@ -26,6 +26,10 @@ typedef Lattice::Lattice<Update::GaugeGroup[4], Lattice::MpiLayout<Lattice::Exte
 typedef Lattice::Lattice<Update::GaugeGroup[4], Lattice::MpiLayout<Lattice::StandardStencil> > standard_gauge_lattice_t;
 typedef Lattice::Lattice<Update::GaugeGroup[4], Lattice::MpiLayout<Lattice::ReducedStencil> > reduced_gauge_lattice_t;
 
+typedef Lattice::Lattice<Update::ForceVector[4], Lattice::MpiLayout<Lattice::ExtendedStencil> > extended_force_lattice_t;
+typedef Lattice::Lattice<Update::ForceVector[4], Lattice::MpiLayout<Lattice::StandardStencil> > standard_force_lattice_t;
+typedef Lattice::Lattice<Update::ForceVector[4], Lattice::MpiLayout<Lattice::ReducedStencil> > reduced_force_lattice_t;
+
 typedef Lattice::Lattice<Update::FermionicGroup[4], Lattice::MpiLayout<Lattice::ExtendedStencil> > extended_fermion_lattice_t;
 typedef Lattice::Lattice<Update::FermionicGroup[4], Lattice::MpiLayout<Lattice::StandardStencil> > standard_fermion_lattice_t;
 typedef Lattice::Lattice<Update::FermionicGroup[4], Lattice::MpiLayout<Lattice::ReducedStencil> > reduced_fermion_lattice_t;
@@ -56,6 +60,10 @@ typedef Lattice::Lattice<int[4], Lattice::MpiLayout<Lattice::ExtendedStencil> > 
 typedef Lattice::Lattice<Update::GaugeGroup[4], Lattice::LocalLayout > extended_gauge_lattice_t;
 typedef Lattice::Lattice<Update::GaugeGroup[4], Lattice::LocalLayout > standard_gauge_lattice_t;
 typedef Lattice::Lattice<Update::GaugeGroup[4], Lattice::LocalLayout > reduced_gauge_lattice_t;
+
+typedef Lattice::Lattice<Update::ForceVector[4], Lattice::LocalLayout > extended_force_lattice_t;
+typedef Lattice::Lattice<Update::ForceVector[4], Lattice::LocalLayout > standard_force_lattice_t;
+typedef Lattice::Lattice<Update::ForceVector[4], Lattice::LocalLayout > reduced_force_lattice_t;
 
 typedef Lattice::Lattice<Update::FermionicGroup[4], Lattice::LocalLayout > extended_fermion_lattice_t;
 typedef Lattice::Lattice<Update::FermionicGroup[4], Lattice::LocalLayout > standard_fermion_lattice_t;
@@ -93,8 +101,8 @@ typedef Lattice::Lattice<int, Lattice::MpiLayout<Lattice::ReducedStencil> > redu
 typedef Lattice::Lattice<int, Lattice::LocalLayout > reduced_index_lattice_t;
 #endif
 
-inline void switchAntiperiodicBc(extended_fermion_lattice_t& lattice) {
-	typedef extended_fermion_lattice_t::Layout LT;
+template<typename T> void switchAntiperiodicBc(T& lattice) {
+	typedef typename T::Layout LT;
 #pragma omp parallel for
 	for (int site = 0; site < lattice.completesize; ++site) {
 		if (LT::globalIndexT(site) == (LT::glob_t - 1)) lattice[site][3] = -lattice[site][3];
@@ -102,8 +110,8 @@ inline void switchAntiperiodicBc(extended_fermion_lattice_t& lattice) {
 	//lattice.updateHalo(); TODO
 }
 
-inline void switchSpatialAntiperiodicBc(extended_fermion_lattice_t& lattice) {
-	typedef extended_fermion_lattice_t::Layout LT;
+template<typename T> void switchSpatialAntiperiodicBc(T& lattice) {
+	typedef typename T::Layout LT;
 #pragma omp parallel for
 	for (int site = 0; site < lattice.completesize; ++site) {
 		if (LT::globalIndexZ(site) == (LT::glob_z - 1)) lattice[site][2] = -lattice[site][2];
@@ -111,8 +119,8 @@ inline void switchSpatialAntiperiodicBc(extended_fermion_lattice_t& lattice) {
 	//lattice.updateHalo(); TODO
 }
 
-inline void switchOpenBc(extended_gauge_lattice_t& lattice) {
-	typedef extended_gauge_lattice_t::Layout LT;
+template<typename T> void switchOpenBc(T& lattice) {
+	typedef typename T::Layout LT;
 #pragma omp parallel for
 	for (int site = 0; site < lattice.completesize; ++site) {
 		int t_index = LT::globalIndexT(site);
@@ -128,7 +136,7 @@ inline void switchOpenBc(extended_gauge_lattice_t& lattice) {
 
 #ifdef ADJOINT
 inline void switchOpenBc(extended_fermion_lattice_t& lattice) {
-	typedef extended_fermion_lattice_t::Layout LT;
+	typedef typename extended_fermion_lattice_t::Layout LT;
 #pragma omp parallel for
 	for (int site = 0; site < lattice.completesize; ++site) {
 		int t_index = LT::globalIndexT(site);
@@ -171,7 +179,7 @@ public:
 
 	void synchronize();
 
-	void setFermionBc(extended_fermion_lattice_t& lattice) const {
+	template<typename T> void setFermionBc(T& lattice) const {
 		try {
 			std::string bc = configurations.get<std::string>("boundary_conditions");
 			if (bc == "fermion_antiperiodic") {
@@ -226,7 +234,7 @@ public:
 	extended_gauge_lattice_t gaugeLinkConfiguration;
 	extended_fermion_lattice_t fermionicLinkConfiguration;
 	StorageParameters configurations;
-
+	
 	unsigned int sweep;
 	unsigned int iteration;
 

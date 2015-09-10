@@ -55,12 +55,11 @@ void StoutSmearing::spatialSmearing(const extended_gauge_lattice_t& initialInput
 GaugeGroup StoutSmearing::smearLink(const extended_gauge_lattice_t& input, int site, unsigned int mu, real_t rho) const {
 	GaugeGroup staple = htrans(wga.staple(input,site,mu));
 	GaugeGroup omega = rho*staple*htrans(input[site][mu]);
-	omega = rho*input[site][mu];//TODO
 	GaugeGroup iStout = 0.5*(htrans(omega) - omega);
 
 	GaugeGroup toExp = -(iStout - (trace(iStout)/static_cast<real_t>(numberColors))*identity);
 
-	return input[site][mu];//*input[site][mu];//this->exp(toExp)*input[site][mu];
+	return this->exp(toExp)*input[site][mu];
 }
 
 #ifdef ADJOINT
@@ -77,7 +76,7 @@ FermionicGroup StoutSmearing::smearLink(const extended_fermion_lattice_t& input,
 	FermionicGroup omega = rho*staple*htrans(input[site][mu]);
 	FermionicGroup iStout = 0.5*(htrans(omega) - omega);
 	FermionicGroup toExp = -(iStout - (trace(iStout)/static_cast<real_t>(numberColors))*adjoint_identity);
-	return /*input[site][mu]*/input[site][mu];//(this->exp(toExp)*input[site][mu]);
+	return this->exp(toExp)*input[site][mu];
 }
 #endif
 

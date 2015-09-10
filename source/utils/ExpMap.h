@@ -8,8 +8,9 @@
 #ifndef EXPMAP_H
 #define EXPMAP_H
 #include "MatrixTypedef.h"
-//#include "ToString.h"
+#include "ToString.h"
 #include "LieGenerators.h"
+#include "ConvertLattice.h"
 
 namespace Update {
 
@@ -54,18 +55,53 @@ public:
 #endif
 	}
 
-	std::vector<real_t> parameters(const GaugeGroup& toLog) const {
+	ForceVector parameters(const GaugeGroup& toLog) const {
 		GaugeGroup lg = this->log(toLog);
-		std::vector<real_t> result(numberColors);
-		for (int c = 0; c < numberColors; ++c) result[c] = (real(trace(lieGenerator.get(c)*lg)));
+		ForceVector result;
+		for (int c = 0; c < numberColors*numberColors - 1; ++c) result[c] = 2.*(imag(trace(lieGenerator.get(c)*lg)));
 		return result;
 	}
 
-	GaugeGroup exp(const std::vector<real_t>& toExp) const {
+	void exp(const ForceVector& toExp, GaugeGroup& result) const {
 		GaugeGroup M;
 		set_to_zero(M);
-		for (int c = 0; c < numberColors; ++c) M += lieGenerator.get(c)*toExp[c];
-		return this->exp(M);
+		for (int c = 0; c < numberColors*numberColors - 1; ++c) M += lieGenerator.get(c)*std::complex<real_t>(0,toExp[c]);
+		result = this->exp(M);
+	}
+	
+	
+	void exp(ForceVector& toExp, AdjointGroup& result) const {
+		GaugeGroup fundamentalExp;
+		this->exp(toExp,fundamentalExp);
+		ConvertLattice<extended_fermion_lattice_t,extended_gauge_lattice_t>::toAdjoint(fundamentalExp,result);
+	}
+	
+	AdjointGroup exp(const AdjointGroup& toExp) const {
+#ifdef EIGEN
+		typedef Eigen::Matrix< complex, numberColors*numberColors - 1, numberColors*numberColors - 1 > CFermionGroup;
+		Eigen::ComplexEigenSolver<CFermionGroup> es( toExp.cast<std::complex<real_t> >() );
+		CFermionGroup result;
+		result.zeros();
+		real_t eigvs_sum = 0.;
+		for (int i = 0; i < numberColors*numberColors - 1; ++i) {
+			result.at(i,i) = std::exp(es.eigenvalues()[i]);
+			eigvs_sum += fabs(real(conj(es.eigenvalues()[i])*es.eigenvalues()[i]));
+		}
+		if (eigvs_sum < 0.0000000000000001) return adjoint_identity+toExp+(0.5)*toExp*toExp;
+		CFermionGroup m = es.eigenvectors();
+		m = (m * result * htrans(m));
+		AdjointGroup a_result;
+		for (int i = 0; i < numberColors*numberColors - 1; ++i) {
+			for (int j = 0; j < numberColors*numberColors - 1; ++j) {
+				a_result.at(i,j) = real(m.at(i,j));
+			}
+		}
+		return a_result;
+#endif
+#ifdef ARMADILLO
+		std::cout << "ExpMap::Adjoint exponential not defined with armadillo!" << std::endl;
+		exit(5);
+#endif
 	}
 
 	GaugeGroup exp(const GaugeGroup& toExp) const {
@@ -151,44 +187,11 @@ public:
 #endif
 	}
 
-
-	AdjointGroup exp(const AdjointGroup& toExp) const {
-#ifdef EIGEN
-		Eigen::Matrix< complex, numberColors*numberColors-1, numberColors*numberColors-1 > tmp;
-		for (int i = 0; i < numberColors*numberColors-1; ++i) {
-			for (int j = 0; j < numberColors*numberColors-1; ++j) {
-				tmp.at(i,j) = toExp.at(i,j);
-			}
-		}
-		Eigen::ComplexEigenSolver< Eigen::Matrix< complex, numberColors*numberColors-1, numberColors*numberColors-1 > > es(tmp);
-		Eigen::Matrix< complex, numberColors*numberColors-1, numberColors*numberColors-1 > result;
-		result.zeros();
-		real_t eigvs_sum = 0.;
-		for (int i = 0; i < numberColors*numberColors-1; ++i) {
-			result.at(i,i) = std::exp(es.eigenvalues()[i]);
-			eigvs_sum += fabs(real(conj(es.eigenvalues()[i])*es.eigenvalues()[i]));
-		}
-		if (eigvs_sum < 0.0000000000000001) return adjoint_identity+toExp+(0.5)*toExp*toExp;
-		Eigen::Matrix< complex, numberColors*numberColors-1, numberColors*numberColors-1 > m = es.eigenvectors();
-		Eigen::Matrix< complex, numberColors*numberColors-1, numberColors*numberColors-1 > final = m * result * htrans(m);
-		FermionicGroup rr;
-		for (int i = 0; i < numberColors*numberColors-1; ++i) {
-			for (int j = 0; j < numberColors*numberColors-1; ++j) {
-				rr.at(i,j) = real(final.at(i,j));
-			}
-		}
-		return rr;
-#endif
-#ifdef ARMADILLO
-		std::cout << "ExpMap in adjoint group not implemented for Armadillo" << std::endl;
-		exit(2);
-#endif
-	}
-
 protected:
 	GaugeGroup identity;
-	FermionicGroup adjoint_identity;
+	AdjointGroup adjoint_identity;
 	LieGenerator<GaugeGroup> lieGenerator;
+	LieGenerator<AdjointGroup> adjointLieGenerator;
 };
 
 } /* namespace Update */

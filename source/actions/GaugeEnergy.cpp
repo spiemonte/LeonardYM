@@ -22,12 +22,12 @@ void GaugeEnergy::execute(environment_t& environment) {
 		GlobalOutput* output = GlobalOutput::getInstance();
 		output->push("gauge_energy");
 
-		typedef extended_gauge_lattice_t::Layout Layout;
 		std::cout << "GaugeEnergy::Energy value " << gaugeEnergy << std::endl; //TODO
 		output->write("gauge_energy", gaugeEnergy);
 
 		output->pop("gauge_energy");
 	}
+	delete gaugeAction;
 }
 
 } /* namespace Update */

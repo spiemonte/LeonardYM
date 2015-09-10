@@ -9,6 +9,7 @@
 #define FERMIONFORCE_H_
 #include "Environment.h"
 #include "utils/LieGenerators.h"
+#include "utils/ExpMap.h"
 
 namespace Update {
 
@@ -25,6 +26,8 @@ public:
 
 protected:
 	real_t kappa;
+	
+	ExponentialMap expMap;
 
 	FermionicForceMatrix tensor(const GaugeVector& x, const GaugeVector& y) const;
 

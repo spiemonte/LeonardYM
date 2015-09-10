@@ -259,7 +259,7 @@ bool BiConjugateGradient::solve(DiracOperator* dirac, const reduced_dirac_vector
 	}
 
 	//Set p to residual
-	real_t beta = AlgebraUtils::squaredNorm(residual);
+	//real_t beta = AlgebraUtils::squaredNorm(residual);
 
 	//Set the initial parameter of the program
 	unsigned int step = 0;

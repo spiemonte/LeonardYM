@@ -7,10 +7,11 @@
 
 #include "FermionForce.h"
 #include "utils/ConvertLattice.h"
+#include "utils/ToString.h"
 
 namespace Update {
 
-FermionForce::FermionForce(real_t _kappa) : kappa(_kappa) { }
+FermionForce::FermionForce(real_t _kappa) : kappa(_kappa), expMap() { }
 
 FermionForce::~FermionForce() { }
 
@@ -47,5 +48,49 @@ GaugeGroup FermionForce::force(const environment_t& env, const FermionicForceMat
 	return result;
 #endif
 }
+
+/*
+ForceVector FermionForce::linkActionDerivative(const environment_t& env, const FermionicForceMatrix& derivative, int site, unsigned int mu) {
+	ForceVector result;
+	ForceVector omega = expMap.parameters(env.gaugeLinkConfiguration[site][mu]);
+	FermionicForceMatrix X;
+	set_to_zero(X);
+	//For every generator
+	for (unsigned int i = 0; i < fermionLieGenerator.numberGenerators(); ++i) {
+		X += std::complex<real_t>(0,omega[i])*fermionLieGenerator.get(i);
+	}
+	//For every generator
+	for (unsigned int i = 0; i < fermionLieGenerator.numberGenerators(); ++i) {
+		FermionicForceMatrix it = std::complex<real_t>(0,1.)*fermionLieGenerator.get(i), XL = it, XP = X;
+		result[i] = 0;
+		int factorial = 1;
+		for (int n = 0; n < 13; ++n) {
+			result[i] += real(trace(derivative*XL))/(factorial);
+			XL = it*XP+X*XL;
+			XP = XP*X;
+			factorial = factorial*(n+2);
+		}
+	}
+	return result;
+}
+
+ForceVector FermionForce::linkLieDerivative(const environment_t& env, int site, unsigned int mu, int color) {
+	ForceVector result;
+	//For every generator
+	for (unsigned int i = 0; i < fermionLieGenerator.numberGenerators(); ++i) {
+		result[i] += -2.*real(trace(gaugeLieGenerator.get(i)*gaugeLieGenerator.get(color)*env.gaugeLinkConfiguration[site][mu]));
+	}
+	return result;
+}
+
+GaugeGroup FermionForce::force(const ForceVector& parameters) {
+	GaugeGroup result;
+	set_to_zero(result);
+	//For every generator
+	for (unsigned int i = 0; i < gaugeLieGenerator.numberGenerators(); ++i) {
+		result += std::complex<real_t>(0,parameters[i])*gaugeLieGenerator.get(i);
+	}
+	return result;
+}*/
 
 } /* namespace Update */

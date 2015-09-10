@@ -110,7 +110,7 @@ public:
 #endif
 	}
 
-	const FermionicForceMatrix& get(unsigned int c) const {
+	const Eigen::Matrix< complex, numberColors*numberColors - 1, numberColors*numberColors - 1 >& get(unsigned int c) const {
 		return gen[c];
 	}
 
@@ -118,7 +118,7 @@ public:
 		return 3;
 	}
 private:
-	FermionicForceMatrix gen[3];
+	Eigen::Matrix< complex, numberColors*numberColors - 1, numberColors*numberColors - 1 > gen[3];
 };
 
 //#endif
@@ -163,7 +163,7 @@ public:
 		gen[7] << 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -((I*sqrt(3.))/2.), 0, 0, 0, 0, 0, 0, 0, 0, -((I*sqrt(3.))/2.), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (I*sqrt(3.))/2., 0, 0, 0, 0, 0, 0, 0, 0, (I*sqrt(3.))/2., 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
 	}
 
-	const FermionicForceMatrix& get(unsigned int c) const {
+	const Eigen::Matrix< complex, numberColors*numberColors - 1, numberColors*numberColors - 1 >& get(unsigned int c) const {
 		return gen[c];
 	}
 
@@ -171,7 +171,7 @@ public:
 		return 8;
 	}
 private:
-	FermionicForceMatrix gen[8];
+	Eigen::Matrix< complex, numberColors*numberColors - 1, numberColors*numberColors - 1 > gen[8];
 };
 
 #else
@@ -242,7 +242,7 @@ public:
 		}
 	}
 
-	const FermionicForceMatrix& get(unsigned int c) const {
+	const Eigen::Matrix< complex, numberColors*numberColors - 1, numberColors*numberColors - 1 >& get(unsigned int c) const {
 		return gen[c];
 	}
 
@@ -250,7 +250,7 @@ public:
 		return numberColors*numberColors-1;
 	}
 private:
-	FermionicForceMatrix gen[numberColors*numberColors-1];
+	Eigen::Matrix< complex, numberColors*numberColors - 1, numberColors*numberColors - 1 > gen[numberColors*numberColors-1];
 };
 
 #endif

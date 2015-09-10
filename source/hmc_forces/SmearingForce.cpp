@@ -15,26 +15,36 @@ real_t fabs(const std::complex<real_t>& number) {
 	return real(conj(number)*number);
 }
 
-SmearingForce::SmearingForce() : StoutSmearing() { }
+SmearingForce::SmearingForce() : StoutSmearing(), expMap() { }
 
 SmearingForce::~SmearingForce() { }
 
-void SmearingForce::derivative(const extended_force_lattice_t& smearedDerivative, extended_force_lattice_t& unsmearedDerivative, extended_gauge_lattice_t& unsmearedLattice, real_t rho) {
+void SmearingForce::force(const extended_fermion_force_lattice_t& actionDerivative, const extended_gauge_lattice_t& originalUnsmearedLattice, extended_gauge_lattice_t& unsmearedDerivative, real_t rho) {
 	typedef extended_gauge_lattice_t LT;
 	
-#pragma omp parallel for
+#ifndef MULTITHREADING
+	extended_gauge_lattice_t unsmearedLattice = originalUnsmearedLattice;
 	for (int site = 0; site < unsmearedLattice.localsize; ++site) {
+#endif
+#ifdef MULTITHREADING
+	extended_gauge_lattice_t thUnsmearedLattice[omp_get_max_threads()];
+	for (int i = 0; i < omp_get_max_threads(); ++i) thUnsmearedLattice[i] = originalUnsmearedLattice;
+#pragma omp parallel for
+	for (int site = 0; site < originalUnsmearedLattice.localsize; ++site) {
+		extended_gauge_lattice_t& unsmearedLattice = thUnsmearedLattice[omp_get_thread_num()];
+#endif
 		for (unsigned int mu = 0; mu < 4; ++mu) {
+			set_to_zero(unsmearedDerivative[site][mu]);
 			//First term
 			for (int color = 0; color < numberColors*numberColors - 1; ++color) {
-				unsmearedDerivative[site][mu][color] = smearedDerivative[site][mu]*this->ridder(unsmearedLattice, site, mu, color, site, mu, rho);
+				unsmearedDerivative[site][mu] += std::complex<real_t>(0,this->ridder(actionDerivative, unsmearedLattice, site, mu, color, site, mu, rho))*gaugeLieGenerators.get(color);
 			}
 
 			//Second term
 			for (unsigned int nu = 0; nu < 4; ++nu) {
 				if (nu != mu) {
 					for (int color = 0; color < numberColors*numberColors - 1; ++color) {
-						unsmearedDerivative[site][mu][color] += smearedDerivative[LT::sup(site,mu)][nu]*this->ridder(unsmearedLattice, site, mu, color, LT::sup(site,mu), nu, rho);
+						unsmearedDerivative[site][mu] += std::complex<real_t>(0,this->ridder(actionDerivative, unsmearedLattice, site, mu, color, LT::sup(site,mu), nu, rho))*gaugeLieGenerators.get(color);
 					}
 				}
 			}
@@ -43,7 +53,7 @@ void SmearingForce::derivative(const extended_force_lattice_t& smearedDerivative
 			for (unsigned int nu = 0; nu < 4; ++nu) {
 				if (nu != mu) {
 					for (int color = 0; color < numberColors*numberColors - 1; ++color) {
-						unsmearedDerivative[site][mu][color] += smearedDerivative[LT::sup(site,nu)][mu]*this->ridder(unsmearedLattice, site, mu, color, LT::sup(site,nu), mu, rho);
+						unsmearedDerivative[site][mu] += std::complex<real_t>(0,this->ridder(actionDerivative, unsmearedLattice, site, mu, color, LT::sup(site,nu), mu, rho))*gaugeLieGenerators.get(color);
 					}
 				}
 			}
@@ -52,7 +62,7 @@ void SmearingForce::derivative(const extended_force_lattice_t& smearedDerivative
 			for (unsigned int nu = 0; nu < 4; ++nu) {
 				if (nu != mu) {
 					for (int color = 0; color < numberColors*numberColors - 1; ++color) {
-						unsmearedDerivative[site][mu][color] += smearedDerivative[site][nu]*this->ridder(unsmearedLattice, site, mu, color, site, nu, rho);
+						unsmearedDerivative[site][mu] += std::complex<real_t>(0,this->ridder(actionDerivative, unsmearedLattice, site, mu, color, site, nu, rho))*gaugeLieGenerators.get(color);
 					}
 				}
 			}
@@ -61,7 +71,7 @@ void SmearingForce::derivative(const extended_force_lattice_t& smearedDerivative
 			for (unsigned int nu = 0; nu < 4; ++nu) {
 				if (nu != mu) {
 					for (int color = 0; color < numberColors*numberColors - 1; ++color) {
-						unsmearedDerivative[site][mu][color] += smearedDerivative[LT::sup(LT::sdn(site,nu),mu)][nu]*this->ridder(unsmearedLattice, site, mu, color, LT::sup(LT::sdn(site,nu),mu), nu, rho);
+						unsmearedDerivative[site][mu] += std::complex<real_t>(0,this->ridder(actionDerivative, unsmearedLattice, site, mu, color, LT::sup(LT::sdn(site,nu),mu), nu, rho))*gaugeLieGenerators.get(color);
 					}
 				}
 			}
@@ -70,7 +80,7 @@ void SmearingForce::derivative(const extended_force_lattice_t& smearedDerivative
 			for (unsigned int nu = 0; nu < 4; ++nu) {
 				if (nu != mu) {
 					for (int color = 0; color < numberColors*numberColors - 1; ++color) {
-						unsmearedDerivative[site][mu][color] += smearedDerivative[LT::sdn(site,nu)][mu]*this->ridder(unsmearedLattice, site, mu, color, LT::sdn(site,nu), mu, rho);
+						unsmearedDerivative[site][mu] += std::complex<real_t>(0,this->ridder(actionDerivative, unsmearedLattice, site, mu, color, LT::sdn(site,nu), mu, rho))*gaugeLieGenerators.get(color);
 					}
 				}
 			}
@@ -79,7 +89,7 @@ void SmearingForce::derivative(const extended_force_lattice_t& smearedDerivative
 			for (unsigned int nu = 0; nu < 4; ++nu) {
 				if (nu != mu) {
 					for (int color = 0; color < numberColors*numberColors - 1; ++color) {
-						unsmearedDerivative[site][mu][color] += smearedDerivative[LT::sdn(site,nu)][nu]*this->ridder(unsmearedLattice, site, mu, color, LT::sdn(site,nu), nu, rho);
+						unsmearedDerivative[site][mu] += std::complex<real_t>(0,this->ridder(actionDerivative, unsmearedLattice, site, mu, color, LT::sdn(site,nu), nu, rho))*gaugeLieGenerators.get(color);
 					}
 				}
 			}
@@ -189,43 +199,75 @@ void SmearingForce::derivative(const extended_force_lattice_t& smearedDerivative
 
 
 
-ForceVector SmearingForce::ridder(extended_gauge_lattice_t& unsmearedLattice, int sited, unsigned int mud, int color, int site, unsigned int mu, real_t rho, real_t h) {
+real_t SmearingForce::ridder(const extended_fermion_force_lattice_t& actionDerivative, extended_gauge_lattice_t& unsmearedLattice, int sited, unsigned int mud, int color, int site, unsigned int mu, real_t rho, real_t h) {
 
-	ForceVector a[MAXSIZE][MAXSIZE];
+	real_t a[MAXSIZE][MAXSIZE];
 	for (int m = 0; m < MAXSIZE; ++m) {
 		for (int n = 0; n < MAXSIZE; ++n) {
-			set_to_zero(a[m][n]);
+			a[m][n] = 0;
 		}
 	}
 
 	real_t err = 1000000.;
 	real_t factor = REDUCTION*REDUCTION;
 
-	ForceVector result;
 	GaugeGroup swap = unsmearedLattice[sited][mud];
-	ForceVector tmp = expMap.parameters(unsmearedLattice[sited][mud]);
-	tmp[color] += h;
-	unsmearedLattice[sited][mud] = expMap.exp(tmp);
-	ForceVector plus = expMap.parameters(this->smearLink(unsmearedLattice,site,mu,rho));
-	tmp[color] -= 2.*h;
-	unsmearedLattice[sited][mud] = expMap.exp(tmp);
-	ForceVector minus = expMap.parameters(this->smearLink(unsmearedLattice,site,mu,rho));
+	
+	ForceVector tmp;
+	set_to_zero(tmp);
+	tmp[color] = h;
+	expMap.exp(tmp, unsmearedLattice[sited][mud]);
+	unsmearedLattice[sited][mud] = unsmearedLattice[sited][mud]*swap;
+#ifdef ADJOINT
+	FermionicGroup link;
+	ConvertLattice<extended_fermion_lattice_t,extended_gauge_lattice_t>::toAdjoint(this->smearLink(unsmearedLattice,site,mu,rho),link);
+	real_t plus = real(trace(actionDerivative[site][mu]*link));
+#endif
+#ifndef ADJOINT
+	real_t plus = real(trace(actionDerivative[site][mu]*this->smearLink(unsmearedLattice,site,mu,rho)));
+#endif
+	tmp[color] = -h;
+	expMap.exp(tmp, unsmearedLattice[sited][mud]);
+	unsmearedLattice[sited][mud] = unsmearedLattice[sited][mud]*swap;
+#ifdef ADJOINT
+	ConvertLattice<extended_fermion_lattice_t,extended_gauge_lattice_t>::toAdjoint(this->smearLink(unsmearedLattice,site,mu,rho),link);
+	real_t minus = real(trace(actionDerivative[site][mu]*link));
+#endif
+#ifndef ADJOINT
+	real_t minus = real(trace(actionDerivative[site][mu]*this->smearLink(unsmearedLattice,site,mu,rho)));
+#endif
 	unsmearedLattice[sited][mud] = swap;
+	
 	a[0][0] = (plus - minus)/(2.*h);
 
 
-	result = a[0][0];
+	real_t result = a[0][0];
 	
 	for (int m = 1; m < MAXSIZE; ++m) {
 		h = h/REDUCTION;
+		
 		swap = unsmearedLattice[sited][mud];
-		tmp = expMap.parameters(unsmearedLattice[sited][mud]);
-		tmp[color] += h;
-		unsmearedLattice[sited][mud] = expMap.exp(tmp);
-		plus = expMap.parameters(this->smearLink(unsmearedLattice,site,mu,rho));
-		tmp[color] -= 2.*h;
-		unsmearedLattice[sited][mud] = expMap.exp(tmp);
-		minus = expMap.parameters(this->smearLink(unsmearedLattice,site,mu,rho));
+		
+		tmp[color] = h;
+		expMap.exp(tmp, unsmearedLattice[sited][mud]);
+		unsmearedLattice[sited][mud] = unsmearedLattice[sited][mud]*swap;
+#ifdef ADJOINT
+		ConvertLattice<extended_fermion_lattice_t,extended_gauge_lattice_t>::toAdjoint(this->smearLink(unsmearedLattice,site,mu,rho),link);
+		plus = real(trace(actionDerivative[site][mu]*link));
+#endif
+#ifndef ADJOINT
+		plus = real(trace(actionDerivative[site][mu]*this->smearLink(unsmearedLattice,site,mu,rho)));
+#endif
+		tmp[color] = -h;
+		expMap.exp(tmp, unsmearedLattice[sited][mud]);
+		unsmearedLattice[sited][mud] = unsmearedLattice[sited][mud]*swap;
+#ifdef ADJOINT
+		ConvertLattice<extended_fermion_lattice_t,extended_gauge_lattice_t>::toAdjoint(this->smearLink(unsmearedLattice,site,mu,rho),link);
+		minus = real(trace(actionDerivative[site][mu]*link));
+#endif
+#ifndef ADJOINT
+		minus = real(trace(actionDerivative[site][mu]*this->smearLink(unsmearedLattice,site,mu,rho)));
+#endif
 		unsmearedLattice[sited][mud] = swap;
 		a[0][m] = (plus - minus)/(2.*h);
 
@@ -234,22 +276,22 @@ ForceVector SmearingForce::ridder(extended_gauge_lattice_t& unsmearedLattice, in
 		for (int n = 1; n <= m; ++n) {
 			a[n][m] = (a[n-1][m]*factor - a[n-1][m-1])/(factor-1.);
 			factor = REDUCTION*REDUCTION*factor;
-			real_t errt = std::max(fabs(a[n][m][0] - a[n-1][m][0]),fabs(a[n][m][0] - a[n-1][m-1][0]));
+			real_t errt = std::max(fabs(a[n][m] - a[n-1][m]),fabs(a[n][m] - a[n-1][m-1]));
 			if (errt < err) {
 				err = errt;
 				result = a[n][m];
 			}
 		}
 	
-		if (fabs(a[m][m][0] - a[m-1][m-1][0]) > 2*err) {
-			if (err > 0.000000001) {
-				std::cout << "Convergence in " << m << " steps and error " << err << " - info "<< sited << " " << mud << "  " << site << " " << mu << std::endl;
+		if (fabs(a[m][m] - a[m-1][m-1]) > 2*err) {
+			if (err > 0.0000001) {
+				std::cout << "SmearingForce::Bad convergence in " << m << " steps and error " << err << std::endl;
 			}
 			return result;
 		}
 	}
 
-	if (err > 0.000000001) std::cout << "No convergence in " << MAXSIZE << " steps and error " << err << std::endl;
+	if (err > 0.0000001) std::cout << "SmearingForce::Bad convergence in " << MAXSIZE << " steps and error " << err << std::endl;
 
 	
 	return result;

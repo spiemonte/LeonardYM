@@ -19,6 +19,7 @@
 #include "./source/utils/LieGenerators.h"
 #include "./source/utils/ToString.h"
 #include <iostream>
+#include <fenv.h>
 
 int Update::RandomSeed::counter = -1;
 boost::mt19937 Update::RandomSeed::rng;
@@ -55,6 +56,7 @@ inline bool testBasicMatrixFunctions(){
 
 
 int main(int ac, char* av[]) {
+	//feenableexcept(FE_ALL_EXCEPT & ~FE_INEXACT);
 	/*Update::LieGenerator<Update::GaugeGroup> lieGenerator;
 	Update::LieGenerator<Update::AdjointGroup> adjointLieGenerator;
 	for (unsigned int t = 0; t < Update::numberColors*Update::numberColors - 1; ++t) std::cout << lieGenerator.get(t) << std::endl << std::endl;
