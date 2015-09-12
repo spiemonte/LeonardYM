@@ -122,7 +122,6 @@ Checkerboard::Checkerboard() {
 Checkerboard::~Checkerboard() { }
 
 void Checkerboard::statistics() {
-	typedef extended_gauge_lattice_t LT;
 	typedef extended_gauge_lattice_t::Layout Layout;
 	numberLoops = 0;
 	std::vector<int> datas;

@@ -13,7 +13,7 @@
 namespace Update {
 
 struct Site {
-	Site(int _site, unsigned int _mu) : site(site), mu(_mu) { }
+	Site(int _site, unsigned int _mu) : site(_site), mu(_mu) { }
 	int site;
 	int mu;
 };

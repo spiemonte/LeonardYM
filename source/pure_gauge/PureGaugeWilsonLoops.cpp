@@ -160,9 +160,6 @@ void PureGaugeWilsonLoops::execute(environment_t& environment) {
 	//Get the gauge action
 	GaugeAction* action = GaugeAction::getInstance(environment.configurations.get<std::string>("name_action"), environment.configurations.get<double>("beta"));
 
-	typedef GaugeGroup WilsonLineField[LT::glob_x][LT::glob_z][LT::glob_t][LT::glob_y/sliceSize];
-
-	//boost::array<boost::multi_array<GaugeGroup,5>, 5> shape = {{ numberSubSweeps, LT::glob_x, LT::glob_y, LT::glob_t, LT::glob_y/sliceSize }};
 	boost::multi_array<GaugeGroup,5> wilsonLineT(boost::extents[numberSubSweeps][LT::glob_x][LT::glob_y][LT::glob_t][LT::glob_y/sliceSize]);
 
 	for (int numSweep = 0; numSweep < numberSubSweeps; ++numSweep) {
@@ -252,7 +249,7 @@ void PureGaugeWilsonLoops::updateSlices(environment_t& environment, GaugeAction*
 
 	//Now we update, first pure gauge heatbath
 #ifdef MULTITHREADING
-	for (unsigned int color = 0; color < checkerboard->getNumberLoops(); ++color) {
+	for (int color = 0; color < checkerboard->getNumberLoops(); ++color) {
 #pragma omp parallel for //shared(beta, color, environment) firstprivate(action, checkerboard) default(none) schedule(dynamic)
 #endif
 		for (int site = 0; site < environment.gaugeLinkConfiguration.localsize; ++site) {

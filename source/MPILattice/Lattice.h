@@ -60,11 +60,17 @@ template<typename T, typename TLayout> class Lattice {
 				exit(7);
 			}
 #endif
-			memcpy(localdata, copy.localdata, TLayout::completesize*sizeof(T));
+			//memcpy(localdata, copy.localdata, TLayout::completesize*sizeof(T));
+			//Is this faster?
+#pragma omp parallel for
+			for (int site = 0; site < TLayout::completesize; ++site) memcpy(&localdata[site], &copy.localdata[site], sizeof(T));
 		}
 		
 		Lattice& operator=(const Lattice& copy) {
-			memcpy(localdata, copy.localdata, TLayout::completesize*sizeof(T));
+			//memcpy(localdata, copy.localdata, TLayout::completesize*sizeof(T));
+			//Is this faster?
+#pragma omp parallel for
+			for (int site = 0; site < TLayout::completesize; ++site) memcpy(&localdata[site], &copy.localdata[site], sizeof(T));
 			return *this;
 		}
 		
