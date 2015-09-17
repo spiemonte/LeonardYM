@@ -15,7 +15,6 @@ number_mcs = 100
 filename=""
 
 def usage():
-	print "Usage: critical_kappa.py "
 	print "Usage: critical_kappa.py --datafile=file [--number_mcs=n]"
 	print "In file \"filename\", list the pion masses and their errors in the form [[kappa,pion_mass,error], ...]"
 
@@ -75,8 +74,8 @@ def linear_pseudo_monte_carlo(data,trials=500):
 	for step in range(1,trials):
 		ppdata_boot = [[(pion_mass_sq[0],),random.gauss(pion_mass_sq[1], pion_mass_sq[2]),pion_mass_sq[2]] for pion_mass_sq in data]
 		min = opt.minimum_chisq(thPm,ppdata_boot,result,derivative_function=d_thPm)
-		resampled_data.append(list(min))
-	return [[numpy.mean(zip(*resampled_data)[i]),numpy.std(zip(*resampled_data)[i])] for i in range(2)]
+		resampled_data.append(list(min)+[-min[1]/min[0]])
+	return [[numpy.mean(zip(*resampled_data)[i]),numpy.std(zip(*resampled_data)[i])] for i in range(3)]
 	
 		
 critical_kappa_fit = linear_pseudo_monte_carlo(pion_masses_sq,number_mcs)
@@ -90,9 +89,8 @@ resultstr += "("+str(round(critical_kappa_fit[1][0],roundlevel))+" +/- "+str(rou
 print resultstr
 title += "\n"+resultstr
 
-error=math.sqrt((critical_kappa_fit[1][1]/critical_kappa_fit[0][0])**2 + ((critical_kappa_fit[1][0]/critical_kappa_fit[0][0])**2)*((critical_kappa_fit[0][1]/critical_kappa_fit[0][0])**2))
-roundlevel = int(-math.log10(error) + 2)
-resultstr = "Critical kappa: "+str(round(-critical_kappa_fit[1][0]/critical_kappa_fit[0][0],roundlevel))+" +/- "+str(round(error,roundlevel))
+roundlevel = int(-math.log10(critical_kappa_fit[2][1]) + 2)
+resultstr = "Critical kappa: "+str(round(critical_kappa_fit[2][0],roundlevel))+" +/- "+str(round(critical_kappa_fit[2][1],roundlevel))
 print resultstr
 title += "\n"+resultstr
 

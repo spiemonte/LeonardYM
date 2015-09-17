@@ -15,7 +15,6 @@ load_layout = ""
 if len(sys.argv) == 5:
 	load_layout = "--load_layout"
 	
-
 pattern = re.search('.*_([0-9]+)\.cfg',sys.argv[1])
 if pattern != None:
 	scriptfile = open("script"+pattern.group(1)+".cmd",'w')
@@ -43,8 +42,10 @@ export OMP_NUM_THREADS=10 \n\
 export MP_TASK_AFFINITY=core:$OMP_NUM_THREADS \n\
 #optional:  \n\
 #module load mpi_pinning/hybrid_blocked \n\
+module load gcc/4.9 \n\
 mpiexec -n "+str(int(sys.argv[3])*4)+" ./leonardQCD.exe --configfile="+sys.argv[1]+" "+load_layout+" > logfile"+pattern.group(1)+".txt \n\
  \n\
-echo -e \"configfile = "+sys.argv[1]+" \\nscriptfile = script"+pattern.group(1)+"\\n\" > script"+pattern.group(1)+"_reloadme.txt \n"
+echo -e \"configfile = "+sys.argv[1].replace("./","")+" \\nscriptfile = script"+pattern.group(1)+".cmd\\n\" > script"+pattern.group(1)+"_reloadme.txt \n"
 	scriptfile.write(scriptdata);
+
 

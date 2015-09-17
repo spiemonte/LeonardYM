@@ -68,7 +68,7 @@ def load(basename,endname,folder,log=False):
 					result[-1][-1][-1].append(float(tmp))
 				tmp = ""
 			inputfile.close()
-			if level != 1:
+			if level != 1 and level != 0:
 				print "Warning, possible corrupted data in",folder+basename+"_"+str(index)+"_"+endname
 				level = 0
 		else:

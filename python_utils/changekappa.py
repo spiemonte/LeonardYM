@@ -13,22 +13,12 @@ newkappa = float(sys.argv[2])
 inputfile = open(sys.argv[1],'r')
 
 filedata = inputfile.read()
-pattern = re.search('kappa.*=.*([0-9]+\.[0-9]+)',filedata)
+pattern = re.search('kappa\ *=\ *([0-9]+\.[0-9]+)',filedata)
 
 if pattern != None:
-	replacerule = re.search('(kappa.*=.*[0-9]+\.[0-9]+)',filedata)
+	replacerule = re.search('(kappa\ *=\ *[0-9]+\.[0-9]+)',filedata)
 	filedata = filedata.replace(replacerule.group(1),'kappa = '+sys.argv[2])
-	oldf = 'k'
-	newf = 'k'
-	if float(pattern.group(1)) < 0.1:
-		oldf = '0' + str(int(float(pattern.group(1))*10000)) + oldf
-	else:
-		oldf = str(int(float(pattern.group(1))*10000)) + oldf
-	if newkappa < 0.1:
-		newf = '0' + str(int(newkappa*10000)) + newf
-	else:
-		newf = str(int(newkappa*10000)) + newf
-	filedata = filedata.replace(oldf,newf)
+	filedata = filedata.replace(str(float(pattern.group(1))).replace("0.","")+"k",str(float(newkappa)).replace("0.","")+"k")
 else:
 	print "Warning, no kappa found!"
 

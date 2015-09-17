@@ -52,6 +52,16 @@ finaldata = [j for i in data for j in i]
 
 end=len(finaldata)
 
+if end == 0:
+	print "Data are not correctly loaded, do they exist?"
+	sys.exit(2)
+elif end < init:
+	print "Not enough data to skip the first ",init," configs!"
+	print "Use the option -s to a lower value than ", end
+	sys.exit(2)
+else:
+	print "Analysing ", end-init, " configurations"
+
 toplot = zip(*finaldata)
 
 import bootstrapping as boot
