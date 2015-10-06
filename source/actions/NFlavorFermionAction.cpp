@@ -148,7 +148,8 @@ void NFlavorFermionAction::updateForce(extended_gauge_lattice_t& forceLattice, c
 				if (LT::globalIndexT(site) == (LT::glob_t - 1)) fermionForceLattice[site][3] = -fermionForceLattice[site][3];
 			}
 		}
-
+		
+		fermionForceLattice.updateHalo();
 		smearingForce.force(fermionForceLattice, env.gaugeLinkConfiguration, forceLattice, rho);
 		
 		/*std::cout << "Che fare? " << this->force(env, 12, 3)-forceLattice[12][3] << std::endl;

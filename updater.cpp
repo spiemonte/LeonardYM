@@ -39,6 +39,7 @@ MPI_Datatype MpiType<Update::FundamentalVector[4]>::type = MPI_DOUBLE;
 MPI_Datatype MpiType<Update::AdjointVector[4]>::type = MPI_DOUBLE;
 MPI_Datatype MpiType<Update::FundamentalGroup>::type = MPI_DOUBLE;
 MPI_Datatype MpiType<Update::AdjointGroup>::type = MPI_DOUBLE;
+MPI_Datatype MpiType<Update::FermionicForceMatrix[4]>::type = MPI_DOUBLE;
 #endif
 
 

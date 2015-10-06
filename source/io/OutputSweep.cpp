@@ -36,7 +36,6 @@ void OutputSweep::execute(environment_t& environment) {
 	}
 	
 	typedef extended_gauge_lattice_t::Layout LT;
-	typedef extended_gauge_lattice_t::Layout Layout;
 	
 	if (format_name == "leonard_format") {
 		std::string output_name = environment.configurations.get<std::string>("output_configuration_name");
@@ -84,8 +83,8 @@ void OutputSweep::execute(environment_t& environment) {
 			std::string descriptor_name = output_directory+output_name+"_"+toString(environment.sweep+offset)+".descriptor.txt";
 			std::fstream descriptor;
 			descriptor.open(descriptor_name.c_str(), std::fstream::out);
-			descriptor << LT::glob_x << " " << LT::glob_y << " " << LT::glob_x << " " << LT::glob_t << std::endl;
-			descriptor << LT::pgrid_x << " " << LT::pgrid_y << " " << LT::pgrid_x << " " << LT::pgrid_t << std::endl;
+			descriptor << LT::glob_x << " " << LT::glob_y << " " << LT::glob_z << " " << LT::glob_t << std::endl;
+			descriptor << LT::pgrid_x << " " << LT::pgrid_y << " " << LT::pgrid_z << " " << LT::pgrid_t << std::endl;
 			descriptor << LT::numberProcessors << std::endl;
 			descriptor << LT::localsize << std::endl;
 			descriptor << std::setprecision(13) << plaquette << std::endl;
@@ -95,6 +94,7 @@ void OutputSweep::execute(environment_t& environment) {
 	}
 	else if (format_name == "muenster_format") {
 #if NUMCOLORS == 2
+		typedef extended_gauge_lattice_t::Layout Layout;
 		std::string output_name = environment.configurations.get<std::string>("output_configuration_name");
 		std::string output_directory = environment.configurations.get<std::string>("output_directory_configurations");
 		int offset = environment.configurations.get<unsigned int>("output_offset");
