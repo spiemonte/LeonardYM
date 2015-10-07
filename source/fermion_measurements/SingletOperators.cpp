@@ -3,7 +3,7 @@
 
 namespace Update {
 
-SingletOperators::SingletOperators() : StochasticEstimator(), LatticeSweep(), WilsonFlow() { }
+SingletOperators::SingletOperators() : StochasticEstimator(), WilsonFlow() { }
 
 void SingletOperators::execute(environment_t& environment) {
 	typedef extended_gauge_lattice_t Lt;
