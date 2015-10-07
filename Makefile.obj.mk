@@ -14,7 +14,7 @@ OBJECTS  = ReducedStencil.o StandardStencil.o ExtendedStencil.o LocalLayout.o \
 			Plaquette.o PolyakovLoop.o PolyakovLoopCorrelator.o AdjointPolyakovLoop.o WilsonLoop.o GaugeEnergy.o \
 			GlobalOutput.o OutputSweep.o \
 			FermionForce.o DiracWilsonFermionForce.o BlockDiracWilsonFermionForce.o ImprovedFermionForce.o TestForce.o SmearingForce.o \
-			StochasticEstimator.o MesonCorrelator.o ChiralCondensate.o GluinoGlue.o \
+			StochasticEstimator.o MesonCorrelator.o ChiralCondensate.o SingletOperators.o GluinoGlue.o \
 			PureGaugeUpdater.o PureGaugeOverrelaxation.o PureGaugeHMCUpdater.o Checkerboard.o PureGaugeWilsonLoops.o \
 			TwoFlavorFermionAction.o TwoFlavorQCDAction.o TwoFlavorHMCUpdater.o \
 			NFlavorFermionAction.o NFlavorQCDAction.o NFlavorQCDUpdater.o MultiStepNFlavorQCDUpdater.o TwistedMultiStepNFlavorQCDUpdater.o NFlavorBlockUpdater.o \

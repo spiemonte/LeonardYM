@@ -265,6 +265,9 @@ NFlavorBlockUpdater.o : ./source/hmc_updaters/NFlavorBlockUpdater.h ./source/hmc
 DiracEigenSolver.o: ./source/fermion_measurements/DiracEigenSolver.h ./source/fermion_measurements/DiracEigenSolver.cpp
 	$(CPP) $(CPPFLAGS) -c -o DiracEigenSolver.o ./source/fermion_measurements/DiracEigenSolver.cpp
 
+SingletOperators.o: ./source/fermion_measurements/SingletOperators.h ./source/fermion_measurements/SingletOperators.cpp
+	$(CPP) $(CPPFLAGS) -c -o SingletOperators.o ./source/fermion_measurements/SingletOperators.cpp
+
 Eigenvalues.o: ./source/fermion_measurements/Eigenvalues.h ./source/fermion_measurements/Eigenvalues.cpp
 	$(CPP) $(CPPFLAGS) -c -o Eigenvalues.o ./source/fermion_measurements/Eigenvalues.cpp
 
