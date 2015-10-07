@@ -20,6 +20,7 @@
 #include "fermion_measurements/Eigenvalues.h"
 #include "correlators/MesonCorrelator.h"
 #include "fermion_measurements/ChiralCondensate.h"
+#include "fermion_measurements/SingletOperators.h"
 #include "polyakov_loops/PolyakovLoop.h"
 #include "correlators/Glueball.h"
 #include "utils/ReUnit.h"
@@ -101,6 +102,8 @@ LatticeSweep* LatticeSweep::getInstance(const std::string& name) {
 		return new MultiStepNFlavorQCDUpdater();
 	} else if (name == "TwistedMultiStepNFlavorQCD") {
 		return new TwistedMultiStepNFlavorQCDUpdater();
+	} else if (name == "SingletOperators") {
+		return new SingletOperators();
 	}
 	else {
 		if (isOutputProcess()) std::cout << "Unknown name sweep: " << name << std::endl;
