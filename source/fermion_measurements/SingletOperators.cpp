@@ -6,7 +6,7 @@ namespace Update {
 SingletOperators::SingletOperators() : StochasticEstimator(), LatticeSweep(), WilsonFlow() { }
 
 void SingletOperators::execute(environment_t& environment) {
-	typedef extended_gauge_lattice_t::Layout Lt;
+	typedef extended_gauge_lattice_t Lt;
 	unsigned int max_step = environment.configurations.get<unsigned int>("number_stochastic_estimators");
 
 	if (squareDiracOperator == 0) {
