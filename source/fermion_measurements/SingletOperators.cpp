@@ -28,7 +28,7 @@ void SingletOperators::execute(environment_t& environment) {
 		long_real_t A00 = 0.;
 
 #pragma omp parallel for reduction(+:A00,A10,A11)
-		for (int site = 0; site < Lt::localsize; ++site) {
+		for (int site = 0; site < environment.getFermionLattice().localsize; ++site) {
 			for (unsigned int mu = 0; mu < 4; ++mu) {
 				for (int c = 0; c < diracVectorLength; ++c) {
 					std::complex<real_t> disconnectedx = conj(randomNoise[site][mu][c])*tmp[site][mu][c];
@@ -36,8 +36,8 @@ void SingletOperators::execute(environment_t& environment) {
 					std::complex<real_t> connected = conj(randomNoise[Lt::sup(Lt::sup(Lt::sup(Lt::sup(site,0),1),2),3)][mu][c])*tmp[site][mu][c]*randomNoise[site][mu][c]*conj(tmp[Lt::sup(Lt::sup(Lt::sup(Lt::sup(site,0),1),2),3)][mu][c]);
 					A00 += real(disconnectedx*disconnectedy)+real(connected);
 					
-					A10 += this->measureEnergyAndTopologicalCharge(environment.gaugeLinkConfiguration,site)*real(disconnectedy);
-					A11 += this->measureEnergyAndTopologicalCharge(environment.gaugeLinkConfiguration,site)*this->measureEnergyAndTopologicalCharge(environment.gaugeLinkConfiguration,Lt::sup(Lt::sup(Lt::sup(Lt::sup(site,0),1),2),3));
+					A10 += this->measureEnergyAndTopologicalCharge(environment.gaugeLinkConfiguration,site).second*real(disconnectedy);
+					A11 += this->measureEnergyAndTopologicalCharge(environment.gaugeLinkConfiguration,site).second*this->measureEnergyAndTopologicalCharge(environment.gaugeLinkConfiguration,Lt::sup(Lt::sup(Lt::sup(Lt::sup(site,0),1),2),3)).second;
 				}
 			}
 		}
