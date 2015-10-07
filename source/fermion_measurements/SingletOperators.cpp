@@ -3,7 +3,7 @@
 
 namespace Update {
 
-SingletOperators::SingletOperators() : StochasticEstimator(), WilsonFlow() { }
+SingletOperators::SingletOperators() : StochasticEstimator(), WilsonFlow(), squareDiracOperator(0), diracOperator(0), biConjugateGradient(0) { }
 
 void SingletOperators::execute(environment_t& environment) {
 	typedef extended_gauge_lattice_t Lt;
@@ -18,6 +18,11 @@ void SingletOperators::execute(environment_t& environment) {
 		diracOperator = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations);
 	}
 	diracOperator->setLattice(environment.getFermionLattice());
+
+	if (biConjugateGradient == 0) {
+		biConjugateGradient = new BiConjugateGradient();
+		biConjugateGradient->setMaximumSteps(environment.configurations.get<unsigned int>("generic_inverter_max_steps"));
+	}
 
 	long_real_t A11 = 0.;
 	long_real_t A10 = 0.;
