@@ -1,8 +1,10 @@
 #ifndef SINGLETOPERATORS_H
 #define SINGLETOPERATORS_H
 #include "StochasticEstimator.h"
+#include "LatticeSweep.h"
 #include "algebra_utils/AlgebraUtils.h"
 #include "inverters/BiConjugateGradient.h"
+#include "wilson_flow/WilsonFlow.h"
 
 namespace Update {
 
