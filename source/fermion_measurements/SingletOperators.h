@@ -8,7 +8,7 @@
 
 namespace Update {
 
-class SingletOperators : public StochasticEstimator, WilsonFlow {
+class SingletOperators : public StochasticEstimator, public WilsonFlow {
 public:
 	SingletOperators();
 
