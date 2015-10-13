@@ -6,6 +6,7 @@ import numpy
 import getopt
 import random
 import math
+import utils
 
 folder = ""
 basename = ""
@@ -69,11 +70,16 @@ import bootstrapping as boot
 title = "Polyakov loop for run "+basename
 
 polyakov_loop = boot.bootstrap(boot.block([abs(toplot[0][i]) for i in range(init,end)],blocking))
+
 polyakov_susc = boot.bootstrap_susc(boot.block([abs(toplot[0][i]) for i in range(init,end)],blocking),boot.block([toplot[0][i]*toplot[0][i] for i in range(init,end)],blocking))
+
+binder = boot.bootstrap_binder(boot.block([toplot[0][i]*toplot[0][i] for i in range(init,end)],blocking),boot.block([toplot[0][i]*toplot[0][i]*toplot[0][i]*toplot[0][i] for i in range(init,end)],blocking))
+
 roundlevel = int(-math.log10(polyakov_loop[1]) + 2)
 resultstr = "Polyakov loop expectation value: "+str(round(polyakov_loop[0],roundlevel))+" +/- "+str(round(polyakov_loop[1],roundlevel))
 roundlevel_susc = int(-math.log10(polyakov_susc[1]) + 2)
 resultstr += "\nPolyakov loop susceptibility: "+str(round(polyakov_susc[0],roundlevel_susc))+" +/- "+str(round(polyakov_susc[1],roundlevel_susc))
+resultstr += "\nBinder cumulant: "+utils.str_round(binder[0],binder[1])+" +/- "+utils.str_round(binder[1],binder[1])
 print resultstr
 title += "\n"+resultstr
 
@@ -88,7 +94,7 @@ pattern = re.search('([0-9]+)k',basename)
 if pattern != None:
 	latticedata += "0."+pattern.group(1)+", "
 
-print "Mathematica output: {"+latticedata+(str(round(polyakov_loop[0],roundlevel))+", "+str(round(polyakov_loop[1],roundlevel))+", "+str(round(polyakov_susc[0],roundlevel_susc))+", "+str(round(polyakov_susc[1],roundlevel_susc))).replace("e","*10^")+"}"
+print "Mathematica output: {"+latticedata+(str(round(polyakov_loop[0],roundlevel))+", "+str(round(polyakov_loop[1],roundlevel))+", "+str(round(polyakov_susc[0],roundlevel_susc))+", "+str(round(polyakov_susc[1],roundlevel_susc))+", "+utils.str_round(binder[0],binder[1])+", "+utils.str_round(binder[1],binder[1])+"}").replace("e","*10^")
 
 try:
 	import matplotlib as mpl
