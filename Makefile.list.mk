@@ -181,6 +181,9 @@ Plaquette.o: ./source/wilson_loops/Plaquette.h ./source/wilson_loops/Plaquette.c
 PolyakovLoop.o: ./source/polyakov_loops/PolyakovLoop.h ./source/polyakov_loops/PolyakovLoop.cpp
 	$(CPP) $(CPPFLAGS) -c -o PolyakovLoop.o ./source/polyakov_loops/PolyakovLoop.cpp
 
+PolyakovLoopEigenvalues.o: ./source/polyakov_loops/PolyakovLoopEigenvalues.h ./source/polyakov_loops/PolyakovLoopEigenvalues.cpp
+	$(CPP) $(CPPFLAGS) -c -o PolyakovLoopEigenvalues.o ./source/polyakov_loops/PolyakovLoopEigenvalues.cpp
+
 PolyakovLoopCorrelator.o: ./source/polyakov_loops/PolyakovLoopCorrelator.h ./source/polyakov_loops/PolyakovLoopCorrelator.cpp
 	$(CPP) $(CPPFLAGS) -c -o PolyakovLoopCorrelator.o ./source/polyakov_loops/PolyakovLoopCorrelator.cpp
 

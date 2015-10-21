@@ -40,6 +40,7 @@ void ChiralCondensate::execute(environment_t& environment) {
 	if (biConjugateGradient == 0) {
 		biConjugateGradient = new BiConjugateGradient();
 		biConjugateGradient->setMaximumSteps(environment.configurations.get<unsigned int>("generic_inverter_max_steps"));
+		biConjugateGradient->setPrecision(environment.configurations.get<real_t>("generic_inverter_precision"));
 	}
 	
 	bool connected;

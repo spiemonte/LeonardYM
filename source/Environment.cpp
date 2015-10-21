@@ -8,7 +8,11 @@ void Environment::synchronize() {
 		int levels = configurations.get<int>("stout_smearing_levels");
 		real_t rho = configurations.get<real_t>("stout_smearing_rho");
 		if (levels > 1) {
-			if (isOutputProcess()) std::cout << "Warning, number of levels " << levels << " not supported in unquenched mode!" << std::endl;
+			static int count = 0;
+			if (count == 0 && isOutputProcess()) {
+				std::cout << "Warning, number of stout smearing levels " << levels << " not supported in unquenched mode!" << std::endl;
+				count = 1;
+			}
 		}
 		else if (levels == 0 || rho < 0.00000000001) {
 			if (isOutputProcess()) std::cout << "Warning, comment smearing options if you don't use it!" << std::endl;
