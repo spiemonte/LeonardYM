@@ -110,63 +110,48 @@ void NFlavorFermionAction::updateForce(extended_gauge_lattice_t& forceLattice, c
 
 	//Compute first the link derivative
 	this->derivative(env);
-	
+
+	typedef extended_gauge_lattice_t::Layout LT;
+	//Set BC for fermions!
 	try {
-		real_t rho = env.configurations.get<real_t>("stout_smearing_rho");
-		SmearingForce smearingForce;
-		
-		typedef extended_gauge_lattice_t::Layout LT;
-		//Set BC for fermions!
-		try {
-			std::string bc = env.configurations.get<std::string>("boundary_conditions");
-			if (bc == "fermion_antiperiodic") {
-#pragma omp parallel for
-				for (int site = 0; site < fermionForceLattice.completesize; ++site) {
-					if (LT::globalIndexT(site) == (LT::glob_t - 1)) fermionForceLattice[site][3] = -fermionForceLattice[site][3];
-				}
-			}
-			else if (bc == "fermion_spatial_antiperiodic") {
-#pragma omp parallel for
-				for (int site = 0; site < fermionForceLattice.completesize; ++site) {
-					if (LT::globalIndexZ(site) == (LT::glob_z - 1)) fermionForceLattice[site][2] = -fermionForceLattice[site][2];
-				}
-			}
-			else if (bc == "fermion_periodic") {
-			}
-			else if (bc == "open") {
-			}
-			else {
-#pragma omp parallel for
-				for (int site = 0; site < fermionForceLattice.completesize; ++site) {
-					if (LT::globalIndexT(site) == (LT::glob_t - 1)) fermionForceLattice[site][3] = -fermionForceLattice[site][3];
-				}
-			}
-		}
-		catch (NotFoundOption& ex) {
+		std::string bc = env.configurations.get<std::string>("boundary_conditions");
+		if (bc == "fermion_antiperiodic") {
 #pragma omp parallel for
 			for (int site = 0; site < fermionForceLattice.completesize; ++site) {
 				if (LT::globalIndexT(site) == (LT::glob_t - 1)) fermionForceLattice[site][3] = -fermionForceLattice[site][3];
 			}
 		}
-		
-		fermionForceLattice.updateHalo();
-		smearingForce.force(fermionForceLattice, env.gaugeLinkConfiguration, forceLattice, rho);
-		
-		/*std::cout << "Che fare? " << this->force(env, 12, 3)-forceLattice[12][3] << std::endl;
-		
-		//Calculate the force directly
-		real_t difference = 0.;
-#pragma omp parallel for reduction(+:difference)
-		for (int site = 0; site < forceLattice.localsize; ++site) {
-			for (unsigned int mu = 0; mu < 4; ++mu) {
-				difference += real(trace((this->force(env, site, mu)-forceLattice[site][mu])*htrans(this->force(env, site, mu)-forceLattice[site][mu])));
-				forceLattice[site][mu] = this->force(env, site, mu);
+		else if (bc == "fermion_spatial_antiperiodic") {
+#pragma omp parallel for
+			for (int site = 0; site < fermionForceLattice.completesize; ++site) {
+				if (LT::globalIndexZ(site) == (LT::glob_z - 1)) fermionForceLattice[site][2] = -fermionForceLattice[site][2];
 			}
 		}
+		else if (bc == "fermion_periodic") {
+		}
+		else if (bc == "open") {
+		}
+		else {
+#pragma omp parallel for
+			for (int site = 0; site < fermionForceLattice.completesize; ++site) {
+				if (LT::globalIndexT(site) == (LT::glob_t - 1)) fermionForceLattice[site][3] = -fermionForceLattice[site][3];
+			}
+		}
+	}
+	catch (NotFoundOption& ex) {
+#pragma omp parallel for
+		for (int site = 0; site < fermionForceLattice.completesize; ++site) {
+			if (LT::globalIndexT(site) == (LT::glob_t - 1)) fermionForceLattice[site][3] = -fermionForceLattice[site][3];
+		}
+	}
 		
-		std::cout << "Non so piu' dove sbattere la testa: "<< rho << " " << difference << std::endl;
+	fermionForceLattice.updateHalo();
+	
+	try {
+		real_t rho = env.configurations.get<real_t>("stout_smearing_rho");
+		SmearingForce smearingForce;
 		
-		forceLattice.updateHalo();//TODO is needed?*/
+		smearingForce.force(fermionForceLattice, env.gaugeLinkConfiguration, forceLattice, rho);
 	}
 	catch (NotFoundOption& ex) {
 		//Calculate the force directly

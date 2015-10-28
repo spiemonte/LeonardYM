@@ -7,6 +7,7 @@
 
 #include "PolyakovLoopCorrelator.h"
 #include "io/GlobalOutput.h"
+#include "utils/StoutSmearing.h"
 
 namespace Update {
 
@@ -22,6 +23,20 @@ void PolyakovLoopCorrelator::execute(environment_t& environment) {
 
 	extended_gauge_lattice_t tmp = environment.gaugeLinkConfiguration;
 	extended_gauge_lattice_t swap;
+
+	try {
+		unsigned int numberLevelSmearing = environment.configurations.get<unsigned int>("level_stout_smearing_polyakov_correlator");
+		double smearingRho = environment.configurations.get<double>("rho_stout_smearing");
+
+		StoutSmearing stoutSmearing;
+		for (unsigned int level = 0; level < numberLevelSmearing; ++level) {
+			swap = tmp;
+			stoutSmearing.smearing(swap, tmp, smearingRho);
+		}
+	} catch (NotFoundOption& ex) {
+		if (isOutputProcess()) std::cout << "PolyakovLoopCorrelator::No smearing options found, proceeding without!" << std::endl;
+	}
+	
 	extended_gauge_lattice_t polyakov;
 	extended_gauge_lattice_t polyakov_translated;
 
