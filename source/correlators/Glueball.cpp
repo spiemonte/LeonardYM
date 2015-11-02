@@ -60,9 +60,15 @@ void Glueball::execute(environment_t& environment) {
 
 #pragma omp parallel for
 		for (int site = 0; site < Layout::localsize; ++site) {
-			long_real_t result_phi_x = real(trace((lattice[LT::sup(site, 0)][1])*htrans(lattice[LT::sup(site, 1)][0])*htrans(lattice[LT::sup(LT::sdn(site, 0), 1)][0])*htrans(lattice[LT::sdn(site, 0)][1])*htrans(lattice[LT::sdn(LT::sdn(site, 0), 1)][1])*(lattice[LT::sdn(LT::sdn(site, 0), 1)][0])*(lattice[LT::sdn(site, 1)][0])*(lattice[LT::sup(LT::sdn(site, 1), 0)][1])));
-			long_real_t result_phi_y = real(trace((lattice[LT::sup(site, 0)][2])*htrans(lattice[LT::sup(site, 2)][0])*htrans(lattice[LT::sup(LT::sdn(site, 0), 2)][0])*htrans(lattice[LT::sdn(site, 0)][2])*htrans(lattice[LT::sdn(LT::sdn(site, 0), 2)][2])*(lattice[LT::sdn(LT::sdn(site, 0), 2)][0])*(lattice[LT::sdn(site, 2)][0])*(lattice[LT::sup(LT::sdn(site, 2), 0)][2])));
-			long_real_t result_phi_z = real(trace((lattice[LT::sup(site, 1)][2])*htrans(lattice[LT::sup(site, 2)][1])*htrans(lattice[LT::sup(LT::sdn(site, 1), 2)][1])*htrans(lattice[LT::sdn(site, 1)][2])*htrans(lattice[LT::sdn(LT::sdn(site, 1), 2)][2])*(lattice[LT::sdn(LT::sdn(site, 1), 2)][1])*(lattice[LT::sdn(site, 2)][1])*(lattice[LT::sup(LT::sdn(site, 2), 1)][2])));
+			//long_real_t result_phi_x = real(trace((lattice[LT::sup(site, 0)][1])*htrans(lattice[LT::sup(site, 1)][0])*htrans(lattice[LT::sup(LT::sdn(site, 0), 1)][0])*htrans(lattice[LT::sdn(site, 0)][1])*htrans(lattice[LT::sdn(LT::sdn(site, 0), 1)][1])*(lattice[LT::sdn(LT::sdn(site, 0), 1)][0])*(lattice[LT::sdn(site, 1)][0])*(lattice[LT::sup(LT::sdn(site, 1), 0)][1])));
+			long_real_t result_phi_x = real(trace(lattice[site][1]*lattice[LT::sup(site,1)][0]*htrans(lattice[LT::sup(site,0)][1])*htrans(lattice[site][0])));
+			
+			//long_real_t result_phi_y = real(trace((lattice[LT::sup(site, 0)][2])*htrans(lattice[LT::sup(site, 2)][0])*htrans(lattice[LT::sup(LT::sdn(site, 0), 2)][0])*htrans(lattice[LT::sdn(site, 0)][2])*htrans(lattice[LT::sdn(LT::sdn(site, 0), 2)][2])*(lattice[LT::sdn(LT::sdn(site, 0), 2)][0])*(lattice[LT::sdn(site, 2)][0])*(lattice[LT::sup(LT::sdn(site, 2), 0)][2])));
+			long_real_t result_phi_y = real(trace(lattice[site][2]*lattice[LT::sup(site,2)][0]*htrans(lattice[LT::sup(site,0)][2])*htrans(lattice[site][0])));
+
+			//long_real_t result_phi_z = real(trace((lattice[LT::sup(site, 1)][2])*htrans(lattice[LT::sup(site, 2)][1])*htrans(lattice[LT::sup(LT::sdn(site, 1), 2)][1])*htrans(lattice[LT::sdn(site, 1)][2])*htrans(lattice[LT::sdn(LT::sdn(site, 1), 2)][2])*(lattice[LT::sdn(LT::sdn(site, 1), 2)][1])*(lattice[LT::sdn(site, 2)][1])*(lattice[LT::sup(LT::sdn(site, 2), 1)][2])));
+			long_real_t result_phi_z = real(trace(lattice[site][2]*lattice[LT::sup(site,2)][1]*htrans(lattice[LT::sup(site,1)][2])*htrans(lattice[site][1])));
+			
 #ifndef MULTITHREADING
 			result_zero[Layout::globalIndexT(site)] += result_phi_x + result_phi_y + result_phi_z;
 			result_two[Layout::globalIndexT(site)] += result_phi_x - result_phi_y;

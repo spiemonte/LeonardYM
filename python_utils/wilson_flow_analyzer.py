@@ -261,7 +261,7 @@ try:
 
 	ax.xaxis.set_label_text("Configuration")
 
-	plt.subplots_adjust(hspace=0.3,wspace=0.3,left=0.2,top=0.88,bottom=0.1)
+	plt.subplots_adjust(hspace=0.3,wspace=0.3,left=0.2,top=0.86,bottom=0.1)
 	plt.savefig(basename+"_wilson_flow")
 
 except ImportError:
