@@ -75,6 +75,9 @@ void PolyakovLoopCorrelator::execute(environment_t& environment) {
 	polyakov_translated = polyakov;
 	
 	for (int l = 0; l < Layout::glob_x/2; ++l) {
+		polyakovLoopCorrelatorRe = 0;
+		polyakovLoopCorrelatorIm = 0;
+
 		swap = polyakov_translated;
 #pragma omp parallel for
 		for (int site = 0; site < Layout::localsize; ++site) {

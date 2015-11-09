@@ -62,7 +62,9 @@ void PolyakovLoopEigenvalues::execute(environment_t& environment) {
 		bins[i] = 0;
 	}
 
-#pragma omp parallel for
+	long_real_t phase_average = 0.;
+
+#pragma omp parallel for reduction(+:phase_average)
 	for (int site = 0; site < Layout::localsize; ++site) {
 		if (Layout::globalIndexT(site) == 0) {
 #ifdef EIGEN
@@ -77,6 +79,7 @@ void PolyakovLoopEigenvalues::execute(environment_t& environment) {
 #ifndef MULTITHREADING
 				bins[static_cast<int>(50.*(arg(es.eigenvalues()[i])+PI))] += 1;
 #endif
+				if (arg(es.eigenvalues()[i] >= 0.) phase_average += arg(es.eigenvalues()[i];
 			}
 #endif
 #ifdef ARMADILLO
@@ -93,6 +96,7 @@ void PolyakovLoopEigenvalues::execute(environment_t& environment) {
 #ifndef MULTITHREADING
 				bins[static_cast<int>(50.*(arg(eigval[i])+PI))] += 1;
 #endif
+				if (arg(es.eigenvalues()[i] >= 0.) phase_average += arg(es.eigenvalues()[i];
 			}
 #endif
 		}
@@ -119,6 +123,10 @@ void PolyakovLoopEigenvalues::execute(environment_t& environment) {
 		}
 
 		output->pop("polyakov_eigenvalues");
+
+		output->write("polyakov_loop_phase_average", phase_average);
+		
+		std::cout << "PolyakovLoopEigenvalues::Phase average " << phase_average << std::endl;
 	}
 }
 
