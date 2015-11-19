@@ -79,7 +79,7 @@ void PolyakovLoopEigenvalues::execute(environment_t& environment) {
 #ifndef MULTITHREADING
 				bins[static_cast<int>(50.*(arg(es.eigenvalues()[i])+PI))] += 1;
 #endif
-				if (arg(es.eigenvalues()[i] >= 0.) phase_average += arg(es.eigenvalues()[i];
+				if (arg(es.eigenvalues()[i]) >= 0.) phase_average += arg(es.eigenvalues()[i]);
 			}
 #endif
 #ifdef ARMADILLO
