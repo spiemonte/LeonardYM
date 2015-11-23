@@ -306,6 +306,7 @@ int main(int ac, char* av[]) {
 		("flow_time", po::value<double>(), "The total time of the flow")
 		("stout_smearing_levels", po::value<int>(), "The levels for the stout smearing of the dirac operator")
 		("stout_smearing_rho", po::value<double>(), "The rho for the stout smearing of the dirac operator")
+		("npr_vertex_momentum", po::value<std::string>(), "Momentum for the measure of the vertex function (syntax: {px,py,pz,pt})")
 	;
 
 	for (int level = 1; level < 4; ++level) {

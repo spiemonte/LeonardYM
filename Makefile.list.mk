@@ -216,6 +216,9 @@ MesonCorrelator.o: ./source/correlators/MesonCorrelator.h ./source/correlators/M
 
 ChiralCondensate.o: ./source/fermion_measurements/ChiralCondensate.h ./source/fermion_measurements/ChiralCondensate.cpp
 	$(CPP) $(CPPFLAGS) -c -o ChiralCondensate.o ./source/fermion_measurements/ChiralCondensate.cpp
+
+NPRVertex.o: ./source/fermion_measurements/NPRVertex.h ./source/fermion_measurements/NPRVertex.cpp
+	$(CPP) $(CPPFLAGS) -c -o NPRVertex.o ./source/fermion_measurements/NPRVertex.cpp
 	
 GluinoGlue.o: ./source/correlators/GluinoGlue.h ./source/correlators/GluinoGlue.cpp
 	$(CPP) $(CPPFLAGS) -c -o GluinoGlue.o ./source/correlators/GluinoGlue.cpp

@@ -26,6 +26,8 @@ protected:
 
 	void generateSource(extended_dirac_vector_t& vector, int alpha, int c);
 
+	void generateMomentumSource(extended_dirac_vector_t& vector, std::vector<real_t> p, int alpha, int c);
+
 	template<typename T> T mean(const std::vector<T>& v) {
 		typename std::vector<T>::const_iterator i;
 		T res(0.);

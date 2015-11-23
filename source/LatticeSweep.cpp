@@ -21,6 +21,7 @@
 #include "correlators/MesonCorrelator.h"
 #include "fermion_measurements/ChiralCondensate.h"
 #include "fermion_measurements/SingletOperators.h"
+#include "fermion_measurements/NPRVertex.h"
 #include "polyakov_loops/PolyakovLoop.h"
 #include "correlators/Glueball.h"
 #include "utils/ReUnit.h"
@@ -66,7 +67,7 @@ LatticeSweep* LatticeSweep::getInstance(const std::string& name) {
 	} else if (name == "TestLinearAlgebra") {
 		return new TestLinearAlgebra();
 	} else if (name == "TestSpeedDiracOperators") {
-			return new TestSpeedDiracOperators();
+		return new TestSpeedDiracOperators();
 	} else if (name == "Eigenvalues") {
 		return new Eigenvalues();
 	} else if (name == "MesonCorrelator") {
@@ -107,6 +108,8 @@ LatticeSweep* LatticeSweep::getInstance(const std::string& name) {
 		return new TwistedMultiStepNFlavorQCDUpdater();
 	} else if (name == "SingletOperators") {
 		return new SingletOperators();
+	} else if (name == "NPRVertex") {
+		return new NPRVertex();
 	}
 	else {
 		if (isOutputProcess()) std::cout << "Unknown name sweep: " << name << std::endl;

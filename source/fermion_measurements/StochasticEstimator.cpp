@@ -107,4 +107,16 @@ void StochasticEstimator::generateSource(extended_dirac_vector_t& vector, int al
 	vector.updateHalo();
 }
 
+void StochasticEstimator::generateMomentumSource(extended_dirac_vector_t& vector, std::vector<real_t> p, int alpha, int c) {
+	typedef extended_dirac_vector_t::Layout Layout;
+#pragma omp parallel for
+	for (int site = 0; site < vector.localsize; ++site) {
+		for (unsigned int mu = 0; mu < 4; ++mu) set_to_zero(vector[site][mu]);
+		real_t phase = Layout::globalIndexX(site)*p[0] + Layout::globalIndexY(site)*p[1] + Layout::globalIndexZ(site)*p[2] + Layout::globalIndexT(site)*p[3];
+		vector[site][alpha][c] = std::complex<real_t>(cos(phase),sin(phase));
+	}
+
+	vector.updateHalo();
+}
+
 } /* namespace Update */
