@@ -87,6 +87,149 @@ delete biConjugateGradient;
 
 		DiracOperator* diracWilsonOperator = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations);
 		diracWilsonOperator->setLattice(environment.getFermionLattice());
+
+		BlockDiracOperator* blackBlockDiracOperator = BlockDiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations, Black);
+		blackBlockDiracOperator->setLattice(environment.getFermionLattice());
+		blackBlockDiracOperator->setGamma5(false);
+		
+		BlockDiracOperator* redBlockDiracOperator = BlockDiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations, Red);
+		redBlockDiracOperator->setLattice(environment.getFermionLattice());
+		redBlockDiracOperator->setGamma5(false);
+
+		TwistedDiracOperator* twistedDiracOperator = new TwistedDiracOperator();
+		twistedDiracOperator->setDiracOperator(diracWilsonOperator);
+		//twistedDiracOperator->setTwist(0.0001);
+		/*SquareTwistedDiracOperator* squareTwistedDiracOperator = new SquareTwistedDiracOperator();
+		squareTwistedDiracOperator->setDiracOperator(diracWilsonOperator);
+		
+
+		TwistedDiracOperator* twistedRed = new TwistedDiracOperator();
+		twistedRed->setDiracOperator(redBlockDiracOperator);
+
+		TwistedDiracOperator* twistedBlack = new TwistedDiracOperator();
+		twistedBlack->setDiracOperator(blackBlockDiracOperator);*/
+
+		ComplementBlockDiracOperator* K = new ComplementBlockDiracOperator(diracWilsonOperator, redBlockDiracOperator, blackBlockDiracOperator);
+		K->setMaximumSteps(205);
+		
+		//SquareComplementBlockDiracOperator* K2 = new SquareComplementBlockDiracOperator(K);
+		
+		SAPPreconditioner *preconditioner = new SAPPreconditioner(twistedDiracOperator,K);
+		preconditioner->setSteps(7);
+		preconditioner->setPrecision(0.00000000001);
+
+
+		int conjugateSpaceDimension = 7;
+		std::complex<real_t> rho[conjugateSpaceDimension];
+		reduced_dirac_vector_t source, r, solution, c[conjugateSpaceDimension], u[conjugateSpaceDimension], ad[conjugateSpaceDimension], tmp1;
+
+		AlgebraUtils::generateRandomVector(source);
+		AlgebraUtils::normalize(source);
+
+		BiConjugateGradient* biConjugateGradient = new BiConjugateGradient();
+		biConjugateGradient->setPrecision(0.0000000001);
+		biConjugateGradient->setMaximumSteps(1000);
+		
+		diracWilsonOperator->setGamma5(false);
+		//biConjugateGradient->solve(diracWilsonOperator, source, solution, preconditioner);
+
+		r = source;
+		AlgebraUtils::setToZero(solution);
+
+		for (int k = 0; k < 535; ++k) {
+			preconditioner->multiply(u[(k % conjugateSpaceDimension)],r);
+			//u[(k % conjugateSpaceDimension)] = r;
+
+			diracWilsonOperator->multiply(c[(k % conjugateSpaceDimension)],u[(k % conjugateSpaceDimension)]);
+			
+			for (int i = 0; i < (k % conjugateSpaceDimension); ++i) {
+				std::complex<real_t> alpha = static_cast< std::complex<real_t> >(AlgebraUtils::dot(c[i],c[(k % conjugateSpaceDimension)]));
+#pragma omp parallel for
+				for (int site = 0; site < solution.completesize; ++site) {
+					for (unsigned int mu = 0; mu < 4; ++mu) {
+						c[(k % conjugateSpaceDimension)][site][mu] = c[(k % conjugateSpaceDimension)][site][mu] - alpha*c[i][site][mu];
+						u[(k % conjugateSpaceDimension)][site][mu] = u[(k % conjugateSpaceDimension)][site][mu] - alpha*u[i][site][mu];
+					}
+				}
+				
+			}
+			
+			real_t norm = sqrt(AlgebraUtils::squaredNorm(c[(k % conjugateSpaceDimension)]));
+#pragma omp parallel for
+			for (int site = 0; site < solution.completesize; ++site) {
+				for (unsigned int mu = 0; mu < 4; ++mu) {
+					c[(k % conjugateSpaceDimension)][site][mu] = c[(k % conjugateSpaceDimension)][site][mu]/norm;
+					u[(k % conjugateSpaceDimension)][site][mu] = u[(k % conjugateSpaceDimension)][site][mu]/norm;
+				}
+			}
+			
+			std::complex<real_t> alpha = static_cast< std::complex<real_t> >(AlgebraUtils::dot(c[(k % conjugateSpaceDimension)],r));
+#pragma omp parallel for
+			for (int site = 0; site < solution.completesize; ++site) {
+				for (unsigned int mu = 0; mu < 4; ++mu) {
+					solution[site][mu] = solution[site][mu] + alpha*u[(k % conjugateSpaceDimension)][site][mu];
+					r[site][mu] = r[site][mu] - alpha*c[(k % conjugateSpaceDimension)][site][mu];
+				}
+			}
+
+
+			if (AlgebraUtils::squaredNorm(r) < 0.00000000001) {
+				//stepsMax = j;
+				break;
+			}
+			else std::cout << "Residual norm at step " << k << ": " << AlgebraUtils::squaredNorm(r) << std::endl;
+
+		}
+
+		/*for (int j = 0; j < 535; ++j) {
+			{
+				preconditioner->multiply(w[(j % conjugateSpaceDimension)],r);
+				AlgebraUtils::gamma5(w[(j % conjugateSpaceDimension)]);
+			}
+
+			d[(j % conjugateSpaceDimension)] = w[(j % conjugateSpaceDimension)];
+
+			int js = ((j % conjugateSpaceDimension) == 0) ? 0 : 1;
+			for (int k = js; k < (j % conjugateSpaceDimension); ++k) {
+				std::complex<real_t> alpha = static_cast< std::complex<real_t> >(AlgebraUtils::dot(w[(j % conjugateSpaceDimension)],ad[k]))/rho[k];
+#pragma omp parallel for
+				for (int site = 0; site < solution.completesize; ++site) {
+					for (unsigned int mu = 0; mu < 4; ++mu) {
+						d[(j % conjugateSpaceDimension)][site][mu] = d[(j % conjugateSpaceDimension)][site][mu] - alpha*d[k][site][mu];
+					}
+				}
+			}
+
+			squareDiracWilsonOperator->multiply(ad[(j % conjugateSpaceDimension)],d[(j % conjugateSpaceDimension)]);
+			rho[(j % conjugateSpaceDimension)] = static_cast< std::complex<real_t> >(AlgebraUtils::dot(d[(j % conjugateSpaceDimension)],ad[(j % conjugateSpaceDimension)]));
+
+			std::complex<real_t> proj = static_cast< std::complex<real_t> >(AlgebraUtils::dot(d[(j % conjugateSpaceDimension)],r))/rho[(j % conjugateSpaceDimension)];
+
+#pragma omp parallel for
+			for (int site = 0; site < solution.completesize; ++site) {
+				for (unsigned int mu = 0; mu < 4; ++mu) {
+					solution[site][mu] = solution[site][mu] + proj*d[(j % conjugateSpaceDimension)][site][mu];
+					r[site][mu] = r[site][mu] - proj*ad[(j % conjugateSpaceDimension)][site][mu];
+				}
+			}
+			//std::cout << "Residual norm at step " << j << ":" << AlgebraUtils::squaredNorm(r) << std::endl;
+			if (AlgebraUtils::squaredNorm(r) < 0.00000000001) {
+				//stepsMax = j;
+				break;
+			}
+			else std::cout << "Residual norm at step " << j << ": " << AlgebraUtils::squaredNorm(r) << std::endl;
+
+			
+		}*/
+		
+	}
+
+	{
+		DiracOperator* squareDiracWilsonOperator = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 2, environment.configurations);
+		squareDiracWilsonOperator->setLattice(environment.getFermionLattice());
+
+		DiracOperator* diracWilsonOperator = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations);
+		diracWilsonOperator->setLattice(environment.getFermionLattice());
 		diracWilsonOperator->setGamma5(false);
 
 		MultiGridOperator* multiGridOperator = new MultiGridOperator();

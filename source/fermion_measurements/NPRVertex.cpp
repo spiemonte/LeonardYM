@@ -10,16 +10,20 @@
 #include "algebra_utils/AlgebraUtils.h"
 #include "utils/StoutSmearing.h"
 #include "utils/Gamma.h"
+#include "dirac_operators/BlockDiracWilsonOperator.h"
+#include "dirac_operators/ComplementBlockDiracWilsonOperator.h"
+#include "dirac_operators/TwistedDiracOperator.h"
+#include "dirac_operators/SAPPreconditioner.h"
 
 namespace Update {
 
-NPRVertex::NPRVertex() : diracOperator(0), squareDiracOperator(0), biConjugateGradient(0) { }
+NPRVertex::NPRVertex() : diracOperator(0), squareDiracOperator(0), inverter(0) { }
 
-NPRVertex::NPRVertex(const NPRVertex& toCopy) : LatticeSweep(toCopy), StochasticEstimator(toCopy), diracOperator(0), squareDiracOperator(0), biConjugateGradient(0) { }
+NPRVertex::NPRVertex(const NPRVertex& toCopy) : LatticeSweep(toCopy), StochasticEstimator(toCopy), diracOperator(0), squareDiracOperator(0), inverter(0) { }
 
 NPRVertex::~NPRVertex() {
 	if (diracOperator) delete diracOperator;
-	if (biConjugateGradient) delete biConjugateGradient;
+	if (inverter) delete inverter;
 }
 
 void NPRVertex::execute(environment_t& environment) {
@@ -33,33 +37,50 @@ void NPRVertex::execute(environment_t& environment) {
 		squareDiracOperator = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 2, environment.configurations);
 	}
 
-	extended_fermion_lattice_t lattice;
-
-	try {
-		unsigned int numberLevelSmearing = environment.configurations.get<unsigned int>("level_stout_smearing_meson");
-		double smearingRho = environment.configurations.get<double>("rho_stout_smearing");
-		StoutSmearing stoutSmearing;
-#ifdef ADJOINT
-		extended_gauge_lattice_t smearedConfiguration;
-		stoutSmearing.spatialSmearing(environment.gaugeLinkConfiguration, smearedConfiguration, numberLevelSmearing, smearingRho);
-		ConvertLattice<extended_fermion_lattice_t,extended_gauge_lattice_t>::convert(lattice, smearedConfiguration);//TODO
-#endif
-#ifndef ADJOINT
-		stoutSmearing.spatialSmearing(environment.gaugeLinkConfiguration, lattice, numberLevelSmearing, smearingRho);
-#endif
-		environment.setFermionBc(lattice);
-	} catch (NotFoundOption& ex) {
-		lattice =  environment.getFermionLattice();
-		if (isOutputProcess()) std::cout << "NPRVertex::No smearing options found, proceeding without!" << std::endl;
-	}
-
-	diracOperator->setLattice(lattice);
-	squareDiracOperator->setLattice(lattice);
+	diracOperator->setLattice(environment.getFermionLattice());
+	diracOperator->setGamma5(false);
+	squareDiracOperator->setLattice(environment.getFermionLattice());
 	
-	if (biConjugateGradient == 0) biConjugateGradient = new BiConjugateGradient();
-	biConjugateGradient->setPrecision(environment.configurations.get<double>("generic_inverter_precision"));
-	biConjugateGradient->setMaximumSteps(environment.configurations.get<unsigned int>("generic_inverter_max_steps"));
+	if (inverter == 0) inverter = new GMRESR();
+	inverter->setPrecision(environment.configurations.get<double>("NPRVertex::inverter_precision"));
+	inverter->setMaximumSteps(environment.configurations.get<unsigned int>("NPRVertex::inverter_max_steps"));
 
+	//Here we construct the SAP preconditioner
+	BlockDiracOperator* blackBlockDiracOperator = 0;
+	BlockDiracOperator* redBlockDiracOperator = 0;
+	TwistedDiracOperator* twistedDiracOperator = 0;
+	ComplementBlockDiracOperator* K = 0;
+	SAPPreconditioner *preconditioner = 0;
+	
+	if (environment.configurations.get<std::string>("NPRVertex::sap_preconditioning") == "true") {
+		blackBlockDiracOperator = BlockDiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations, Black);
+		blackBlockDiracOperator->setLattice(environment.getFermionLattice());
+		blackBlockDiracOperator->setGamma5(false);
+		blackBlockDiracOperator->setBlockSize(environment.configurations.get< std::vector<unsigned int> >("NPRVertex::sap_block_size"));
+		
+		redBlockDiracOperator = BlockDiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations, Red);
+		redBlockDiracOperator->setLattice(environment.getFermionLattice());
+		redBlockDiracOperator->setGamma5(false);
+		redBlockDiracOperator->setBlockSize(environment.configurations.get< std::vector<unsigned int> >("NPRVertex::sap_block_size"));
+
+		twistedDiracOperator = new TwistedDiracOperator();
+		twistedDiracOperator->setDiracOperator(diracOperator);
+		twistedDiracOperator->setTwist(environment.configurations.get<double>("NPRVertex::sap_twist"));
+
+		K = new ComplementBlockDiracOperator(diracOperator, redBlockDiracOperator, blackBlockDiracOperator);
+		K->setMaximumSteps(environment.configurations.get<unsigned int>("NPRVertex::sap_inverter_max_steps"));
+		K->setBlockSize(environment.configurations.get< std::vector<unsigned int> >("NPRVertex::sap_block_size"));
+		
+		preconditioner = new SAPPreconditioner(twistedDiracOperator,K);
+		preconditioner->setSteps(environment.configurations.get<unsigned int>("NPRVertex::sap_iterations"));
+		preconditioner->setPrecision(environment.configurations.get<double>("NPRVertex::sap_inverter_precision"));
+
+		if (isOutputProcess()) std::cout << "NPRVertex::Using SAP preconditioning ..." << std::endl;
+	}
+	else {
+		if (isOutputProcess()) std::cout << "NPRVertex::Without using SAP preconditioning ..." << std::endl;
+	}
+	
 	extended_dirac_vector_t source;
 
 	std::complex<long_real_t> propagator[4][4];
@@ -67,19 +88,26 @@ void NPRVertex::execute(environment_t& environment) {
 
 	int inversionSteps = 0;
 
-	std::vector<real_t> momentum = environment.configurations.get< std::vector<real_t> >("npr_vertex_momentum");
+	std::vector<real_t> momentum = environment.configurations.get< std::vector<real_t> >("NPRVertex::momentum");
 	momentum[0] = momentum[0]*2.*PI/Layout::glob_x;
 	momentum[1] = momentum[1]*2.*PI/Layout::glob_y;
 	momentum[2] = momentum[2]*2.*PI/Layout::glob_z;
 	momentum[3] = momentum[3]*2.*PI/Layout::glob_t;
+
+	
 	
 	for (unsigned int alpha = 0; alpha < 4; ++alpha) {
 		for (int c = 0; c < diracVectorLength; ++c) {
 			this->generateMomentumSource(source, momentum, alpha, c);
-			biConjugateGradient->solve(squareDiracOperator, source, eta);
-			diracOperator->multiply(tmp[c*4 + alpha],eta);
+			inverter->solve(diracOperator, source, tmp[c*4 + alpha], preconditioner);
+			inversionSteps += inverter->getLastSteps();
+			
+			/*diracOperator->multiply(eta,source);
+			biConjugateGradient->solve(squareDiracOperator, eta, tmp[c*4 + alpha]);
 			AlgebraUtils::gamma5(tmp[c*4 + alpha]);
-			inversionSteps += biConjugateGradient->getLastSteps();
+			inversionSteps += biConjugateGradient->getLastSteps();*/
+
+			
 		}
 	}
 	
@@ -251,7 +279,28 @@ void NPRVertex::execute(environment_t& environment) {
 		}
 		output->pop("vertex");
 	}
+	
+	if (environment.configurations.get<std::string>("NPRVertex::sap_preconditioning") == "true") {
+		delete preconditioner;
+		delete redBlockDiracOperator;
+		delete blackBlockDiracOperator;
+		delete twistedDiracOperator;
+		delete K;
+	}
+}
 
+void NPRVertex::registerParameters(po::options_description& desc) {
+	desc.add_options()
+		("NPRVertex::inverter_precision", po::value<double>()->default_value(0.0000000001), "set the precision used by the inverter")
+		("NPRVertex::inverter_max_steps", po::value<unsigned int>()->default_value(5000), "set the maximum steps used by the inverter")
+		("NPRVertex::momentum", po::value<std::string>()->default_value("{2,2,2,2}"), "Momentum for the measure of the vertex function (syntax: {px,py,pz,pt})")
+		("NPRVertex::sap_preconditioning", po::value<std::string>()->default_value("true"), "Should we use SAP? true/false")
+		("NPRVertex::sap_block_size", po::value<std::string>()->default_value("{4,4,4,4}"), "Block size for SAP (syntax: {bx,by,bz,bt})")
+		("NPRVertex::sap_iterations", po::value<unsigned int>()->default_value(5), "The number of sap iterations")
+		("NPRVertex::sap_inverter_precision", po::value<double>()->default_value(0.00000000001), "The precision of the inner SAP inverter")
+		("NPRVertex::sap_inverter_max_steps", po::value<unsigned int>()->default_value(100), "The maximum number of steps for the inner SAP inverter")
+		("NPRVertex::sap_twist", po::value<double>()->default_value(0.), "The precision of the inner SAP inverter")
+		;
 }
 
 } /* namespace Update */

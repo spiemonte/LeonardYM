@@ -17,16 +17,18 @@ TwistedDiracOperator::~TwistedDiracOperator() { }
 
 void TwistedDiracOperator::multiply(reduced_dirac_vector_t& output, const reduced_dirac_vector_t& input) {
 	diracOperator->multiply(output, input);
+	if (fabs(twist) > 0.00000000000000001) {
 #pragma omp parallel for
-	for (int site = 0; site < output.completesize; ++site) {
-		for (unsigned int mu = 0; mu < 2; ++mu) {
-			for (int c = 0; c < diracVectorLength; ++c) {
-				output[site][mu][c] += std::complex<real_t>(0,twist)*input[site][mu][c];
+		for (int site = 0; site < output.completesize; ++site) {
+			for (unsigned int mu = 0; mu < 2; ++mu) {
+				for (int c = 0; c < diracVectorLength; ++c) {
+					output[site][mu][c] += std::complex<real_t>(0,twist)*input[site][mu][c];
+				}
 			}
-		}
-		for (unsigned int mu = 2; mu < 4; ++mu) {
-			for (int c = 0; c < diracVectorLength; ++c) {
-				output[site][mu][c] -= std::complex<real_t>(0,twist)*input[site][mu][c];
+			for (unsigned int mu = 2; mu < 4; ++mu) {
+				for (int c = 0; c < diracVectorLength; ++c) {
+					output[site][mu][c] -= std::complex<real_t>(0,twist)*input[site][mu][c];
+				}
 			}
 		}
 	}
@@ -34,16 +36,18 @@ void TwistedDiracOperator::multiply(reduced_dirac_vector_t& output, const reduce
 
 void TwistedDiracOperator::multiplyAdd(reduced_dirac_vector_t& output, const reduced_dirac_vector_t& vector1, const reduced_dirac_vector_t& vector2, const complex& alpha) {
 	diracOperator->multiplyAdd(output, vector1, vector2, alpha);
+	if (fabs(twist) > 0.00000000000000001) {
 #pragma omp parallel for
-	for (int site = 0; site < output.completesize; ++site) {
-		for (unsigned int mu = 0; mu < 2; ++mu) {
-			for (int c = 0; c < diracVectorLength; ++c) {
-				output[site][mu][c] += std::complex<real_t>(0,twist)*vector1[site][mu][c];
+		for (int site = 0; site < output.completesize; ++site) {
+			for (unsigned int mu = 0; mu < 2; ++mu) {
+				for (int c = 0; c < diracVectorLength; ++c) {
+					output[site][mu][c] += std::complex<real_t>(0,twist)*vector1[site][mu][c];
+				}
 			}
-		}
-		for (unsigned int mu = 2; mu < 4; ++mu) {
-			for (int c = 0; c < diracVectorLength; ++c) {
-				output[site][mu][c] -= std::complex<real_t>(0,twist)*vector1[site][mu][c];
+			for (unsigned int mu = 2; mu < 4; ++mu) {
+				for (int c = 0; c < diracVectorLength; ++c) {
+					output[site][mu][c] -= std::complex<real_t>(0,twist)*vector1[site][mu][c];
+				}
 			}
 		}
 	}

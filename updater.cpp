@@ -11,6 +11,7 @@
 #include "./source/utils/RandomSeed.h"
 #include "./source/utils/ToString.h"
 #include "./source/Simulation.h"
+#include "./source/LatticeSweep.h"
 #include "./source/io/GlobalOutput.h"
 #include "./source/MPILattice/ReducedStencil.h"
 #include "./source/MPILattice/StandardStencil.h"
@@ -39,7 +40,9 @@ MPI_Datatype MpiType<Update::FundamentalVector[4]>::type = MPI_DOUBLE;
 MPI_Datatype MpiType<Update::AdjointVector[4]>::type = MPI_DOUBLE;
 MPI_Datatype MpiType<Update::FundamentalGroup>::type = MPI_DOUBLE;
 MPI_Datatype MpiType<Update::AdjointGroup>::type = MPI_DOUBLE;
+#ifdef ADJOINT
 MPI_Datatype MpiType<Update::FermionicForceMatrix[4]>::type = MPI_DOUBLE;
+#endif
 #endif
 
 
@@ -145,108 +148,7 @@ int main(int ac, char* av[]) {
 		("boundary_conditions", po::value<std::string>(), "Boundary conditions to use: periodic (fermions), antiperiodic (fermions), spatialantiperiodic (fermion), open")
 		("number_extra_vectors_eigensolver", po::value<unsigned int>(), "Number of extra vectors for the Arnoldi algorithm, increase this number to increase precision")
 		("number_eigenvalues", po::value<unsigned int>(), "Number of eigenvalues ofthe dirac wilson operator to be computed")
-		("measure_condensate_connected", po::value<bool>(), "Should I measure the connected part of the condensate susceptibility?")
-
-/*	    ("heatbath_rational_fraction_1", po::value<std::string>(), "the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-	    ("metropolis_rational_fraction_1", po::value<std::string>(), "the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-	    ("force_rational_fraction_1", po::value<std::string>(), "the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-	    ("heatbath_rational_fraction_2", po::value<std::string>(), "the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-	    ("metropolis_rational_fraction_2", po::value<std::string>(), "the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-	    ("force_rational_fraction_2", po::value<std::string>(), "the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-	    ("heatbath_rational_fraction_3", po::value<std::string>(), "the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-	    ("metropolis_rational_fraction_3", po::value<std::string>(), "the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-	    ("force_rational_fraction_3", po::value<std::string>(), "the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-	    ("heatbath_rational_fraction_4", po::value<std::string>(), "the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-	    ("metropolis_rational_fraction_4", po::value<std::string>(), "the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-	    ("force_rational_fraction_4", po::value<std::string>(), "the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-	    ("heatbath_rational_fraction_5", po::value<std::string>(), "the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-	    ("metropolis_rational_fraction_5", po::value<std::string>(), "the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-	    ("force_rational_fraction_5", po::value<std::string>(), "the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-	    ("heatbath_rational_fraction_6", po::value<std::string>(), "the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-	    ("metropolis_rational_fraction_6", po::value<std::string>(), "the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-	    ("force_rational_fraction_6", po::value<std::string>(), "the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-	    ("heatbath_rational_fraction_7", po::value<std::string>(), "the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-	    ("metropolis_rational_fraction_7", po::value<std::string>(), "the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-	    ("force_rational_fraction_7", po::value<std::string>(), "the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-	    ("heatbath_rational_fraction_8", po::value<std::string>(), "the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-	    ("metropolis_rational_fraction_8", po::value<std::string>(), "the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-	    ("force_rational_fraction_8", po::value<std::string>(), "the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("heatbath_rational_fraction_9",po::value<std::string>(),"the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-		("metropolis_rational_fraction_9",po::value<std::string>(),"the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("force_rational_fraction_9",po::value<std::string>(),"the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("heatbath_rational_fraction_10",po::value<std::string>(),"the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-		("metropolis_rational_fraction_10",po::value<std::string>(),"the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("force_rational_fraction_10",po::value<std::string>(),"the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("heatbath_rational_fraction_11",po::value<std::string>(),"the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-		("metropolis_rational_fraction_11",po::value<std::string>(),"the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("force_rational_fraction_11",po::value<std::string>(),"the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("heatbath_rational_fraction_12",po::value<std::string>(),"the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-		("metropolis_rational_fraction_12",po::value<std::string>(),"the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("force_rational_fraction_12",po::value<std::string>(),"the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("heatbath_rational_fraction_13",po::value<std::string>(),"the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-		("metropolis_rational_fraction_13",po::value<std::string>(),"the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("force_rational_fraction_13",po::value<std::string>(),"the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("heatbath_rational_fraction_14",po::value<std::string>(),"the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-		("metropolis_rational_fraction_14",po::value<std::string>(),"the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("force_rational_fraction_14",po::value<std::string>(),"the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("heatbath_rational_fraction_15",po::value<std::string>(),"the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-		("metropolis_rational_fraction_15",po::value<std::string>(),"the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("force_rational_fraction_15",po::value<std::string>(),"the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("heatbath_rational_fraction_16",po::value<std::string>(),"the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-		("metropolis_rational_fraction_16",po::value<std::string>(),"the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("force_rational_fraction_16",po::value<std::string>(),"the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("heatbath_rational_fraction_17",po::value<std::string>(),"the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-		("metropolis_rational_fraction_17",po::value<std::string>(),"the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("force_rational_fraction_17",po::value<std::string>(),"the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("heatbath_rational_fraction_18",po::value<std::string>(),"the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-		("metropolis_rational_fraction_18",po::value<std::string>(),"the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("force_rational_fraction_18",po::value<std::string>(),"the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("heatbath_rational_fraction_19",po::value<std::string>(),"the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-		("metropolis_rational_fraction_19",po::value<std::string>(),"the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("force_rational_fraction_19",po::value<std::string>(),"the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("heatbath_rational_fraction_20",po::value<std::string>(),"the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-		("metropolis_rational_fraction_20",po::value<std::string>(),"the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("force_rational_fraction_20",po::value<std::string>(),"the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("heatbath_rational_fraction_21",po::value<std::string>(),"the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-		("metropolis_rational_fraction_21",po::value<std::string>(),"the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("force_rational_fraction_21",po::value<std::string>(),"the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("heatbath_rational_fraction_22",po::value<std::string>(),"the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-		("metropolis_rational_fraction_22",po::value<std::string>(),"the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("force_rational_fraction_22",po::value<std::string>(),"the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("heatbath_rational_fraction_23",po::value<std::string>(),"the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-		("metropolis_rational_fraction_23",po::value<std::string>(),"the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("force_rational_fraction_23",po::value<std::string>(),"the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("heatbath_rational_fraction_24",po::value<std::string>(),"the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-		("metropolis_rational_fraction_24",po::value<std::string>(),"the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("force_rational_fraction_24",po::value<std::string>(),"the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("heatbath_rational_fraction_25",po::value<std::string>(),"the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-		("metropolis_rational_fraction_25",po::value<std::string>(),"the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("force_rational_fraction_25",po::value<std::string>(),"the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("heatbath_rational_fraction_26",po::value<std::string>(),"the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-		("metropolis_rational_fraction_26",po::value<std::string>(),"the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("force_rational_fraction_26",po::value<std::string>(),"the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("heatbath_rational_fraction_27",po::value<std::string>(),"the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-		("metropolis_rational_fraction_27",po::value<std::string>(),"the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("force_rational_fraction_27",po::value<std::string>(),"the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("heatbath_rational_fraction_28",po::value<std::string>(),"the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-		("metropolis_rational_fraction_28",po::value<std::string>(),"the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("force_rational_fraction_28",po::value<std::string>(),"the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("heatbath_rational_fraction_29",po::value<std::string>(),"the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-		("metropolis_rational_fraction_29",po::value<std::string>(),"the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("force_rational_fraction_29",po::value<std::string>(),"the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("heatbath_rational_fraction_30",po::value<std::string>(),"the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-		("metropolis_rational_fraction_30",po::value<std::string>(),"the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("force_rational_fraction_30",po::value<std::string>(),"the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("heatbath_rational_fraction_31",po::value<std::string>(),"the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-		("metropolis_rational_fraction_31",po::value<std::string>(),"the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("force_rational_fraction_31",po::value<std::string>(),"the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("heatbath_rational_fraction_32",po::value<std::string>(),"the polynomial that should be used for the heatbath (syntax: {(globalfactorRE,globalfactorIm),(r1Re,r1Im),(),(),...,(rnRe,rnIm)})")
-		("metropolis_rational_fraction_32",po::value<std::string>(),"the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-		("force_rational_fraction_32",po::value<std::string>(),"the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})")
-*/
-
-
-		
+		("measure_condensate_connected", po::value<bool>(), "Should I measure the connected part of the condensate susceptibility?")		
 		("eigenvalues_map", po::value<std::string>(), "the map used for computing the lowest eigenvalues (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})")
 	    ("output_directory_configurations", po::value<std::string>(), "The directory for the output of the configurations")
 		("output_directory_measurements", po::value<std::string>(), "The directory for the output of the measurements")
@@ -306,7 +208,6 @@ int main(int ac, char* av[]) {
 		("flow_time", po::value<double>(), "The total time of the flow")
 		("stout_smearing_levels", po::value<int>(), "The levels for the stout smearing of the dirac operator")
 		("stout_smearing_rho", po::value<double>(), "The rho for the stout smearing of the dirac operator")
-		("npr_vertex_momentum", po::value<std::string>(), "Momentum for the measure of the vertex function (syntax: {px,py,pz,pt})")
 	;
 
 	for (int level = 1; level < 4; ++level) {
@@ -320,6 +221,8 @@ int main(int ac, char* av[]) {
 		desc.add_options()((std::string("metropolis_rational_fraction_")+Update::toString(i)).c_str(),po::value<std::string>(),"the rational fraction approximation that should be used for the metropolis (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})");
 		desc.add_options()((std::string("force_rational_fraction_")+Update::toString(i)).c_str(),po::value<std::string>(),"the rational fraction approximation that should be used for the force (syntax: {alpha_1,..,alpha_n,beta_1, ..., beta_n})");
 	}
+
+	Update::LatticeSweep::addParameters(desc);
 
 	//Now we can parse the command line
 	po::variables_map vm;

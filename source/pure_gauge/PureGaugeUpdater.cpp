@@ -182,7 +182,7 @@ void PureGaugeUpdater::updateLink(extended_gauge_lattice_t& lattice, int site, i
 	//take the plaquette
 	GaugeGroup plaquette = lattice[site][mu]*(staple);
 	for (unsigned int k = 0; k < numberColors-1; ++k) {
-		for (unsigned int l = k+1; l < numberColors; ++l) {
+		for (int l = k+1; l < numberColors; ++l) {
 			//Take the su2 subgroup matrix for the cabibbo marinari update
 			real_t aeff = (imag(plaquette.at(k,k))-imag(plaquette.at(l,l)))/2.;
 			real_t beff = (imag(plaquette.at(k,l))+imag(plaquette.at(l,k)))/2.;
@@ -208,7 +208,7 @@ void PureGaugeUpdater::updateLink(extended_gauge_lattice_t& lattice, int site, i
 			//extract the su2 update matrix, compute also one overrelaxation step
 			subupdate = htrans(substaple)*htrans((subupdate)*(htrans(substaple)))*htrans(substaple)/pow(detStaple,3./2.);
 			//Update the plaquette and the link
-			for (unsigned int i = 0; i < numberColors; ++i) {
+			for (int i = 0; i < numberColors; ++i) {
 				std::complex<real_t> tmp1 = subupdate.at(0,0)*lattice[site][mu].at(k,i) + subupdate.at(0,1)*lattice[site][mu].at(l,i);
 				std::complex<real_t> tmp2 = subupdate.at(1,0)*lattice[site][mu].at(k,i) + subupdate.at(1,1)*lattice[site][mu].at(l,i);
 				lattice[site][mu].at(k,i) = tmp1;

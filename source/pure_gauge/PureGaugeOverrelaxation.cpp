@@ -21,7 +21,7 @@ PureGaugeOverrelaxation::PureGaugeOverrelaxation() : LatticeSweep(), acceptance(
 PureGaugeOverrelaxation::PureGaugeOverrelaxation() : LatticeSweep(), acceptance(0), nsteps(0) {
 	randomGenerator = new random_generator_t*[omp_get_max_threads()];
 	randomUniform = new random_uniform_generator_t*[omp_get_max_threads()];
-	for (unsigned int i = 0; i < omp_get_max_threads(); ++i) {
+	for (int i = 0; i < omp_get_max_threads(); ++i) {
 		randomGenerator[i] = new random_generator_t(RandomSeed::randomSeed());
 		randomUniform[i] = new random_uniform_generator_t(RandomSeed::getRandomNumberGenerator(*randomGenerator[i]));
 	}
@@ -144,7 +144,7 @@ void PureGaugeOverrelaxation::updateLink(extended_gauge_lattice_t& lattice, int 
 	//Now set the det(Q) to 1:
 	std::complex<real_t> determinant = conj(det(Q));
 	// by multiply the first row with the complex conjugate of det:
-	for (unsigned int i = 0; i < numberColors; ++i) {
+	for (int i = 0; i < numberColors; ++i) {
 		Q(0,i) *= determinant;
 	}
 	GaugeGroup trial = htrans(Q)*htrans(lattice[site][mu])*htrans(Q);

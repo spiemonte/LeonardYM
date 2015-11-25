@@ -9,6 +9,8 @@
 #define LATTICESWEEP_H_
 #include "Environment.h"
 
+namespace po = boost::program_options;
+
 namespace Update {
 
 class LatticeSweep {
@@ -28,6 +30,10 @@ public:
 	void setSweepToJump(unsigned int _sweepToJump);
 
 	static void printSweepsName();
+
+	static void addParameters(po::options_description& desc);
+
+	static void registerParameters(po::options_description& desc);
 private:
 	unsigned int numberTimes;
 	unsigned int sweepToJump;

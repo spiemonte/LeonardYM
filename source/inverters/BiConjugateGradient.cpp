@@ -331,11 +331,12 @@ bool BiConjugateGradient::solve(DiracOperator* dirac, const reduced_dirac_vector
 		if (norm < epsilon && step > 5) {
 			lastSteps = step;
 #ifdef BICGLOG
-			if (isOutputProcess()) std::cout << "BiCGStab steps: " << step << " - final error norm: " << real(norm) << std::endl;
+			if (isOutputProcess()) std::cout << "BiCGStab steps: " << step << " - final error norm: " << norm << std::endl;
 #endif
 			return true;
 		}
 		else {
+			if (isOutputProcess()) std::cout << "BiCGStab steps: " << step << " - error norm: " << norm << std::endl;
 		}
 		
 		rho_prev = rho;

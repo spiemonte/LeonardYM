@@ -98,11 +98,13 @@ template<> class MpiType<Update::AdjointGroup> {
 		static MPI_Datatype type;
 };
 
+#ifdef ADJOINT
 template<> class MpiType<Update::FermionicForceMatrix[4]> {
 	public:
 		static const int size = 8;
 		static MPI_Datatype type;
 };
+#endif
 
 #endif
 

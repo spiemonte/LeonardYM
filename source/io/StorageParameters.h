@@ -71,8 +71,6 @@ public:
 		return implement::get<T>(vm, nameOption);
 	}
 
-	//template<> std::vector<std::string> get< std::vector<std::string> >(const std::string& nameOption) const;
-
 private:
 	boost::program_options::variables_map vm;
 };

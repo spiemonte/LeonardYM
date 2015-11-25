@@ -185,11 +185,48 @@ void LatticeSweep::setSweepToJump(unsigned int _sweepToJump) {
 	sweepToJump = _sweepToJump;
 }
 
+void LatticeSweep::addParameters(po::options_description& desc) {
+	PureGaugeUpdater::registerParameters(desc);
+	Plaquette::registerParameters(desc);
+	PureGaugeHMCUpdater::registerParameters(desc);
+	TwoFlavorHMCUpdater::registerParameters(desc);
+	NFlavorQCDUpdater::registerParameters(desc);
+	NFlavorBlockUpdater::registerParameters(desc);
+	PureGaugeOverrelaxation::registerParameters(desc);
+	OutputSweep::registerParameters(desc);
+	TestLinearAlgebra::registerParameters(desc);
+	TestSpeedDiracOperators::registerParameters(desc);
+	Eigenvalues::registerParameters(desc);
+	MesonCorrelator::registerParameters(desc);
+	ChiralCondensate::registerParameters(desc);
+	PolyakovLoop::registerParameters(desc);
+	PolyakovLoopEigenvalues::registerParameters(desc);
+	PolyakovLoopCorrelator::registerParameters(desc);
+	AdjointPolyakovLoop::registerParameters(desc);
+	Glueball::registerParameters(desc);
+	GluinoGlue::registerParameters(desc);
+	ReUnit::registerParameters(desc);
+	BandTwoFlavorUpdater::registerParameters(desc);
+	PureGaugeWilsonLoops::registerParameters(desc);
+	WilsonLoop::registerParameters(desc);
+	TestCommunication::registerParameters(desc);
+	ReadGaugeConfiguration::registerParameters(desc);
+	WilsonFlow::registerParameters(desc);
+	GaugeEnergy::registerParameters(desc);
+	MultiStepNFlavorQCDUpdater::registerParameters(desc);
+	TwistedMultiStepNFlavorQCDUpdater::registerParameters(desc);
+	SingletOperators::registerParameters(desc);
+	NPRVertex::registerParameters(desc);
+}
+
+void LatticeSweep::registerParameters(po::options_description&) {
+}
+
 void LatticeSweep::printSweepsName() {
 	if (isOutputProcess()) {
 		std::cout << "List of the possible Sweeps name:" << std::endl;
 		std::cout
-		<< " PureGaugeCM" << std::endl
+		<< "PureGaugeCM" << std::endl
 		<< "Plaquette" << std::endl
 		<< "PureGaugeHMC" << std::endl
 		<< "TwoFlavorQCD" << std::endl

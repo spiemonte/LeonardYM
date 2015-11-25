@@ -1,6 +1,6 @@
 OBJECTS  = ReducedStencil.o StandardStencil.o ExtendedStencil.o LocalLayout.o \
 			AlgebraUtils.o \
-			BiConjugateGradient.o DeflationInverter.o ConjugateGradient.o MultishiftSolver.o ChronologicalMultishiftSolver.o MMMRMultishiftSolver.o MEMultishiftSolver.o \
+			BiConjugateGradient.o DeflationInverter.o ConjugateGradient.o MultishiftSolver.o ChronologicalMultishiftSolver.o MMMRMultishiftSolver.o MEMultishiftSolver.o GMRESR.o \
 			DiracOperator.o BasicDiracWilsonOperator.o BasicSquareDiracWilsonOperator.o DiracWilsonOperator.o SquareDiracWilsonOperator.o BlockDiracWilsonOperator.o BlockImprovedDiracWilsonOperator.o BlockDiracOperator.o ComplementBlockDiracWilsonOperator.o SquareComplementBlockDiracWilsonOperator.o SquareComplementBlockDiracOperator.o SquareBlockDiracWilsonOperator.o ImprovedDiracWilsonOperator.o SquareImprovedDiracWilsonOperator.o SquareTwistedDiracOperator.o TwistedDiracOperator.o SAPPreconditioner.o MultiGridOperator.o \
 			Polynomial.o RationalApproximation.o \
 			Integrate.o LeapFrog.o FourthOrderLeapFrog.o SixthOrderLeapFrog.o OmelyanLeapFrog.o FourthOmelyanLeapFrog.o Energy.o Force.o \
