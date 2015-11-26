@@ -5,7 +5,7 @@
  *      Author: spiem_01
  */
 
-#include "ComplementBlockDiracWilsonOperator.h"
+#include "ComplementBlockDiracOperator.h"
 #include "hmc_forces/DiracWilsonFermionForce.h"
 #include "algebra_utils/AlgebraUtils.h"
 

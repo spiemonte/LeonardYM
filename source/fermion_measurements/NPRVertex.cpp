@@ -11,7 +11,7 @@
 #include "utils/StoutSmearing.h"
 #include "utils/Gamma.h"
 #include "dirac_operators/BlockDiracWilsonOperator.h"
-#include "dirac_operators/ComplementBlockDiracWilsonOperator.h"
+#include "dirac_operators/ComplementBlockDiracOperator.h"
 #include "dirac_operators/TwistedDiracOperator.h"
 #include "dirac_operators/SAPPreconditioner.h"
 

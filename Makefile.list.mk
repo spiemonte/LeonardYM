@@ -67,8 +67,8 @@ SquareTwistedDiracOperator.o: ./source/dirac_operators/SquareTwistedDiracOperato
 TwistedDiracOperator.o: ./source/dirac_operators/TwistedDiracOperator.h ./source/dirac_operators/TwistedDiracOperator.cpp
 	$(CPP) $(CPPFLAGS) -c -o TwistedDiracOperator.o ./source/dirac_operators/TwistedDiracOperator.cpp
 
-ComplementBlockDiracWilsonOperator.o: ./source/dirac_operators/ComplementBlockDiracWilsonOperator.h ./source/dirac_operators/ComplementBlockDiracWilsonOperator.cpp
-	$(CPP) $(CPPFLAGS) -c -o ComplementBlockDiracWilsonOperator.o ./source/dirac_operators/ComplementBlockDiracWilsonOperator.cpp
+ComplementBlockDiracOperator.o: ./source/dirac_operators/ComplementBlockDiracOperator.h ./source/dirac_operators/ComplementBlockDiracOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o ComplementBlockDiracOperator.o ./source/dirac_operators/ComplementBlockDiracOperator.cpp
 
 SquareComplementBlockDiracWilsonOperator.o: ./source/dirac_operators/SquareComplementBlockDiracWilsonOperator.h ./source/dirac_operators/SquareComplementBlockDiracWilsonOperator.cpp
 	$(CPP) $(CPPFLAGS) -c -o SquareComplementBlockDiracWilsonOperator.o ./source/dirac_operators/SquareComplementBlockDiracWilsonOperator.cpp

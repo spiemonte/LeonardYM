@@ -1,12 +1,12 @@
 /*
- * ComplementBlockDiracWilsonOperator.h
+ * ComplementBlockDiracOperator.h
  *
  *  Created on: Mar 18, 2013
  *      Author: spiem_01
  */
 
-#ifndef COMPLEMENTBLOCKDIRACWILSONOPERATOR_H_
-#define COMPLEMENTBLOCKDIRACWILSONOPERATOR_H_
+#ifndef COMPLEMENTBLOCKDIRACOPERATOR_H_
+#define COMPLEMENTBLOCKDIRACOPERATOR_H_
 #include "BlockDiracWilsonOperator.h"
 #include "BlockDiracOperator.h"
 #include "inverters/BiConjugateGradient.h"

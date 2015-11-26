@@ -7,7 +7,7 @@
 
 #ifndef SAPPRECONDITIONER_H_
 #define SAPPRECONDITIONER_H_
-#include "ComplementBlockDiracWilsonOperator.h"
+#include "ComplementBlockDiracOperator.h"
 
 namespace Update {
 
