@@ -10,7 +10,6 @@
 #include "actions/WilsonGaugeAction.h"
 #include "io/GlobalOutput.h"
 #include "wilson_loops/Plaquette.h"
-#define PI 3.14159265358979323846264338328
 
 namespace Update {
 

@@ -110,7 +110,7 @@ bool GMRESR::solve(DiracOperator* dirac, const reduced_dirac_vector_t& source, r
 			return true;
 		}
 		else {
-			if (isOutputProcess()) std::cout << "GMRESR::Residual norm at step " << k << ": " << AlgebraUtils::squaredNorm(r) << std::endl;
+			//if (isOutputProcess()) std::cout << "GMRESR::Residual norm at step " << k << ": " << error << std::endl;
 			lastError = error;
 		}
 

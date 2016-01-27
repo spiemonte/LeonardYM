@@ -17,9 +17,9 @@
 
 namespace Update {
 
-NPRVertex::NPRVertex() : diracOperator(0), squareDiracOperator(0), inverter(0) { }
+NPRVertex::NPRVertex() : diracOperator(0), squareDiracOperator(0), inverter(0), gamma() { }
 
-NPRVertex::NPRVertex(const NPRVertex& toCopy) : LatticeSweep(toCopy), StochasticEstimator(toCopy), diracOperator(0), squareDiracOperator(0), inverter(0) { }
+NPRVertex::NPRVertex(const NPRVertex& toCopy) : LatticeSweep(toCopy), StochasticEstimator(toCopy), diracOperator(0), squareDiracOperator(0), inverter(0), gamma() { }
 
 NPRVertex::~NPRVertex() {
 	if (diracOperator) delete diracOperator;
@@ -84,21 +84,21 @@ void NPRVertex::execute(environment_t& environment) {
 	extended_dirac_vector_t source;
 
 	std::complex<long_real_t> propagator[4][4];
-	std::complex<long_real_t> vertex[1][4][4];
+	std::complex<long_real_t> vertex[16][4][4];
 
 	int inversionSteps = 0;
 
 	std::vector<real_t> momentum = environment.configurations.get< std::vector<real_t> >("NPRVertex::momentum");
+	if (isOutputProcess()) std::cout << "NPRVertex::Momentum p = {" << momentum[0] << ", " << momentum[1] << ", " << momentum[2] << ", " << momentum[3] << "}" << std::endl;
 	momentum[0] = momentum[0]*2.*PI/Layout::glob_x;
 	momentum[1] = momentum[1]*2.*PI/Layout::glob_y;
 	momentum[2] = momentum[2]*2.*PI/Layout::glob_z;
 	momentum[3] = momentum[3]*2.*PI/Layout::glob_t;
-
-	
 	
 	for (unsigned int alpha = 0; alpha < 4; ++alpha) {
 		for (int c = 0; c < diracVectorLength; ++c) {
 			this->generateMomentumSource(source, momentum, alpha, c);
+			//this->generateSource(source, alpha, c);
 			inverter->solve(diracOperator, source, tmp[c*4 + alpha], preconditioner);
 			inversionSteps += inverter->getLastSteps();
 			
@@ -116,7 +116,7 @@ void NPRVertex::execute(environment_t& environment) {
 	//Ugly initialization to zero
 #ifdef MULTITHREADING
 	std::complex<long_real_t> resultPropagator[4][4][omp_get_max_threads()];
-	std::complex<long_real_t> resultVertex[1][4][4][omp_get_max_threads()];
+	std::complex<long_real_t> resultVertex[16][4][4][omp_get_max_threads()];
 	for (int i = 0; i < 4; ++i) {
 		for (int j = 0; j < 4; ++j) {
 			for (int k = 0; k < omp_get_max_threads(); ++k) {
@@ -130,11 +130,11 @@ void NPRVertex::execute(environment_t& environment) {
 #endif
 #ifndef MULTITHREADING
 	std::complex<long_real_t> resultPropagator[4][4];
-	std::complex<long_real_t> resultVertex[1][4][4];
+	std::complex<long_real_t> resultVertex[16][4][4];
 	for (int i = 0; i < 4; ++i) {
 		for (int j = 0; j < 4; ++j) {
 			resultPropagator[i][j] = 0.;
-			for (int v = 0; v < 1; ++v) {
+			for (int v = 0; v < 16; ++v) {
 				resultVertex[v][i][j] = 0.;
 			}
 		}
@@ -162,16 +162,6 @@ void NPRVertex::execute(environment_t& environment) {
 		}
 	}
 
-	//Gamma5 vertex
-	matrix_t gamma5(4,4);
-	for (int alpha = 0; alpha < 4; ++alpha) {
-		for (int beta = 0; beta < 4; ++beta) {
-			if (alpha != beta) gamma5(alpha,beta) = 0.;
-			else if (alpha < 2) gamma5(alpha,beta) = 1.;
-			else gamma5(alpha,beta) = -1.;
-		}
-	}
-
 	for (int c = 0; c < diracVectorLength; ++c) {
 #pragma omp parallel for
 		for (int site = 0; site < Layout::localsize; ++site) {
@@ -184,16 +174,18 @@ void NPRVertex::execute(environment_t& environment) {
 					}
 				}
 				
-				matrix_t result = gamma5*htrans(S)*gamma5*gamma5*S;
-				for (int nu = 0; nu < 4; ++nu) {
-					for (int rho = 0; rho < 4; ++rho) {
+				for (int v = 0; v < 16; ++v) {
+					matrix_t result = gamma.gamma5()*htrans(S)*gamma.gamma5()*gamma.gammaChromaMatrices(v)*S;
+					for (int nu = 0; nu < 4; ++nu) {
+						for (int rho = 0; rho < 4; ++rho) {
 
 #ifdef MULTITHREADING
-						resultVertex[0][nu][rho][omp_get_thread_num()] += result(nu,rho);
+							resultVertex[v][nu][rho][omp_get_thread_num()] += result(nu,rho);
 #endif
 #ifndef MULTITHREADING
-						resultVertex[0][nu][rho] += result(nu,rho);
+							resultVertex[v][nu][rho] += result(nu,rho);
 #endif					
+						}
 					}
 				}
 			}
@@ -209,7 +201,7 @@ void NPRVertex::execute(environment_t& environment) {
 			for (int thread = 0; thread < omp_get_max_threads(); ++thread) {
 				propagator[i][j] += resultPropagator[i][j][thread];	
 			}
-			for (int v = 0; v < 1; ++v) {
+			for (int v = 0; v < 16; ++v) {
 				vertex[v][i][j] = 0;
 				for (int thread = 0; thread < omp_get_max_threads(); ++thread) {
 					vertex[v][i][j] += resultVertex[v][i][j][thread];
@@ -218,7 +210,7 @@ void NPRVertex::execute(environment_t& environment) {
 #endif
 #ifndef MULTITHREADING
 			propagator[i][j] = resultPropagator[i][j];
-			for (int v = 0; v < 1; ++v) {
+			for (int v = 0; v < 16; ++v) {
 				vertex[v][i][j] = resultVertex[v][i][j][thread];
 			}
 #endif
@@ -233,7 +225,7 @@ void NPRVertex::execute(environment_t& environment) {
 			//Correct normalization
 			long_real_t factor = 2.*diracOperator->getKappa();
 			propagator[i][j] = factor*propagator[i][j]/static_cast<long_real_t>(Layout::globalVolume);
-			for (int v = 0; v < 1; ++v) {
+			for (int v = 0; v < 16; ++v) {
 				reduceAllSum(vertex[v][i][j].real());
 				reduceAllSum(vertex[v][i][j].imag());
 				vertex[v][i][j] = factor*factor*vertex[v][i][j]/static_cast<long_real_t>(Layout::globalVolume);
@@ -261,12 +253,12 @@ void NPRVertex::execute(environment_t& environment) {
 		output->pop("propagator");
 
 		output->push("vertex");
-		for (int v = 0; v < 1; ++v) {
+		for (int v = 0; v < 16; ++v) {
 			output->push("vertex");
 			for (int i = 0; i < 4; ++i) {
 				output->push("vertex");
 				for (int j = 0; j < 4; ++j) {
-					std::cout << "NPRVertex::Vertex " << v << " V(" << i << "," << j << "): " << vertex[v][i][j] << std::endl;
+					std::cout << "NPRVertex::Vertex Gamma_" << v << " V(" << i << "," << j << "): " << vertex[v][i][j] << std::endl;
 				
 					output->push("vertex");
 					output->write("vertex", real(vertex[v][i][j]));
@@ -281,11 +273,11 @@ void NPRVertex::execute(environment_t& environment) {
 	}
 	
 	if (environment.configurations.get<std::string>("NPRVertex::sap_preconditioning") == "true") {
-		delete preconditioner;
-		delete redBlockDiracOperator;
-		delete blackBlockDiracOperator;
-		delete twistedDiracOperator;
-		delete K;
+		if (preconditioner) delete preconditioner;
+		if (redBlockDiracOperator) delete redBlockDiracOperator;
+		if (blackBlockDiracOperator) delete blackBlockDiracOperator;
+		if (twistedDiracOperator) delete twistedDiracOperator;
+		if (K) delete K;
 	}
 }
 

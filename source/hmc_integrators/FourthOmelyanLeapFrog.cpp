@@ -14,7 +14,7 @@ void FourthOmelyanLeapFrog::integrate(environment_t& env, extended_gauge_lattice
 	real_t mu = -0.03230286765269967;
 	real_t lambda = 0.6822365335719091;
 	
-	for (unsigned int i = 0; i < numberSteps; ++i) {
+	for (int i = 0; i < numberSteps; ++i) {
 		//Position version of the integrator, first we integrate the linkconf
 		//Update the linkConfiguration
 		this->updateLinkConfiguration(env.gaugeLinkConfiguration, momenta, theta*step);

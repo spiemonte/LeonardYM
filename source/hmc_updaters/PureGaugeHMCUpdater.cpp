@@ -54,14 +54,33 @@ void PureGaugeHMCUpdater::execute(environment_t& environment) {
 	//Integrate numerically the equation of motion
 	//integrate->integrate(environmentNew, momenta, force, numbers_steps, t_length);
 
-	gaugeAction->setBeta(beta);
-	integrate->integrate(environmentNew, momenta, force, numbers_steps, t_length);
+	long_real_t energy_diff = 0., energy_diff_sq = 0.;
+	int NN = 30;
 
-	gaugeAction->setBeta(beta-0.25);
-	integrate->integrate(environmentNew, momenta, force, numbers_steps, 0.1);
+	for (int i = 0; i < NN; ++i) {
+		environmentNew = environment;
+		this->randomMomenta(momenta);
+		gaugeAction->setBeta(beta+0.1);
+		integrate->integrate(environmentNew, momenta, force, numbers_steps, t_length);
 
-	gaugeAction->setBeta(beta);
-	integrate->integrate(environmentNew, momenta, force, numbers_steps, t_length);
+		gaugeAction->setBeta(beta-0.25);
+		integrate->integrate(environmentNew, momenta, force, numbers_steps, 0.1);
+
+		gaugeAction->setBeta(beta+0.1);
+		integrate->integrate(environmentNew, momenta, force, numbers_steps, t_length);
+
+		//Get the final energy of momenta
+		long_real_t newMomentaEnergy = this->momentaEnergy(momenta);
+		//Get the final energy of the lattice
+		long_real_t newLatticeEnergy = gaugeAction->energy(environmentNew);
+		
+		energy_diff += - (oldMomentaEnergy + oldLatticeEnergy) + (newMomentaEnergy + newLatticeEnergy);
+		energy_diff_sq += (- (oldMomentaEnergy + oldLatticeEnergy) + (newMomentaEnergy + newLatticeEnergy))*(- (oldMomentaEnergy + oldLatticeEnergy) + (newMomentaEnergy + newLatticeEnergy));
+
+		if (isOutputProcess()) std::cout << "Energy difference: " <<  - (oldMomentaEnergy + oldLatticeEnergy) + (newMomentaEnergy + newLatticeEnergy) << std::endl;
+		
+	}
+	if (isOutputProcess()) std::cout << "Mean energy difference: " << energy_diff/NN << " +/ " << energy_diff_sq/(NN) - energy_diff*energy_diff/(NN*NN) << std::endl;
 
 	gaugeAction->setBeta(beta);
 #ifdef REVERSIBILITY_CHECK

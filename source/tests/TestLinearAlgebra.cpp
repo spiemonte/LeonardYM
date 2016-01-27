@@ -7,6 +7,7 @@
 
 #include "TestLinearAlgebra.h"
 #include "inverters/BiConjugateGradient.h"
+#include "inverters/GMRESR.h"
 #include "algebra_utils/AlgebraUtils.h"
 #include "dirac_operators/SquareDiracWilsonOperator.h"
 #include "dirac_operators/SquareImprovedDiracWilsonOperator.h"
@@ -14,7 +15,7 @@
 #include "dirac_operators/ImprovedDiracWilsonOperator.h"
 #include "dirac_operators/BasicDiracWilsonOperator.h"
 #include "dirac_operators/SquareBlockDiracWilsonOperator.h"
-#include "dirac_operators/ComplementBlockDiracWilsonOperator.h"
+#include "dirac_operators/ComplementBlockDiracOperator.h"
 #include "dirac_operators/SquareComplementBlockDiracWilsonOperator.h"
 #include "dirac_operators/SquareComplementBlockDiracOperator.h"
 #include "dirac_operators/SquareTwistedDiracOperator.h"
@@ -82,62 +83,170 @@ delete biConjugateGradient;
 
 
 	{
-		DiracOperator* squareDiracWilsonOperator = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 2, environment.configurations);
-		squareDiracWilsonOperator->setLattice(environment.getFermionLattice());
+		/*DiracOperator* squareDiracWilsonOperator = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 2, environment.configurations);
+		squareDiracWilsonOperator->setLattice(environment.getFermionLattice());*/
 
 		DiracOperator* diracWilsonOperator = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations);
 		diracWilsonOperator->setLattice(environment.getFermionLattice());
+		diracWilsonOperator->setGamma5(false);
+
+		std::vector<unsigned int> blockSize(4);
+		blockSize[0] = 4;
+		blockSize[1] = 4;
+		blockSize[2] = 4;
+		blockSize[3] = 4;
 
 		BlockDiracOperator* blackBlockDiracOperator = BlockDiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations, Black);
 		blackBlockDiracOperator->setLattice(environment.getFermionLattice());
 		blackBlockDiracOperator->setGamma5(false);
+		blackBlockDiracOperator->setBlockSize(blockSize);
 		
 		BlockDiracOperator* redBlockDiracOperator = BlockDiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations, Red);
 		redBlockDiracOperator->setLattice(environment.getFermionLattice());
 		redBlockDiracOperator->setGamma5(false);
+		redBlockDiracOperator->setBlockSize(blockSize);
 
 		TwistedDiracOperator* twistedDiracOperator = new TwistedDiracOperator();
 		twistedDiracOperator->setDiracOperator(diracWilsonOperator);
+		twistedDiracOperator->setLattice(environment.getFermionLattice());
 		//twistedDiracOperator->setTwist(0.0001);
-		/*SquareTwistedDiracOperator* squareTwistedDiracOperator = new SquareTwistedDiracOperator();
-		squareTwistedDiracOperator->setDiracOperator(diracWilsonOperator);
 		
-
-		TwistedDiracOperator* twistedRed = new TwistedDiracOperator();
-		twistedRed->setDiracOperator(redBlockDiracOperator);
-
-		TwistedDiracOperator* twistedBlack = new TwistedDiracOperator();
-		twistedBlack->setDiracOperator(blackBlockDiracOperator);*/
-
 		ComplementBlockDiracOperator* K = new ComplementBlockDiracOperator(diracWilsonOperator, redBlockDiracOperator, blackBlockDiracOperator);
 		K->setMaximumSteps(205);
+		K->setBlockSize(blockSize);
 		
-		//SquareComplementBlockDiracOperator* K2 = new SquareComplementBlockDiracOperator(K);
+		
+
+
 		
 		SAPPreconditioner *preconditioner = new SAPPreconditioner(twistedDiracOperator,K);
 		preconditioner->setSteps(7);
-		preconditioner->setPrecision(0.00000000001);
+		preconditioner->setPrecision(0.00001);
+
+		MultiGridOperator* multiGridOperator = new MultiGridOperator();
+		MultiGridProjector* multiGridProjector = new MultiGridProjector();
+		multiGridOperator->setDiracOperator(diracWilsonOperator);
+		
+		int basisDimension = 20;
+		MultiGridVectorLayout::setBasisDimension(basisDimension);
+		MultiGridVectorLayout::tBlockSize = 4;
+		MultiGridVectorLayout::initialize();
+
+		BlockBasis test(basisDimension);
+		reduced_dirac_vector_t zeroVector;
+		AlgebraUtils::setToZero(zeroVector);
+		reduced_dirac_vector_t randomVector;
+		GMRESR* gmres_inverter = new GMRESR();
+		gmres_inverter->setPrecision(0.0000000001);
+		gmres_inverter->setMaximumSteps(1);
+
+		struct timespec start, finish;
+		double elapsed;
+		clock_gettime(CLOCK_REALTIME, &start);
+		
+		for (int i = 0; i < basisDimension; i += 1) {
+			//We start with a random vector
+			AlgebraUtils::generateRandomVector(randomVector);
+			AlgebraUtils::normalize(randomVector);
+
+			//We give random vector as initial guess to solve the omogeneous system
+			gmres_inverter->solve(diracWilsonOperator, zeroVector, test[i], preconditioner, &randomVector);
+			//test[i+1] = test[i];
+			//AlgebraUtils::gamma5(test[i+1]);
+			/*diracWilsonOperator->multiply(randomVector,test[i]);
+			if (isOutputProcess()) std::cout << "MultiGrid::Deficit for the vector " << i << ": " << AlgebraUtils::squaredNorm(randomVector)/AlgebraUtils::squaredNorm(test[i]) << "" << std::endl;*/
+		}
+
+		test.orthogonalize();
+
+		clock_gettime(CLOCK_REALTIME, &finish);
+		elapsed = (finish.tv_sec - start.tv_sec);
+		elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+
+		if (isOutputProcess()) std::cout << "TestLinearAlgebra::Multigrid basis constructed in: " << (elapsed) << " s."<< std::endl;
+
+		for (int i = 0; i < basisDimension; ++i) {
+			multiGridOperator->addVector(test[i]);
+			multiGridProjector->addVector(test[i]);
+		}
+
+		int numberTests;
+		try {
+			numberTests = environment.configurations.get<unsigned int>("number_multiplication_test_speed");
+		} catch (NotFoundOption& e) {
+			numberTests = 300;
+		}
+
+		multigrid_vector_t tmp1, tmp2;
+		for (int i = 0; i < multigrid_vector_t::Layout::size; ++i) tmp2[i] = std::complex<real_t>(0.2-i*i,0.4+i);
+
+		clock_gettime(CLOCK_REALTIME, &start);
+		for (int i = 0; i < numberTests; ++i) {
+			multiGridOperator->multiply(tmp1,tmp2);
+		}
+		clock_gettime(CLOCK_REALTIME, &finish);
+		elapsed = (finish.tv_sec - start.tv_sec);
+		elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+#ifdef TEST_PAPI_SPEED
+		if((retval=PAPI_flops( &real_time, &proc_time, &flpins, &mflops)) < PAPI_OK) test_fail(__FILE__, __LINE__, "PAPI_flops", retval);
+		if (isOutputProcess()) std::cout << "MFLOPS for MultiGridOperator: " << mflops << " MFLOPS. " << std::endl;
+#endif
+		if (isOutputProcess()) std::cout << "Timing for MultiGridOperator: " << (elapsed*1000)/numberTests << " ms."<< std::endl;
+
+		
+		MultiGridBiConjugateGradientSolver* biMgSolver = new MultiGridBiConjugateGradientSolver();
+		biMgSolver->setMaximumSteps(35);
+		biMgSolver->setPrecision(0.00000000001);
+
+		multigrid_vector_t solution_hat, source_hat;
 
 
-		int conjugateSpaceDimension = 7;
-		std::complex<real_t> rho[conjugateSpaceDimension];
-		reduced_dirac_vector_t source, r, solution, c[conjugateSpaceDimension], u[conjugateSpaceDimension], ad[conjugateSpaceDimension], tmp1;
+		int conjugateSpaceDimension = 15;
+		reduced_dirac_vector_t source, r, solution, c[conjugateSpaceDimension], u[conjugateSpaceDimension], mg_inverse, source_sap;
 
 		AlgebraUtils::generateRandomVector(source);
 		AlgebraUtils::normalize(source);
 
-		BiConjugateGradient* biConjugateGradient = new BiConjugateGradient();
-		biConjugateGradient->setPrecision(0.0000000001);
-		biConjugateGradient->setMaximumSteps(1000);
-		
-		diracWilsonOperator->setGamma5(false);
-		//biConjugateGradient->solve(diracWilsonOperator, source, solution, preconditioner);
-
 		r = source;
 		AlgebraUtils::setToZero(solution);
 
+		clock_gettime(CLOCK_REALTIME, &start);
+
 		for (int k = 0; k < 535; ++k) {
-			preconditioner->multiply(u[(k % conjugateSpaceDimension)],r);
+			{
+				multiGridOperator->setDiracOperator(diracWilsonOperator);
+
+				multiGridProjector->apply(source_hat,r);
+				biMgSolver->solve(multiGridOperator, source_hat, solution_hat);
+
+				//multiGridOperator->multiply(source_test,solution_hat);
+
+				multiGridProjector->apply(mg_inverse,solution_hat);
+
+				diracWilsonOperator->multiply(source_sap,mg_inverse);
+#pragma omp parallel for
+				for (int site = 0; site < solution.completesize; ++site) {
+					for (unsigned int mu = 0; mu < 4; ++mu) {
+						source_sap[site][mu] = r[site][mu] - source_sap[site][mu];
+					}
+				}
+				
+				preconditioner->multiply(u[(k % conjugateSpaceDimension)],source_sap);
+#pragma omp parallel for
+				for (int site = 0; site < solution.completesize; ++site) {
+					for (unsigned int mu = 0; mu < 4; ++mu) {
+						u[(k % conjugateSpaceDimension)][site][mu] = u[(k % conjugateSpaceDimension)][site][mu] + mg_inverse[site][mu];
+					}
+				}
+
+				//preconditioner->multiply(u[(k % conjugateSpaceDimension)],r);
+				
+				//preconditioner->multiply(tmp1,r);
+
+				//diracWilsonOperator->multiply(tmp2,tmp1);
+				//diracWilsonOperator->multiply(tmp2,u[(k % conjugateSpaceDimension)]);
+				//std::cout << "Giusto per: " << AlgebraUtils::differenceNorm(r,tmp2) << " " << AlgebraUtils::differenceNorm(r,tmp3) << std::endl;
+			}
 			//u[(k % conjugateSpaceDimension)] = r;
 
 			diracWilsonOperator->multiply(c[(k % conjugateSpaceDimension)],u[(k % conjugateSpaceDimension)]);
@@ -172,58 +281,36 @@ delete biConjugateGradient;
 				}
 			}
 
-
-			if (AlgebraUtils::squaredNorm(r) < 0.00000000001) {
+			long_real_t error = AlgebraUtils::squaredNorm(r);
+			if (error < 0.00000000001) {
 				//stepsMax = j;
 				break;
 			}
-			else std::cout << "Residual norm at step " << k << ": " << AlgebraUtils::squaredNorm(r) << std::endl;
+			else if (isOutputProcess()) std::cout << "Residual norm at step " << k << ": " << error << std::endl;
 
 		}
 
-		/*for (int j = 0; j < 535; ++j) {
-			{
-				preconditioner->multiply(w[(j % conjugateSpaceDimension)],r);
-				AlgebraUtils::gamma5(w[(j % conjugateSpaceDimension)]);
-			}
+		clock_gettime(CLOCK_REALTIME, &finish);
+		elapsed = (finish.tv_sec - start.tv_sec);
+		elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
 
-			d[(j % conjugateSpaceDimension)] = w[(j % conjugateSpaceDimension)];
+		if (isOutputProcess()) std::cout << "TestLinearAlgebra::Multigrid inversion done in: " << (elapsed) << " s."<< std::endl;
 
-			int js = ((j % conjugateSpaceDimension) == 0) ? 0 : 1;
-			for (int k = js; k < (j % conjugateSpaceDimension); ++k) {
-				std::complex<real_t> alpha = static_cast< std::complex<real_t> >(AlgebraUtils::dot(w[(j % conjugateSpaceDimension)],ad[k]))/rho[k];
-#pragma omp parallel for
-				for (int site = 0; site < solution.completesize; ++site) {
-					for (unsigned int mu = 0; mu < 4; ++mu) {
-						d[(j % conjugateSpaceDimension)][site][mu] = d[(j % conjugateSpaceDimension)][site][mu] - alpha*d[k][site][mu];
-					}
-				}
-			}
+		gmres_inverter->setMaximumSteps(10000);
+		BiConjugateGradient* biConjugateGradient = new BiConjugateGradient();
+		biConjugateGradient->setPrecision(0.00000000001);
+		biConjugateGradient->setMaximumSteps(100000);
 
-			squareDiracWilsonOperator->multiply(ad[(j % conjugateSpaceDimension)],d[(j % conjugateSpaceDimension)]);
-			rho[(j % conjugateSpaceDimension)] = static_cast< std::complex<real_t> >(AlgebraUtils::dot(d[(j % conjugateSpaceDimension)],ad[(j % conjugateSpaceDimension)]));
-
-			std::complex<real_t> proj = static_cast< std::complex<real_t> >(AlgebraUtils::dot(d[(j % conjugateSpaceDimension)],r))/rho[(j % conjugateSpaceDimension)];
-
-#pragma omp parallel for
-			for (int site = 0; site < solution.completesize; ++site) {
-				for (unsigned int mu = 0; mu < 4; ++mu) {
-					solution[site][mu] = solution[site][mu] + proj*d[(j % conjugateSpaceDimension)][site][mu];
-					r[site][mu] = r[site][mu] - proj*ad[(j % conjugateSpaceDimension)][site][mu];
-				}
-			}
-			//std::cout << "Residual norm at step " << j << ":" << AlgebraUtils::squaredNorm(r) << std::endl;
-			if (AlgebraUtils::squaredNorm(r) < 0.00000000001) {
-				//stepsMax = j;
-				break;
-			}
-			else std::cout << "Residual norm at step " << j << ": " << AlgebraUtils::squaredNorm(r) << std::endl;
-
-			
-		}*/
+		clock_gettime(CLOCK_REALTIME, &start);
+		biConjugateGradient->solve(diracWilsonOperator, source, solution);
+		clock_gettime(CLOCK_REALTIME, &finish);
+		elapsed = (finish.tv_sec - start.tv_sec);
+		elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+		
+		if (isOutputProcess()) std::cout << "TestLinearAlgebra:: vs standard inversion done in: " << (elapsed) << " s."<< std::endl;
 		
 	}
-
+#ifdef TESTALL
 	{
 		DiracOperator* squareDiracWilsonOperator = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 2, environment.configurations);
 		squareDiracWilsonOperator->setLattice(environment.getFermionLattice());
@@ -257,8 +344,6 @@ delete biConjugateGradient;
 		Polynomial polynomialPreconditioner;
 		polynomialPreconditioner.setRoots(roots);
 		polynomialPreconditioner.setScaling(0.4046234347673221166251352);
-
-		std::cout << "Test: " << polynomialPreconditioner.evaluate(0.1) << std::endl;
 
 		for (int i = 0; i < 70; i += 2) {
 			//We start with a random vector
@@ -993,7 +1078,7 @@ delete biConjugateGradient;
 
 		delete multiGridOperator;
 	}
-	
+#endif
 	
 	//Gamma5 test
 	{

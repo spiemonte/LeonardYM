@@ -36,6 +36,26 @@ typedef long double long_real_t;
 typedef std::complex<real_t> complex;
 typedef std::complex<single_real_t> single_complex;
 
+inline std::complex<float> operator*(const double& x, const std::complex<float>& y) {
+	return std::complex<float>(x*y.real(),x*y.imag());
+}
+
+inline std::complex<float> operator*(const std::complex<float>& y, const double& x) {
+	return std::complex<float>(y.real()*x,y.imag()*x);
+}
+
+inline std::complex<float> operator/(const std::complex<float>& y, const double& x) {
+	return std::complex<float>(y.real()/x,y.imag()/x);
+}
+
+inline std::complex<float> operator+(const std::complex<float>& y, const double& x) {
+	return std::complex<float>(y.real()+x,y.imag());
+}
+
+inline std::complex<float> operator+(const double& x, const std::complex<float>& y) {
+	return std::complex<float>(x+y.real(),y.imag());
+}
+
 typedef Eigen::Matrix< complex, 2, 2 > matrix2x2_t;
 typedef Eigen::Matrix< complex, Eigen::Dynamic, Eigen::Dynamic > matrix_t;
 typedef Eigen::Matrix< complex, Eigen::Dynamic, 1 > vector_t;

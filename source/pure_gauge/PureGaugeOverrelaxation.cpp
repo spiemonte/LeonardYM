@@ -73,7 +73,7 @@ PureGaugeOverrelaxation::~PureGaugeOverrelaxation() {
 void PureGaugeOverrelaxation::execute(environment_t& environment) {
 	typedef extended_gauge_lattice_t::Layout Layout;
 	//Get the gauge action
-	GaugeAction* gaugeAction = GaugeAction::getInstance(environment.configurations.get<std::string>("name_action"),environment.configurations.get<double>("beta"));
+	GaugeAction* gaugeAction = GaugeAction::getInstance(environment.configurations.get<std::string>("name_action"),environment.configurations.get<real_t>("beta"));
 
 #ifdef MULTITHREADING
 	Checkerboard* checkerboard = Checkerboard::getInstance();

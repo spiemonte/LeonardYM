@@ -12,6 +12,7 @@
 #include "fermion_measurements/StochasticEstimator.h"
 #include "dirac_operators/DiracOperator.h"
 #include "inverters/GMRESR.h"
+#include "utils/Gamma.h"
 
 namespace Update {
 
@@ -32,6 +33,8 @@ private:
 	DiracOperator* diracOperator;
 	DiracOperator* squareDiracOperator;
 	GMRESR* inverter;
+
+	Gamma gamma;
 };
 
 } /* namespace Update */

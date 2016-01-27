@@ -23,7 +23,7 @@ void MultiGridVectorLayout::initialize() {
 	int numberBT = LT::loc_t/tBlockSize + ((LT::loc_t % tBlockSize) != 0 ? 1 : 0);
 
 	if (LT::loc_x % xBlockSize != 0 || LT::loc_y % yBlockSize != 0 || LT::loc_z % zBlockSize != 0 || LT::loc_t % tBlockSize != 0) {
-		if (isOutputProcess()) std::cout << "MultiGridOperator::Warning, block grid does not evenly match the processor grid!" << std::endl;
+		if (isOutputProcess()) std::cout << "MultiGridOperator::Warning, block grid does not evenly match the processor grid: (" << LT::loc_x % xBlockSize << "," << LT::loc_y % yBlockSize << "," << LT::loc_z % zBlockSize << "," << LT::loc_t % tBlockSize << ")" << std::endl;
 	}
 
 	totalNumberOfBlocks = numberBX*numberBY*numberBZ*numberBT;
@@ -65,14 +65,18 @@ void MultiGridOperator::multiply(multigrid_vector_t& output, const multigrid_vec
 	
 	for (int i = 0; i < multigrid_vector_t::Layout::basisDimension; ++i) {
 #pragma omp parallel for
-		for (int site = 0; site < vectorspace[i]->completesize; ++site) {
+		for (int site = 0; site < vectorspace[i]->localsize; ++site) {
 			for (unsigned int mu = 0; mu < 4; ++mu) {
-				tmp_input[site][mu] += input(i,site)*(*vectorspace[i])[site][mu];
+				for (int c = 0; c < diracVectorLength; ++c) {
+					tmp_input[site][mu][c] += input(i,site)*(*vectorspace[i])[site][mu][c];
+				}
 			}
 		}
 	}
 
-	dirac->multiply(tmp_output,tmp_input);
+	tmp_input.updateHalo();
+
+	dirac->multiply(tmp_output,tmp_input);//TODO: we don't need an updateHalo here
 
 #pragma omp parallel for
 	for (int i = 0; i < multigrid_vector_t::Layout::size; ++i) {
@@ -122,13 +126,14 @@ void MultiGridOperator::multiplyAdd(multigrid_vector_t& output, const multigrid_
 	
 	for (int i = 0; i < multigrid_vector_t::Layout::basisDimension; ++i) {
 #pragma omp parallel for
-		for (int site = 0; site < vectorspace[i]->completesize; ++site) {
+		for (int site = 0; site < vectorspace[i]->localsize; ++site) {
 			for (unsigned int mu = 0; mu < 4; ++mu) {
 				tmp_input[site][mu] += input(i,site)*(*vectorspace[i])[site][mu];
 			}
 		}
 	}
-
+	
+	tmp_input.updateHalo();
 	dirac->multiplyAdd(tmp_output,tmp_input,tmp_input,alpha);
 
 #pragma omp parallel for
@@ -242,12 +247,13 @@ void MultiGridProjector::apply(reduced_dirac_vector_t& output, const multigrid_v
 
 	for (int i = 0; i < multigrid_vector_t::Layout::basisDimension; ++i) {
 #pragma omp parallel for
-		for (int site = 0; site < vectorspace[i]->completesize; ++site) {
+		for (int site = 0; site < vectorspace[i]->localsize; ++site) {
 			for (unsigned int mu = 0; mu < 4; ++mu) {
 				output[site][mu] += input(i,site)*(*vectorspace[i])[site][mu];
 			}
 		}
-	}	
+	}
+	output.updateHalo();
 }
 
 
@@ -278,7 +284,7 @@ void BlockBasis::orthogonalize(unsigned int index) {
 #endif
 
 	//We orthogonalize first the vector between the others to have a better projection to the low modes
-	for (int j = 0; j < multigrid_vector_t::Layout::basisDimension; ++j) {
+	/*for (int j = 0; j < multigrid_vector_t::Layout::basisDimension; ++j) {
 		if (j != index) {
 			std::complex<real_t> proj = static_cast< std::complex<real_t> >(AlgebraUtils::dot(vectorspace[j],vectorspace[index]));
 #pragma omp parallel for
@@ -290,7 +296,7 @@ void BlockBasis::orthogonalize(unsigned int index) {
 		}
 	}
 	//localBasis[i].updateHalo();TODO maybe not needed
-	AlgebraUtils::normalize(vectorspace[index]);
+	AlgebraUtils::normalize(vectorspace[index]);*/
 
 	//Now we perform a block orthogonalization of the local basis
 	for (int j = 0; j < multigrid_vector_t::Layout::basisDimension; ++j) {
@@ -368,7 +374,7 @@ void BlockBasis::orthogonalize() {
 #endif
 
 	//We orthogonalize first the vectors between themself to have a better projection to the low modes
-	/*for (int i = 0; i < basisDimension; ++i) {
+	for (int i = 0; i < basisDimension; ++i) {
 		for (int j = 0; j < i; ++j) {
 			std::complex<real_t> proj = static_cast< std::complex<real_t> >(AlgebraUtils::dot(vectorspace[j],vectorspace[i]));
 #pragma omp parallel for
@@ -380,7 +386,7 @@ void BlockBasis::orthogonalize() {
 		}
 		//localBasis[i].updateHalo();TODO maybe not needed
 		AlgebraUtils::normalize(vectorspace[i]);
-	}*/
+	}
 
 	//Now we perform a block orthogonalization of the local basis
 	for (int i = 0; i < multigrid_vector_t::Layout::basisDimension; ++i) {

@@ -60,10 +60,10 @@ PureGaugeUpdater::~PureGaugeUpdater() { }
 
 void PureGaugeUpdater::execute(environment_t & environment) {
 	typedef extended_gauge_lattice_t::Layout Layout;
-	real_t beta = environment.configurations.get<double>("beta");
+	real_t beta = environment.configurations.get<real_t>("beta");
 
 	//Get the gauge action
-	GaugeAction* action = GaugeAction::getInstance(environment.configurations.get<std::string>("name_action"),environment.configurations.get<double>("beta"));
+	GaugeAction* action = GaugeAction::getInstance(environment.configurations.get<std::string>("name_action"),environment.configurations.get<real_t>("beta"));
 
 	
 #ifdef MULTITHREADING

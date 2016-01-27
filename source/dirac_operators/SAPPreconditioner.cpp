@@ -6,14 +6,20 @@
  */
 
 #include "SAPPreconditioner.h"
+#include "algebra_utils/AlgebraUtils.h"
 
 namespace Update {
 
-SAPPreconditioner::SAPPreconditioner(DiracOperator* _diracOperator, ComplementBlockDiracOperator* _K) : DiracOperator(), diracOperator(_diracOperator), K(_K), steps(7) { }
+SAPPreconditioner::SAPPreconditioner(DiracOperator* _diracOperator, ComplementBlockDiracOperator* _K) : DiracOperator(), diracOperator(_diracOperator), K(_K), steps(7), precision(0.00001) { }
 
 SAPPreconditioner::~SAPPreconditioner() { }
 
 void SAPPreconditioner::multiply(reduced_dirac_vector_t& output, const reduced_dirac_vector_t& input) {
+	//Adaptative strategy
+	long_real_t norm = AlgebraUtils::squaredNorm(input);
+	if (norm < 10.*precision) K->setPrecision(0.001*norm);
+	else K->setPrecision(precision);
+
 	output = input;
 	K->multiply(tmp1,input);
 	for (int i = 0; i < steps; ++i) {
@@ -29,7 +35,7 @@ void SAPPreconditioner::multiply(reduced_dirac_vector_t& output, const reduced_d
 	}
 }
 
-void SAPPreconditioner::multiplyAdd(reduced_dirac_vector_t& output, const reduced_dirac_vector_t& vector1, const reduced_dirac_vector_t& vector2, const std::complex<real_t>& alpha) {
+void SAPPreconditioner::multiplyAdd(reduced_dirac_vector_t& , const reduced_dirac_vector_t& , const reduced_dirac_vector_t& , const std::complex<real_t>& ) {
 	//TODO: to be implemented
 	
 }
@@ -54,8 +60,9 @@ void SAPPreconditioner::setSteps(int _steps) {
 	steps = _steps;
 }
 
-void SAPPreconditioner::setPrecision(double precision) {
-	K->setPrecision(precision);
+void SAPPreconditioner::setPrecision(double _precision) {
+	precision = _precision;
+	K->setPrecision(_precision);
 }
 
 } /* namespace Update */

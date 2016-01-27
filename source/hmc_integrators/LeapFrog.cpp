@@ -21,7 +21,7 @@ void LeapFrog::integrate(environment_t& env, extended_gauge_lattice_t& momenta, 
 	this->updateMomenta(momenta, forceLattice, step/2.);
 
 	//Central update of leapfrog
-	for (unsigned int i = 0; i < numberSteps-1; ++i) {
+	for (int i = 0; i < numberSteps-1; ++i) {
 		//Update the linkConfiguration
 		this->updateLinkConfiguration(env.gaugeLinkConfiguration, momenta, step);
 		env.gaugeLinkConfiguration.updateHalo();

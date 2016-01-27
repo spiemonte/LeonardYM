@@ -183,7 +183,7 @@ public:
 		reduceAllSum(norm);
 		long_real_t norm_next = norm;
 
-		for (unsigned int innerStep = 0; innerStep < maxSteps; ++innerStep) {
+		for (int innerStep = 0; innerStep < maxSteps; ++innerStep) {
 			multiGridOperator->multiply(tmp_hat,p_hat);
 			norm = norm_next;
 			long_real_t gammaRe = 0;
@@ -212,10 +212,10 @@ public:
 			}
 			//Check for convergence
 			if (norm_next < precision && innerStep > 5) {
-				std::cout << "Inner convergence in " << innerStep << " steps."<< std::endl;
+				if (isOutputProcess()) std::cout << "Inner convergence in " << innerStep << " steps."<< std::endl;
 				break;
 			} else if (innerStep == maxSteps - 1) {
-				std::cout << "Failure in finding convergence in inner solver, last error " << norm_next << std::endl;
+				if (isOutputProcess()) std::cout << "Failure in finding convergence in inner solver, last error " << norm_next << std::endl;
 			}
 			//std::cout << "Inner norm at step " << innerStep << ": " << norm_next << std::endl; 
 

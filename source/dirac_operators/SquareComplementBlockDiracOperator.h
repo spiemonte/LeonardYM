@@ -8,7 +8,7 @@
 #ifndef SQUARECOMPLEMENTBLOCKDIRACOPERATOR_H_
 #define SQUARECOMPLEMENTBLOCKDIRACOPERATOR_H_
 #include "DiracWilsonOperator.h"
-#include "ComplementBlockDiracWilsonOperator.h"
+#include "ComplementBlockDiracOperator.h"
 #include "SquareBlockDiracWilsonOperator.h"
 #include "inverters/BiConjugateGradient.h"
 

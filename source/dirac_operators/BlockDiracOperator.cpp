@@ -23,7 +23,6 @@ BlockDiracOperator::BlockDiracOperator(const extended_fermion_lattice_t& _lattic
 BlockDiracOperator::~BlockDiracOperator() { }
 
 BlockDiracOperator* BlockDiracOperator::getInstance(const std::string& name, unsigned int power, const StorageParameters& parameters, Color _color) {
-	std::vector<unsigned int> blockSize = parameters.get< std::vector<unsigned int> >("deflation_block_size");
 	if (power == 1) {
 		if (name == "DiracWilson") {
 			BlockDiracWilsonOperator* result = new BlockDiracWilsonOperator(_color);
@@ -71,6 +70,7 @@ void BlockDiracOperator::setBlockSize(const std::vector<unsigned int>& _blockSiz
 	yBlockSize = _blockSize[1];
 	zBlockSize = _blockSize[2];
 	tBlockSize = _blockSize[3];
+	this->initialize_index_lattice();
 }
 
 std::vector<unsigned int> BlockDiracOperator::getBlockSize() const {

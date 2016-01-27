@@ -38,6 +38,7 @@ private:
 	reduced_dirac_vector_t tmp3;
 	
 	int steps;
+	real_t precision;
 };
 
 } /* namespace Update */

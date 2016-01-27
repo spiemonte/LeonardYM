@@ -13,7 +13,7 @@
 #include "dirac_operators/ImprovedDiracWilsonOperator.h"
 #include "dirac_operators/BasicDiracWilsonOperator.h"
 #include "dirac_operators/SquareBlockDiracWilsonOperator.h"
-#include "dirac_operators/ComplementBlockDiracWilsonOperator.h"
+#include "dirac_operators/ComplementBlockDiracOperator.h"
 #include "dirac_operators/SquareComplementBlockDiracWilsonOperator.h"
 #include "dirac_operators/SquareComplementBlockDiracOperator.h"
 #include "dirac_operators/SquareTwistedDiracOperator.h"
