@@ -24,6 +24,8 @@ protected:
 
 	void generateRandomNoise(extended_dirac_vector_t* vector, int t);
 
+	void generateRandomNoise(extended_dirac_vector_t& vector, int t0, int t1);
+
 	void generateSource(extended_dirac_vector_t& vector, int alpha, int c);
 
 	void generateMomentumSource(extended_dirac_vector_t& vector, std::vector<real_t> p, int alpha, int c);
@@ -47,7 +49,6 @@ protected:
 		return sqrt(res/(v.size()-1));
 	}
 
-private:
 #ifndef MULTITHREADING
 	//The generator of random numbers
 	random_generator_t randomGenerator;

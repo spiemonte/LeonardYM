@@ -26,17 +26,20 @@ DiracOperator* DiracOperator::getInstance(const std::string& name, unsigned int 
 		if (name == "DiracWilson") {
 			DiracWilsonOperator* result = new DiracWilsonOperator();
 			result->setKappa(parameters.get<double>("kappa"));
+			result->name = name;
 			return result;
 		}
 		if (name == "BasicDiracWilson") {
 			BasicDiracWilsonOperator* result = new BasicDiracWilsonOperator();
 			result->setKappa(parameters.get<double>("kappa"));
+			result->name = name;
 			return result;
 		}
 		else if (name == "Improved") {
 			ImprovedDiracWilsonOperator* result = new ImprovedDiracWilsonOperator();
 			result->setKappa(parameters.get<double>("kappa"));
 			result->setCSW(parameters.get<double>("csw"));
+			result->name = name;
 			return result;
 		}
 		else {
@@ -47,17 +50,20 @@ DiracOperator* DiracOperator::getInstance(const std::string& name, unsigned int 
 		if (name == "DiracWilson") {
 			SquareDiracWilsonOperator* result = new SquareDiracWilsonOperator();
 			result->setKappa(parameters.get<double>("kappa"));
+			result->name = name;
 			return result;
 		}
 		else if (name == "Improved") {
 			SquareImprovedDiracWilsonOperator* result = new SquareImprovedDiracWilsonOperator();
 			result->setKappa(parameters.get<double>("kappa"));
 			result->setCSW(parameters.get<double>("csw"));
+			result->name = name;
 			return result;
 		}
 		if (name == "BasicDiracWilson") {
 			BasicSquareDiracWilsonOperator* result = new BasicSquareDiracWilsonOperator();
 			result->setKappa(parameters.get<double>("kappa"));
+			result->name = name;
 			return result;
 		}
 		else {
@@ -92,6 +98,10 @@ const reduced_fermion_lattice_t *DiracOperator::getLattice() const {
 
 void DiracOperator::setLattice(const extended_fermion_lattice_t& _lattice) {
 	this->lattice = _lattice;
+}
+
+std::string DiracOperator::getName() const {
+	return name;
 }
 
 } /* namespace Update */

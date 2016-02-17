@@ -93,9 +93,11 @@ void SingletOperators::execute(environment_t& environment) {
 
 	for (unsigned int step = 0; step < max_step; ++step) {
 		this->generateRandomNoise(randomNoise);
-		biConjugateGradient->solve(squareDiracOperator, randomNoise, tmp_square);
+		diracOperator->multiply(tmp_square, randomNoise);
+		biConjugateGradient->solve(squareDiracOperator, tmp_square, tmp);
 		inversionSteps += biConjugateGradient->getLastSteps();
-		diracOperator->multiply(tmp, tmp_square);
+		if (isOutputProcess()) std::cout << "SingletOperators::Inversion " << step << " done in " << biConjugateGradient->getLastSteps() << " steps." << std::endl;
+		//diracOperator->multiply(tmp, tmp_square);
 
 		//This part is needed to compute the disconnected contribution
 #pragma omp parallel for
@@ -159,8 +161,10 @@ void SingletOperators::execute(environment_t& environment) {
 	for (unsigned int alpha = 0; alpha < 4; ++alpha) {
 		for (int c = 0; c < diracVectorLength; ++c) {
 			this->generateSource(source, alpha, c);
-			biConjugateGradient->solve(squareDiracOperator, source, eta);
-			diracOperator->multiply(inverseFull[c*4 + alpha],eta);
+			diracOperator->multiply(eta,source);
+			biConjugateGradient->solve(squareDiracOperator, eta, inverseFull[c*4 + alpha]);
+			//diracOperator->multiply(inverseFull[c*4 + alpha],eta);
+			if (isOutputProcess()) std::cout << "SingletOperators::Inversion " << c*4 + alpha << " done in " << biConjugateGradient->getLastSteps() << " steps." << std::endl;
 			inversionSteps += biConjugateGradient->getLastSteps();
 		}
 	}

@@ -73,6 +73,12 @@ ComplementBlockDiracOperator.o: ./source/dirac_operators/ComplementBlockDiracOpe
 SquareComplementBlockDiracWilsonOperator.o: ./source/dirac_operators/SquareComplementBlockDiracWilsonOperator.h ./source/dirac_operators/SquareComplementBlockDiracWilsonOperator.cpp
 	$(CPP) $(CPPFLAGS) -c -o SquareComplementBlockDiracWilsonOperator.o ./source/dirac_operators/SquareComplementBlockDiracWilsonOperator.cpp
 
+HoppingOperator.o: ./source/dirac_operators/HoppingOperator.h ./source/dirac_operators/HoppingOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o HoppingOperator.o ./source/dirac_operators/HoppingOperator.cpp
+
+GammaOperators.o: ./source/dirac_operators/GammaOperators.h ./source/dirac_operators/GammaOperators.cpp
+	$(CPP) $(CPPFLAGS) -c -o GammaOperators.o ./source/dirac_operators/GammaOperators.cpp
+
 SquareComplementBlockDiracOperator.o: ./source/dirac_operators/SquareComplementBlockDiracOperator.h ./source/dirac_operators/SquareComplementBlockDiracOperator.cpp
 	$(CPP) $(CPPFLAGS) -c -o SquareComplementBlockDiracOperator.o ./source/dirac_operators/SquareComplementBlockDiracOperator.cpp
 
@@ -313,12 +319,31 @@ GaugeEnergy.o: ./source/actions/GaugeEnergy.h ./source/actions/GaugeEnergy.cpp
 MultiGridDiracOperator.o: ./source/multigrid_solver/MultiGridDiracOperator.h ./source/multigrid_solver/MultiGridDiracOperator.cpp
 	$(CPP) $(CPPFLAGS) -c -o MultiGridDiracOperator.o ./source/multigrid_solver/MultiGridDiracOperator.cpp
 
-MultiGridSolver.o: ./source/multigrid_solver/MultiGridSolver.h ./source/multigrid_solver/MultiGridSolver.cpp
-	$(CPP) $(CPPFLAGS) -c -o MultiGridSolver.o ./source/multigrid_solver/MultiGridSolver.cpp
-
 SAPPreconditioner.o: ./source/dirac_operators/SAPPreconditioner.h ./source/dirac_operators/SAPPreconditioner.cpp
 	$(CPP) $(CPPFLAGS) -c -o SAPPreconditioner.o ./source/dirac_operators/SAPPreconditioner.cpp
 	
-MultiGridOperator.o: ./source/dirac_operators/MultiGridOperator.h ./source/dirac_operators/MultiGridOperator.cpp
-	$(CPP) $(CPPFLAGS) -c -o MultiGridOperator.o ./source/dirac_operators/MultiGridOperator.cpp
+BlockBasis.o: ./source/multigrid/BlockBasis.cpp ./source/multigrid/BlockBasis.h
+	$(CPP) $(CPPFLAGS) -c -o BlockBasis.o ./source/multigrid/BlockBasis.cpp
+
+MultiGridBiConjugateGradient.o: ./source/multigrid/MultiGridBiConjugateGradient.cpp ./source/multigrid/MultiGridBiConjugateGradient.h
+	$(CPP) $(CPPFLAGS) -c -o MultiGridBiConjugateGradient.o ./source/multigrid/MultiGridBiConjugateGradient.cpp
+
+MultiGridConjugateGradient.o: ./source/multigrid/MultiGridConjugateGradient.cpp ./source/multigrid/MultiGridConjugateGradient.h
+	$(CPP) $(CPPFLAGS) -c -o MultiGridConjugateGradient.o ./source/multigrid/MultiGridConjugateGradient.cpp
+
+MultiGridOperator.o: ./source/multigrid/MultiGridOperator.cpp ./source/multigrid/MultiGridOperator.h
+	$(CPP) $(CPPFLAGS) -c -o MultiGridOperator.o ./source/multigrid/MultiGridOperator.cpp
+
+MultiGridProjector.o: ./source/multigrid/MultiGridProjector.cpp ./source/multigrid/MultiGridProjector.h
+	$(CPP) $(CPPFLAGS) -c -o MultiGridProjector.o ./source/multigrid/MultiGridProjector.cpp
+
+MultiGridSolver.o: ./source/multigrid/MultiGridSolver.cpp ./source/multigrid/MultiGridSolver.h
+	$(CPP) $(CPPFLAGS) -c -o MultiGridSolver.o ./source/multigrid/MultiGridSolver.cpp
+
+MultiGridVectorLayout.o: ./source/multigrid/MultiGridVectorLayout.cpp ./source/multigrid/MultiGridVectorLayout.h
+	$(CPP) $(CPPFLAGS) -c -o MultiGridVectorLayout.o ./source/multigrid/MultiGridVectorLayout.cpp
+
+MultiGridStochasticEstimator.o: ./source/multigrid/MultiGridStochasticEstimator.cpp ./source/multigrid/MultiGridStochasticEstimator.h
+	$(CPP) $(CPPFLAGS) -c -o MultiGridStochasticEstimator.o ./source/multigrid/MultiGridStochasticEstimator.cpp
+
 

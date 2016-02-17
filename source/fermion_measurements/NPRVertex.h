@@ -11,12 +11,13 @@
 #include "LatticeSweep.h"
 #include "fermion_measurements/StochasticEstimator.h"
 #include "dirac_operators/DiracOperator.h"
-#include "inverters/GMRESR.h"
+#include "inverters/Solver.h"
+#include "multigrid/MultiGridStochasticEstimator.h"
 #include "utils/Gamma.h"
 
 namespace Update {
 
-class NPRVertex : public Update::LatticeSweep, public Update::StochasticEstimator {
+class NPRVertex : public Update::LatticeSweep, public Update::MultiGridStochasticEstimator {
 public:
 	NPRVertex();
 	NPRVertex(const NPRVertex& toCopy);
@@ -32,7 +33,7 @@ private:
 	extended_dirac_vector_t tmp[4*diracVectorLength];
 	DiracOperator* diracOperator;
 	DiracOperator* squareDiracOperator;
-	GMRESR* inverter;
+	Solver* inverter;
 
 	Gamma gamma;
 };

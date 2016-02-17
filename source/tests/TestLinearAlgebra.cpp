@@ -21,7 +21,7 @@
 #include "dirac_operators/SquareTwistedDiracOperator.h"
 #include "dirac_operators/TwistedDiracOperator.h"
 #include "dirac_operators/SAPPreconditioner.h"
-#include "dirac_operators/MultiGridOperator.h"
+#include "multigrid/MultiGridOperator.h"
 #include "inverters/DeflationInverter.h"
 #include "dirac_functions/Polynomial.h"
 #include "utils/ToString.h"
@@ -78,14 +78,11 @@ void TestLinearAlgebra::execute(environment_t& environment) {
 
 		delete diracOperator;
 		delete squareDiracOperator;
-delete biConjugateGradient;
-}*/
+		delete biConjugateGradient;
+	}*/
 
 
-	{
-		/*DiracOperator* squareDiracWilsonOperator = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 2, environment.configurations);
-		squareDiracWilsonOperator->setLattice(environment.getFermionLattice());*/
-
+	/*{
 		DiracOperator* diracWilsonOperator = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations);
 		diracWilsonOperator->setLattice(environment.getFermionLattice());
 		diracWilsonOperator->setGamma5(false);
@@ -153,8 +150,8 @@ delete biConjugateGradient;
 			gmres_inverter->solve(diracWilsonOperator, zeroVector, test[i], preconditioner, &randomVector);
 			//test[i+1] = test[i];
 			//AlgebraUtils::gamma5(test[i+1]);
-			/*diracWilsonOperator->multiply(randomVector,test[i]);
-			if (isOutputProcess()) std::cout << "MultiGrid::Deficit for the vector " << i << ": " << AlgebraUtils::squaredNorm(randomVector)/AlgebraUtils::squaredNorm(test[i]) << "" << std::endl;*/
+			//diracWilsonOperator->multiply(randomVector,test[i]);
+			//if (isOutputProcess()) std::cout << "MultiGrid::Deficit for the vector " << i << ": " << AlgebraUtils::squaredNorm(randomVector)/AlgebraUtils::squaredNorm(test[i]) << "" << std::endl;
 		}
 
 		test.orthogonalize();
@@ -353,11 +350,11 @@ delete biConjugateGradient;
 			conjugateGradient->setPrecision(0.00000000001);
 			//We give random vector as initial guess to solve the omogeneous system
 			conjugateGradient->solve(squareDiracWilsonOperator,zeroVector,test[i],&randomVector);
-			/*for (int k = 0; k < 4; ++k) {
-				randomVector = test[i];
-				AlgebraUtils::normalize(randomVector);
-				polynomialPreconditioner.evaluate(squareDiracWilsonOperator,test[i],randomVector);
-			}*/
+			//for (int k = 0; k < 4; ++k) {
+			//	randomVector = test[i];
+			//	AlgebraUtils::normalize(randomVector);
+			//	polynomialPreconditioner.evaluate(squareDiracWilsonOperator,test[i],randomVector);
+			//}
 			//test[i] = randomVector;
 			test[i+1] = test[i];
 			AlgebraUtils::gamma5(test[i+1]);
@@ -373,61 +370,6 @@ delete biConjugateGradient;
 		}
 
 		//std::cout << toString(multiGridOperator->asMatrix()) << std::endl;
-
-
-
-		/*{
-			multigrid_vector_t test1, test2, test3, test4;
-			for (int i = 0; i < multigrid_vector_t::Layout::size; ++i) {
-				test1[i] = std::complex<real_t>(0.2+i*i,0.4-i);
-				test2[i] = std::complex<real_t>(0.2-i*i,0.4+i);
-			}
-			
-			multiGridOperator->multiply(test3,test1);
-			multiGridOperator->multiply(test4,test2);
-
-			long_real_t norm1 = 0., norm2 = 0.;
-#pragma omp parallel for reduction(+:norm1,norm2)
-			for (int m = 0; m < multigrid_vector_t::Layout::size; ++m) {
-				norm1 += real(conj(test2[m])*test3[m]);
-				norm2 += real(conj(test1[m])*test4[m]);
-			}
-
-			if (isOutputProcess()) std::cout << "TestLinearAlgebra::Hermitian test on SquareBlockDiracWilsonOperator: " << norm1 - norm2 << std::endl;
-		}
-
-		{
-			multigrid_vector_t test1, test2;
-			reduced_dirac_vector_t tmp3;
-			AlgebraUtils::generateRandomVector(tmp3);
-			multiGridProjector->apply(test1,tmp3);
-			multiGridProjector->apply(tmp3,test1);
-			multiGridProjector->apply(test2,tmp3);
-
-			long_real_t norm = 0.;
-#pragma omp parallel for reduction(+:norm)
-			for (int m = 0; m < multigrid_vector_t::Layout::size; ++m) {
-				norm += real(conj(test2[m] - test1[m])*(test2[m] - test1[m]));
-			}
-
-			if (isOutputProcess()) std::cout << "TestLinearAlgebra::Double projection test: " << norm << std::endl;
-		}
-
-		{
-			multigrid_vector_t test1, test2;
-			reduced_dirac_vector_t tmp3;
-			AlgebraUtils::generateRandomVector(tmp3);
-			multiGridProjector->apply(test1,tmp3);
-			multiGridOperator->multiply(test2,test1);
-
-			long_real_t norm = 0.;
-#pragma omp parallel for reduction(+:norm)
-			for (int m = 0; m < multigrid_vector_t::Layout::size; ++m) {
-				norm += real(conj(test2[m] - test1[m])*(test2[m] - test1[m]));
-			}
-
-			if (isOutputProcess()) std::cout << "TestLinearAlgebra::Identity test: " << norm << std::endl;
-		}*/
 
 
 
@@ -470,7 +412,7 @@ delete biConjugateGradient;
 		solution = source;
 
 
-		/*{
+		{
 			reduced_dirac_vector_t tmp1,tmp2,tmp3,tmp4;
 			squareDiracWilsonOperator->multiply(tmp1,source);
 			leftProjector->apply(squareDiracWilsonOperator, multiGridOperator, multiGridProjector, tmp2,tmp1);
@@ -491,9 +433,9 @@ delete biConjugateGradient;
 		leftProjector->apply(squareDiracWilsonOperator, multiGridOperator, multiGridProjector, projectedSource,source);
 
 		conjugateGradient->setMaximumSteps(15);
-		conjugateGradient->solve(deflatedDirac,projectedSource,chi);*/
+		conjugateGradient->solve(deflatedDirac,projectedSource,chi);
 
-		/*r = projectedSource;
+		r = projectedSource;
 		AlgebraUtils::setToZero(chi);
 		int conjugateSpaceDimension = 15;
 		std::complex<real_t> rho[conjugateSpaceDimension];
@@ -534,11 +476,11 @@ delete biConjugateGradient;
 			}
 			else std::cout << "Residual norm at step " << j << ":" << AlgebraUtils::squaredNorm(r) << std::endl;
 
-		}*/
+		}
 
 		
 
-		/*std::cout << "Deflated convergence (e ridiamo) in " << biConjugateGradient->getLastSteps() << " steps." << std::endl;
+		std::cout << "Deflated convergence (e ridiamo) in " << biConjugateGradient->getLastSteps() << " steps." << std::endl;
 
 		reduced_dirac_vector_t chiProjected;
 		rightProjector->apply(squareDiracWilsonOperator, multiGridOperator, multiGridProjector, chiProjected, chi);
@@ -557,7 +499,7 @@ delete biConjugateGradient;
 			for (unsigned int mu = 0; mu < 4; ++mu) {
 				solution[site][mu] = eta[site][mu] + chiProjected[site][mu];
 			}
-		}*/
+		}
 
 
 		extended_fermion_lattice_t blockedLattice = environment.getFermionLattice();
@@ -635,15 +577,6 @@ delete biConjugateGradient;
 			r_hat = r;
 			for (int i = 0; i < gmresBasis; ++i) {
 				diracWilsonOperator->setGamma5(false);
-				/*multiGridOperator->setDiracOperator(diracWilsonOperator);
-
-				multiGridProjector->apply(source_hat,r_hat);
-
-				biMgSolver->solve(multiGridOperator, source_hat, solution_hat);
-
-				multiGridOperator->multiply(source_test,solution_hat);
-
-				multiGridProjector->apply(mg_inverse,solution_hat);*/
 
 				multiGridOperator->setDiracOperator(diracWilsonOperator);
 
@@ -732,7 +665,7 @@ delete biConjugateGradient;
 				
 			}
 
-			/*for (int i = 0; i < gmresBasis/2; ++i) {
+			for (int i = 0; i < gmresBasis/2; ++i) {
 				diracWilsonOperator->setGamma5(false);
 
 				K->multiply(zBasis[i],r_hat);
@@ -765,7 +698,7 @@ delete biConjugateGradient;
 		
 				AlgebraUtils::normalize(zBasis[i]);
 				diracWilsonOperator->multiply(dBasis[i],zBasis[i]);
-			}*/				
+			}		
 
 
 
@@ -840,7 +773,7 @@ delete biConjugateGradient;
 
 		if (isOutputProcess()) std::cout << "TestLinearAlgebra:: obtained in: " << (elapsed) << " s."<< std::endl;
 
-		/*int basisIndex = 0;
+		int basisIndex = 0;
 		for (int j = 0; j < 30; ++j) {
 
 			squareDiracWilsonOperator->multiply(tmp7,solution);
@@ -936,10 +869,10 @@ delete biConjugateGradient;
 
 			}
 			
-		}*/
+		}
 
 		//Now we try to solve the dirac equation
-		/*r = source;
+		r = source;
 		AlgebraUtils::setToZero(solution);
 		int conjugateSpaceDimension = 7;
 		std::complex<real_t> rho[conjugateSpaceDimension];
@@ -1046,7 +979,7 @@ delete biConjugateGradient;
 			}
 			else std::cout << "Residual norm at step " << j << ":" << AlgebraUtils::squaredNorm(r) << std::endl;
 
-		}*/
+		}
 
 		
 
@@ -1103,7 +1036,7 @@ delete biConjugateGradient;
 		if (isOutputProcess()) std::cout << "TestLinearAlgebra::Gamma5 test on ImprovedDiracWilsonOperator: " << g5test << std::endl;
 	}
 	
-	/*{
+	{
 		BiConjugateGradient* biConjugateGradient = new BiConjugateGradient();
 		biConjugateGradient->setPrecision(0.000000001);
 		biConjugateGradient->setMaximumSteps(300);

@@ -19,7 +19,6 @@
 #include "dirac_operators/SquareTwistedDiracOperator.h"
 #include "dirac_operators/TwistedDiracOperator.h"
 #include "dirac_operators/SAPPreconditioner.h"
-#include "dirac_operators/MultiGridOperator.h"
 #include "utils/ToString.h"
 #include <vector>
 #ifdef TEST_PAPI_SPEED

@@ -22,8 +22,10 @@ const std::complex<real_t> Sigma::_sigma[4][4][4][4] = {{{{0, 0, 0, 0}, {0, 0, 0
 
 Gamma::Gamma() : gammaBasis(16), gammaChroma(16) {
 	for (int i = 0; i < 16; ++i) {
-		gammaBasis[i].resize(4,4);
-		gammaChroma[i].resize(4,4);
+		gammaBasis[i].resize(4*diracVectorLength,4*diracVectorLength);
+		gammaChroma[i].resize(4*diracVectorLength,4*diracVectorLength);
+		set_to_zero(gammaBasis[i]);
+		set_to_zero(gammaChroma[i]);
 	}
 
 	gammaBasis[0].at(0, 0) = std::complex<real_t>(1, 0);
@@ -541,6 +543,23 @@ Gamma::Gamma() : gammaBasis(16), gammaChroma(16) {
 	gammaChroma[15].at(3, 1) = std::complex<real_t>(0, 0);
 	gammaChroma[15].at(3, 2) = std::complex<real_t>(0, 0);
 	gammaChroma[15].at(3, 3) = std::complex<real_t>(-1, 0);
+
+	for (int c = 0; c < diracVectorLength; ++c) {
+		for (int d = 0; d < diracVectorLength; ++d) {
+			if (c == 0 && d == 0) {
+			}
+			else if (c == d) {
+				for (int i = 0; i < 16; ++i) {
+					for (int nu = 0; nu < 4; ++nu) {
+						for (int rho = 0; rho < 4; ++rho) {
+							gammaChroma[i].at(c*4 + nu, d*4 + rho) = gammaChroma[i].at(nu, rho);
+							gammaBasis[i].at(c*4 + nu, d*4 + rho) = gammaBasis[i].at(nu, rho);
+						}
+					}
+				}
+			}
+		}
+	}
 	
 }
 

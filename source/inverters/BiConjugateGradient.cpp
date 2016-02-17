@@ -11,7 +11,7 @@
 
 namespace Update {
 
-BiConjugateGradient::BiConjugateGradient() : epsilon(0.00000000001), maxSteps(3000) { }
+BiConjugateGradient::BiConjugateGradient() : Solver("BiConjugateGradient") { }
 
 BiConjugateGradient::~BiConjugateGradient() { }
 
@@ -214,29 +214,11 @@ BiConjugateGradient::~BiConjugateGradient() { }
 	return false;
 }*/
 
-#ifdef ENABLE_MPI
-
-bool BiConjugateGradient::solve(DiracOperator* dirac, const extended_dirac_vector_t& original_source, extended_dirac_vector_t& original_solution, extended_dirac_vector_t const* original_initial_guess) {
-	//First set the initial solution
-	reduced_dirac_vector_t source = original_source;
-	reduced_dirac_vector_t solution = source;
-	bool result;
-	if (original_initial_guess != 0) {
-		reduced_dirac_vector_t initial_guess = *original_initial_guess;
-		result = solve(dirac, source, solution, &initial_guess);
-	}
-	else result = solve(dirac, source, solution);
-	original_solution = solution;
-	return result;
-}
-
-#endif
-
 bool BiConjugateGradient::solve(DiracOperator* dirac, const reduced_dirac_vector_t& source, reduced_dirac_vector_t& solution, DiracOperator* preconditioner, reduced_dirac_vector_t const* initial_guess) {
 	//First set the initial solution
 	if (initial_guess == 0) {
 		long_real_t normSource = AlgebraUtils::squaredNorm(source);
-		if (normSource > epsilon) {
+		if (normSource > precision) {
 			solution = source;
 		}
 		else {
@@ -328,7 +310,7 @@ bool BiConjugateGradient::solve(DiracOperator* dirac, const reduced_dirac_vector
 		
 		//Check convergence
 		long_real_t norm = AlgebraUtils::squaredNorm(residual);
-		if (norm < epsilon && step > 5) {
+		if (norm < precision && step > 5) {
 			lastSteps = step;
 #ifdef BICGLOG
 			if (isOutputProcess()) std::cout << "BiCGStab steps: " << step << " - final error norm: " << norm << std::endl;
@@ -356,7 +338,7 @@ bool BiConjugateGradient::solve(DiracOperator* dirac, const reduced_dirac_vector
 	//First set the initial solution
 	if (initial_guess == 0) {
 		long_real_t normSource = AlgebraUtils::squaredNorm(source);
-		if (normSource > epsilon) {
+		if (normSource > precision) {
 			solution = source;
 		}
 		else {
@@ -519,7 +501,7 @@ bool BiConjugateGradient::solve(DiracOperator* dirac, const reduced_dirac_vector
 		
 		//Check convergence
 		long_real_t norm = AlgebraUtils::squaredNorm(r_hat[0]);
-		if (norm < epsilon) {
+		if (norm < precision) {
 			lastSteps = step;
 #ifdef BICGLOG
 			if (isOutputProcess()) std::cout << "BiCGStab steps: " << step << " - final error norm: " << real(norm) << std::endl;
@@ -657,7 +639,7 @@ bool BiConjugateGradient::solve(DiracOperator* dirac, const reduced_dirac_vector
 	//First set the initial solution
 	if (initial_guess == 0) {
 		long_real_t normSource = AlgebraUtils::squaredNorm(source);
-		if (normSource > epsilon) {
+		if (normSource > precision) {
 			solution = source;
 		}
 		else {
@@ -821,7 +803,7 @@ bool BiConjugateGradient::solve(DiracOperator* dirac, const reduced_dirac_vector
 		}
 
 
-		if (norm < epsilon) {
+		if (norm < precision) {
 			lastSteps = step;
 #ifdef BICGLOG
 			if (isOutputProcess()) std::cout << "BiCGStab steps: " << step << " - final error norm: " << real(norm) << std::endl;
@@ -849,7 +831,7 @@ bool BiConjugateGradient::solve(DiracOperator* dirac, const reduced_dirac_vector
 	//First set the initial solution
 	if (initial_guess == 0) {
 		long_real_t normSource = AlgebraUtils::squaredNorm(source);
-		if (normSource > epsilon) {
+		if (normSource > precision) {
 			solution = source;
 		}
 		else {
@@ -1007,7 +989,7 @@ bool BiConjugateGradient::solve(DiracOperator* dirac, const reduced_dirac_vector
 		residual.updateHalo();//TODO maybe not needed
 
 
-		if (norm < epsilon) {
+		if (norm < precision) {
 			lastSteps = step;
 #ifdef BICGLOG
 			if (isOutputProcess()) std::cout << "BiCGStab steps: " << step << " - final error norm: " << real(norm) << std::endl;
@@ -1028,30 +1010,6 @@ bool BiConjugateGradient::solve(DiracOperator* dirac, const reduced_dirac_vector
 	if (isOutputProcess()) std::cout << "Failure in finding convergence after " << maxSteps << " cicles, last error: " << lastError << std::endl;
 	
 	return false;
-}		
-
-void BiConjugateGradient::setPrecision(double _epsilon) {
-	epsilon = _epsilon;
-}
-
-double BiConjugateGradient::getPrecision() const {
-	return epsilon;
-}
-
-void BiConjugateGradient::setMaximumSteps(unsigned int _maxSteps) {
-	maxSteps = _maxSteps;
-}
-
-unsigned int BiConjugateGradient::getMaximumSteps() const {
-	return maxSteps;
-}
-
-double BiConjugateGradient::getLastError() const {
-	return lastError;
-}
-
-unsigned int BiConjugateGradient::getLastSteps() const {
-	return lastSteps;
 }
 
 } /* namespace Update */

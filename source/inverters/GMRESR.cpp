@@ -10,12 +10,12 @@
 
 namespace Update {
 
-GMRESR::GMRESR() : epsilon(0.00000000001), maxSteps(3000), conjugateSpaceDimension(13) {
+GMRESR::GMRESR() : Solver("GMRESR"), conjugateSpaceDimension(13) {
 	c = new reduced_dirac_vector_t[conjugateSpaceDimension];
 	u = new reduced_dirac_vector_t[conjugateSpaceDimension];
 }
 
-GMRESR::GMRESR(const GMRESR& toCopy) : epsilon(toCopy.epsilon), maxSteps(toCopy.maxSteps), conjugateSpaceDimension(toCopy. conjugateSpaceDimension) {
+GMRESR::GMRESR(const GMRESR& toCopy) : Solver(toCopy), conjugateSpaceDimension(toCopy. conjugateSpaceDimension) {
 	c = new reduced_dirac_vector_t[conjugateSpaceDimension];
 	u = new reduced_dirac_vector_t[conjugateSpaceDimension];
 }
@@ -47,7 +47,7 @@ bool GMRESR::solve(DiracOperator* dirac, const reduced_dirac_vector_t& source, r
 	//First set the initial solution
 	if (initial_guess == 0) {
 		long_real_t normSource = AlgebraUtils::squaredNorm(source);
-		if (normSource > epsilon) {
+		if (normSource > precision) {
 			solution = source;
 		}
 		else {
@@ -104,9 +104,8 @@ bool GMRESR::solve(DiracOperator* dirac, const reduced_dirac_vector_t& source, r
 		}
 
 		long_real_t error = AlgebraUtils::squaredNorm(r);
-		if (error < epsilon) {
+		if (error < precision) {
 			lastSteps = k;
-			//stepsMax = j;
 			return true;
 		}
 		else {
@@ -122,36 +121,12 @@ bool GMRESR::solve(DiracOperator* dirac, const reduced_dirac_vector_t& source, r
 	return false;
 }
 
-void GMRESR::setPrecision(double _epsilon) {
-	epsilon = _epsilon;
-}
-
-double GMRESR::getPrecision() const {
-	return epsilon;
-}
-
-void GMRESR::setMaximumSteps(unsigned int _maxSteps) {
-	maxSteps = _maxSteps;
-}
-
-unsigned int GMRESR::getMaximumSteps() const {
-	return maxSteps;
-}
-
 void GMRESR::setConjugateSpaceDimension(unsigned int _conjugateSpaceDimension) {
 	conjugateSpaceDimension = _conjugateSpaceDimension;
 }
 
 unsigned int GMRESR::getConjugateSpaceDimension() const {
 	return conjugateSpaceDimension;
-}
-
-double GMRESR::getLastError() const {
-	return lastError;
-}
-
-unsigned int GMRESR::getLastSteps() const {
-	return lastSteps;
 }
 
 } /* namespace Update */

@@ -94,6 +94,34 @@ void StochasticEstimator::generateRandomNoise(extended_dirac_vector_t* vector, i
 	for (unsigned int mu = 0; mu < 4; ++mu) vector[mu].updateHalo();
 }
 
+void StochasticEstimator::generateRandomNoise(extended_dirac_vector_t& vector, int t0, int t1) {
+	typedef extended_dirac_vector_t::Layout Layout;
+
+#pragma omp parallel for
+	for (int site = 0; site < vector.localsize; ++site) {
+		for (unsigned int mu = 0; mu < 4; ++mu) {
+			//Only if t0 <= t  t1 we produce noise, dilution of the errors
+			if (Layout::globalIndexT(site) >= t0 && Layout::globalIndexT(site) < t1) {
+				for (int i = 0; i < diracVectorLength; ++i) {
+#ifndef MULTITHREADING
+						real_t realPart = (randomInteger() == 0 ? -1 : 1);
+#endif
+#ifdef MULTITHREADING
+						real_t realPart = ((*randomInteger[omp_get_thread_num()])() == 0 ? -1 : 1);
+#endif
+						vector[site][mu][i] = std::complex<real_t>(realPart,0.);
+					}
+				}
+				else {
+					for (int i = 0; i < diracVectorLength; ++i) {
+						vector[site][mu][i] = std::complex<real_t>(0.,0.);
+					}
+				}
+		}
+	}
+	vector.updateHalo();
+}
+
 void StochasticEstimator::generateSource(extended_dirac_vector_t& vector, int alpha, int c) {
 	typedef extended_dirac_vector_t::Layout Layout;
 #pragma omp parallel for

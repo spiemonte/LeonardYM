@@ -30,16 +30,16 @@ boost::uniform_int<> Update::RandomSeed::dist = boost::uniform_int<>(-1000000,10
 MPI_Datatype MpiType<short int>::type = MPI_SHORT;
 MPI_Datatype MpiType<int>::type = MPI_INT;
 MPI_Datatype MpiType<int[4]>::type = MPI_INT;
-MPI_Datatype MpiType<Update::real_t>::type = MPI_Update::real_t;
-MPI_Datatype MpiType<Update::real_t[4]>::type = MPI_Update::real_t;
-MPI_Datatype MpiType<Update::FundamentalGroup[4]>::type = MPI_Update::real_t;
-MPI_Datatype MpiType<Update::AdjointGroup[4]>::type = MPI_Update::real_t;
-MPI_Datatype MpiType<Update::FundamentalGroup[6]>::type = MPI_Update::real_t;
-MPI_Datatype MpiType<Update::AdjointGroup[6]>::type = MPI_Update::real_t;
-MPI_Datatype MpiType<Update::FundamentalVector[4]>::type = MPI_Update::real_t;
-MPI_Datatype MpiType<Update::AdjointVector[4]>::type = MPI_Update::real_t;
-MPI_Datatype MpiType<Update::FundamentalGroup>::type = MPI_Update::real_t;
-MPI_Datatype MpiType<Update::AdjointGroup>::type = MPI_Update::real_t;
+MPI_Datatype MpiType<Update::real_t>::type = MPI_DOUBLE;
+MPI_Datatype MpiType<Update::real_t[4]>::type = MPI_DOUBLE;
+MPI_Datatype MpiType<Update::FundamentalGroup[4]>::type = MPI_DOUBLE;
+MPI_Datatype MpiType<Update::AdjointGroup[4]>::type = MPI_DOUBLE;
+MPI_Datatype MpiType<Update::FundamentalGroup[6]>::type = MPI_DOUBLE;
+MPI_Datatype MpiType<Update::AdjointGroup[6]>::type = MPI_DOUBLE;
+MPI_Datatype MpiType<Update::FundamentalVector[4]>::type = MPI_DOUBLE;
+MPI_Datatype MpiType<Update::AdjointVector[4]>::type = MPI_DOUBLE;
+MPI_Datatype MpiType<Update::FundamentalGroup>::type = MPI_DOUBLE;
+MPI_Datatype MpiType<Update::AdjointGroup>::type = MPI_DOUBLE;
 #ifdef ADJOINT
 MPI_Datatype MpiType<Update::FermionicForceMatrix[4]>::type = MPI_Update::real_t;
 #endif
