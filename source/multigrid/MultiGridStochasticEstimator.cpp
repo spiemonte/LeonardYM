@@ -43,7 +43,7 @@ void MultiGridStochasticEstimator::getMultigridVectors(DiracOperator* dirac, ext
 
 	biMgSolver->solve(multiGridOperator, mg_sr, mg_sol);
 
-	reduced_vector_t reduced_mg_source, reduced_inverse_mg_source;
+	reduced_dirac_vector_t reduced_mg_source, reduced_inverse_mg_source;
 	multiGridProjector->apply(reduced_mg_source,mg_sr);
 	mg_source = reduced_mg_source;
 	multiGridProjector->apply(reduced_inverse_mg_source,mg_sol);

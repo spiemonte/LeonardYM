@@ -415,9 +415,14 @@ void NPRVertex::execute(environment_t& environment) {
 			}
 		}
 
+		struct timespec start, finish;
+		double elapsed;
+		clock_gettime(CLOCK_REALTIME, &start);
+
 		extended_dirac_vector_t source, hopping_source, previous;
+		unsigned int hopping_stochastic_estimators = environment.configurations.get<unsigned int>("NPRVertex::number_stochastic_estimators_hopping_terms");
 				
-		for (unsigned int i = 0; i < 3000; ++i) {
+		for (unsigned int i = 0; i < hopping_stochastic_estimators; ++i) {
 			this->generateRandomNoise(source);
 			previous = source;
 			for (int hopping = 1; hopping < 8; ++hopping) {
@@ -476,6 +481,12 @@ void NPRVertex::execute(environment_t& environment) {
 		
 		delete[] randomSources;
 		delete[] inverseRandomSources;
+
+		clock_gettime(CLOCK_REALTIME, &finish);
+		elapsed = (finish.tv_sec - start.tv_sec);
+		elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+
+		if (isOutputProcess()) std::cout << "NPRVertex::Measure of hopping parameter expansion done in: " << (elapsed) << " s."<< std::endl;
 	}
 
 	
@@ -503,6 +514,7 @@ void NPRVertex::registerParameters(po::options_description& desc) {
 		
 		("NPRVertex::measure_disconnected", po::value<std::string>()->default_value("true"), "Should we measure the disconnected contributions (default: true)")
 		("NPRVertex::number_stochastic_estimators", po::value<unsigned int>()->default_value(13), "Number of stochastic estimators for the disconnected part")
+		("NPRVertex::number_stochastic_estimators_hopping_terms", po::value<unsigned int>()->default_value(2500), "Number of stochastic estimators for the disconnected part in the hopping parameter expansion")
 		("NPRVertex::use_multigrid_diluition", po::value<std::string>()->default_value("true"), "Should we use the multigrid diluition for the measure of disconnected contribution? true/false")
 		;
 }
