@@ -26,14 +26,14 @@ public:
 	GMRESR(const GMRESR& toCopy);
 	~GMRESR();
 
-	bool solve(DiracOperator* dirac, const reduced_dirac_vector_t& source, reduced_dirac_vector_t& solution, DiracOperator* preconditioner = 0, reduced_dirac_vector_t const* initial_guess = 0);
+	bool solve(DiracOperator* dirac, const reduced_dirac_vector_t& source, reduced_dirac_vector_t& solution, DiracOperator* preconditioner, reduced_dirac_vector_t const* initial_guess = 0);
 
 	virtual bool solve(DiracOperator* dirac, const reduced_dirac_vector_t& source, reduced_dirac_vector_t& solution, reduced_dirac_vector_t const* initial_guess = 0) {
 		return this->solve(dirac, source, solution, 0, initial_guess);
 	}
 
 #ifdef ENABLE_MPI
-	bool solve(DiracOperator* dirac, const extended_dirac_vector_t& source, extended_dirac_vector_t& solution, DiracOperator* preconditioner = 0, extended_dirac_vector_t const* initial_guess = 0);
+	bool solve(DiracOperator* dirac, const extended_dirac_vector_t& source, extended_dirac_vector_t& solution, DiracOperator* preconditioner, extended_dirac_vector_t const* initial_guess = 0);
 #endif
 
 	void setConjugateSpaceDimension(unsigned int _maxSteps);

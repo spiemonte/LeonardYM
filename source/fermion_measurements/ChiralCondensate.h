@@ -11,7 +11,7 @@
 #include "LatticeSweep.h"
 #include "StochasticEstimator.h"
 #include "dirac_operators/DiracOperator.h"
-#include "inverters/BiConjugateGradient.h"
+#include "inverters/GMRESR.h"
 
 namespace Update {
 
@@ -23,13 +23,14 @@ public:
 
 	virtual void execute(environment_t& environment);
 
+	static void registerParameters(po::options_description& desc);
+
 private:
 	extended_dirac_vector_t randomNoise;
-	extended_dirac_vector_t tmp_square;
 	extended_dirac_vector_t tmp;
-	DiracOperator* squareDiracOperator;
+	extended_dirac_vector_t tmp_square;
 	DiracOperator* diracOperator;
-	BiConjugateGradient* biConjugateGradient;
+	GMRESR *gmresr;
 };
 
 } /* namespace Update */

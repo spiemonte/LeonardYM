@@ -12,43 +12,36 @@
 
 namespace Update {
 
-ChiralCondensate::ChiralCondensate() : LatticeSweep(), StochasticEstimator(), squareDiracOperator(0), diracOperator(0), biConjugateGradient(0) { }
+ChiralCondensate::ChiralCondensate() : LatticeSweep(), StochasticEstimator(), diracOperator(0), gmresr(0) { }
 
-ChiralCondensate::ChiralCondensate(const ChiralCondensate& toCopy) : LatticeSweep(toCopy), StochasticEstimator(toCopy), squareDiracOperator(0), diracOperator(0), biConjugateGradient(0) { }
+ChiralCondensate::ChiralCondensate(const ChiralCondensate& toCopy) : LatticeSweep(toCopy), StochasticEstimator(toCopy), diracOperator(0), gmresr(0) { }
 
 ChiralCondensate::~ChiralCondensate() {
-	if (squareDiracOperator) delete squareDiracOperator;
 	if (diracOperator) delete diracOperator;
-	if (biConjugateGradient) delete biConjugateGradient;
+	if (gmresr) delete gmresr;
 }
 
 void ChiralCondensate::execute(environment_t& environment) {
-	unsigned int max_step = environment.configurations.get<unsigned int>("number_stochastic_estimators");
-
-	if (squareDiracOperator == 0) {
-		squareDiracOperator = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 2, environment.configurations);
-	}
-	squareDiracOperator->setLattice(environment.getFermionLattice());
+	unsigned int max_step = environment.configurations.get<unsigned int>("ChiralCondensate::number_stochastic_estimators");
 	
 	if (diracOperator == 0) {
 		diracOperator = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations);
 	}
 	diracOperator->setLattice(environment.getFermionLattice());
+	diracOperator->setGamma5(false);
 	
 	long_real_t volume = environment.gaugeLinkConfiguration.getLayout().globalVolume;
 
-	if (biConjugateGradient == 0) {
-		biConjugateGradient = new BiConjugateGradient();
-		biConjugateGradient->setMaximumSteps(environment.configurations.get<unsigned int>("generic_inverter_max_steps"));
-		biConjugateGradient->setPrecision(environment.configurations.get<real_t>("generic_inverter_precision"));
+	if (gmresr == 0) {
+		gmresr = new GMRESR();
+		gmresr->setMaximumSteps(environment.configurations.get<unsigned int>("ChiralCondensate::inverter_max_steps"));
+		gmresr->setPrecision(environment.configurations.get<real_t>("ChiralCondensate::inverter_precision"));
 	}
 	
-	bool connected;
+	bool connected = true;
 	
-	try {
-		connected = environment.configurations.get<bool>("measure_condensate_connected");
-	} catch (NotFoundOption& ex) {
-		connected = true;
+	if (environment.configurations.get<std::string>("ChiralCondensate::measure_condensate_connected") != "true") {
+		connected = false;
 	}
 	
 	if (connected && isOutputProcess()) {
@@ -71,27 +64,24 @@ void ChiralCondensate::execute(environment_t& environment) {
 	for (unsigned int step = 0; step < max_step; ++step) {
 		this->generateRandomNoise(randomNoise);
 		
-		biConjugateGradient->solve(squareDiracOperator, randomNoise, tmp_square);
-		diracOperator->multiply(tmp, tmp_square);
+		gmresr->solve(diracOperator, randomNoise, tmp);
 		
-		std::complex<long_real_t> condensate = AlgebraUtils::gamma5dot(randomNoise, tmp);
+		std::complex<long_real_t> condensate = AlgebraUtils::dot(randomNoise, tmp);
 		chiralCondensateRe.push_back(real(condensate)/volume);
 		chiralCondensateIm.push_back(imag(condensate)/volume);
 		
-		std::complex<long_real_t> pseudoCondensate = AlgebraUtils::dot(randomNoise, tmp);
+		std::complex<long_real_t> pseudoCondensate = AlgebraUtils::gamma5dot(randomNoise, tmp);
 		pseudoCondensateRe.push_back(real(pseudoCondensate)/volume);
 		pseudoCondensateIm.push_back(imag(pseudoCondensate)/volume);
 
-		std::complex<long_real_t> pionNorm = AlgebraUtils::dot(randomNoise, tmp_square);
+		std::complex<long_real_t> pionNorm = AlgebraUtils::dot(tmp, tmp);
 		pionNormRe.push_back(real(pionNorm)/volume);
 		pionNormIm.push_back(imag(pionNorm)/volume);
 		
 		if (connected) {
-			AlgebraUtils::gamma5(randomNoise);
-			biConjugateGradient->solve(squareDiracOperator, randomNoise, tmp_square);
-			diracOperator->multiply(randomNoise, tmp_square);
+			gmresr->solve(diracOperator, tmp, tmp_square);
 
-			std::complex<long_real_t> condensateConnected = AlgebraUtils::gamma5dot(randomNoise, tmp);
+			std::complex<long_real_t> condensateConnected = AlgebraUtils::dot(randomNoise, tmp_square);
 			chiralCondensateConnectedRe.push_back(real(condensateConnected)/volume);
 			chiralCondensateConnectedIm.push_back(imag(condensateConnected)/volume);
 		}
@@ -136,6 +126,15 @@ void ChiralCondensate::execute(environment_t& environment) {
 		output->pop("pion_norm");
 	}
 	
+}
+
+void ChiralCondensate::registerParameters(po::options_description& desc) {
+	desc.add_options()
+		("ChiralCondensate::number_stochastic_estimators", po::value<unsigned int>()->default_value(20), "The number of stochastic estimators to be used")
+		("ChiralCondensate::inverter_precision", po::value<double>()->default_value(0.0000000001), "set the precision used by the inverter")
+		("ChiralCondensate::inverter_max_steps", po::value<unsigned int>()->default_value(5000), "set the maximum steps used by the inverter")
+		("ChiralCondensate::measure_condensate_connected", po::value<std::string>()->default_value("false"), "Should we measure the connected part of the condensate?")
+	;
 }
 
 } /* namespace Update */

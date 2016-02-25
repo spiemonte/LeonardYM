@@ -283,6 +283,9 @@ DiracEigenSolver.o: ./source/fermion_measurements/DiracEigenSolver.h ./source/fe
 SingletOperators.o: ./source/fermion_measurements/SingletOperators.h ./source/fermion_measurements/SingletOperators.cpp
 	$(CPP) $(CPPFLAGS) -c -o SingletOperators.o ./source/fermion_measurements/SingletOperators.cpp
 
+XSpaceCorrelators.o: ./source/fermion_measurements/XSpaceCorrelators.h ./source/fermion_measurements/XSpaceCorrelators.cpp
+	$(CPP) $(CPPFLAGS) -c -o XSpaceCorrelators.o ./source/fermion_measurements/XSpaceCorrelators.cpp
+
 Eigenvalues.o: ./source/fermion_measurements/Eigenvalues.h ./source/fermion_measurements/Eigenvalues.cpp
 	$(CPP) $(CPPFLAGS) -c -o Eigenvalues.o ./source/fermion_measurements/Eigenvalues.cpp
 

@@ -21,6 +21,7 @@
 #include "correlators/MesonCorrelator.h"
 #include "fermion_measurements/ChiralCondensate.h"
 #include "fermion_measurements/SingletOperators.h"
+#include "fermion_measurements/XSpaceCorrelators.h"
 #include "fermion_measurements/NPRVertex.h"
 #include "polyakov_loops/PolyakovLoop.h"
 #include "correlators/Glueball.h"
@@ -108,6 +109,8 @@ LatticeSweep* LatticeSweep::getInstance(const std::string& name) {
 		return new TwistedMultiStepNFlavorQCDUpdater();
 	} else if (name == "SingletOperators") {
 		return new SingletOperators();
+	} else if (name == "XSpaceCorrelators") {
+		return new XSpaceCorrelators();
 	} else if (name == "NPRVertex") {
 		return new NPRVertex();
 	}
@@ -216,6 +219,7 @@ void LatticeSweep::addParameters(po::options_description& desc) {
 	MultiStepNFlavorQCDUpdater::registerParameters(desc);
 	TwistedMultiStepNFlavorQCDUpdater::registerParameters(desc);
 	SingletOperators::registerParameters(desc);
+	XSpaceCorrelators::registerParameters(desc);
 	NPRVertex::registerParameters(desc);
 }
 
