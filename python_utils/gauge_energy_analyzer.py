@@ -55,12 +55,12 @@ end=len(finaldata)
 toplot = zip(*finaldata)
 
 import bootstrapping as boot
+from utils import *
 
 title = "Gauge energy for run "+basename
 
 gauge_energy = boot.bootstrap(boot.block(toplot[0][init:end],blocking))
-roundlevel = int(-math.log10(gauge_energy[1]) + 2)
-resultstr = "Gauge energy expectation value: "+str(round(gauge_energy[0],roundlevel))+" +/- "+str(round(gauge_energy[1],roundlevel))
+resultstr = "Gauge energy expectation value: "+str_round(gauge_energy[0],gauge_energy[1])+" +/- "+str_round(gauge_energy[1],gauge_energy[1])
 print resultstr
 title += "\n"+resultstr
 
@@ -68,6 +68,8 @@ pattern = re.search('([0-9]+)c([0-9]+)',basename)
 latticedata = ""
 if pattern != None:
 	latticedata += pattern.group(1)+", "+pattern.group(2)+", "
+	volume = float(int(pattern.group(1))*int(pattern.group(1))*int(pattern.group(1))*int(pattern.group(2)))
+	print "Gauge energy density expectation value: "+str_round(gauge_energy[0]/volume,gauge_energy[1]/volume)+" +/- "+str_round(gauge_energy[1]/volume,gauge_energy[1]/volume)
 pattern = re.search('([0-9]+)b',basename)
 if pattern != None:
 	latticedata += pattern.group(1)[0]+"."+pattern.group(1)[1:]+", "
@@ -75,7 +77,7 @@ pattern = re.search('([0-9]+)k',basename)
 if pattern != None:
 	latticedata += "0."+pattern.group(1)+", "
 
-print "Mathematica output: {"+latticedata+(str(round(gauge_energy[0],roundlevel))+", "+str(round(gauge_energy[1],roundlevel))).replace("e","*10^")+"}"
+print "Mathematica output: {"+latticedata+(str_round(gauge_energy[0],gauge_energy[1])+", "+str_round(gauge_energy[1],gauge_energy[1])).replace("e","*10^")+"}"
 
 try:
 	import matplotlib as mpl

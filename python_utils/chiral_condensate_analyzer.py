@@ -82,8 +82,11 @@ chiral_condensate = boot.bootstrap(boot.block(toplot[0][init:end],blocking))
 chiral_condensate_susc = boot.bootstrap_susc(boot.block([abs(toplot[0][i]) for i in range(init,end)],blocking),boot.block([toplot[0][i]*toplot[0][i] for i in range(init,end)],blocking))
 
 connected = zip(*finaldatac)
-chiral_condensate_connected_susc = boot.bootstrap(boot.block(connected[0][init:end],blocking))
-
+if len(connected) == 0:
+        chiral_condensate_connected_susc = [0,1]
+        print "Warning, no connected part of the chiral susceptibility found"
+else:
+        chiral_condensate_connected_susc = boot.bootstrap(boot.block(connected[0][init:end],blocking))
 
 roundlevel = int(-math.log10(chiral_condensate[1]) + 2)
 resultstr = "Chiral condensate expectation value: "+str(round(chiral_condensate[0],roundlevel))+" +/- "+str(round(chiral_condensate[1],roundlevel))
