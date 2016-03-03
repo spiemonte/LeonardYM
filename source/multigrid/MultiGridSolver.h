@@ -17,6 +17,7 @@ class MultiGridSolver : public Solver {
 		bool solve(DiracOperator* dirac, const reduced_dirac_vector_t& source, reduced_dirac_vector_t& solution, reduced_dirac_vector_t const* initial_guess = 0);
 		
 		void initializeBasis(DiracOperator* dirac);
+		void updateBasis(DiracOperator* dirac);
 
 		void setSAPIterations(int _SAPIterantions);
 		int getSAPIterations() const;
@@ -38,13 +39,14 @@ class MultiGridSolver : public Solver {
 	
 		BlockBasis* getBasis();
 
-	private:
+		void setBlockDiracOperators(BlockDiracOperator* _blackBlockDiracOperator, BlockDiracOperator* _redBlockDiracOperator);
+
+	protected:
 		BlockBasis blockBasis;
 		std::vector<unsigned int> blockSize;
 
 		BlockDiracOperator* blackBlockDiracOperator;
 		BlockDiracOperator* redBlockDiracOperator;
-		ComplementBlockDiracOperator* K;
 
 		MultiGridBiConjugateGradientSolver* biMgSolver;
 

@@ -97,19 +97,19 @@ void BlockImprovedDiracWilsonOperator::multiply(reduced_dirac_vector_t& output, 
 			if (gamma5) {
 				//The final result is gamma5*input - kappa*hopping
 				for (int n = 0; n < diracVectorLength; ++n) {
-					output[site][0][n] = std::complex<real_t>(real(input[site][0][n])-kappa*(real(tmp_plus[0][0][n])+real(tmp_plus[1][0][n])+real(tmp_plus[2][0][n])+real(tmp_plus[3][0][n])),imag(input[site][0][n])-kappa*(imag(tmp_plus[0][0][n])+imag(tmp_plus[1][0][n])+imag(tmp_plus[2][0][n])+imag(tmp_plus[3][0][n])));
-					output[site][1][n] = std::complex<real_t>(real(input[site][1][n])-kappa*(real(tmp_plus[0][1][n])+real(tmp_plus[1][1][n])+real(tmp_plus[2][1][n])+real(tmp_plus[3][1][n])),imag(input[site][1][n])-kappa*(imag(tmp_plus[0][1][n])+imag(tmp_plus[1][1][n])+imag(tmp_plus[2][1][n])+imag(tmp_plus[3][1][n])));
-					output[site][2][n] = std::complex<real_t>(-(real(input[site][2][n]) + kappa*(real(tmp_minus[1][1][n]) + real(tmp_minus[3][0][n]) - imag(tmp_minus[0][1][n]) - imag(tmp_minus[2][0][n]))),-(imag(input[site][2][n]) + kappa*(real(tmp_minus[0][1][n]) + real(tmp_minus[2][0][n]) + imag(tmp_minus[1][1][n]) + imag(tmp_minus[3][0][n]))));
-					output[site][3][n] = std::complex<real_t>(-(real(input[site][3][n]) + kappa*(imag(tmp_minus[2][1][n]) - imag(tmp_minus[0][0][n]) - real(tmp_minus[1][0][n]) + real(tmp_minus[3][1][n]))),-(imag(input[site][3][n]) + kappa*(real(tmp_minus[0][0][n]) - real(tmp_minus[2][1][n]) - imag(tmp_minus[1][0][n]) + imag(tmp_minus[3][1][n]))));
+					output[site][0][n] = std::complex<real_t>(0.,twist)*input[site][0][n] + std::complex<real_t>(real(input[site][0][n])-kappa*(real(tmp_plus[0][0][n])+real(tmp_plus[1][0][n])+real(tmp_plus[2][0][n])+real(tmp_plus[3][0][n])),imag(input[site][0][n]) -kappa*(imag(tmp_plus[0][0][n])+imag(tmp_plus[1][0][n])+imag(tmp_plus[2][0][n])+imag(tmp_plus[3][0][n])));
+					output[site][1][n] = std::complex<real_t>(0.,twist)*input[site][1][n] + std::complex<real_t>(real(input[site][1][n])-kappa*(real(tmp_plus[0][1][n])+real(tmp_plus[1][1][n])+real(tmp_plus[2][1][n])+real(tmp_plus[3][1][n])),imag(input[site][1][n]) -kappa*(imag(tmp_plus[0][1][n])+imag(tmp_plus[1][1][n])+imag(tmp_plus[2][1][n])+imag(tmp_plus[3][1][n])));
+					output[site][2][n] = std::complex<real_t>(0.,twist)*input[site][2][n] + std::complex<real_t>(-(real(input[site][2][n]) + kappa*(real(tmp_minus[1][1][n]) + real(tmp_minus[3][0][n]) - imag(tmp_minus[0][1][n]) - imag(tmp_minus[2][0][n]))),-(imag(input[site][2][n]) + kappa*(real(tmp_minus[0][1][n]) + real(tmp_minus[2][0][n]) + imag(tmp_minus[1][1][n]) + imag(tmp_minus[3][0][n]))));
+					output[site][3][n] = std::complex<real_t>(0.,twist)*input[site][3][n] + std::complex<real_t>(-(real(input[site][3][n]) + kappa*(imag(tmp_minus[2][1][n]) - imag(tmp_minus[0][0][n]) - real(tmp_minus[1][0][n]) + real(tmp_minus[3][1][n]))),-(imag(input[site][3][n]) + kappa*(real(tmp_minus[0][0][n]) - real(tmp_minus[2][1][n]) - imag(tmp_minus[1][0][n]) + imag(tmp_minus[3][1][n]))));
 				}
 			}
 			else {
 				//The final result is input - kappa*gamma5*hopping
 				for (int n = 0; n < diracVectorLength; ++n) {
-					output[site][0][n] = std::complex<real_t>(real(input[site][0][n]) - kappa*(real(tmp_plus[0][0][n])+real(tmp_plus[1][0][n])+real(tmp_plus[2][0][n])+real(tmp_plus[3][0][n])),imag(input[site][0][n]) - kappa*(imag(tmp_plus[0][0][n])+imag(tmp_plus[1][0][n])+imag(tmp_plus[2][0][n])+imag(tmp_plus[3][0][n])));
-					output[site][1][n] = std::complex<real_t>(real(input[site][1][n]) - kappa*(real(tmp_plus[0][1][n])+real(tmp_plus[1][1][n])+real(tmp_plus[2][1][n])+real(tmp_plus[3][1][n])),imag(input[site][1][n]) - kappa*(imag(tmp_plus[0][1][n])+imag(tmp_plus[1][1][n])+imag(tmp_plus[2][1][n])+imag(tmp_plus[3][1][n])));
-					output[site][2][n] = std::complex<real_t>(real(input[site][2][n]) + kappa*(real(tmp_minus[1][1][n]) + real(tmp_minus[3][0][n]) - imag(tmp_minus[0][1][n]) - imag(tmp_minus[2][0][n])),imag(input[site][2][n]) + kappa*(real(tmp_minus[0][1][n]) + real(tmp_minus[2][0][n]) + imag(tmp_minus[1][1][n]) + imag(tmp_minus[3][0][n])));
-					output[site][3][n] = std::complex<real_t>(real(input[site][3][n]) + kappa*(imag(tmp_minus[2][1][n]) - imag(tmp_minus[0][0][n]) - real(tmp_minus[1][0][n]) + real(tmp_minus[3][1][n])),imag(input[site][3][n]) + kappa*(real(tmp_minus[0][0][n]) - real(tmp_minus[2][1][n]) - imag(tmp_minus[1][0][n]) + imag(tmp_minus[3][1][n])));
+					output[site][0][n] = std::complex<real_t>(0.,twist)*input[site][0][n] + std::complex<real_t>(real(input[site][0][n]) - kappa*(real(tmp_plus[0][0][n])+real(tmp_plus[1][0][n])+real(tmp_plus[2][0][n])+real(tmp_plus[3][0][n])),imag(input[site][0][n]) - kappa*(imag(tmp_plus[0][0][n])+imag(tmp_plus[1][0][n])+imag(tmp_plus[2][0][n])+imag(tmp_plus[3][0][n])));
+					output[site][1][n] = std::complex<real_t>(0.,twist)*input[site][1][n] + std::complex<real_t>(real(input[site][1][n]) - kappa*(real(tmp_plus[0][1][n])+real(tmp_plus[1][1][n])+real(tmp_plus[2][1][n])+real(tmp_plus[3][1][n])),imag(input[site][1][n]) - kappa*(imag(tmp_plus[0][1][n])+imag(tmp_plus[1][1][n])+imag(tmp_plus[2][1][n])+imag(tmp_plus[3][1][n])));
+					output[site][2][n] = std::complex<real_t>(0.,-twist)*input[site][2][n] + std::complex<real_t>(real(input[site][2][n]) + kappa*(real(tmp_minus[1][1][n]) + real(tmp_minus[3][0][n]) - imag(tmp_minus[0][1][n]) - imag(tmp_minus[2][0][n])),imag(input[site][2][n]) + kappa*(real(tmp_minus[0][1][n]) + real(tmp_minus[2][0][n]) + imag(tmp_minus[1][1][n]) + imag(tmp_minus[3][0][n])));
+					output[site][3][n] = std::complex<real_t>(0.,-twist)*input[site][3][n] + std::complex<real_t>(real(input[site][3][n]) + kappa*(imag(tmp_minus[2][1][n]) - imag(tmp_minus[0][0][n]) - real(tmp_minus[1][0][n]) + real(tmp_minus[3][1][n])),imag(input[site][3][n]) + kappa*(real(tmp_minus[0][0][n]) - real(tmp_minus[2][1][n]) - imag(tmp_minus[1][0][n]) + imag(tmp_minus[3][1][n])));
 				}
 			}
 
@@ -117,18 +117,18 @@ void BlockImprovedDiracWilsonOperator::multiply(reduced_dirac_vector_t& output, 
 		else {
 			if (gamma5) {
 				for (int n = 0; n < diracVectorLength; ++n) {
-					output[site][0][n] = + input[site][0][n];
-					output[site][1][n] = + input[site][1][n];
-					output[site][2][n] = - input[site][2][n];
-					output[site][3][n] = - input[site][3][n];
+					output[site][0][n] = std::complex<real_t>(1.,twist)*input[site][0][n];
+					output[site][1][n] = std::complex<real_t>(1.,twist)*input[site][1][n];
+					output[site][2][n] = std::complex<real_t>(-1.,twist)*input[site][2][n];
+					output[site][3][n] = std::complex<real_t>(-1.,twist)*input[site][3][n];
 				}
 			}
 			else {
 				for (int n = 0; n < diracVectorLength; ++n) {
-					output[site][0][n] = + input[site][0][n];
-					output[site][1][n] = + input[site][1][n];
-					output[site][2][n] = + input[site][2][n];
-					output[site][3][n] = + input[site][3][n];
+					output[site][0][n] = std::complex<real_t>(1.,twist)*input[site][0][n];
+					output[site][1][n] = std::complex<real_t>(1.,twist)*input[site][1][n];
+					output[site][2][n] = std::complex<real_t>(1.,-twist)*input[site][2][n];
+					output[site][3][n] = std::complex<real_t>(1.,-twist)*input[site][3][n];
 				}
 			}
 		}
@@ -237,37 +237,37 @@ void BlockImprovedDiracWilsonOperator::multiplyAdd(reduced_dirac_vector_t& outpu
 			if (gamma5) {
 				//The final result is gamma5*input - kappa*hopping
 				for (int n = 0; n < diracVectorLength; ++n) {
-					output[site][0][n] = alpha*vector2[site][0][n] + vector1[site][0][n] - kappa*hopping[0][n];
-					output[site][1][n] = alpha*vector2[site][1][n] + vector1[site][1][n] - kappa*hopping[1][n];
-					output[site][2][n] = alpha*vector2[site][2][n] - (vector1[site][2][n] + kappa*hopping[2][n]);
-					output[site][3][n] = alpha*vector2[site][3][n] - (vector1[site][3][n] + kappa*hopping[3][n]);
+					output[site][0][n] = alpha*vector2[site][0][n] + std::complex<real_t>(1.,twist)*vector1[site][0][n] - kappa*hopping[0][n];
+					output[site][1][n] = alpha*vector2[site][1][n] + std::complex<real_t>(1.,twist)*vector1[site][1][n] - kappa*hopping[1][n];
+					output[site][2][n] = alpha*vector2[site][2][n] - (std::complex<real_t>(1.,-twist)*vector1[site][2][n] + kappa*hopping[2][n]);
+					output[site][3][n] = alpha*vector2[site][3][n] - (std::complex<real_t>(1.,-twist)*vector1[site][3][n] + kappa*hopping[3][n]);
 				}
 			}
 			else {
 				//The final result is input - kappa*gamma5*hopping
 				for (int n = 0; n < diracVectorLength; ++n) {
-					output[site][0][n] = alpha*vector2[site][0][n] + vector1[site][0][n] - kappa*hopping[0][n];
-					output[site][1][n] = alpha*vector2[site][1][n] + vector1[site][1][n] - kappa*hopping[1][n];
-					output[site][2][n] = alpha*vector2[site][2][n] + vector1[site][2][n] + kappa*hopping[2][n];
-					output[site][3][n] = alpha*vector2[site][3][n] + vector1[site][3][n] + kappa*hopping[3][n];
+					output[site][0][n] = alpha*vector2[site][0][n] +std::complex<real_t>(1.,twist)* vector1[site][0][n] - kappa*hopping[0][n];
+					output[site][1][n] = alpha*vector2[site][1][n] + std::complex<real_t>(1.,twist)*vector1[site][1][n] - kappa*hopping[1][n];
+					output[site][2][n] = alpha*vector2[site][2][n] + std::complex<real_t>(1.,-twist)*vector1[site][2][n] + kappa*hopping[2][n];
+					output[site][3][n] = alpha*vector2[site][3][n] + std::complex<real_t>(1.,-twist)*vector1[site][3][n] + kappa*hopping[3][n];
 				}
 			}
 		}
 		else {
 			if (gamma5) {
 				for (int n = 0; n < diracVectorLength; ++n) {
-					output[site][0][n] = alpha*vector2[site][0][n] + vector1[site][0][n];
-					output[site][1][n] = alpha*vector2[site][1][n] + vector1[site][1][n];
-					output[site][2][n] = alpha*vector2[site][2][n] - vector1[site][2][n];
-					output[site][3][n] = alpha*vector2[site][3][n] - vector1[site][3][n];
+					output[site][0][n] = alpha*vector2[site][0][n] + std::complex<real_t>(1.,twist)*vector1[site][0][n];
+					output[site][1][n] = alpha*vector2[site][1][n] + std::complex<real_t>(1.,twist)*vector1[site][1][n];
+					output[site][2][n] = alpha*vector2[site][2][n] + std::complex<real_t>(-1.,twist)*vector1[site][2][n];
+					output[site][3][n] = alpha*vector2[site][3][n] + std::complex<real_t>(-1.,twist)*vector1[site][3][n];
 				}
 			}
 			else {
 				for (int n = 0; n < diracVectorLength; ++n) {
-					output[site][0][n] = alpha*vector2[site][0][n] + vector1[site][0][n];
-					output[site][1][n] = alpha*vector2[site][1][n] + vector1[site][1][n];
-					output[site][2][n] = alpha*vector2[site][2][n] + vector1[site][2][n];
-					output[site][3][n] = alpha*vector2[site][3][n] + vector1[site][3][n];
+					output[site][0][n] = alpha*vector2[site][0][n] + std::complex<real_t>(1.,twist)*vector1[site][0][n];
+					output[site][1][n] = alpha*vector2[site][1][n] + std::complex<real_t>(1.,twist)*vector1[site][1][n];
+					output[site][2][n] = alpha*vector2[site][2][n] + std::complex<real_t>(1.,-twist)*vector1[site][2][n];
+					output[site][3][n] = alpha*vector2[site][3][n] + std::complex<real_t>(1.,-twist)*vector1[site][3][n];
 				}
 			}
 		}

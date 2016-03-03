@@ -1,6 +1,6 @@
 OBJECTS  = ReducedStencil.o StandardStencil.o ExtendedStencil.o LocalLayout.o \
 			AlgebraUtils.o \
-			BiConjugateGradient.o DeflationInverter.o ConjugateGradient.o MultishiftSolver.o ChronologicalMultishiftSolver.o MMMRMultishiftSolver.o MEMultishiftSolver.o GMRESR.o \
+			BiConjugateGradient.o DeflationInverter.o ConjugateGradient.o MultishiftSolver.o ChronologicalMultishiftSolver.o MMMRMultishiftSolver.o MEMultishiftSolver.o MultiGridMEMultishiftSolver.o GMRESR.o \
 			DiracOperator.o BasicDiracWilsonOperator.o BasicSquareDiracWilsonOperator.o DiracWilsonOperator.o SquareDiracWilsonOperator.o BlockDiracWilsonOperator.o BlockImprovedDiracWilsonOperator.o BlockDiracOperator.o ComplementBlockDiracOperator.o SquareComplementBlockDiracWilsonOperator.o SquareComplementBlockDiracOperator.o SquareBlockDiracWilsonOperator.o ImprovedDiracWilsonOperator.o SquareImprovedDiracWilsonOperator.o SquareTwistedDiracOperator.o TwistedDiracOperator.o SAPPreconditioner.o HoppingOperator.o GammaOperators.o \
 			BlockBasis.o MultiGridBiConjugateGradient.o MultiGridConjugateGradient.o MultiGridOperator.o MultiGridProjector.o MultiGridSolver.o MultiGridVectorLayout.o MultiGridStochasticEstimator.o \
 			Polynomial.o RationalApproximation.o \

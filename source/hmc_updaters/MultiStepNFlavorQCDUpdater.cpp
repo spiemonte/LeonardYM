@@ -11,6 +11,10 @@
 #include "inverters/MultishiftSolver.h"
 #include "dirac_functions/RationalApproximation.h"
 #include "inverters/BiConjugateGradient.h"
+#include "inverters/MultiGridMEMultishiftSolver.h"
+#include "dirac_operators/ComplementBlockDiracOperator.h"
+#include "dirac_operators/TwistedDiracOperator.h"
+#include "dirac_operators/SAPPreconditioner.h"
 #include "actions/GaugeAction.h"
 #include "hmc_integrators/Integrate.h"
 #include "utils/ToString.h"
@@ -27,21 +31,63 @@
 
 namespace Update {
 
-MultiStepNFlavorQCDUpdater::MultiStepNFlavorQCDUpdater() : LatticeSweep(), nFlavorQCDAction(0), gaugeAction(0), fermionAction(0), squareDiracOperator(0), diracOperator(0) { }
+MultiStepNFlavorQCDUpdater::MultiStepNFlavorQCDUpdater() : LatticeSweep(), nFlavorQCDAction(0), gaugeAction(0), fermionAction(0), squareDiracOperator(0), diracOperator(0), multishiftSolver(0), blackBlockDiracOperator(0), redBlockDiracOperator(0) { }
 
-MultiStepNFlavorQCDUpdater::MultiStepNFlavorQCDUpdater(const MultiStepNFlavorQCDUpdater& toCopy) : LatticeSweep(toCopy), nFlavorQCDAction(0), gaugeAction(0), fermionAction(0), squareDiracOperator(0), diracOperator(0) { }
+MultiStepNFlavorQCDUpdater::MultiStepNFlavorQCDUpdater(const MultiStepNFlavorQCDUpdater& toCopy) : LatticeSweep(toCopy), nFlavorQCDAction(0), gaugeAction(0), fermionAction(0), squareDiracOperator(0), diracOperator(0), multishiftSolver(0) { }
 
 MultiStepNFlavorQCDUpdater::~MultiStepNFlavorQCDUpdater() {
 	if (nFlavorQCDAction != 0) delete nFlavorQCDAction;
+	if (multishiftSolver != 0) delete multishiftSolver;
+	if (blackBlockDiracOperator != 0) delete blackBlockDiracOperator;
+	if (redBlockDiracOperator != 0) delete redBlockDiracOperator;
 }
 
 void MultiStepNFlavorQCDUpdater::initializeApproximations(environment_t& environment) {
+	if (multishiftSolver == 0) {
+		if (environment.configurations.get<std::string>("MultiStepNFlavorQCDUpdater::multigrid") == "true") {
+			DiracOperator* diracOperator = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations);
+			diracOperator->setLattice(environment.getFermionLattice());
+			diracOperator->setGamma5(false);
+
+			blackBlockDiracOperator = BlockDiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations, Black);
+			blackBlockDiracOperator->setLattice(environment.getFermionLattice());
+			blackBlockDiracOperator->setGamma5(false);
+			blackBlockDiracOperator->setBlockSize(environment.configurations.get< std::vector<unsigned int> >("MultiStepNFlavorQCDUpdater::sap_block_size"));
+		
+			redBlockDiracOperator = BlockDiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations, Red);
+			redBlockDiracOperator->setLattice(environment.getFermionLattice());
+			redBlockDiracOperator->setGamma5(false);
+			redBlockDiracOperator->setBlockSize(environment.configurations.get< std::vector<unsigned int> >("MultiStepNFlavorQCDUpdater::sap_block_size"));
+
+			MultiGridMEMultishiftSolver* multishiftMultiGridSolver = new MultiGridMEMultishiftSolver(environment.configurations.get< unsigned int >("MultiStepNFlavorQCDUpdater::multigrid_basis_dimension"), environment.configurations.get< std::vector<unsigned int> >("MultiStepNFlavorQCDUpdater::multigrid_block_size"), blackBlockDiracOperator, redBlockDiracOperator);
+			multishiftMultiGridSolver->setSAPIterations(environment.configurations.get<unsigned int>("MultiStepNFlavorQCDUpdater::sap_iterations"));
+			multishiftMultiGridSolver->setSAPMaxSteps(environment.configurations.get<unsigned int>("MultiStepNFlavorQCDUpdater::sap_inverter_max_steps"));
+			multishiftMultiGridSolver->setSAPPrecision(environment.configurations.get<real_t>("MultiStepNFlavorQCDUpdater::sap_inverter_precision"));
+			multishiftMultiGridSolver->setGMRESIterations(environment.configurations.get<unsigned int>("MultiStepNFlavorQCDUpdater::gmres_inverter_max_steps"));
+			multishiftMultiGridSolver->setGMRESPrecision(environment.configurations.get<real_t>("MultiStepNFlavorQCDUpdater::gmres_inverter_precision"));
+
+			multishiftMultiGridSolver->initializeBasis(diracOperator);			
+			multishiftSolver = multishiftMultiGridSolver;
+			
+			delete diracOperator;
+			if (isOutputProcess()) std::cout << "MultiStepNFlavorQCDUpdater::Using multigrid inverter and SAP preconditioning ..." << std::endl;
+		}
+		else {
+			multishiftSolver = MultishiftSolver::getInstance("minimal_residual");
+		}
+	}
+	else {
+		if (environment.configurations.get<std::string>("MultiStepNFlavorQCDUpdater::multigrid") == "true") {
+			MultiGridMEMultishiftSolver* multishiftMultiGridSolver = dynamic_cast<MultiGridMEMultishiftSolver*>(multishiftSolver);
+			multishiftMultiGridSolver->initializeBasis(diracOperator);
+		}
+	}
 	//First take the rational function approximation for the heatbath step
 	if (rationalApproximationsHeatBath.empty()) {
 		int numberPseudofermions = environment.configurations.get< unsigned int >("number_pseudofermions");
 		for (int i = 1; i <= numberPseudofermions; ++i) {
 			std::vector<real_t> rat = environment.configurations.get< std::vector<real_t> >(std::string("heatbath_rational_fraction_")+toString(i));
-			RationalApproximation rational;
+			RationalApproximation rational(multishiftSolver);
 			rational.setAlphas(std::vector<real_t>(rat.begin(), rat.begin() + rat.size()/2));
 			rational.setBetas(std::vector<real_t>(rat.begin() + rat.size()/2, rat.end()));
 			rational.setPrecision(environment.configurations.get<double>("metropolis_inverter_precision"));
@@ -56,7 +102,7 @@ void MultiStepNFlavorQCDUpdater::initializeApproximations(environment_t& environ
 		int numberPseudofermions = environment.configurations.get< unsigned int >("number_pseudofermions");
 		for (int i = 1; i <= numberPseudofermions; ++i) {
 			std::vector<real_t> rat = environment.configurations.get< std::vector<real_t> >(std::string("metropolis_rational_fraction_")+toString(i));
-			RationalApproximation rational;
+			RationalApproximation rational(multishiftSolver);
 			rational.setAlphas(std::vector<real_t>(rat.begin(), rat.begin() + rat.size()/2));
 			rational.setBetas(std::vector<real_t>(rat.begin() + rat.size()/2, rat.end()));
 			rational.setPrecision(environment.configurations.get<double>("metropolis_inverter_precision"));
@@ -87,7 +133,7 @@ void MultiStepNFlavorQCDUpdater::initializeApproximations(environment_t& environ
 			std::vector<RationalApproximation> levelRationaApproximationForce;
 			for (int j = 1; j <= numberPseudofermions; ++j) {
 				std::vector<real_t> rat = environment.configurations.get< std::vector<real_t> >(std::string("force_rational_fraction_")+toString(j)+"_level_"+toString(i));
-				RationalApproximation rational;
+				RationalApproximation rational(multishiftSolver);
 				rational.setAlphas(std::vector<real_t>(rat.begin(), rat.begin() + rat.size()/2));
 				rational.setBetas(std::vector<real_t>(rat.begin() + rat.size()/2, rat.end()));
 				rational.setPrecision(level_precisions[i - 1]);
@@ -366,6 +412,26 @@ void MultiStepNFlavorQCDUpdater::execute(environment_t& environment) {
 	std::cout << "Vediamo la nostra morte 2: " << std::endl << tmp2[5][3] << std::endl;
 	std::cout << "Vediamo la nostra morte 3: " << std::endl << tmp_pseudofermion[5][3] << std::endl;
 	*/
+}
+
+void MultiStepNFlavorQCDUpdater::registerParameters(po::options_description& desc) {
+	static bool single = true;
+	if (single) desc.add_options()
+		("MultiStepNFlavorQCDUpdater::inverter_precision", po::value<double>()->default_value(0.0000000001), "set the precision used by the inverter")
+		("MultiStepNFlavorQCDUpdater::inverter_max_steps", po::value<unsigned int>()->default_value(5000), "set the maximum steps used by the inverter")
+		
+		("MultiStepNFlavorQCDUpdater::multigrid", po::value<std::string>()->default_value("false"), "Should we use the multigrid inverter? true/false")
+		("MultiStepNFlavorQCDUpdater::multigrid_basis_dimension", po::value<unsigned int>()->default_value(20), "The dimension of the basis for multigrid")
+		("MultiStepNFlavorQCDUpdater::multigrid_block_size", po::value<std::string>()->default_value("{4,4,4,4}"), "Block size for Multigrid (syntax: {bx,by,bz,bt})")
+
+		("MultiStepNFlavorQCDUpdater::sap_block_size", po::value<std::string>()->default_value("{4,4,4,4}"), "Block size for SAP (syntax: {bx,by,bz,bt})")
+		("MultiStepNFlavorQCDUpdater::sap_iterations", po::value<unsigned int>()->default_value(5), "The number of sap iterations")
+		("MultiStepNFlavorQCDUpdater::sap_inverter_precision", po::value<double>()->default_value(0.00000000001), "The precision of the inner SAP inverter")
+		("MultiStepNFlavorQCDUpdater::sap_inverter_max_steps", po::value<unsigned int>()->default_value(50), "The maximum number of steps for the inner SAP inverter")
+		("MultiStepNFlavorQCDUpdater::gmres_inverter_precision", po::value<double>()->default_value(0.00000000001), "The precision of the GMRES inverter used to initialize the multigrid basis")
+		("MultiStepNFlavorQCDUpdater::gmres_inverter_max_steps", po::value<unsigned int>()->default_value(100), "The maximum number of steps for the GMRES inverter used to initialize the multigrid basis")
+		;
+	single = false;
 }
 
 } /* namespace Update */

@@ -11,6 +11,7 @@
 #include "LatticeSweep.h"
 #include "FermionHMCUpdater.h"
 #include "dirac_functions/RationalApproximation.h"
+#include "dirac_operators/BlockDiracOperator.h"
 #include "actions/NFlavorQCDAction.h"
 #include "actions/GaugeAction.h"
 
@@ -25,6 +26,8 @@ public:
 	~MultiStepNFlavorQCDUpdater();
 
 	virtual void execute(environment_t& environment);
+
+	static void registerParameters(po::options_description& desc);
 
 protected:
 	void initializeApproximations(environment_t& environment);
@@ -53,6 +56,10 @@ protected:
 	//The dirac operators for the theory
 	DiracOperator* squareDiracOperator;
 	DiracOperator* diracOperator;
+
+	MultishiftSolver* multishiftSolver;
+	BlockDiracOperator* blackBlockDiracOperator;
+	BlockDiracOperator* redBlockDiracOperator;
 };
 
 } /* namespace Update */

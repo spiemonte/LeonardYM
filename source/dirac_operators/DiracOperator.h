@@ -21,6 +21,7 @@ public:
 	DiracOperator(const extended_fermion_lattice_t& _lattice, double _kappa = 0., bool _gamma5 = true);
 	virtual ~DiracOperator();
 	static DiracOperator* getInstance(const std::string& name, unsigned int power, const StorageParameters& parameters);
+	static DiracOperator* getSquareRoot(DiracOperator* dirac);
 	
 #ifdef ENABLE_MPI
 	void multiply(standard_dirac_vector_t& output, const standard_dirac_vector_t& input) {

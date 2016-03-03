@@ -16,15 +16,13 @@ std::vector< extended_dirac_vector_t > RationalApproximation::tmp;
 //extended_dirac_vector_t RationalApproximation::tmp1;
 //extended_dirac_vector_t RationalApproximation::tmp2;
 
-RationalApproximation::RationalApproximation() : precision(0.000000000001), maximumSteps(3000), multishiftSolver(new MMMRMultishiftSolver()) { }
+RationalApproximation::RationalApproximation(MultishiftSolver* _multishiftSolver) : precision(0.000000000001), maximumSteps(3000), multishiftSolver(_multishiftSolver) { }
 
-RationalApproximation::RationalApproximation(const RationalApproximation& toCopy) : alphas(toCopy.alphas), betas(toCopy.betas), precision(toCopy.precision), maximumSteps(toCopy.maximumSteps), multishiftSolver(new MMMRMultishiftSolver()) { }
+RationalApproximation::RationalApproximation(const RationalApproximation& toCopy) : alphas(toCopy.alphas), betas(toCopy.betas), precision(toCopy.precision), maximumSteps(toCopy.maximumSteps), multishiftSolver(toCopy.multishiftSolver) { }
 
-RationalApproximation::RationalApproximation(const std::vector< real_t >& _alphas, const std::vector< real_t >& _betas) : alphas(_alphas), betas(_betas), precision(0.000000000001), maximumSteps(3000), multishiftSolver(new MMMRMultishiftSolver()) { }
+RationalApproximation::RationalApproximation(const std::vector< real_t >& _alphas, const std::vector< real_t >& _betas, MultishiftSolver* _multishiftSolver) : alphas(_alphas), betas(_betas), precision(0.000000000001), maximumSteps(3000), multishiftSolver(_multishiftSolver) { }
 
-RationalApproximation::~RationalApproximation() {
-	delete multishiftSolver;
-}
+RationalApproximation::~RationalApproximation() { }
 
 void RationalApproximation::evaluate(DiracOperator* diracOperator, extended_dirac_vector_t& output, const extended_dirac_vector_t& input) {
 	//Allocate the memory
@@ -93,6 +91,10 @@ void RationalApproximation::setPrecision(const real_t& _precision) {
 
 real_t RationalApproximation::getPrecision() const {
 	return precision;
+}
+
+MultishiftSolver* RationalApproximation::getMultishiftSolver() {
+	return multishiftSolver;
 }
 
 void RationalApproximation::setMaximumRecursion(unsigned int maximumRecursion) {

@@ -57,6 +57,8 @@ protected:
 	reduced_dirac_vector_t temp1, temp2, result;
 
 	long_real_t determinant(const environment_t& env, real_t alpha, real_t twist1, real_t twist2);
+
+	MultishiftSolver *multishiftSolver;
 };
 
 } /* namespace Update */

@@ -17,9 +17,9 @@ namespace Update {
 
 class RationalApproximation {
 public:
-	RationalApproximation();
+	RationalApproximation(MultishiftSolver* _multishiftSolver);
 	RationalApproximation(const RationalApproximation& toCopy);
-	RationalApproximation(const std::vector< real_t >& _alphas, const std::vector< real_t >& _betas);
+	RationalApproximation(const std::vector< real_t >& _alphas, const std::vector< real_t >& _betas, MultishiftSolver* _multishiftSolver);
 	~RationalApproximation();
 
 	void evaluate(DiracOperator* diracOperator, extended_dirac_vector_t& output, const extended_dirac_vector_t& input);
@@ -33,6 +33,8 @@ public:
 
 	void setPrecision(const real_t& _precision);
 	real_t getPrecision() const;
+
+	MultishiftSolver* getMultishiftSolver();
 
 	void setMaximumRecursion(unsigned int maximumRecursion);
 	unsigned int getMaximumRecursion() const;

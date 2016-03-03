@@ -128,9 +128,9 @@ bool MultiGridBiConjugateGradientSolver::solve(MultiGridOperator* multiGridOpera
 
 		if (norm_r < precision && step > 4) {
 			//lastSteps = step;
-//#ifdef BICGLOG
+#ifdef BICGLOG
 			if (isOutputProcess()) std::cout << "MultiGridBiConjugateGradientSolver::Convergence in " << step << " - final error norm: " << norm_r << std::endl;
-//#endif
+#endif
 			return true;
 		}
 		//#ifdef BICGLOG
@@ -142,7 +142,9 @@ bool MultiGridBiConjugateGradientSolver::solve(MultiGridOperator* multiGridOpera
 		++step;
 	}
 
+#ifdef BICGLOG
 	if (isOutputProcess()) std::cout << "MultiGridBiConjugateGradientSolver::Failure in finding convergence in " << maxSteps << " - final error norm: " << norm_r << std::endl;
+#endif
 
 	return false;
 }

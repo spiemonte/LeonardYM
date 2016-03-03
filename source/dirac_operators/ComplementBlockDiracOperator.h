@@ -10,12 +10,14 @@
 #include "BlockDiracWilsonOperator.h"
 #include "BlockDiracOperator.h"
 #include "inverters/BiConjugateGradient.h"
+#include "inverters/GMRESR.h"
 
 namespace Update {
 
 class ComplementBlockDiracOperator : public BlockDiracOperator {
 public:
 	ComplementBlockDiracOperator(DiracOperator* _diracOperator, BlockDiracOperator* _redBlockDiracOperator, BlockDiracOperator* _blackBlockDiracOperator);
+	ComplementBlockDiracOperator(const ComplementBlockDiracOperator& toCopy);
 	//ComplementBlockDiracOperator(const extended_fermion_lattice_t& _lattice, real_t _kappa = 0.);
 	~ComplementBlockDiracOperator();
 
@@ -35,7 +37,8 @@ private:
 	DiracOperator* diracOperator;
 	BlockDiracOperator* redBlockDiracOperator;
 	BlockDiracOperator* blackBlockDiracOperator;
-	BiConjugateGradient* biConjugateGradient;
+	//BiConjugateGradient* biConjugateGradient;
+	GMRESR* gmresr;
 	reduced_dirac_vector_t tmp1;
 	reduced_dirac_vector_t tmp2;
 };

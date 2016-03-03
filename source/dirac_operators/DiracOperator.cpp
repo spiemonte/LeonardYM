@@ -29,7 +29,7 @@ DiracOperator* DiracOperator::getInstance(const std::string& name, unsigned int 
 			result->name = name;
 			return result;
 		}
-		if (name == "BasicDiracWilson") {
+		else if (name == "BasicDiracWilson") {
 			BasicDiracWilsonOperator* result = new BasicDiracWilsonOperator();
 			result->setKappa(parameters.get<double>("kappa"));
 			result->name = name;
@@ -60,7 +60,7 @@ DiracOperator* DiracOperator::getInstance(const std::string& name, unsigned int 
 			result->name = name;
 			return result;
 		}
-		if (name == "BasicDiracWilson") {
+		else if (name == "BasicDiracWilson") {
 			BasicSquareDiracWilsonOperator* result = new BasicSquareDiracWilsonOperator();
 			result->setKappa(parameters.get<double>("kappa"));
 			result->name = name;
@@ -72,6 +72,50 @@ DiracOperator* DiracOperator::getInstance(const std::string& name, unsigned int 
 		}
 	} else {
 		std::cout << "Power of the Dirac Wilson Operator not supported!" << std::endl;
+		exit(1);
+	}
+}
+
+DiracOperator* DiracOperator::getSquareRoot(DiracOperator* dirac) {
+	if (dirac->name == "DiracWilson") {
+		if (dynamic_cast<SquareDiracWilsonOperator*>(dirac)) {
+			DiracWilsonOperator* result = new DiracWilsonOperator();
+			result->setKappa(dirac->getKappa());
+			result->name = dirac->name;
+			result->lattice = dirac->lattice;
+			return result;
+		} else {
+			std::cout << "Power of the Dirac Wilson Operator not supported!" << std::endl;
+			exit(1);
+		}
+	}
+	else if (dirac->name == "Improved") {
+		if (dynamic_cast<SquareImprovedDiracWilsonOperator*>(dirac)) {
+			ImprovedDiracWilsonOperator* result = new ImprovedDiracWilsonOperator();
+			result->setKappa(dirac->getKappa());
+			result->setCSW(dynamic_cast<SquareImprovedDiracWilsonOperator*>(dirac)->getCSW());
+			result->name = dirac->name;
+			result->lattice = dirac->lattice;
+			return result;
+		} else {
+			std::cout << "Power of the Dirac Wilson Operator not supported!" << std::endl;
+			exit(1);
+		}
+	}
+	else if (dirac->name == "BasicDiracWilson") {
+		if (dynamic_cast<BasicSquareDiracWilsonOperator*>(dirac)) {
+			BasicDiracWilsonOperator* result = new BasicDiracWilsonOperator();
+			result->setKappa(dirac->getKappa());
+			result->name = dirac->name;
+			result->lattice = dirac->lattice;
+			return result;
+		} else {
+			std::cout << "Power of the Dirac Wilson Operator not supported!" << std::endl;
+			exit(1);
+		}
+	}
+	else {
+		std::cout << "Dirac Wilson Operator" << dirac->name << " not supported!" << std::endl;
 		exit(1);
 	}
 }

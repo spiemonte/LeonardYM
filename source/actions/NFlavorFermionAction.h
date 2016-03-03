@@ -58,8 +58,6 @@ private:
 	extended_dirac_vector_t* tmp_pseudofermion;
 	//The derivative of the whole action with respect to the link variables
 	extended_fermion_force_lattice_t fermionForceLattice;
-
-	MultishiftSolver* multishiftSolver;
 };
 
 } /* namespace Update */

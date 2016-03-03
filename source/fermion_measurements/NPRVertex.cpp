@@ -10,7 +10,7 @@
 #include "algebra_utils/AlgebraUtils.h"
 #include "utils/StoutSmearing.h"
 #include "utils/Gamma.h"
-#include "dirac_operators/BlockDiracWilsonOperator.h"
+#include "dirac_operators/BlockDiracOperator.h"
 #include "dirac_operators/ComplementBlockDiracOperator.h"
 #include "dirac_operators/TwistedDiracOperator.h"
 #include "dirac_operators/SAPPreconditioner.h"

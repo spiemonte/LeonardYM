@@ -25,15 +25,17 @@
 
 namespace Update {
 
-TwistedMultiStepNFlavorQCDUpdater::TwistedMultiStepNFlavorQCDUpdater() : LatticeSweep(), nFlavorQCDAction(0), gaugeAction(0), fermionAction(0), squareDiracOperator(0), diracOperator(0) { }
+TwistedMultiStepNFlavorQCDUpdater::TwistedMultiStepNFlavorQCDUpdater() : LatticeSweep(), nFlavorQCDAction(0), gaugeAction(0), fermionAction(0), squareDiracOperator(0), diracOperator(0), multishiftSolver(0) { }
 
-TwistedMultiStepNFlavorQCDUpdater::TwistedMultiStepNFlavorQCDUpdater(const TwistedMultiStepNFlavorQCDUpdater& toCopy) : LatticeSweep(toCopy), nFlavorQCDAction(0), gaugeAction(0), fermionAction(0), squareDiracOperator(0), diracOperator(0) { }
+TwistedMultiStepNFlavorQCDUpdater::TwistedMultiStepNFlavorQCDUpdater(const TwistedMultiStepNFlavorQCDUpdater& toCopy) : LatticeSweep(toCopy), nFlavorQCDAction(0), gaugeAction(0), fermionAction(0), squareDiracOperator(0), diracOperator(0), multishiftSolver(0) { }
 
 TwistedMultiStepNFlavorQCDUpdater::~TwistedMultiStepNFlavorQCDUpdater() {
 	if (nFlavorQCDAction != 0) delete nFlavorQCDAction;
+	if (multishiftSolver != 0) delete multishiftSolver;
 }
 
 void TwistedMultiStepNFlavorQCDUpdater::initializeApproximations(environment_t& environment) {
+	if (multishiftSolver == 0) multishiftSolver = MultishiftSolver::getInstance("minimal_residual");
 	real_t twist = environment.configurations.get< real_t >("twisted_mass_squared");
 	//First take the rational function approximation for the heatbath step
 	if (rationalApproximationsHeatBath.empty()) {
@@ -47,7 +49,7 @@ void TwistedMultiStepNFlavorQCDUpdater::initializeApproximations(environment_t& 
 				betas[i] += twist;
 			}
 
-			RationalApproximation rational;
+			RationalApproximation rational(multishiftSolver);
 			rational.setAlphas(std::vector<real_t>(rat.begin(), rat.begin() + rat.size()/2));
 			rational.setBetas(betas);
 			rational.setPrecision(environment.configurations.get<double>("metropolis_inverter_precision"));
@@ -69,7 +71,7 @@ void TwistedMultiStepNFlavorQCDUpdater::initializeApproximations(environment_t& 
 				betas[i] += twist;
 			}
 
-			RationalApproximation rational;
+			RationalApproximation rational(multishiftSolver);
 			rational.setAlphas(std::vector<real_t>(rat.begin(), rat.begin() + rat.size()/2));
 			rational.setBetas(betas);
 			rational.setPrecision(environment.configurations.get<double>("metropolis_inverter_precision"));
@@ -93,7 +95,7 @@ void TwistedMultiStepNFlavorQCDUpdater::initializeApproximations(environment_t& 
 					betas[i] += twist;
 				}
 
-				RationalApproximation rational;
+				RationalApproximation rational(multishiftSolver);
 				rational.setAlphas(std::vector<real_t>(rat.begin(), rat.begin() + rat.size()/2));
 				rational.setBetas(betas);
 				rational.setPrecision(environment.configurations.get<double>("force_inverter_precision"));

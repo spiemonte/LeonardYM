@@ -8,10 +8,10 @@ endif
 
 CC       = gcc
 CPP      = g++
-OPTIMIZE = -O2 -Wall -Wextra -pipe -fopenmp 
+OPTIMIZE = -O1 -g -Wall -Wextra -pipe #-fopenmp 
 INC	= -I./extra_libs/Eigen -I./extra_libs/ -I./source/ -I/home/pis52920/local/usr/include/
 CFLAGS   = $(OPTIMIZE) $(INC)
-CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/utils/MatrixBaseExtension.h\"" -DNUMCOLORS=$(nc) -DMULTITHREADING $(adj) -DEIGEN
+CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/utils/MatrixBaseExtension.h\"" -DNUMCOLORS=$(nc) $(adj) -DEIGEN #-DMULTITHREADING
 
 include Makefile.obj.mk
 

@@ -25,21 +25,23 @@
 
 namespace Update {
 
-NFlavorQCDUpdater::NFlavorQCDUpdater() : LatticeSweep(), nFlavorQCDAction(0), gaugeAction(0), fermionAction(0), squareDiracOperator(0), diracOperator(0) { }
+NFlavorQCDUpdater::NFlavorQCDUpdater() : LatticeSweep(), nFlavorQCDAction(0), gaugeAction(0), fermionAction(0), squareDiracOperator(0), diracOperator(0), multishiftSolver(0) { }
 
-NFlavorQCDUpdater::NFlavorQCDUpdater(const NFlavorQCDUpdater& toCopy) : LatticeSweep(toCopy), nFlavorQCDAction(0), gaugeAction(0), fermionAction(0), squareDiracOperator(0), diracOperator(0) { }
+NFlavorQCDUpdater::NFlavorQCDUpdater(const NFlavorQCDUpdater& toCopy) : LatticeSweep(toCopy), nFlavorQCDAction(0), gaugeAction(0), fermionAction(0), squareDiracOperator(0), diracOperator(0), multishiftSolver(0) { }
 
 NFlavorQCDUpdater::~NFlavorQCDUpdater() {
 	if (nFlavorQCDAction != 0) delete nFlavorQCDAction;
+	if (multishiftSolver != 0) delete multishiftSolver;
 }
 
 void NFlavorQCDUpdater::initializeApproximations(environment_t& environment) {
+	if (multishiftSolver == 0) multishiftSolver = MultishiftSolver::getInstance("minimal_residual");
 	//First take the rational function approximation for the heatbath step
 	if (rationalApproximationsHeatBath.empty()) {
 		int numberPseudofermions = environment.configurations.get< unsigned int >("number_pseudofermions");
 		for (int i = 1; i <= numberPseudofermions; ++i) {
 			std::vector<real_t> rat = environment.configurations.get< std::vector<real_t> >(std::string("heatbath_rational_fraction_")+toString(i));
-			RationalApproximation rational;
+			RationalApproximation rational(multishiftSolver);
 			rational.setAlphas(std::vector<real_t>(rat.begin(), rat.begin() + rat.size()/2));
 			rational.setBetas(std::vector<real_t>(rat.begin() + rat.size()/2, rat.end()));
 			rational.setPrecision(environment.configurations.get<double>("metropolis_inverter_precision"));
@@ -54,7 +56,7 @@ void NFlavorQCDUpdater::initializeApproximations(environment_t& environment) {
 		int numberPseudofermions = environment.configurations.get< unsigned int >("number_pseudofermions");
 		for (int i = 1; i <= numberPseudofermions; ++i) {
 			std::vector<real_t> rat = environment.configurations.get< std::vector<real_t> >(std::string("metropolis_rational_fraction_")+toString(i));
-			RationalApproximation rational;
+			RationalApproximation rational(multishiftSolver);
 			rational.setAlphas(std::vector<real_t>(rat.begin(), rat.begin() + rat.size()/2));
 			rational.setBetas(std::vector<real_t>(rat.begin() + rat.size()/2, rat.end()));
 			rational.setPrecision(environment.configurations.get<double>("metropolis_inverter_precision"));
@@ -68,7 +70,7 @@ void NFlavorQCDUpdater::initializeApproximations(environment_t& environment) {
 		int numberPseudofermions = environment.configurations.get< unsigned int >("number_pseudofermions");
 		for (int i = 1; i <= numberPseudofermions; ++i) {
 			std::vector<real_t> rat = environment.configurations.get< std::vector<real_t> >(std::string("force_rational_fraction_")+toString(i));
-			RationalApproximation rational;
+			RationalApproximation rational(multishiftSolver);
 			rational.setAlphas(std::vector<real_t>(rat.begin(), rat.begin() + rat.size()/2));
 			rational.setBetas(std::vector<real_t>(rat.begin() + rat.size()/2, rat.end()));
 			rational.setPrecision(environment.configurations.get<double>("force_inverter_precision"));

@@ -23,8 +23,8 @@ typedef Lattice::Lattice<short int, Lattice::LocalLayout > reduced_index_lattice
 
 class BlockDiracOperator : public DiracOperator {
 public:
-	BlockDiracOperator(Color _color = Black);
-	BlockDiracOperator(const extended_fermion_lattice_t& _lattice, real_t _kappa, Color _color = Black);
+	BlockDiracOperator(Color _color = Black, real_t _twist = 0.);
+	BlockDiracOperator(const extended_fermion_lattice_t& _lattice, real_t _kappa, Color _color = Black, real_t _twist = 0.);
 	~BlockDiracOperator();
 
 	static BlockDiracOperator* getInstance(const std::string& name, unsigned int power, const StorageParameters& parameters, Color _color = Black);
@@ -33,12 +33,15 @@ public:
 	std::vector<unsigned int> getBlockSize() const;
 
 	void project(reduced_dirac_vector_t& output);
+
+	void setTwist(real_t _twist);
 protected:
 	int xBlockSize;
 	int yBlockSize;
 	int zBlockSize;
 	int tBlockSize;
 	Color color;
+	real_t twist;
 	
 	reduced_index_lattice_t index_lattice;
 	void initialize_index_lattice();

@@ -12,11 +12,11 @@
 
 namespace Update {
 
-BlockDiracOperator::BlockDiracOperator(Color _color) : DiracOperator(), xBlockSize(6), yBlockSize(6), zBlockSize(6), tBlockSize(6), color(_color) {
+BlockDiracOperator::BlockDiracOperator(Color _color, real_t _twist) : DiracOperator(), xBlockSize(6), yBlockSize(6), zBlockSize(6), tBlockSize(6), color(_color), twist(_twist) {
 	this->initialize_index_lattice();
 }
 
-BlockDiracOperator::BlockDiracOperator(const extended_fermion_lattice_t& _lattice, real_t _kappa, Color _color) : DiracOperator(_lattice, _kappa), xBlockSize(6), yBlockSize(6), zBlockSize(6), tBlockSize(6), color(_color) {
+BlockDiracOperator::BlockDiracOperator(const extended_fermion_lattice_t& _lattice, real_t _kappa, Color _color, real_t _twist) : DiracOperator(_lattice, _kappa), xBlockSize(6), yBlockSize(6), zBlockSize(6), tBlockSize(6), color(_color), twist(_twist) {
 	this->initialize_index_lattice();
 }
 
@@ -95,6 +95,10 @@ void BlockDiracOperator::initialize_index_lattice() {
 		else this->index_lattice[site] = 0;
 	}
 	index_lattice.updateHalo();
+}
+
+void BlockDiracOperator::setTwist(real_t _twist) {
+	twist = _twist;
 }
 
 } /* namespace Update */

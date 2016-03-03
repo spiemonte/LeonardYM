@@ -40,14 +40,11 @@ NFlavorFermionAction::NFlavorFermionAction(DiracOperator* _squareDiracOperator, 
 		}
 	}
 	if (tmp_pseudofermion == 0) tmp_pseudofermion = new extended_dirac_vector_t;
-
-	multishiftSolver = MultishiftSolver::getInstance("minimal_residual");
 }
 
 NFlavorFermionAction::~NFlavorFermionAction() {
 	delete squareDiracOperator;
 	delete fermionForce;
-	delete multishiftSolver;
 }
 
 GaugeGroup NFlavorFermionAction::force(const environment_t& env, int site, int mu) const {
@@ -87,17 +84,14 @@ void NFlavorFermionAction::updateForce(extended_gauge_lattice_t& forceLattice, c
 	diracOperator->setLattice(env.getFermionLattice());
 	squareDiracOperator->setLattice(env.getFermionLattice());
 	fermionForce->setLattice(env.getFermionLattice());
-	//Take the multi-shift solver
-	multishiftSolver->setPrecision(forcePrecision);
-	multishiftSolver->setMaxSteps(maxIterations);
 	//Solve the dirac equation for all the pseudofermions
 	std::vector< std::vector<extended_dirac_vector_t> >::iterator x = Xs.begin();
 	std::vector< std::vector<extended_dirac_vector_t> >::iterator y = Ys.begin();
 	std::vector<extended_dirac_vector_t*>::const_iterator pseudofermion = pseudofermions.begin();
-	std::vector<RationalApproximation>::const_iterator i;
+	std::vector<RationalApproximation>::iterator i;
 	for (i = rationalApproximations.begin(); i != rationalApproximations.end(); ++i) {
 		//Solve the dirac equation for all the shifts
-		multishiftSolver->solve(squareDiracOperator, *(*pseudofermion), *x, i->getBetas());
+		i->getMultishiftSolver()->solve(squareDiracOperator, *(*pseudofermion), *x, i->getBetas());
 		std::vector<extended_dirac_vector_t>::const_iterator j;
 		std::vector<extended_dirac_vector_t>::iterator k;
 		for (j = x->begin(), k = y->begin(); j != x->end(); ++j, ++k) {

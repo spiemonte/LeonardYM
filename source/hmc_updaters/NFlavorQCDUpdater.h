@@ -53,6 +53,8 @@ protected:
 	//The dirac operators for the theory
 	DiracOperator* squareDiracOperator;
 	DiracOperator* diracOperator;
+	//The multishift solver
+	MultishiftSolver* multishiftSolver;
 };
 
 } /* namespace Update */

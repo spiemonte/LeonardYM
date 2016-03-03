@@ -100,6 +100,9 @@ MultishiftSolver.o: ./source/inverters/MultishiftSolver.h ./source/inverters/Mul
 ChronologicalMultishiftSolver.o: ./source/inverters/ChronologicalMultishiftSolver.h ./source/inverters/ChronologicalMultishiftSolver.cpp
 	$(CPP) $(CPPFLAGS) -c -o ChronologicalMultishiftSolver.o ./source/inverters/ChronologicalMultishiftSolver.cpp
 
+MultiGridMEMultishiftSolver.o: ./source/inverters/MultiGridMEMultishiftSolver.h ./source/inverters/MultiGridMEMultishiftSolver.cpp
+	$(CPP) $(CPPFLAGS) -c -o MultiGridMEMultishiftSolver.o ./source/inverters/MultiGridMEMultishiftSolver.cpp
+
 DeflationInverter.o: ./source/inverters/DeflationInverter.h ./source/inverters/DeflationInverter.cpp
 	$(CPP) $(CPPFLAGS) -c -o DeflationInverter.o ./source/inverters/DeflationInverter.cpp
 

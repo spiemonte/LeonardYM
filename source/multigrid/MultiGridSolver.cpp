@@ -5,18 +5,18 @@
 
 namespace Update {
 
-MultiGridSolver::MultiGridSolver(int basisDimension, const std::vector<unsigned int>& _blockSize, BlockDiracOperator* _blackBlockDiracOperator, BlockDiracOperator* _redBlockDiracOperator) : Solver("MultiGridSolver"), blockBasis(basisDimension), blockSize(_blockSize), blackBlockDiracOperator(_blackBlockDiracOperator), redBlockDiracOperator(_redBlockDiracOperator), K(0), biMgSolver(new MultiGridBiConjugateGradientSolver()), SAPIterantions(7), SAPMaxSteps(100), SAPPrecision(0.00001), GMRESIterations(300), GMRESPrecision(0.0000000001), BiMGIterations(35), BiMGPrecision(0.00000000001) { }
+MultiGridSolver::MultiGridSolver(int basisDimension, const std::vector<unsigned int>& _blockSize, BlockDiracOperator* _blackBlockDiracOperator, BlockDiracOperator* _redBlockDiracOperator) : Solver("MultiGridSolver"), blockBasis(basisDimension), blockSize(_blockSize), blackBlockDiracOperator(_blackBlockDiracOperator), redBlockDiracOperator(_redBlockDiracOperator), biMgSolver(new MultiGridBiConjugateGradientSolver()), SAPIterantions(7), SAPMaxSteps(100), SAPPrecision(0.00001), GMRESIterations(300), GMRESPrecision(0.0000000001), BiMGIterations(35), BiMGPrecision(0.00000000001) { }
 
 bool MultiGridSolver::solve(DiracOperator* dirac, const reduced_dirac_vector_t& source, reduced_dirac_vector_t& solution, reduced_dirac_vector_t const* initial_guess) {
 	blackBlockDiracOperator->setLattice(*dirac->getLattice());
 	blackBlockDiracOperator->setGamma5(false);
-	blackBlockDiracOperator->setBlockSize(blockSize);
+	//blackBlockDiracOperator->setBlockSize(blockSize);
 		
 	redBlockDiracOperator->setLattice(*dirac->getLattice());
 	redBlockDiracOperator->setGamma5(false);
-	redBlockDiracOperator->setBlockSize(blockSize);
-		
-	K = new ComplementBlockDiracOperator(dirac, redBlockDiracOperator, blackBlockDiracOperator);
+	//redBlockDiracOperator->setBlockSize(blockSize);
+	
+	ComplementBlockDiracOperator* K = new ComplementBlockDiracOperator(dirac, redBlockDiracOperator, blackBlockDiracOperator);
 	K->setMaximumSteps(SAPMaxSteps);
 	K->setBlockSize(blockSize);
 
@@ -168,13 +168,13 @@ void MultiGridSolver::initializeBasis(DiracOperator* dirac) {
 	blackBlockDiracOperator->setLattice(*dirac->getLattice());
 	blackBlockDiracOperator->setGamma5(false);
 	blackBlockDiracOperator->setBlockSize(blockSize);
-		
+	
 	redBlockDiracOperator->setLattice(*dirac->getLattice());
 	redBlockDiracOperator->setGamma5(false);
 	redBlockDiracOperator->setBlockSize(blockSize);
-		
-	K = new ComplementBlockDiracOperator(dirac, redBlockDiracOperator, blackBlockDiracOperator);
-	K->setMaximumSteps(205);
+	
+	ComplementBlockDiracOperator* K = new ComplementBlockDiracOperator(dirac, redBlockDiracOperator, blackBlockDiracOperator);
+	K->setMaximumSteps(SAPMaxSteps);
 	K->setBlockSize(blockSize);
 
 	SAPPreconditioner *preconditioner = new SAPPreconditioner(dirac,K);
@@ -192,6 +192,60 @@ void MultiGridSolver::initializeBasis(DiracOperator* dirac) {
 
 		//We give random vector as initial guess to solve the omogeneous system
 		gmres_inverter->solve(dirac, zeroVector, tmp, preconditioner, &randomVector);
+		gmres_inverter->solve(dirac, tmp, blockBasis[i], preconditioner);
+		//gmres_inverter->solve(dirac, blockBasis[i], tmp, preconditioner);
+		//gmres_inverter->solve(dirac, tmp, blockBasis[i], preconditioner);
+		
+		dirac->multiply(randomVector, blockBasis[i]);
+		
+		long_real_t deficit = AlgebraUtils::squaredNorm(randomVector)/AlgebraUtils::squaredNorm(blockBasis[i]);
+		if (isOutputProcess()) std::cout << "MultiGridSolver::Deficit for the basis vector " << i << " " << sqrt(deficit) << std::endl;
+	}
+
+	blockBasis.orthogonalize();
+
+	clock_gettime(CLOCK_REALTIME, &finish);
+	elapsed = (finish.tv_sec - start.tv_sec);
+	elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+
+	if (isOutputProcess()) std::cout << "MultiGridSolver::Multigrid basis constructed in: " << (elapsed) << " s."<< std::endl;
+
+	delete gmres_inverter;
+	delete K;
+	delete preconditioner;
+}
+
+void MultiGridSolver::updateBasis(DiracOperator* dirac) {
+	reduced_dirac_vector_t zeroVector, tmp;
+	AlgebraUtils::setToZero(zeroVector);
+	reduced_dirac_vector_t randomVector;
+	GMRESR* gmres_inverter = new GMRESR();
+	gmres_inverter->setPrecision(GMRESPrecision);
+	gmres_inverter->setMaximumSteps(GMRESIterations/5+1);
+
+	blackBlockDiracOperator->setLattice(*dirac->getLattice());
+	blackBlockDiracOperator->setGamma5(false);
+	blackBlockDiracOperator->setBlockSize(blockSize);
+		
+	redBlockDiracOperator->setLattice(*dirac->getLattice());
+	redBlockDiracOperator->setGamma5(false);
+	redBlockDiracOperator->setBlockSize(blockSize);
+	
+	ComplementBlockDiracOperator* K = new ComplementBlockDiracOperator(dirac, redBlockDiracOperator, blackBlockDiracOperator);
+	K->setMaximumSteps(SAPMaxSteps);
+	K->setBlockSize(blockSize);
+
+	SAPPreconditioner *preconditioner = new SAPPreconditioner(dirac,K);
+	preconditioner->setSteps(SAPIterantions);
+	preconditioner->setPrecision(SAPPrecision);
+
+	struct timespec start, finish;
+	double elapsed;
+	clock_gettime(CLOCK_REALTIME, &start);
+		
+	for (int i = 0; i < blockBasis.size(); i += 1) {
+		//We give random vector as initial guess to solve the omogeneous system
+		gmres_inverter->solve(dirac, zeroVector, tmp, preconditioner, &blockBasis[i]);
 		gmres_inverter->solve(dirac, tmp, blockBasis[i], preconditioner);
 		//gmres_inverter->solve(dirac, blockBasis[i], tmp, preconditioner);
 		//gmres_inverter->solve(dirac, tmp, blockBasis[i], preconditioner);
@@ -265,6 +319,12 @@ unsigned int MultiGridSolver::getBasisDimension() const {
 	
 BlockBasis* MultiGridSolver::getBasis() {
 	return &blockBasis;
+}
+
+void MultiGridSolver::setBlockDiracOperators(BlockDiracOperator* _blackBlockDiracOperator, BlockDiracOperator* _redBlockDiracOperator) {
+	blackBlockDiracOperator = _blackBlockDiracOperator;
+	redBlockDiracOperator = _redBlockDiracOperator;
+	
 }
 
 }

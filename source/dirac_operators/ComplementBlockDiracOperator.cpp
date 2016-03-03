@@ -13,13 +13,20 @@
 
 namespace Update {
 
-ComplementBlockDiracOperator::ComplementBlockDiracOperator(DiracOperator* _diracOperator, BlockDiracOperator* _redBlockDiracOperator, BlockDiracOperator* _blackBlockDiracOperator) : BlockDiracOperator(), diracOperator(_diracOperator), redBlockDiracOperator(_redBlockDiracOperator), blackBlockDiracOperator(_blackBlockDiracOperator), biConjugateGradient(new BiConjugateGradient()) {
-	biConjugateGradient->setPrecision(0.00000001);
+ComplementBlockDiracOperator::ComplementBlockDiracOperator(DiracOperator* _diracOperator, BlockDiracOperator* _redBlockDiracOperator, BlockDiracOperator* _blackBlockDiracOperator) : BlockDiracOperator(), diracOperator(_diracOperator), redBlockDiracOperator(_redBlockDiracOperator), blackBlockDiracOperator(_blackBlockDiracOperator), gmresr(new GMRESR()) { //biConjugateGradient(new BiConjugateGradient()) {
+	//biConjugateGradient->setPrecision(0.00000001);
+	gmresr->setPrecision(0.00000001);
+}
+
+ComplementBlockDiracOperator::ComplementBlockDiracOperator(const ComplementBlockDiracOperator& toCopy) : BlockDiracOperator(toCopy), diracOperator(toCopy.diracOperator), redBlockDiracOperator(toCopy.redBlockDiracOperator), blackBlockDiracOperator(toCopy.blackBlockDiracOperator), gmresr(new GMRESR()) {
+	gmresr->setPrecision(0.00000001);
 }
 
 ComplementBlockDiracOperator::~ComplementBlockDiracOperator() {
-	delete biConjugateGradient;
-	biConjugateGradient = 0;
+	//delete biConjugateGradient;
+	//biConjugateGradient = 0;
+	delete gmresr;
+	gmresr = 0;
 }
 
 void ComplementBlockDiracOperator::multiply(reduced_dirac_vector_t& output, const reduced_dirac_vector_t& input) {
@@ -27,7 +34,8 @@ void ComplementBlockDiracOperator::multiply(reduced_dirac_vector_t& output, cons
 	int steps = 0;
 #endif
 	
-	biConjugateGradient->solve(redBlockDiracOperator, input, tmp1);
+	//biConjugateGradient->solve(redBlockDiracOperator, input, tmp1);
+	gmresr->solve(redBlockDiracOperator, input, tmp1);
 	tmp1.updateHalo();
 	redBlockDiracOperator->project(tmp1);
 
@@ -42,7 +50,8 @@ void ComplementBlockDiracOperator::multiply(reduced_dirac_vector_t& output, cons
 			tmp2[site][mu] = input[site][mu] - tmp2[site][mu];
 		}
 	}
-	biConjugateGradient->solve(blackBlockDiracOperator, tmp2, output);
+	//biConjugateGradient->solve(blackBlockDiracOperator, tmp2, output);
+	gmresr->solve(blackBlockDiracOperator, tmp2, output);
 	output.updateHalo();
 	blackBlockDiracOperator->project(output);
 	
@@ -101,11 +110,11 @@ void ComplementBlockDiracOperator::setKappa(real_t _kappa) {
 }
 
 void ComplementBlockDiracOperator::setPrecision(double precision) {
-	biConjugateGradient->setPrecision(precision);
+	gmresr->setPrecision(precision);
 }
 
 void ComplementBlockDiracOperator::setMaximumSteps(int steps) {
-	biConjugateGradient->setMaximumSteps(steps);
+	gmresr->setMaximumSteps(steps);
 }
 
 } /* namespace Update */
