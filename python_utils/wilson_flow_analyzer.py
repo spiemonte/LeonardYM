@@ -63,7 +63,7 @@ if folder == "":
 print "Skipping ", init, " initial configurations as thermalization"
 print "Using ", blocking," blocking levels"
 print "The scale will be set at the reference value ", reference, " (use --reference to change it)"
-print "A polynomial lest square of order ", order, " will be used (use --order to change it)"
+print "A polynomial least square of order ", order, " will be used (use --order to change it)"
 print " fitting ", 2*delta + 1, " points (use --delta to change it)"
 print "The error will be estimated with ", number_boot_resamplings, " bootstrapping resamplings (use --number_boot_resamplings to change it)"
 

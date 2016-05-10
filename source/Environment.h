@@ -51,6 +51,10 @@ typedef Lattice::Lattice<Update::GaugeGroup, Lattice::MpiLayout<Lattice::Extende
 typedef Lattice::Lattice<Update::GaugeGroup, Lattice::MpiLayout<Lattice::StandardStencil> > standard_matrix_lattice_t;
 typedef Lattice::Lattice<Update::GaugeGroup, Lattice::MpiLayout<Lattice::ReducedStencil> > reduced_matrix_lattice_t;
 
+typedef Lattice::Lattice<Update::GaugeVector, Lattice::MpiLayout<Lattice::ExtendedStencil> > extended_color_vector_t;
+typedef Lattice::Lattice<Update::GaugeVector, Lattice::MpiLayout<Lattice::StandardStencil> > standard_color_vector_t;
+typedef Lattice::Lattice<Update::GaugeVector, Lattice::MpiLayout<Lattice::ReducedStencil> > reduced_color_vector_t;
+
 typedef Lattice::Lattice<int[4], Lattice::MpiLayout<Lattice::ExtendedStencil> > extended_index_lattice_t;
 
 #endif
@@ -89,6 +93,10 @@ typedef Lattice::Lattice<Update::FermionicGroup[6], Lattice::LocalLayout > reduc
 typedef Lattice::Lattice<Update::GaugeGroup, Lattice::LocalLayout > extended_matrix_lattice_t;
 typedef Lattice::Lattice<Update::GaugeGroup, Lattice::LocalLayout > standard_matrix_lattice_t;
 typedef Lattice::Lattice<Update::GaugeGroup, Lattice::LocalLayout > reduced_matrix_lattice_t;
+
+typedef Lattice::Lattice<Update::GaugeVector, Lattice::LocalLayout > extended_color_vector_t;
+typedef Lattice::Lattice<Update::GaugeVector, Lattice::LocalLayout > standard_color_vector_t;
+typedef Lattice::Lattice<Update::GaugeVector, Lattice::LocalLayout > reduced_color_vector_t;
 
 typedef Lattice::Lattice<int[4], Lattice::LocalLayout > extended_index_lattice_t;
 

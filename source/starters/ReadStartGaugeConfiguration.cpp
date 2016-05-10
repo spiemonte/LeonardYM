@@ -287,6 +287,186 @@ void ReadStartGaugeConfiguration::readConfiguration(environment_t& environment, 
 		xdr_destroy( &xin);
 		fclose(fin);
 #endif
+#if NUMCOLORS == 3
+		std::string directory = environment.configurations.get<std::string>("input_directory_configurations");
+		std::string input_name = environment.configurations.get<std::string>("input_name");
+
+		std::string filename = directory + input_name + ".config-" + toString(numberfile);
+
+		FILE* fin(NULL);
+
+
+		fin = fopen(filename.c_str(), "r");
+
+		if (!fin) {
+			if (isOutputProcess()) std::cout << "ReadStartGaugeConfiguration::File " << filename << " impossible to read!" << std::endl;
+			exit(13);
+		}
+
+
+		//initialisation of xdr
+		XDR xin;
+		xdrstdio_create(&xin, fin, XDR_DECODE);
+
+		//read fundamental gauge field
+		int red = 0;
+
+		for (int t = 0; t < Layout::glob_t; ++t) {
+			for (int z = 0; z < Layout::glob_z; ++z) {
+				for (int y = 0; y < Layout::glob_y; ++y) {
+					for (int x = 0; x < Layout::glob_x; ++x) {
+						int globsite = Layout::getGlobalCoordinate(x,y,z,t);
+#ifndef ENABLE_MPI
+						GaugeGroup mt;
+						for (size_t mu = 0; mu < 4; ++mu) {
+							for (size_t ii = 0; ii < 3; ++ii) {
+								for (size_t jj = 0; jj < 2; ++jj) {
+									float tmp, tmp2;
+									red += xdr_float(&xin, &tmp);
+									red += xdr_float(&xin, &tmp2);
+									/** Assuming now Istvans format with U^* saved insted of U*/
+									mt.at(ii,jj) = std::complex<real_t>(tmp, -tmp2);
+								}
+							}
+							
+							{
+         							const std::complex<real_t> temp = 1.0 / sqrt(absq(mt(0,0)) + absq(mt(1,0)) + absq(mt(2,0)));
+								mt(0,0) *= temp;
+								mt(1,0) *= temp;
+								mt(2,0) *= temp;
+							}
+
+							{
+								const std::complex<real_t> temp = mt(0,1) * conj(mt(0,0)) + mt(1,1) * conj(mt(1,0)) + mt(2,1) * conj(mt(2,0));
+								mt(0,1) -= temp * mt(0,0);
+								mt(1,1) -= temp * mt(1,0);
+								mt(2,1) -= temp * mt(2,0);
+							}
+
+							{
+								const std::complex<real_t> temp = 1.0 / sqrt(absq(mt(0,1)) + absq(mt(1,1)) + absq(mt(2,1)));
+								mt(0,1) *= temp;
+								mt(1,1) *= temp;
+ 								mt(2,1) *= temp;
+							}
+
+							mt(0,2) = conj(mt(1,0)) * conj(mt(2,1)) - conj(mt(2,0)) * conj(mt(1,1));
+							mt(1,2) = conj(mt(2,0)) * conj(mt(0,1)) - conj(mt(0,0)) * conj(mt(2,1));
+							mt(2,2) = conj(mt(0,0)) * conj(mt(1,1)) - conj(mt(1,0)) * conj(mt(0,1));
+
+							environment.gaugeLinkConfiguration[globsite][mu] = mt;
+						}
+#endif
+#ifdef ENABLE_MPI
+						int localsite = Layout::localIndex[globsite];
+						if (localsite != -1) {
+							GaugeGroup mt;
+							for (size_t mu = 0; mu < 4; ++mu) {
+								for (size_t ii = 0; ii < 3; ++ii) {
+									for (size_t jj = 0; jj < 2; ++jj) {
+										float tmp, tmp2;
+										red += xdr_float(&xin, &tmp);
+										red += xdr_float(&xin, &tmp2);
+										/** Assuming now Istvans format with U^* saved insted of U*/
+										mt.at(ii,jj) = std::complex<real_t>(tmp, -tmp2);
+									}
+								}
+							
+								{
+         								const std::complex<real_t> temp = 1.0 / sqrt(absq(mt(0,0)) + absq(mt(1,0)) + absq(mt(2,0)));
+									mt(0,0) *= temp;
+									mt(1,0) *= temp;
+									mt(2,0) *= temp;
+								}
+
+								{
+									const std::complex<real_t> temp = mt(0,1) * conj(mt(0,0)) + mt(1,1) * conj(mt(1,0)) + mt(2,1) * conj(mt(2,0));
+									mt(0,1) -= temp * mt(0,0);
+									mt(1,1) -= temp * mt(1,0);
+									mt(2,1) -= temp * mt(2,0);
+								}
+
+								{
+									const std::complex<real_t> temp = 1.0 / sqrt(absq(mt(0,1)) + absq(mt(1,1)) + absq(mt(2,1)));
+									mt(0,1) *= temp;
+									mt(1,1) *= temp;
+ 									mt(2,1) *= temp;
+								}
+
+								mt(0,2) = conj(mt(1,0)) * conj(mt(2,1)) - conj(mt(2,0)) * conj(mt(1,1));
+								mt(1,2) = conj(mt(2,0)) * conj(mt(0,1)) - conj(mt(0,0)) * conj(mt(2,1));
+								mt(2,2) = conj(mt(0,0)) * conj(mt(1,1)) - conj(mt(1,0)) * conj(mt(0,1));
+								environment.gaugeLinkConfiguration[localsite][mu] = mt;
+							}
+						}
+						else {
+							for (size_t mu = 0; mu < 4; ++mu) {
+								for (size_t ii = 0; ii < 6; ++ii) {
+									float tmp, tmp2;
+									red += xdr_float(&xin, &tmp);
+									red += xdr_float(&xin, &tmp2);
+								}
+							}
+						}
+#endif
+					}
+				}
+			}
+		}
+
+
+
+
+		// - check if the number of read fields is correct - reading failure if not
+		if (isOutputProcess()) {
+			if (red != 48 * Layout::globalVolume) {
+				std::cout << " read error for gauge fields on lattice " << ": " << red << std::endl;
+			}
+			else {
+				std::cout << "ReadStartGaugeConfiguration::Finished reading " << red / 4 << " gauge fields" << std::endl;
+				std::cout << "ReadStartGaugeConfiguration::From file " << filename << std::endl;
+			}
+
+			/// - read the global lattice extend and lvrco
+          		int lato[4];
+
+         		for (int ii(0); ii < 4; ++ii) xdr_int(&xin, &lato[ii]);
+
+          		double beto(0.0);
+          		xdr_double(&xin, &beto);
+
+     			double c1(0.0);
+          		xdr_double(&xin, &c1);
+
+         		std::cout << "ReadStartGaugeConfiguration::Beta and c1 values (not checked) beta=" << beto << " c1=" << c1 << std::endl;
+
+			// - compare read parameters to the ones in measureconfig.dat / Stop program if they are not the same (This is first done directly on the master node without communication of all the paramters)
+			// - test for lattice size - new included: reading failure if given incorrect
+			if (static_cast<int>(lato[0]) != Layout::glob_x
+					|| static_cast<int>(lato[1]) != Layout::glob_y
+					|| static_cast<int>(lato[2]) != Layout::glob_z
+					|| static_cast<int>(lato[3]) != Layout::glob_t) {
+				if (isOutputProcess()) std::cout << "Lattice size is different:\n" << lato[0] << " " << lato[1] << " "
+						<< lato[2] << " " << lato[3] << "\n" << Layout::glob_x << " "
+						<< Layout::glob_y << " " << Layout::glob_z << " "
+						<< Layout::glob_t;
+			}
+
+			double plaq(0.0);
+			if (xdr_double(&xin, &plaq)) {
+				read_plaquette = plaq;
+			}
+			else {
+				std::cout << "ReadStartGaugeConfiguration::Warning, no temporal plaquette value found!" << std::endl;
+			}
+			
+
+		} // on of Io node only
+
+		xdr_destroy( &xin);
+		fclose(fin);
+		
+#endif
 	}
 	environment.gaugeLinkConfiguration.updateHalo();
 	environment.synchronize();

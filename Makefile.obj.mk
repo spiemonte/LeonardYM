@@ -11,6 +11,7 @@ OBJECTS  = ReducedStencil.o StandardStencil.o ExtendedStencil.o LocalLayout.o \
 			GaugeForce.o GaugeAction.o WilsonGaugeAction.o ImprovedGaugeAction.o \
 			ReUnit.o StoutSmearing.o Gamma.o \
 			RandomSeed.o \
+			GaugeFixing.o LandauGaugeFixing.o MaximalAbelianGaugeFixing.o MaximalAbelianProjection.o \
 			Glueball.o \
 			Plaquette.o PolyakovLoop.o PolyakovLoopEigenvalues.o PolyakovLoopCorrelator.o AdjointPolyakovLoop.o WilsonLoop.o GaugeEnergy.o \
 			GlobalOutput.o OutputSweep.o \

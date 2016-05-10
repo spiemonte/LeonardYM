@@ -179,6 +179,15 @@ public:
 #endif
 	}
 
+	template<typename dirac_vector_t> static void conjugate(dirac_vector_t& output, const dirac_vector_t& input) {
+#pragma omp parallel for
+		for (int site = 0; site < input.completesize; ++site) {
+			for (unsigned int mu = 0; mu < 4; ++mu) {
+				for (unsigned int c = 0; c < diracVectorLength; ++c) output[site][mu][c] = conj(input[site][mu][c]);
+			}
+		}
+	}
+
 	/**
 	 * This function returns back the dot product of two dirac_vector
 	 * \return vector1.vector.2
@@ -231,6 +240,23 @@ public:
 		reduceAllSum(result_re);
 		reduceAllSum(result_im);
 		return std::complex<long_real_t>(result_re, result_im);*/
+	}
+
+	template<typename dirac_vector_t> static std::complex<long_real_t> real_dot(const dirac_vector_t& vector1, const dirac_vector_t& vector2) {
+		long_real_t result_re = 0.;
+		long_real_t result_im = 0.;
+#pragma omp parallel for reduction(+:result_re, result_im)
+		for (int site = 0; site < vector1.localsize; ++site) {
+			for (unsigned int mu = 0; mu < 4; ++mu) {
+				complex partial(0.);
+				for (unsigned int c = 0; c < diracVectorLength; ++c) partial += vector1[site][mu][c]*vector2[site][mu][c];
+				result_re += real(partial);
+				result_im += imag(partial);
+			}
+		}
+		reduceAllSum(result_re);
+		reduceAllSum(result_im);
+		return std::complex<long_real_t>(result_re, result_im);
 	}
 
 	/**

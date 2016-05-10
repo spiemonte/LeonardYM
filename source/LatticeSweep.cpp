@@ -26,6 +26,9 @@
 #include "polyakov_loops/PolyakovLoop.h"
 #include "correlators/Glueball.h"
 #include "utils/ReUnit.h"
+#include "utils/LandauGaugeFixing.h"
+#include "utils/MaximalAbelianGaugeFixing.h"
+#include "utils/MaximalAbelianProjection.h"
 #include "hmc_updaters/BandTwoFlavorUpdater.h"
 #include "pure_gauge/PureGaugeWilsonLoops.h"
 #include "tests/TestCommunication.h"
@@ -113,6 +116,12 @@ LatticeSweep* LatticeSweep::getInstance(const std::string& name) {
 		return new XSpaceCorrelators();
 	} else if (name == "NPRVertex") {
 		return new NPRVertex();
+	} else if (name == "LandauGaugeFixing") {
+		return new LandauGaugeFixing();
+	} else if (name == "MaximalAbelianGaugeFixing") {
+		return new MaximalAbelianGaugeFixing();
+	} else if (name == "MaximalAbelianProjection") {
+		return new MaximalAbelianProjection();
 	}
 	else {
 		if (isOutputProcess()) std::cout << "Unknown name sweep: " << name << std::endl;
@@ -221,6 +230,9 @@ void LatticeSweep::addParameters(po::options_description& desc) {
 	SingletOperators::registerParameters(desc);
 	XSpaceCorrelators::registerParameters(desc);
 	NPRVertex::registerParameters(desc);
+	LandauGaugeFixing::registerParameters(desc);
+	MaximalAbelianGaugeFixing::registerParameters(desc);
+	MaximalAbelianProjection::registerParameters(desc);
 }
 
 void LatticeSweep::registerParameters(po::options_description&) {

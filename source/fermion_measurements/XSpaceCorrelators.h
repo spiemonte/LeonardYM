@@ -5,6 +5,7 @@
 #include "algebra_utils/AlgebraUtils.h"
 #include "inverters/BiConjugateGradient.h"
 #include "wilson_flow/WilsonFlow.h"
+#include "dirac_operators/GammaOperators.h"
 
 namespace Update {
 
@@ -15,12 +16,13 @@ public:
 	virtual void execute(environment_t& environment);
 
 private:
-	extended_dirac_vector_t randomNoise;
-	extended_dirac_vector_t tmp_square;
-	extended_dirac_vector_t tmp;
+	extended_dirac_vector_t tmp, source;
 	DiracOperator* squareDiracOperator;
 	DiracOperator* diracOperator;
 	BiConjugateGradient* biConjugateGradient;
+	
+	GammaOperators gammaOperators;
+	Gamma gammas;
 };
 
 }

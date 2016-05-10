@@ -6,7 +6,7 @@ import sys
 
 if len(sys.argv) != 4:
 	print "This script must be called with three arguments!"
-	print "Usage:\n   changesize.py file newdirectoryconfigs newdirectorymeas"
+	print "Usage:\n   changeiodirectory.py file newdirectoryconfigs newdirectorymeas"
 	sys.exit(1)
 	
 inputfile = open(sys.argv[1],'r')

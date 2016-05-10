@@ -163,6 +163,18 @@ Polynomial.o: ./source/dirac_functions/Polynomial.h ./source/dirac_functions/Pol
 RationalApproximation.o: ./source/dirac_functions/RationalApproximation.h ./source/dirac_functions/RationalApproximation.cpp
 	$(CPP) $(CPPFLAGS) -c -o RationalApproximation.o ./source/dirac_functions/RationalApproximation.cpp
 
+GaugeFixing.o: ./source/utils/GaugeFixing.h ./source/utils/GaugeFixing.cpp
+	$(CPP) $(CPPFLAGS) -c -o GaugeFixing.o ./source/utils/GaugeFixing.cpp
+
+LandauGaugeFixing.o: ./source/utils/LandauGaugeFixing.h ./source/utils/LandauGaugeFixing.cpp
+	$(CPP) $(CPPFLAGS) -c -o LandauGaugeFixing.o ./source/utils/LandauGaugeFixing.cpp
+
+MaximalAbelianGaugeFixing.o: ./source/utils/MaximalAbelianGaugeFixing.h ./source/utils/MaximalAbelianGaugeFixing.cpp
+	$(CPP) $(CPPFLAGS) -c -o MaximalAbelianGaugeFixing.o ./source/utils/MaximalAbelianGaugeFixing.cpp
+
+MaximalAbelianProjection.o: ./source/utils/MaximalAbelianProjection.h ./source/utils/MaximalAbelianProjection.cpp
+	$(CPP) $(CPPFLAGS) -c -o MaximalAbelianProjection.o ./source/utils/MaximalAbelianProjection.cpp
+
 ReUnit.o: ./source/utils/ReUnit.h ./source/utils/ReUnit.cpp
 	$(CPP) $(CPPFLAGS) -c -o ReUnit.o ./source/utils/ReUnit.cpp
 

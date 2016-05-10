@@ -279,7 +279,146 @@ void OutputSweep::execute(environment_t& environment) {
 			fclose(fout);
 		}
 #endif
-#if NUMCOLORS > 2
+#if NUMCOLORS == 3
+		typedef extended_gauge_lattice_t::Layout Layout;
+		std::string output_name = environment.configurations.get<std::string>("output_configuration_name");
+		std::string output_directory = environment.configurations.get<std::string>("output_directory_configurations");
+		int offset = environment.configurations.get<unsigned int>("output_offset");
+
+
+		FILE* fout(NULL);
+		if (isOutputProcess()) {
+			std::ostringstream filenamestream;
+			filenamestream << output_directory << output_name << ".config-"<< environment.sweep+offset;
+			if (isOutputProcess()) std::cout << "OutputSweep::Starting field write on file " << filenamestream.str() << std::endl;
+			fout = fopen(filenamestream.str().c_str(), "w");
+
+			if (!fout) {
+				if (isOutputProcess()) std::cout << "OutputSweep::File not writable!" << std::endl;
+				exit(19);
+				return;
+			}
+		}
+
+		XDR xout;
+
+		if (isOutputProcess()) {
+			xdrstdio_create(&xout, fout, XDR_ENCODE);
+		}
+
+		// Write fundamental gauge field
+#ifdef ENABLE_MPI
+		MPI_Barrier(MPI_COMM_WORLD);
+		float write_field[48]; // 48=4*6*2
+#endif
+		int wrt(0);
+
+		for (int t = 0; t < Layout::glob_t; ++t) {
+			for (int z = 0; z < Layout::glob_z; ++z) {
+				for (int y = 0; y < Layout::glob_y; ++y) {
+					for (int x = 0; x < Layout::glob_x; ++x) {
+						int globsite = Layout::getGlobalCoordinate(x,y,z,t);
+#ifndef ENABLE_MPI
+						
+						for (unsigned int mu = 0; mu < 4; ++mu) {
+							GaugeGroup mt = environment.gaugeLinkConfiguration[globsite][mu];
+							for (size_t ii = 0; ii < 3; ++ii) {
+								for (size_t jj = 0; jj < 2; ++jj) {
+									/** Assuming now Istvans format with U^* saved insted of U*/
+									float tmp = mt.at(ii,jj).real(), tmp2 = -mt.at(ii,jj).imag();
+									wrt += xdr_float(&xout, &tmp);
+									wrt += xdr_float(&xout, &tmp2);
+								}
+							}
+						}
+#endif
+#ifdef ENABLE_MPI
+						int localsite = Layout::localIndex[globsite];
+						if (isOutputProcess()) {
+							if (localsite != -1 && localsite < Layout::localsize) {
+								for (unsigned int mu = 0; mu < 4; ++mu) {
+									GaugeGroup mt = environment.gaugeLinkConfiguration[globsite][mu];
+									for (size_t ii = 0; ii < 3; ++ii) {
+										for (size_t jj = 0; jj < 2; ++jj) {
+											/** Assuming now Istvans format with U^* saved insted of U*/
+											float tmp = mt.at(ii,jj).real(), tmp2 = -mt.at(ii,jj).imag();
+											wrt += xdr_float(&xout, &tmp);
+											wrt += xdr_float(&xout, &tmp2);
+										}
+									}
+								}
+							} else {
+								int processor = Layout::rankTable(x,y,z,t);
+								MPI_Recv(write_field, 48, MPI_FLOAT, processor, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+								for (int ii = 0; ii < 48; ++ii) {
+									wrt += xdr_float(&xout, &write_field[ii]);
+								}
+							}
+						}
+						else {
+							if (localsite != -1 && localsite < Layout::localsize) {
+								int count = 0;
+								for (unsigned int mu = 0; mu < 4; ++mu) {
+									GaugeGroup mt = environment.gaugeLinkConfiguration[globsite][mu];
+									for (size_t ii = 0; ii < 3; ++ii) {
+										for (size_t jj = 0; jj < 2; ++jj) {
+											/** Assuming now Istvans format with U^* saved insted of U*/
+											float tmp = mt.at(ii,jj).real(), tmp2 = -mt.at(ii,jj).imag();
+											write_field[count++] = tmp;
+											write_field[count++] = tmp2;
+										}
+									}
+								}
+								MPI_Send(write_field, 48, MPI_FLOAT, 0, 0, MPI_COMM_WORLD);
+							}
+						}
+#endif
+					}
+				}
+			}
+		}
+
+		double t_plaq = Plaquette::temporalPlaquette(environment.gaugeLinkConfiguration);
+
+		if (isOutputProcess()) {
+			if (wrt != 48 * Layout::globalVolume){
+				std::cout << "OutputSweep::write error for gauge fields on lattice "	<< 0 << ": " << (wrt / 4) << " : " << static_cast<size_t>(4 * Layout::globalVolume) << std::endl;
+			}
+			else {
+				std::cout << "OutputSweep::number of gauge fields written: " << wrt / 4 << " using XDR-format " << std::endl;
+			}
+		}
+		
+		if (isOutputProcess()) {
+			if (wrt != 48 * Layout::globalVolume) {
+				std::cout << " write error for gauge fields on lattice " << ": " << wrt << std::endl;
+			}
+			else {
+				std::cout << "OutputSweep::Finished writing " << wrt / 4 << " gauge fields" << std::endl;
+			}
+
+			/// - read the global lattice extend and lvrco
+          		int lats[4] = { Layout::glob_x, Layout::glob_y, Layout::glob_z, Layout::glob_t };
+
+			for (int ii(0); ii < 4; ++ii) xdr_int(&xout, &lats[ii]);
+
+          		double beto = static_cast<float >(environment.configurations.get<double>("beta"));
+          		xdr_double(&xout, &beto);
+
+     			double c1(-1./12.);
+          		xdr_double(&xout, &c1);
+
+			double fplq = t_plaq;	
+			xdr_double(&xout, &fplq);
+		}
+
+		if (isOutputProcess()) {
+			xdr_destroy(&xout);
+			fclose(fout);
+		}
+		
+#endif
+#if NUMCOLORS > 3
 		if (isOutputProcess()) {
 			std::cout << "OuputSweep::munster_format not implemented for NC>2!" << std::endl;
 		}
