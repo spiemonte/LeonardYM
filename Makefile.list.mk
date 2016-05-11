@@ -28,6 +28,9 @@ Simulation.o: ./source/Simulation.h ./source/Simulation.cpp
 BiConjugateGradient.o: ./source/inverters/BiConjugateGradient.h ./source/inverters/BiConjugateGradient.cpp
 	$(CPP) $(CPPFLAGS) -c -o BiConjugateGradient.o ./source/inverters/BiConjugateGradient.cpp
 
+PreconditionedBiCGStab.o: ./source/inverters/PreconditionedBiCGStab.h ./source/inverters/PreconditionedBiCGStab.cpp
+	$(CPP) $(CPPFLAGS) -c -o PreconditionedBiCGStab.o ./source/inverters/PreconditionedBiCGStab.cpp
+
 GMRESR.o: ./source/inverters/GMRESR.h ./source/inverters/GMRESR.cpp
 	$(CPP) $(CPPFLAGS) -c -o GMRESR.o ./source/inverters/GMRESR.cpp
 

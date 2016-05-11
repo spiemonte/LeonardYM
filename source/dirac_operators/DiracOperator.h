@@ -22,6 +22,7 @@ public:
 	virtual ~DiracOperator();
 	static DiracOperator* getInstance(const std::string& name, unsigned int power, const StorageParameters& parameters);
 	static DiracOperator* getSquareRoot(DiracOperator* dirac);
+	static DiracOperator* getSquare(DiracOperator* dirac);
 	
 #ifdef ENABLE_MPI
 	void multiply(standard_dirac_vector_t& output, const standard_dirac_vector_t& input) {

@@ -6,31 +6,34 @@ LaplacianConjugateGradient::LaplacianConjugateGradient() : epsilon(0.00000000001
 
 LaplacianConjugateGradient::~LaplacianConjugateGradient() { }
 
-bool LaplacianConjugateGradient::solve(const multi1d<LatticeColorMatrix>& u, const LatticeColorVector &source, LatticeColorVector &solution, const Subset & s, int j_decay, const Double& shift) {
+bool LaplacianConjugateGradient::solve(const reduced_fermion_lattice_t& lattice, const reduced_color_vector_t& source, reduced_color_vector_t& solution, const block& s, int j_decay, const real_t& shift) {
 	solution = source;
 	r = zero;
 	p = zero;
 
-	LatticeColorVector tmp = zero;
-	klein_gord(u, solution, tmp, shift, j_decay);
+	Laplacian laplacian(shift, j_decay);
+	laplacian.setLattice(lattice);
 
-	r[s] = source - tmp;
-	p[s] = r;
+	reduced_fermion_lattice_t tmp;
+	AlgebraUtils::setToZero(tmp);
 
-	Double norm = norm2(r);
+	laplacian.apply(solution, tmp);
+
+	r = source - tmp;
+	p = r;
+
+	real_t norm = AlgebraUtils::squaredNorm(r);
 	
-	Double norm_next = norm;
+	real_t norm_next = norm;
 
 	for (unsigned int step = 0; step < maxSteps; ++step) {
-		//tmp[s] = p;
-		//laplacian(u, tmp, j_decay, 1);
-		klein_gord(u, p, tmp, shift, j_decay);
+		laplacian.apply(p, tmp);
 		
 		norm = norm_next;
-		Complex alpha = norm/innerProduct(p,tmp);
+		std::complex<real_t> alpha = norm/innerProduct(p,tmp);
 
-		solution[s] = solution + alpha*p;
-		r[s] = r - alpha*tmp;
+		solution = solution + alpha*p;
+		r = r - alpha*tmp;
 
 
 		norm_next = norm2(r);

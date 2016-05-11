@@ -16,6 +16,7 @@
 #include "dirac_operators/SAPPreconditioner.h"
 #include "multigrid/MultiGridSolver.h"
 #include "inverters/GMRESR.h"
+#include "inverters/PreconditionedBiCGStab.h"
 #include "dirac_operators/GammaOperators.h"
 #include "dirac_operators/HoppingOperator.h"
 
@@ -73,8 +74,8 @@ void NPRVertex::execute(environment_t& environment) {
 		if (isOutputProcess()) std::cout << "NPRVertex::Using multigrid inverter and SAP preconditioning ..." << std::endl;
 	}
 	else {
-		GMRESR* gmresr = new GMRESR();
-		inverter = gmresr;
+		PreconditionedBiCGStab* pbicg = new PreconditionedBiCGStab();
+		inverter = pbicg;
 		
 
 		if (isOutputProcess()) std::cout << "NPRVertex::Without using multigrid ..." << std::endl;
@@ -102,6 +103,11 @@ void NPRVertex::execute(environment_t& environment) {
 			this->generateMomentumSource(source, momentum, alpha, c);
 			//this->generateSource(source, alpha, c);
 			inverter->solve(diracOperator, source, tmp[c*4 + alpha]);
+			
+			extended_dirac_vector_t test;
+			diracOperator->multiply(test,tmp[c*4 + alpha]);
+			std::cout << "Prova: " << AlgebraUtils::differenceNorm(test, source) << std::endl;
+
 			inversionSteps += inverter->getLastSteps();
 			
 			/*diracOperator->multiply(eta,source);
@@ -296,7 +302,7 @@ void NPRVertex::execute(environment_t& environment) {
 
 void NPRVertex::registerParameters(po::options_description& desc) {
 	desc.add_options()
-		("NPRVertex::inverter_precision", po::value<double>()->default_value(0.0000000001), "set the precision used by the inverter")
+		("NPRVertex::inverter_precision", po::value<double>()->default_value(0.000000000001), "set the precision used by the inverter")
 		("NPRVertex::inverter_max_steps", po::value<unsigned int>()->default_value(5000), "set the maximum steps used by the inverter")
 		("NPRVertex::momentum", po::value<std::string>()->default_value("{2,2,2,2}"), "Momentum for the measure of the vertex function (syntax: {px,py,pz,pt})")
 		

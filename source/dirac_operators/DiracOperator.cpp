@@ -83,6 +83,7 @@ DiracOperator* DiracOperator::getSquareRoot(DiracOperator* dirac) {
 			result->setKappa(dirac->getKappa());
 			result->name = dirac->name;
 			result->lattice = dirac->lattice;
+			result->gamma5 = dirac->gamma5;
 			return result;
 		} else {
 			std::cout << "Power of the Dirac Wilson Operator not supported!" << std::endl;
@@ -96,6 +97,7 @@ DiracOperator* DiracOperator::getSquareRoot(DiracOperator* dirac) {
 			result->setCSW(dynamic_cast<SquareImprovedDiracWilsonOperator*>(dirac)->getCSW());
 			result->name = dirac->name;
 			result->lattice = dirac->lattice;
+			result->gamma5 = dirac->gamma5;
 			return result;
 		} else {
 			std::cout << "Power of the Dirac Wilson Operator not supported!" << std::endl;
@@ -108,6 +110,54 @@ DiracOperator* DiracOperator::getSquareRoot(DiracOperator* dirac) {
 			result->setKappa(dirac->getKappa());
 			result->name = dirac->name;
 			result->lattice = dirac->lattice;
+			result->gamma5 = dirac->gamma5;
+			return result;
+		} else {
+			std::cout << "Power of the Dirac Wilson Operator not supported!" << std::endl;
+			exit(1);
+		}
+	}
+	else {
+		std::cout << "Dirac Wilson Operator" << dirac->name << " not supported!" << std::endl;
+		exit(1);
+	}
+}
+
+DiracOperator* DiracOperator::getSquare(DiracOperator* dirac) {
+	if (dirac->name == "DiracWilson") {
+		if (dynamic_cast<DiracWilsonOperator*>(dirac)) {
+			SquareDiracWilsonOperator* result = new SquareDiracWilsonOperator();
+			result->setKappa(dirac->getKappa());
+			result->name = dirac->name;
+			result->setLattice(dirac->lattice);
+			result->gamma5 = dirac->gamma5;
+			return result;
+		} else {
+			std::cout << "Power of the Dirac Wilson Operator not supported!" << std::endl;
+			exit(1);
+		}
+	}
+	else if (dirac->name == "Improved") {
+		if (dynamic_cast<ImprovedDiracWilsonOperator*>(dirac)) {
+			SquareImprovedDiracWilsonOperator* result = new SquareImprovedDiracWilsonOperator();
+			result->setKappa(dirac->getKappa());
+			result->setCSW(dynamic_cast<ImprovedDiracWilsonOperator*>(dirac)->getCSW());
+			result->name = dirac->name;
+			result->setLattice(dirac->lattice);
+			result->gamma5 = dirac->gamma5;
+			return result;
+		} else {
+			std::cout << "Power of the Dirac Wilson Operator not supported!" << std::endl;
+			exit(1);
+		}
+	}
+	else if (dirac->name == "BasicDiracWilson") {
+		if (dynamic_cast<BasicDiracWilsonOperator*>(dirac)) {
+			BasicSquareDiracWilsonOperator* result = new BasicSquareDiracWilsonOperator();
+			result->setKappa(dirac->getKappa());
+			result->name = dirac->name;
+			result->setLattice(dirac->lattice);
+			result->gamma5 = dirac->gamma5;
 			return result;
 		} else {
 			std::cout << "Power of the Dirac Wilson Operator not supported!" << std::endl;
