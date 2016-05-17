@@ -32,7 +32,6 @@ private:
 	extended_dirac_vector_t eta;
 	extended_dirac_vector_t tmp[4*diracVectorLength];
 	DiracOperator* diracOperator;
-	DiracOperator* squareDiracOperator;
 	Solver* inverter;
 
 	Gamma gamma;

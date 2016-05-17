@@ -11,7 +11,7 @@ public:
 	virtual ~Solver() { }
 
 	virtual bool solve(DiracOperator* , const reduced_dirac_vector_t& , reduced_dirac_vector_t&  , reduced_dirac_vector_t const* = 0) {
-		if (isOutputProcess()) std::cout << "Solver not implemented by this class " << name << std::endl;
+		if (isOutputProcess()) std::cout << "Solver::Solver not implemented by this class " << name << std::endl;
 		return false;
 	}
 

@@ -88,6 +88,12 @@ SquareComplementBlockDiracOperator.o: ./source/dirac_operators/SquareComplementB
 ImprovedDiracWilsonOperator.o: ./source/dirac_operators/ImprovedDiracWilsonOperator.h ./source/dirac_operators/ImprovedDiracWilsonOperator.cpp
 	$(CPP) $(CPPFLAGS) -c -o ImprovedDiracWilsonOperator.o ./source/dirac_operators/ImprovedDiracWilsonOperator.cpp
 
+EvenOddImprovedDiracWilsonOperator.o: ./source/dirac_operators/EvenOddImprovedDiracWilsonOperator.h ./source/dirac_operators/EvenOddImprovedDiracWilsonOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o EvenOddImprovedDiracWilsonOperator.o ./source/dirac_operators/EvenOddImprovedDiracWilsonOperator.cpp
+
+SquareEvenOddImprovedDiracWilsonOperator.o: ./source/dirac_operators/SquareEvenOddImprovedDiracWilsonOperator.h ./source/dirac_operators/EvenOddImprovedDiracWilsonOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o SquareEvenOddImprovedDiracWilsonOperator.o ./source/dirac_operators/SquareEvenOddImprovedDiracWilsonOperator.cpp
+
 SquareImprovedDiracWilsonOperator.o: ./source/dirac_operators/SquareImprovedDiracWilsonOperator.h ./source/dirac_operators/SquareImprovedDiracWilsonOperator.cpp
 	$(CPP) $(CPPFLAGS) -c -o SquareImprovedDiracWilsonOperator.o ./source/dirac_operators/SquareImprovedDiracWilsonOperator.cpp
 

@@ -22,9 +22,9 @@
 
 namespace Update {
 
-NPRVertex::NPRVertex() : LatticeSweep(), MultiGridStochasticEstimator(), diracOperator(0), squareDiracOperator(0), inverter(0), gamma() { }
+NPRVertex::NPRVertex() : LatticeSweep(), MultiGridStochasticEstimator(), diracOperator(0), inverter(0), gamma() { }
 
-NPRVertex::NPRVertex(const NPRVertex& toCopy) : LatticeSweep(toCopy), MultiGridStochasticEstimator(toCopy), diracOperator(0), squareDiracOperator(0), inverter(0), gamma() { }
+NPRVertex::NPRVertex(const NPRVertex& toCopy) : LatticeSweep(toCopy), MultiGridStochasticEstimator(toCopy), diracOperator(0), inverter(0), gamma() { }
 
 NPRVertex::~NPRVertex() {
 	if (diracOperator) delete diracOperator;
@@ -37,13 +37,9 @@ void NPRVertex::execute(environment_t& environment) {
 	if (diracOperator == 0) {
 		diracOperator = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations);
 	}
-	if (squareDiracOperator == 0) {
-		squareDiracOperator = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 2, environment.configurations);
-	}
 
 	diracOperator->setLattice(environment.getFermionLattice());
 	diracOperator->setGamma5(false);
-	squareDiracOperator->setLattice(environment.getFermionLattice());
 
 	//Here we construct the SAP preconditioner
 	BlockDiracOperator* blackBlockDiracOperator = 0;
@@ -106,7 +102,8 @@ void NPRVertex::execute(environment_t& environment) {
 			
 			extended_dirac_vector_t test;
 			diracOperator->multiply(test,tmp[c*4 + alpha]);
-			std::cout << "Prova: " << AlgebraUtils::differenceNorm(test, source) << std::endl;
+			long_real_t dtest = AlgebraUtils::differenceNorm(test, source);
+			if (isOutputProcess()) std::cout << "NPRVertex::Convergence test of the inverter : " << dtest << std::endl;
 
 			inversionSteps += inverter->getLastSteps();
 			

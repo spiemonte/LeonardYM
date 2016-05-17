@@ -10,19 +10,20 @@
 #include "algebra_utils/AlgebraUtils.h"
 #include "utils/StoutSmearing.h"
 #include "utils/Gamma.h"
+#include "inverters/PreconditionedBiCGStab.h"
 #ifndef PI
 #define PI 3.141592653589793238462643
 #endif
 
 namespace Update {
 
-MesonCorrelator::MesonCorrelator() : diracOperator(0), squareDiracOperator(0), biConjugateGradient(0) { }
+MesonCorrelator::MesonCorrelator() : diracOperator(0), inverter(0) { }
 
-MesonCorrelator::MesonCorrelator(const MesonCorrelator& toCopy) : LatticeSweep(toCopy), StochasticEstimator(toCopy), diracOperator(0), squareDiracOperator(0), biConjugateGradient(0) { }
+MesonCorrelator::MesonCorrelator(const MesonCorrelator& toCopy) : LatticeSweep(toCopy), StochasticEstimator(toCopy), diracOperator(0), inverter(0) { }
 
 MesonCorrelator::~MesonCorrelator() {
 	if (diracOperator) delete diracOperator;
-	if (biConjugateGradient) delete biConjugateGradient;
+	if (inverter) delete inverter;
 }
 
 void MesonCorrelator::execute(environment_t& environment) {
@@ -32,15 +33,12 @@ void MesonCorrelator::execute(environment_t& environment) {
 	if (diracOperator == 0) {
 		diracOperator = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations);
 	}
-	if (squareDiracOperator == 0) {
-		squareDiracOperator = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 2, environment.configurations);
-	}
 
 	extended_fermion_lattice_t lattice;
 
 	try {
-		unsigned int numberLevelSmearing = environment.configurations.get<unsigned int>("level_stout_smearing_meson");
-		double smearingRho = environment.configurations.get<double>("rho_stout_smearing");
+		unsigned int numberLevelSmearing = environment.configurations.get<unsigned int>("MesonCorrelator::levels_stout_smearing");
+		double smearingRho = environment.configurations.get<double>("MesonCorrelator::rho_stout_smearing");
 		StoutSmearing stoutSmearing;
 #ifdef ADJOINT
 		extended_gauge_lattice_t smearedConfiguration;
@@ -57,7 +55,7 @@ void MesonCorrelator::execute(environment_t& environment) {
 	}
 
 	try {
-		unsigned int t = environment.configurations.get<unsigned int>("t_source_origin");
+		unsigned int t = environment.configurations.get<unsigned int>("MesonCorrelator::t_source_origin");
 		extended_fermion_lattice_t swaplinkconfig;
 		typedef extended_fermion_lattice_t LT;
 		if (t != 0) {
@@ -79,11 +77,11 @@ void MesonCorrelator::execute(environment_t& environment) {
 	}
 
 	diracOperator->setLattice(lattice);
-	squareDiracOperator->setLattice(lattice);
+	diracOperator->setGamma5(false);
 	
-	if (biConjugateGradient == 0) biConjugateGradient = new BiConjugateGradient();
-	biConjugateGradient->setPrecision(environment.configurations.get<double>("generic_inverter_precision"));
-	biConjugateGradient->setMaximumSteps(environment.configurations.get<unsigned int>("generic_inverter_max_steps"));
+	if (inverter == 0) inverter = new PreconditionedBiCGStab();
+	inverter->setPrecision(environment.configurations.get<double>("MesonCorrelator::inverter_precision"));
+	inverter->setMaximumSteps(environment.configurations.get<unsigned int>("MesonCorrelator::inverter_max_steps"));
 
 	std::vector< long_real_t > pionNorm;
 
@@ -103,9 +101,10 @@ void MesonCorrelator::execute(environment_t& environment) {
 	for (unsigned int alpha = 0; alpha < 4; ++alpha) {
 		for (int c = 0; c < diracVectorLength; ++c) {
 			this->generateSource(source, alpha, c);
-			biConjugateGradient->solve(squareDiracOperator, source, eta);
-			diracOperator->multiply(tmp[c*4 + alpha],eta);
-			inversionSteps += biConjugateGradient->getLastSteps();
+			//biConjugateGradient->solve(squareDiracOperator, source, eta);
+			//diracOperator->multiply(tmp[c*4 + alpha],eta);
+			inverter->solve(diracOperator, source, tmp[c*4 + alpha]);
+			inversionSteps += inverter->getLastSteps();
 		}
 	}
 	
@@ -414,6 +413,16 @@ void MesonCorrelator::execute(environment_t& environment) {
 	//delete[] pionOperator;
 	//delete[] etaOperatorRe;
 	//delete[] etaOperatorIm;
+}
+
+void MesonCorrelator::registerParameters(po::options_description& desc) {
+	desc.add_options()
+		("MesonCorrelator::inverter_precision", po::value<real_t>()->default_value(0.0000000001), "set the inverter precision")
+		("MesonCorrelator::inverter_max_steps", po::value<unsigned int>()->default_value(10000), "maximum number of inverter steps")
+		("MesonCorrelator::t_source_origin", po::value<unsigned int>()->default_value(0), "T origin for the wall source")
+		("MesonCorrelator::rho_stout_smearing", po::value<real_t>(), "set the stout smearing parameter")
+		("MesonCorrelator::levels_stout_smearing", po::value<unsigned int>(), "levels of stout smearing")
+		;
 }
 
 } /* namespace Update */

@@ -7,35 +7,54 @@
 
 #include "ChiralCondensate.h"
 #include "algebra_utils/AlgebraUtils.h"
-#include "inverters/BiConjugateGradient.h"
+#include "inverters/PreconditionedBiCGStab.h"
 #include "io/GlobalOutput.h"
+#include "utils/StoutSmearing.h"
 
 namespace Update {
 
-ChiralCondensate::ChiralCondensate() : LatticeSweep(), StochasticEstimator(), diracOperator(0), gmresr(0) { }
+ChiralCondensate::ChiralCondensate() : LatticeSweep(), StochasticEstimator(), diracOperator(0), inverter(0) { }
 
-ChiralCondensate::ChiralCondensate(const ChiralCondensate& toCopy) : LatticeSweep(toCopy), StochasticEstimator(toCopy), diracOperator(0), gmresr(0) { }
+ChiralCondensate::ChiralCondensate(const ChiralCondensate& toCopy) : LatticeSweep(toCopy), StochasticEstimator(toCopy), diracOperator(0), inverter(0) { }
 
 ChiralCondensate::~ChiralCondensate() {
 	if (diracOperator) delete diracOperator;
-	if (gmresr) delete gmresr;
+	if (inverter) delete inverter;
 }
 
 void ChiralCondensate::execute(environment_t& environment) {
-	unsigned int max_step = environment.configurations.get<unsigned int>("ChiralCondensate::number_stochastic_estimators");
+	extended_fermion_lattice_t lattice;
+
+	try {
+		unsigned int numberLevelSmearing = environment.configurations.get<unsigned int>("ChiralCondensate::levels_stout_smearing");
+		double smearingRho = environment.configurations.get<double>("ChiralCondensate::rho_stout_smearing");
+		StoutSmearing stoutSmearing;
+#ifdef ADJOINT
+		extended_gauge_lattice_t smearedConfiguration;
+		stoutSmearing.spatialSmearing(environment.gaugeLinkConfiguration, smearedConfiguration, numberLevelSmearing, smearingRho);
+		ConvertLattice<extended_fermion_lattice_t,extended_gauge_lattice_t>::convert(lattice, smearedConfiguration);//TODO
+#endif
+#ifndef ADJOINT
+		stoutSmearing.spatialSmearing(environment.gaugeLinkConfiguration, lattice, numberLevelSmearing, smearingRho);
+#endif
+		environment.setFermionBc(lattice);
+	} catch (NotFoundOption& ex) {
+		lattice =  environment.getFermionLattice();
+		if (isOutputProcess()) std::cout << "ChiralCondensate::No smearing options found, proceeding without!" << std::endl;
+	}
 	
 	if (diracOperator == 0) {
 		diracOperator = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations);
 	}
-	diracOperator->setLattice(environment.getFermionLattice());
+	diracOperator->setLattice(lattice);
 	diracOperator->setGamma5(false);
 	
 	long_real_t volume = environment.gaugeLinkConfiguration.getLayout().globalVolume;
 
-	if (gmresr == 0) {
-		gmresr = new GMRESR();
-		gmresr->setMaximumSteps(environment.configurations.get<unsigned int>("ChiralCondensate::inverter_max_steps"));
-		gmresr->setPrecision(environment.configurations.get<real_t>("ChiralCondensate::inverter_precision"));
+	if (inverter == 0) {
+		inverter = new PreconditionedBiCGStab();
+		inverter->setMaximumSteps(environment.configurations.get<unsigned int>("ChiralCondensate::inverter_max_steps"));
+		inverter->setPrecision(environment.configurations.get<real_t>("ChiralCondensate::inverter_precision"));
 	}
 	
 	bool connected = true;
@@ -61,10 +80,12 @@ void ChiralCondensate::execute(environment_t& environment) {
 	std::vector< long_real_t > pionNormRe;
 	std::vector< long_real_t > pionNormIm;
 
+	unsigned int max_step = environment.configurations.get<unsigned int>("ChiralCondensate::number_stochastic_estimators");
+
 	for (unsigned int step = 0; step < max_step; ++step) {
 		this->generateRandomNoise(randomNoise);
 		
-		gmresr->solve(diracOperator, randomNoise, tmp);
+		inverter->solve(diracOperator, randomNoise, tmp);
 		
 		std::complex<long_real_t> condensate = AlgebraUtils::dot(randomNoise, tmp);
 		chiralCondensateRe.push_back(real(condensate)/volume);
@@ -79,7 +100,7 @@ void ChiralCondensate::execute(environment_t& environment) {
 		pionNormIm.push_back(imag(pionNorm)/volume);
 		
 		if (connected) {
-			gmresr->solve(diracOperator, tmp, tmp_square);
+			inverter->solve(diracOperator, tmp, tmp_square);
 
 			std::complex<long_real_t> condensateConnected = AlgebraUtils::dot(randomNoise, tmp_square);
 			chiralCondensateConnectedRe.push_back(real(condensateConnected)/volume);
@@ -134,6 +155,8 @@ void ChiralCondensate::registerParameters(po::options_description& desc) {
 		("ChiralCondensate::inverter_precision", po::value<double>()->default_value(0.0000000001), "set the precision used by the inverter")
 		("ChiralCondensate::inverter_max_steps", po::value<unsigned int>()->default_value(5000), "set the maximum steps used by the inverter")
 		("ChiralCondensate::measure_condensate_connected", po::value<std::string>()->default_value("false"), "Should we measure the connected part of the condensate?")
+		("ChiralCondensate::rho_stout_smearing", po::value<real_t>(), "set the stout smearing parameter")
+		("ChiralCondensate::levels_stout_smearing", po::value<unsigned int>(), "levels of stout smearing")
 	;
 }
 

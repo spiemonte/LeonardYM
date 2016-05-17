@@ -12,6 +12,7 @@ MaximalAbelianGaugeFixing::~MaximalAbelianGaugeFixing() { }
 void MaximalAbelianGaugeFixing::execute(environment_t& environment) {
 #if NUMCOLORS == 2
 	typedef extended_matrix_lattice_t LT;
+	typedef extended_matrix_lattice_t::Layout Layout;
 
 	real_t epsilon1 = environment.configurations.get<real_t>("MaximalAbelianGaugeFixing::epsilon1");
 	real_t epsilon2 = environment.configurations.get<real_t>("MaximalAbelianGaugeFixing::epsilon2");

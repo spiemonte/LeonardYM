@@ -11,7 +11,7 @@
 #include "LatticeSweep.h"
 #include "StochasticEstimator.h"
 #include "dirac_operators/DiracOperator.h"
-#include "inverters/GMRESR.h"
+#include "inverters/Solver.h"
 
 namespace Update {
 
@@ -30,7 +30,7 @@ private:
 	extended_dirac_vector_t tmp;
 	extended_dirac_vector_t tmp_square;
 	DiracOperator* diracOperator;
-	GMRESR *gmresr;
+	Solver *inverter;
 };
 
 } /* namespace Update */

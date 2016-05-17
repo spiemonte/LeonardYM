@@ -11,7 +11,7 @@
 #include "LatticeSweep.h"
 #include "fermion_measurements/StochasticEstimator.h"
 #include "dirac_operators/DiracOperator.h"
-#include "inverters/BiConjugateGradient.h"
+#include "inverters/Solver.h"
 
 namespace Update {
 
@@ -23,13 +23,13 @@ public:
 
 	virtual void execute(environment_t& environment);
 
+	static void registerParameters(po::options_description& desc);
+
 private:
 	extended_dirac_vector_t randomNoise;
-	extended_dirac_vector_t eta;
 	extended_dirac_vector_t tmp[4*diracVectorLength];
 	DiracOperator* diracOperator;
-	DiracOperator* squareDiracOperator;
-	BiConjugateGradient* biConjugateGradient;
+	Solver* inverter;
 };
 
 } /* namespace Update */

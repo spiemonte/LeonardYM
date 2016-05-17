@@ -10,6 +10,7 @@ LandauGaugeFixing::~LandauGaugeFixing() { }
 
 void LandauGaugeFixing::execute(environment_t& environment) {
 	typedef extended_matrix_lattice_t LT;
+	typedef extended_matrix_lattice_t::Layout Layout;
 
 	real_t epsilon1 = environment.configurations.get<real_t>("LandauGaugeFixing::epsilon1");
 	real_t epsilon2 = environment.configurations.get<real_t>("LandauGaugeFixing::epsilon2");
@@ -179,7 +180,7 @@ void LandauGaugeFixing::execute(environment_t& environment) {
 	
 					real_t resultNew = 0.;
 					for (unsigned int mu = 0; mu < 4; ++mu) {
-						resultNew += real(tmp[site][mu]));
+						resultNew += real(trace(tmp[site][mu]));
 						resultNew += real(trace(tmp[LT::sdn(site,mu)][mu]));
 					}
 

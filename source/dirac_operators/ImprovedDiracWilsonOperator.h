@@ -40,7 +40,7 @@ public:
 	real_t getCSW() const;
 	void setCSW(real_t _csw);
 
-private:
+protected:
 	//The clover term
 	real_t csw;
 	//The field strength
