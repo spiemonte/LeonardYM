@@ -213,8 +213,10 @@ void MaximalAbelianGaugeFixing::execute(environment_t& environment) {
 		}
 	}
 
-	for (unsigned int i = 0; i < 5*steps; ++i) {
-		if ((i+1) % steps == 0 && isOutputProcess()) std::cout << "MaximalAbelianGaugeFixing::Maximal functional at step " << i + 1 << ": " << maximalFunctionalValue << std::endl;
+	unsigned int local_steps_phase2 = environment.configurations.get<unsigned int>("MaximalAbelianGaugeFixing::local_steps_phase2");
+
+	for (unsigned int i = 0; i < local_steps_phase2; ++i) {
+		if ((i+1) % static_cast<int>(local_steps_phase2/10) == 0 && isOutputProcess()) std::cout << "MaximalAbelianGaugeFixing::Maximal functional at step " << i + 1 << ": " << maximalFunctionalValue << std::endl;
 		//The first
 		tmp = gaugeFixed1;
 		this->generateRandomGaugeTransformation(gauge_transformation, epsilon2);
@@ -332,7 +334,8 @@ void MaximalAbelianGaugeFixing::registerParameters(po::options_description& desc
 		("MaximalAbelianGaugeFixing::beta3", po::value<real_t>()->default_value(0.2), "set the beta for the random transformation used by the third PT run")
 
 		("MaximalAbelianGaugeFixing::steps", po::value<unsigned int>()->default_value(500), "set the number of MC trials")
-		("MaximalAbelianGaugeFixing::local_steps", po::value<unsigned int>()->default_value(3000), "set the number of local MC trials")
+		("MaximalAbelianGaugeFixing::local_steps", po::value<unsigned int>()->default_value(4000), "set the number of local MC trials")
+		("MaximalAbelianGaugeFixing::local_steps_phase2", po::value<unsigned int>()->default_value(1000), "set the number of local MC trials")
 		;
 }
 

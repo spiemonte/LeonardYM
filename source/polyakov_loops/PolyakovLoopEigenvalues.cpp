@@ -113,6 +113,7 @@ void PolyakovLoopEigenvalues::execute(environment_t& environment) {
 	for (unsigned int i = 0; i < 315; ++i) {
 		reduceAllSum(bins[i]);
 	}
+	reduceAllSum(phase_average);
 
 	if (environment.measurement && isOutputProcess()) {
 		GlobalOutput* output = GlobalOutput::getInstance();
@@ -124,9 +125,9 @@ void PolyakovLoopEigenvalues::execute(environment_t& environment) {
 
 		output->pop("polyakov_eigenvalues");
 
-		output->write("polyakov_loop_phase_average", phase_average);
+		output->write("polyakov_loop_phase_average", phase_average/Layout::glob_spatial_volume);
 		
-		std::cout << "PolyakovLoopEigenvalues::Phase average " << phase_average << std::endl;
+		std::cout << "PolyakovLoopEigenvalues::Phase average " << phase_average/Layout::glob_spatial_volume << std::endl;
 	}
 }
 

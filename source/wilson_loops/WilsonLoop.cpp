@@ -28,8 +28,8 @@ void WilsonLoop::execute(environment_t& environment) {
 	reduced_gauge_lattice_t originalLattice = environment.gaugeLinkConfiguration;
 
 	try {
-		unsigned int numberLevelSmearing = environment.configurations.get<unsigned int>("level_stout_smearing_wilson_loop");
-		double smearingRho = environment.configurations.get<double>("rho_stout_smearing");
+		unsigned int numberLevelSmearing = environment.configurations.get<unsigned int>("WilsonLoop::level_stout_smearing");
+		double smearingRho = environment.configurations.get<double>("WilsonLoop::rho_stout_smearing");
 		extended_gauge_lattice_t smearedConfiguration;
 		StoutSmearing stoutSmearing;
 		stoutSmearing.spatialSmearing(environment.gaugeLinkConfiguration, smearedConfiguration, numberLevelSmearing, smearingRho);
@@ -38,8 +38,10 @@ void WilsonLoop::execute(environment_t& environment) {
 		if (isOutputProcess()) std::cout << "WilsonLoop::No smearing options found, proceeding without!" << std::endl;
 	}
 
-	RMax = environment.configurations.get<unsigned int>("max_r_wilsonloop");
-	TMax = environment.configurations.get<unsigned int>("max_t_wilsonloop");
+	RMax = environment.configurations.get<unsigned int>("WilsonLoop::max_r_wilsonloop");
+	TMax = environment.configurations.get<unsigned int>("WilsonLoop::max_t_wilsonloop");
+
+	int t_dir = environment.configurations.get<unsigned int>("WilsonLoop::t_dir");
 
 	//tWilsonLine[T][R] contains the wilson line in the t-direction long T and shifted of R sites in the x-direction
 	if (tWilsonLine == 0) {
@@ -65,7 +67,7 @@ void WilsonLoop::execute(environment_t& environment) {
 
 #pragma omp parallel for
 	for (int site = 0; site < originalLattice.localsize; ++site) {
-		tWilsonLine[0][0][site] =  originalLattice[site][3];
+		tWilsonLine[0][0][site] =  originalLattice[site][t_dir];
 		xWilsonLine[0][0][site] =  originalLattice[site][0];
 	}
 	tWilsonLine[0][0].updateHalo();
@@ -75,8 +77,8 @@ void WilsonLoop::execute(environment_t& environment) {
 	for (int t = 1; t < TMax; ++t) {
 #pragma omp parallel for
 		for (int site = 0; site < originalLattice.localsize; ++site) {
-			tWilsonLine[t][0][site] = tWilsonLine[t-1][0][site]*shiftedLattice[LT::sup(site,3)];
-			swap[site] = shiftedLattice[LT::sup(site,3)];
+			tWilsonLine[t][0][site] = tWilsonLine[t-1][0][site]*shiftedLattice[LT::sup(site,t_dir)];
+			swap[site] = shiftedLattice[LT::sup(site,t_dir)];
 		}
 		swap.updateHalo();
 		shiftedLattice = swap;
@@ -97,7 +99,7 @@ void WilsonLoop::execute(environment_t& environment) {
 		for (int t = 1; t < TMax + 1; ++t) {
 #pragma omp parallel for
 			for (int site = 0; site < originalLattice.localsize; ++site) {
-				xWilsonLine[r][t][site] = xWilsonLine[r][t-1][LT::sup(site,3)];
+				xWilsonLine[r][t][site] = xWilsonLine[r][t-1][LT::sup(site,t_dir)];
 			}
 			xWilsonLine[r][t].updateHalo();
 		}
@@ -142,6 +144,15 @@ void WilsonLoop::execute(environment_t& environment) {
 		GlobalOutput* output = GlobalOutput::getInstance();
 		output->pop("wilson_loops");
 	}
+}
+
+void WilsonLoop::registerParameters(po::options_description& desc) {
+	desc.add_options()
+		("WilsonLoop::max_t_wilsonloop", po::value<unsigned int>()->default_value(6), "The maximum dimension of the Wilson loop in the R direction")
+		("WilsonLoop::max_r_wilsonloop", po::value<unsigned int>()->default_value(6), "The maximum dimension of the Wilson loop in the R direction")
+		("WilsonLoop::t_dir", po::value<unsigned int>()->default_value(3), "The time direction of the loops")
+		("WilsonLoop::level_stout_smearing", po::value<unsigned int>()->default_value(10), "Number of levels of the stout smearing")
+		("WilsonLoop::rho_stout_smearing", po::value<double>()->default_value(0.05), "Rho stout smearing");
 }
 
 } /* namespace Update */

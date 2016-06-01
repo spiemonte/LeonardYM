@@ -25,8 +25,8 @@ void PolyakovLoopCorrelator::execute(environment_t& environment) {
 	extended_gauge_lattice_t swap;
 
 	try {
-		unsigned int numberLevelSmearing = environment.configurations.get<unsigned int>("level_stout_smearing_polyakov_correlator");
-		double smearingRho = environment.configurations.get<double>("rho_stout_smearing");
+		unsigned int numberLevelSmearing = environment.configurations.get<unsigned int>("PolyakovCorrelator::level_stout_smearing");
+		double smearingRho = environment.configurations.get<double>("PolyakovCorrelator::rho_stout_smearing");
 
 		StoutSmearing stoutSmearing;
 		for (unsigned int level = 0; level < numberLevelSmearing; ++level) {
@@ -119,6 +119,12 @@ void PolyakovLoopCorrelator::execute(environment_t& environment) {
 		GlobalOutput* output = GlobalOutput::getInstance();
 		output->pop("polyakov_correlator");
 	}
+}
+
+void PolyakovLoopCorrelator::registerParameters(po::options_description& desc) {
+	desc.add_options()
+		("PolyakovCorrelator::level_stout_smearing", po::value<unsigned int>()->default_value(10), "Number of levels of the stout smearing")
+		("PolyakovCorrelator::rho_stout_smearing", po::value<double>()->default_value(0.05), "Rho stout smearing");
 }
 
 } /* namespace Update */

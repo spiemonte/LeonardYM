@@ -34,8 +34,9 @@ void EvenOddImprovedDiracWilsonOperator::multiply(reduced_dirac_vector_t & outpu
 	this->multiplyEvenOdd(output, input, EVEN);
 	this->multiplyEvenEvenInverse(output);
 	this->multiplyEvenOdd(output, output, ODD);
-	//this->multiplyOddOdd(output, output, ODD);
 	this->multiplyOddOddMinusIdentity(output, input, ODD);
+
+	
 
 	typedef reduced_dirac_vector_t::Layout Layout;
 	
@@ -87,7 +88,7 @@ void EvenOddImprovedDiracWilsonOperator::multiplyEvenEvenInverse(reduced_dirac_v
 							tmp += cloverMatrixInverse[site].at(3*alpha+c,3*beta+b) * antialias[beta][b];//TODO disperazione
 			    			}
 					}
-					output[site][alpha][c] = /*complex<Real>(0.,kappa*cloverTerm/2.)**/tmp;//Factor kappa and 2 and inverse ERRORE
+					output[site][alpha][c] = tmp;
 				}
 			}
 		}

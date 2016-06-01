@@ -8,7 +8,7 @@ endif
 
 CC       = gcc
 CPP      = g++
-OPTIMIZE = -O2 -Wno-unused-local-typedefs -Wall -Wextra -pipe -fopenmp 
+OPTIMIZE = -O2 -Wno-unused-local-typedefs -Wall -Wextra -pipe -fopenmp -mssse3
 INC	= -I./extra_libs/Eigen -I./extra_libs/ -I./source/ -I/home/pis52920/local/usr/include/
 CFLAGS   = $(OPTIMIZE) $(INC)
 CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/utils/MatrixBaseExtension.h\"" -DNUMCOLORS=$(nc) $(adj) -DEIGEN -DMULTITHREADING

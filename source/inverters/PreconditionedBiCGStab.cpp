@@ -113,6 +113,9 @@ bool PreconditionedBiCGStab::solve(DiracOperator* dirac, const reduced_dirac_vec
 		eo->multiplyEvenEvenInverse(even_inverse);
 
 		solution = even_inverse;
+
+		delete eo;
+		delete eo_sq;
 	} else {
 		if (isOutputProcess()) std::cout << "PreconditionedBiCGStab::Not using even-odd preconditioning ... " << std::endl;
 		solution = source;

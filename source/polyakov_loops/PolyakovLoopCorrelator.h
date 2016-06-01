@@ -18,6 +18,8 @@ public:
 	~PolyakovLoopCorrelator();
 
 	virtual void execute(environment_t& environment);
+
+	static void registerParameters(po::options_description&);
 };
 
 } /* namespace Update */
