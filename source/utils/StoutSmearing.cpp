@@ -8,6 +8,7 @@
 #include "StoutSmearing.h"
 #include "actions/WilsonGaugeAction.h"
 #include "utils/ToString.h"
+#include "wilson_loops/Plaquette.h"
 
 namespace Update {
 
