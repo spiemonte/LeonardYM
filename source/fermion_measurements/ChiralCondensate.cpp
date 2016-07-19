@@ -52,7 +52,11 @@ void ChiralCondensate::execute(environment_t& environment) {
 	long_real_t volume = environment.gaugeLinkConfiguration.getLayout().globalVolume;
 
 	if (inverter == 0) {
-		inverter = new PreconditionedBiCGStab();
+		PreconditionedBiCGStab* p_inverter = new PreconditionedBiCGStab();
+		if (environment.configurations.get<std::string>("ChiralCondensate::use_even_odd_preconditioning") != "true") {
+                        p_inverter->setUseEvenOddPreconditioning(false);
+                }
+		inverter = p_inverter;
 		inverter->setMaximumSteps(environment.configurations.get<unsigned int>("ChiralCondensate::inverter_max_steps"));
 		inverter->setPrecision(environment.configurations.get<real_t>("ChiralCondensate::inverter_precision"));
 	}
@@ -156,6 +160,7 @@ void ChiralCondensate::registerParameters(po::options_description& desc) {
 		("ChiralCondensate::inverter_max_steps", po::value<unsigned int>()->default_value(5000), "set the maximum steps used by the inverter")
 		("ChiralCondensate::measure_condensate_connected", po::value<std::string>()->default_value("false"), "Should we measure the connected part of the condensate?")
 		("ChiralCondensate::rho_stout_smearing", po::value<real_t>(), "set the stout smearing parameter")
+		("ChiralCondensate::use_even_odd_preconditioning", po::value<std::string>()->default_value("true"), "use the even odd preconditioning?")
 		("ChiralCondensate::levels_stout_smearing", po::value<unsigned int>(), "levels of stout smearing")
 	;
 }

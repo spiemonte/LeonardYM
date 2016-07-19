@@ -30,7 +30,10 @@ public:
 #ifdef ENABLE_MPI
 	bool solve(DiracOperator* dirac, const extended_dirac_vector_t& source, extended_dirac_vector_t& solution, DiracOperator* preconditioner, extended_dirac_vector_t const* initial_guess = 0);
 #endif
+	
+	void setUseEvenOddPreconditioning(bool);
 private:
+	bool useEvenOddPreconditioning;
 	BiConjugateGradient* biConjugateGradient;
 };
 

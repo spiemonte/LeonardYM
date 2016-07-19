@@ -8,7 +8,7 @@ endif
 
 CC       = gcc
 CPP      = g++
-OPTIMIZE = -O3 -ffast-math -pipe -march=corei7 -fomit-frame-pointer -fopenmp -I/share/Applic.PALMA/boost/boost-trunk
+OPTIMIZE = -O2 -pipe -march=corei7 -fomit-frame-pointer -fopenmp -I/share/Applic.PALMA/boost/boost-trunk
 INC	= -I./extra_libs/Eigen -I./source/
 CFLAGS   = $(OPTIMIZE) $(INC)
 CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/utils/MatrixBaseExtension.h\"" $(adj) -DNUMCOLORS=$(nc) -DMULTITHREADING -DEIGEN

@@ -11,9 +11,9 @@
 
 namespace Update {
 
-PreconditionedBiCGStab::PreconditionedBiCGStab(const PreconditionedBiCGStab& toCopy) : Solver(toCopy), biConjugateGradient(0) { }
+PreconditionedBiCGStab::PreconditionedBiCGStab(const PreconditionedBiCGStab& toCopy) : Solver(toCopy), useEvenOddPreconditioning(true), biConjugateGradient(0) { }
 
-PreconditionedBiCGStab::PreconditionedBiCGStab() : Solver(), biConjugateGradient(0) { }
+PreconditionedBiCGStab::PreconditionedBiCGStab() : Solver(), useEvenOddPreconditioning(true), biConjugateGradient(0) { }
 
 PreconditionedBiCGStab::~PreconditionedBiCGStab() {
 	if (biConjugateGradient != 0) delete biConjugateGradient;
@@ -47,7 +47,7 @@ bool PreconditionedBiCGStab::solve(DiracOperator* dirac, const reduced_dirac_vec
 		biConjugateGradient->setPrecision(this->getPrecision());
 	}
 
-	if (dynamic_cast<ImprovedDiracWilsonOperator*>(dirac) && (Layout::glob_x % 2 == 0) && (Layout::glob_y % 2 == 0) && (Layout::glob_z % 2 == 0) && (Layout::glob_t % 2 == 0)) {
+	if (dynamic_cast<ImprovedDiracWilsonOperator*>(dirac) && (Layout::glob_x % 2 == 0) && (Layout::glob_y % 2 == 0) && (Layout::glob_z % 2 == 0) && (Layout::glob_t % 2 == 0) && useEvenOddPreconditioning) {
 		ImprovedDiracWilsonOperator* dirac_improved = dynamic_cast<ImprovedDiracWilsonOperator*>(dirac);
 		
 		SquareEvenOddImprovedDiracWilsonOperator* eo_sq = new SquareEvenOddImprovedDiracWilsonOperator();
@@ -133,6 +133,10 @@ bool PreconditionedBiCGStab::solve(DiracOperator* dirac, const reduced_dirac_vec
 
 	lastSteps = biConjugateGradient->getLastSteps();
 	return res;
+}
+
+void PreconditionedBiCGStab::setUseEvenOddPreconditioning(bool _useEvenOddPreconditioning) {
+	useEvenOddPreconditioning = _useEvenOddPreconditioning;	
 }
 
 } /* namespace Update */
