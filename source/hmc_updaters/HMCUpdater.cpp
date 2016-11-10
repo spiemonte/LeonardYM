@@ -52,8 +52,8 @@ void HMCUpdater::randomMomenta(extended_gauge_lattice_t& momenta) {
 					real_t realPart = (*randomNormal[omp_get_thread_num()])()/2.;
 					real_t imagPart = (*randomNormal[omp_get_thread_num()])()/2.;
 #endif
-					momenta[position][mu].at(i,j) = std::complex<real_t>(realPart,imagPart);
-					momenta[position][mu].at(j,i) = std::complex<real_t>(-realPart,imagPart);
+					momenta(position, mu).at(i,j) = std::complex<real_t>(realPart,imagPart);
+					momenta(position, mu).at(j,i) = std::complex<real_t>(-realPart,imagPart);
 				}
 			}
 			for (int i = 0; i < numberColors; ++i) {
