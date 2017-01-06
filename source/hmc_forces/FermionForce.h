@@ -1,8 +1,9 @@
-// Author: Stefano Piemonte, (C) 2017
-//
-// Copyright: See COPYING file that comes with this distribution
-//
-//
+/*
+ * FermionForce.h
+ *
+ *  Created on: Apr 17, 2012
+ *      Author: spiem_01
+ */
 
 #ifndef FERMIONFORCE_H_
 #define FERMIONFORCE_H_
@@ -12,53 +13,26 @@
 
 namespace Update {
 
-template <class TLinkConfig, class TFermionLinkConfig, class TVector> class FermionForce {
+class FermionForce {
 public:
-	typedef typename TLinkConfig::TMatrix TMatrix;
-	typedef typename TLinkConfig::MatrixLib MatrixLib;
-	typedef typename TLinkConfig::Real Real;
-	//We need full color complex matrices even in the adjoint case
-	typedef typename PlainMatrixLibrary<std::complex<Real>, TVector::grouplength>::TMatrix FermionicForceMatrix;
-	typedef typename PlainMatrixLibrary<std::complex<Real>, TVector::grouplength> FermionicForceMatrixLib;
-	//Color vector
-	typedef typename TVector::GroupVector TGroupVector;
+	FermionForce(real_t _kappa);
+	virtual ~FermionForce();
 
-	FermionForce(Real _kappa) : kappa(_kappa) { }
-	virtual ~FermionForce() { }
+	virtual FermionicForceMatrix derivative(const extended_fermion_lattice_t& lattice, const extended_dirac_vector_t& X, const extended_dirac_vector_t& Y, int site, int mu) const = 0;
 
-	virtual FermionicForceMatrix derivative(const TFermionLinkConfig& lattice, const TVector& X, const TVector& Y, int site, int mu) const = 0;
+	GaugeGroup force(const environment_t& env, const FermionicForceMatrix& derivative, int site, unsigned int mu);
 
-	TMatrix force(const TFermionLinkConfig& fermionLinkConfig, const FermionicForceMatrix& derivative, int site, unsigned int mu) {
-		TMatrix result;
-		MatrixLib::setToZero(result);
-		//For every generator
-		for (unsigned int i = 0; i < fermionLieGenerator.numberGenerators(); ++i) {
-			result += -I*imag(trace(derivative*fermionLieGenerator.get(i)*fermionLinkConfig[site][mu]))*gaugeLieGenerator.get(i);
-		}
-		return result;
-	}
-
-	//Required by the clover term force
-	virtual void setLattice(const TFermionLinkConfig& ) { }
+	virtual void setLattice(const extended_fermion_lattice_t& ) { }
 
 protected:
-	Real kappa;
+	real_t kappa;
 	
-	//ExponentialMap expMap;
+	ExponentialMap expMap;
 
-	FermionicForceMatrix tensor(const TGroupVector& x, const TGroupVector& y) const {
-		FermionicForceMatrix result;
-		FermionicForceMatrixLib::setToZero(result);
-		for (int i = 0; i < TVector::grouplength; ++i) {
-			for (int j = 0; j < TVector::grouplength; ++j) {
-				result(i,j) = y[i]*conj(x[j]);
-			}
-		}
-		return result;
-	}
+	FermionicForceMatrix tensor(const GaugeVector& x, const GaugeVector& y) const;
 
-	LieGenerator<TFermionLinkConfig::TMatrix> fermionLieGenerator;
-	LieGenerator<TLinkConfig::TMatrix> gaugeLieGenerator;
+	LieGenerator<FermionicGroup> fermionLieGenerator;
+	LieGenerator<GaugeGroup> gaugeLieGenerator;
 };
 
 } /* namespace Update */
