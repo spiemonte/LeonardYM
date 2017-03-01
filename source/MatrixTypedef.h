@@ -15,7 +15,7 @@
 #endif
 
 #ifdef MULTITHREADING
-#include <omp.h>
+//#include <omp.h>
 #endif
 
 #ifdef EIGEN

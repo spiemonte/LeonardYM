@@ -381,8 +381,7 @@ void XSpaceCorrelators::execute(environment_t& environment) {
 					}
 				}
 			}
-			reduceAllSum(result_connected[gamma_index].real());
-			reduceAllSum(result_connected[gamma_index].imag());
+			reduceAllSum(result_connected[gamma_index]);
 		}
 
 		if (environment.measurement && isOutputProcess()) {

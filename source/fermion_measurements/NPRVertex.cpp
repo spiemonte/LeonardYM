@@ -240,14 +240,12 @@ void NPRVertex::execute(environment_t& environment) {
 	//... from the MPI processes
 	for (int i = 0; i < 4*diracVectorLength; ++i) {
 		for (int j = 0; j < 4*diracVectorLength; ++j) {
-			reduceAllSum(propagator[i][j].real());
-			reduceAllSum(propagator[i][j].imag());
+			reduceAllSum(propagator[i][j]);
 			//Correct normalization
 			long_real_t factor = 2.*diracOperator->getKappa();
 			propagator[i][j] = factor*propagator[i][j]/static_cast<long_real_t>(Layout::globalVolume);
 			for (int v = 0; v < 16; ++v) {
-				reduceAllSum(vertex[v][i][j].real());
-				reduceAllSum(vertex[v][i][j].imag());
+				reduceAllSum(vertex[v][i][j]);
 				vertex[v][i][j] = factor*factor*vertex[v][i][j]/static_cast<long_real_t>(Layout::globalVolume);
 			}
 		}

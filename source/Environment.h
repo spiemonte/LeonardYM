@@ -127,6 +127,21 @@ template<typename T> void switchSpatialAntiperiodicBc(T& lattice) {
 	//lattice.updateHalo(); TODO
 }
 
+template<typename T> void switchFullAntiperiodicBc(T& lattice) {
+        typedef typename T::Layout LT;
+#pragma omp parallel for
+        for (int site = 0; site < lattice.completesize; ++site) {
+		if (LT::globalIndexX(site) == (LT::glob_x - 1)) {
+			lattice[site][0] = -lattice[site][0];
+			std::cout << LT::globalIndexX(site) << " " << LT::globalIndexY(site) << " " << LT::globalIndexZ(site) << " " << LT::globalIndexT(site) << std::endl; 
+		}
+		//if (LT::globalIndexY(site) == (LT::glob_y - 1)) lattice[site][1] = -lattice[site][1];
+		//if (LT::globalIndexZ(site) == (LT::glob_z - 1)) lattice[site][2] = -lattice[site][2];
+		//if (LT::globalIndexT(site) == (LT::glob_t - 1)) lattice[site][3] = -lattice[site][3];
+        }
+        //lattice.updateHalo(); TODO
+}
+
 template<typename T> void switchOpenBc(T& lattice) {
 	typedef typename T::Layout LT;
 #pragma omp parallel for
@@ -196,6 +211,9 @@ public:
 			else if (bc == "fermion_spatial_antiperiodic") {
 				switchSpatialAntiperiodicBc(lattice);
 			}
+			else if (bc == "fermion_full_antiperiodic") {
+				switchFullAntiperiodicBc(lattice);
+			}
 			else if (bc == "fermion_periodic") {
 
 			}
@@ -264,7 +282,7 @@ inline void reduceAllSum(double&) { }
 #ifdef ENABLE_MPI
 inline void reduceAllSum(float& value) {
 	float result = value;
-	MPI_Allreduce(&value, &result, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+	MPI_Allreduce(&value, &result, 1, MPI_FLOAT, MPI_SUM, MPI_COMM_WORLD);
 	value = result;
 }
 #endif
@@ -285,10 +303,11 @@ inline void reduceAllSum(int&) { }
 
 #ifdef ENABLE_MPI
 inline void reduceAllSum(std::complex<double>& value) {
-	std::complex<double> result = value;
-	MPI_Allreduce(&value.real(), &result.real(), 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-	MPI_Allreduce(&value.imag(), &result.imag(), 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-	value = result;
+	double reValue = real(value), reResult;
+	double imValue = imag(value), imResult;
+	MPI_Allreduce(&reValue, &reResult, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+	MPI_Allreduce(&imValue, &imResult, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+	value = std::complex<double>(reResult,imResult);
 }
 #endif
 #ifndef ENABLE_MPI
@@ -296,11 +315,25 @@ inline void reduceAllSum(std::complex<double>&) { }
 #endif
 
 #ifdef ENABLE_MPI
+inline void reduceAllSum(std::complex<long double>& value) {
+        long double reValue = real(value), reResult;
+        long double imValue = imag(value), imResult;
+        MPI_Allreduce(&reValue, &reResult, 1, MPI_LONG_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+        MPI_Allreduce(&imValue, &imResult, 1, MPI_LONG_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+        value = std::complex<long double>(reResult,imResult);
+}
+#endif
+#ifndef ENABLE_MPI
+inline void reduceAllSum(std::complex<long double>&) { }
+#endif
+
+#ifdef ENABLE_MPI
 inline void reduceAllSum(std::complex<float>& value) {
-	std::complex<float> result = value;
-	MPI_Allreduce(&value.real(), &result.real(), 1, MPI_FLOAT, MPI_SUM, MPI_COMM_WORLD);
-	MPI_Allreduce(&value.imag(), &result.imag(), 1, MPI_FLOAT, MPI_SUM, MPI_COMM_WORLD);
-	value = result;
+	float reValue = real(value), reResult;
+        float imValue = imag(value), imResult;
+	MPI_Allreduce(&reValue, &reResult, 1, MPI_FLOAT, MPI_SUM, MPI_COMM_WORLD);
+	MPI_Allreduce(&imValue, &imResult, 1, MPI_FLOAT, MPI_SUM, MPI_COMM_WORLD);
+	value = std::complex<float>(reResult,imResult);
 }
 #endif
 #ifndef ENABLE_MPI

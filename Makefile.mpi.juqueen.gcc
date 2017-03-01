@@ -6,17 +6,17 @@ else
 	adj = -DADJOINT
 endif
 
-CC       = mpig++
-CPP      = mpigcc
-OPTIMIZE = -O3 -ffast-math -Wno-attributes -fopenmp
-INC	     = -I./extra_libs/Eigen  -I/bgsys/local/boost/1.47.0/ -I./source/
+CC       = mpigcc
+CPP      = mpig++
+OPTIMIZE = -O2 -Wno-attributes -fopenmp
+INC	 = -I./extra_libs/Eigen  -I./source/ -I/homec/hms19/hms195/boost/include/
 CFLAGS   = $(OPTIMIZE) $(INC)
 CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/utils/MatrixBaseExtension.h\"" $(adj) -DENABLE_MPI -DNUMCOLORS=$(nc) -DMULTITHREADING -DEIGEN
 
 include Makefile.obj.mk
 
 all: leonardQCD
-	$(CPP) $(CPPFLAGS) $(OBJECTS) -o leonardQCD.exe /homec/hhh04/hhh041/boost_1_47_0/bin.v2/libs/program_options/build/gcc-4.4.6/release/link-static/threading-multi/libboost_program_options.a -lm -static
+	$(CPP) $(CPPFLAGS) $(OBJECTS) -o leonardQCD.exe /homec/hms19/hms195/boost/lib/libboost_program_options.a -lm -static
 	@echo "Compiled with NUMCOLORS: " $(nc)
 
 leonardQCD: $(OBJECTS)

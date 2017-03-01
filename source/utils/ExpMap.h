@@ -123,7 +123,7 @@ public:
 		std::complex<real_t> dumexp2(cos(2.*u),sin(2.*u));
 		std::complex<real_t> dumexp1(cos(u),-sin(u));
 
-		if(abs(w)<0.05) ksi=1.-(1./6.)*w*w*(1.-(1./20.)*w*w*(1.-(1./42.)*w*w));
+		if(fabs(w)<0.05) ksi=1.-(1./6.)*w*w*(1.-(1./20.)*w*w*(1.-(1./42.)*w*w));
 		else ksi=sin(w)/w;
 
 		h0=(u*u-w*w)*dumexp2+dumexp1*(8.*u*u*cos(w)+2.*u*std::complex<real_t>(0.0,1.0)*(3.*u*u+w*w)*ksi);
