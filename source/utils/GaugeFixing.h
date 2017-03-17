@@ -14,7 +14,9 @@ public:
 
 	void generateRandomGaugeTransformation(extended_matrix_lattice_t& gauge_transformation, real_t epsilon);
 
-	void transform(extended_gauge_lattice_t& lattice, const extended_matrix_lattice_t& gauge_transformation);
+	void transform(extended_gauge_lattice_t& lattice, const extended_matrix_lattice_t& gauge_transformation) const;
+
+	void getLieAlgebraField(extended_gauge_lattice_t& Afield, const extended_gauge_lattice_t& lattice) const;
 
 	bool metropolis(real_t delta);
 

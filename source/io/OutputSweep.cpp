@@ -420,7 +420,7 @@ void OutputSweep::execute(environment_t& environment) {
 #endif
 #if NUMCOLORS > 3
 		if (isOutputProcess()) {
-			std::cout << "OuputSweep::munster_format not implemented for NC>2!" << std::endl;
+			std::cout << "OuputSweep::munster_format not implemented for NC>3!" << std::endl;
 		}
 #endif
 	}

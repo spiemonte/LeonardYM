@@ -87,15 +87,33 @@ void GaugeFixing::generateRandomGaugeTransformation(extended_matrix_lattice_t& g
 	gauge_transformation.updateHalo();
 }
 
-void GaugeFixing::transform(extended_gauge_lattice_t& lattice, const extended_matrix_lattice_t& gauge_transformation) {
+void GaugeFixing::transform(extended_gauge_lattice_t& lattice, const extended_matrix_lattice_t& gauge_transformation) const {
 	typedef extended_matrix_lattice_t LT;
 
 #pragma omp parallel for
 	for (int site = 0; site < gauge_transformation.localsize; ++site) {
-		for (unsigned int mu = 0; mu < 4; ++mu) lattice[site][mu] = htrans(gauge_transformation[site])*lattice[site][mu]*gauge_transformation[LT::sup(site,mu)];
+		for (unsigned int mu = 0; mu < 4; ++mu) lattice[site][mu] = gauge_transformation[site]*lattice[site][mu]*htrans(gauge_transformation[LT::sup(site,mu)]);
 	}
 
 	lattice.updateHalo();
+}
+
+void GaugeFixing::getLieAlgebraField(extended_gauge_lattice_t& Afield, const extended_gauge_lattice_t& lattice) const {
+	typedef extended_matrix_lattice_t LT;
+
+#pragma omp parallel for
+	for (int site = 0; site < lattice.localsize; ++site) {
+		for (unsigned int mu = 0; mu < 4; ++mu) {
+			Afield[site][mu] = lattice[site][mu] - htrans(lattice[site][mu]);
+			std::complex<real_t> tr = trace(Afield[site][mu]);
+			for (int i = 1; i < numberColors; ++i) {
+				Afield[site][mu].at(i,i) -= tr/static_cast<real_t>(numberColors);
+			}
+			Afield[site][mu] = Afield[site][mu]/(std::complex<real_t>(0.,2.));
+		}
+	}
+
+	Afield.updateHalo();
 }
 
 bool GaugeFixing::metropolis(real_t delta) {
