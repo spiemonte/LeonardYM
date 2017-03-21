@@ -1,4 +1,4 @@
-nc = 2
+nc = 3
 
 ifeq ($(adjoint),false)
 	adj = 
@@ -6,8 +6,8 @@ else
 	adj = -DADJOINT
 endif
 
-CC       = mpigcc
-CPP      = mpicxx
+CC       = mpigcc.mpich
+CPP      = mpicxx.mpich
 OPTIMIZE = -O2 -pipe -march=native -fopenmp #-Wall -Wextra
 INC	= -I./extra_libs/Eigen -I./extra_libs/ -I./source/
 CFLAGS   = $(OPTIMIZE) $(INC)
