@@ -105,11 +105,11 @@ void GaugeFixing::getLieAlgebraField(extended_gauge_lattice_t& Afield, const ext
 	for (int site = 0; site < lattice.localsize; ++site) {
 		for (unsigned int mu = 0; mu < 4; ++mu) {
 			Afield[site][mu] = lattice[site][mu] - htrans(lattice[site][mu]);
+			Afield[site][mu] = Afield[site][mu]/(std::complex<real_t>(0.,2.));
 			std::complex<real_t> tr = trace(Afield[site][mu]);
-			for (int i = 1; i < numberColors; ++i) {
+			for (int i = 0; i < numberColors; ++i) {
 				Afield[site][mu].at(i,i) -= tr/static_cast<real_t>(numberColors);
 			}
-			Afield[site][mu] = Afield[site][mu]/(std::complex<real_t>(0.,2.));
 		}
 	}
 

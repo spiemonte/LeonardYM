@@ -20,6 +20,8 @@ public:
 	static void registerParameters(po::options_description&);
 protected:
 	long_real_t functional(const extended_gauge_lattice_t& lattice);
+
+	long_real_t deviation(const extended_gauge_lattice_t& lattice) const;
 };
 
 }

@@ -25,7 +25,7 @@ public:
 	 */
 	virtual void execute(environment_t& environment);
 
-	static void readConfiguration(environment_t& environment, int numberConfiguration);
+	static bool readConfiguration(environment_t& environment, int numberConfiguration);
 
 private:
 	/*

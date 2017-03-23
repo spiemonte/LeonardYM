@@ -223,8 +223,8 @@ void LandauGaugeFixing::execute(environment_t& environment) {
 
 	for (unsigned int i = 0; i < local_steps; ++i) {
 		if ((i) % static_cast<int>(local_steps/(environment.configurations.get<unsigned int>("LandauGaugeFixing::output_steps"))) == 0 && isOutputProcess()) {
-			std::cout << "LandauGaugeFixing::Maximal functional at step " << i  << ": " << maximalFunctionalValue << std::endl;
-			if (i > 0) std::cout << "LandauGaugeFixing::   convergence: " << convergence << std::endl;
+			if (isOutputProcess()) std::cout << "LandauGaugeFixing::Maximal functional at step " << i  << ": " << maximalFunctionalValue << std::endl;
+			if (i > 0 && isOutputProcess()) std::cout << "LandauGaugeFixing::   convergence: " << convergence << std::endl;
 			if (fabs(convergence) < environment.configurations.get<real_t>("LandauGaugeFixing::precision") && i > 0) break;
 			convergence = 0;
 		}
@@ -238,12 +238,56 @@ void LandauGaugeFixing::execute(environment_t& environment) {
 			convergence += newFunctional - maximalFunctionalValue;
 			maximalFunctionalValue = newFunctional;
 			maximum = tmp;
-			acceptance1 += 1.;
 		}
+
+		/*tmp = maximum;
+		this->generateRandomGaugeTransformation(gauge_transformation, epsilon1);
+
+		for (int site = 0; site < tmp.localsize; ++site) {
+			GaugeGroup oldS[4], oldD[4];
+			real_t resultOld = 0.;
+			for (unsigned int mu = 0; mu < 4; ++mu) {
+				resultOld += real(trace(tmp[site][mu]));
+				oldS[mu] = tmp[site][mu];
+				resultOld += real(trace(tmp[LT::sdn(site,mu)][mu]));
+				oldD[mu] = tmp[LT::sdn(site,mu)][mu];
+			}
+	
+			for (unsigned int mu = 0; mu < 4; ++mu) {
+				tmp[site][mu] = htrans(gauge_transformation[site])*tmp[site][mu];
+				tmp[LT::sdn(site,mu)][mu] = tmp[LT::sdn(site,mu)][mu]*gauge_transformation[site];
+			}
+	
+			real_t resultNew = 0.;
+			for (unsigned int mu = 0; mu < 4; ++mu) {
+				resultNew += real(trace(tmp[site][mu]));
+				resultNew += real(trace(tmp[LT::sdn(site,mu)][mu]));
+			}
+
+			if (resultNew < resultOld) {
+				for (unsigned int mu = 0; mu < 4; ++mu) {
+					tmp[site][mu] = oldS[mu];
+					tmp[LT::sdn(site,mu)][mu] = oldD[mu];
+				}
+			}
+			
+		}
+
+		newFunctional = functional(tmp);
+		if (newFunctional - maximalFunctionalValue > 0.) {
+			std::cout << "Giusto per: " << newFunctional - maximalFunctionalValue << std::endl;
+			convergence += newFunctional - maximalFunctionalValue;
+			maximalFunctionalValue = newFunctional;
+			maximum = tmp;
+			acceptance1 += 1.;
+		}*/
+		
 	}
 
 	environment.gaugeLinkConfiguration = maximum;
 	environment.synchronize();
+
+	if (isOutputProcess()) std::cout << "LandauGaugeFixing::Final deviation from the Landau gauge: " << this->deviation(environment.gaugeLinkConfiguration) << std::endl;
 }
 
 long_real_t LandauGaugeFixing::functional(const extended_gauge_lattice_t& lattice) {
@@ -258,6 +302,28 @@ long_real_t LandauGaugeFixing::functional(const extended_gauge_lattice_t& lattic
 
 	reduceAllSum(result);
 	return result;
+}
+
+long_real_t LandauGaugeFixing::deviation(const extended_gauge_lattice_t& lattice) const {
+	typedef extended_matrix_lattice_t LT;
+	typedef extended_matrix_lattice_t::Layout Layout;
+
+	extended_gauge_lattice_t Afield;
+	this->getLieAlgebraField(Afield, lattice);
+
+	real_t convergence = 0.;
+#pragma omp parallel for reduction(+:convergence)
+	for (int site = 0; site < Afield.localsize; ++site) {
+		GaugeGroup dmu;
+		set_to_zero(dmu);
+		for (unsigned int mu = 0; mu < 4; ++mu) {
+			dmu += (Afield[site][mu]-Afield[LT::sdn(site,mu)][mu]);
+		}
+		convergence += real(trace(dmu*htrans(dmu)));
+	}
+
+	reduceAllSum(convergence);
+	return convergence/static_cast<real_t>(Layout::globalVolume);
 }
 
 void LandauGaugeFixing::registerParameters(po::options_description& desc) {

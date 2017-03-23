@@ -178,6 +178,9 @@ GaugeFixing.o: ./source/utils/GaugeFixing.h ./source/utils/GaugeFixing.cpp
 LandauGaugeFixing.o: ./source/utils/LandauGaugeFixing.h ./source/utils/LandauGaugeFixing.cpp
 	$(CPP) $(CPPFLAGS) -c -o LandauGaugeFixing.o ./source/utils/LandauGaugeFixing.cpp
 
+LandauPropagator.o: ./source/utils/LandauPropagator.h ./source/utils/LandauPropagator.cpp
+	$(CPP) $(CPPFLAGS) -c -o LandauPropagator.o ./source/utils/LandauPropagator.cpp
+
 MaximalAbelianGaugeFixing.o: ./source/utils/MaximalAbelianGaugeFixing.h ./source/utils/MaximalAbelianGaugeFixing.cpp
 	$(CPP) $(CPPFLAGS) -c -o MaximalAbelianGaugeFixing.o ./source/utils/MaximalAbelianGaugeFixing.cpp
 
