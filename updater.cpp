@@ -38,6 +38,7 @@ MPI_Datatype MpiType<Update::FundamentalGroup[6]>::type = MPI_DOUBLE;
 MPI_Datatype MpiType<Update::AdjointGroup[6]>::type = MPI_DOUBLE;
 MPI_Datatype MpiType<Update::FundamentalVector[4]>::type = MPI_DOUBLE;
 MPI_Datatype MpiType<Update::AdjointVector[4]>::type = MPI_DOUBLE;
+MPI_Datatype MpiType<Update::AdjointVector>::type = MPI_DOUBLE;
 MPI_Datatype MpiType<Update::FundamentalGroup>::type = MPI_DOUBLE;
 MPI_Datatype MpiType<Update::AdjointGroup>::type = MPI_DOUBLE;
 #ifdef ADJOINT

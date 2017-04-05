@@ -74,6 +74,12 @@ template<> class MpiType<Update::AdjointVector[4]> {
 		static MPI_Datatype type;
 };
 
+template<> class MpiType<Update::AdjointVector> {
+        public:
+                static const int size = 8;
+                static MPI_Datatype type;
+};
+
 template<> class MpiType<Update::single_FundamentalVector[4]> {
 	public:
 		static const int size = sizeof(float);
