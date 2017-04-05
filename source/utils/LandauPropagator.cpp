@@ -25,7 +25,7 @@ void LandauPropagator::ghostMatrix(extended_adjoint_color_vector_t& output, cons
 	output.updateHalo();
 }
 
-bool LandauPropagator::ghostPropagator(std::complex<real_t>& result, const extended_gauge_lattice_t& lattice, const std::vector<real_t>& momentum, int c, real_t epsilon, unsigned int max_steps) const {
+bool LandauPropagator::ghostPropagatorCG(std::complex<real_t>& result, const extended_gauge_lattice_t& lattice, const std::vector<real_t>& momentum, int c, real_t epsilon, unsigned int max_steps) const {
 	extended_adjoint_lattice_t A, B, C;
 	typedef extended_adjoint_color_vector_t LT;
 	typedef extended_adjoint_color_vector_t::Layout Layout;
@@ -177,6 +177,236 @@ bool LandauPropagator::ghostPropagator(std::complex<real_t>& result, const exten
 
 }
 
+bool LandauPropagator::ghostPropagatorBiCGStab(std::complex<real_t>& result, const extended_gauge_lattice_t& lattice, const std::vector<real_t>& momentum, int c, real_t epsilon, unsigned int max_steps) const {
+	extended_adjoint_lattice_t A, B, C;
+	typedef extended_adjoint_color_vector_t LT;
+	typedef extended_adjoint_color_vector_t::Layout Layout;
+
+	LieGenerator<GaugeGroup> lieGenerators;
+	
+#pragma omp parallel for
+	for (int site = 0; site < A.localsize; ++site) {
+		for (unsigned int mu = 0; mu < 4; ++mu) {
+			for (unsigned int a = 0; a < lieGenerators.numberGenerators(); ++a) {
+				for (unsigned int b = 0; b < lieGenerators.numberGenerators(); ++b) {
+					A[site][mu].at(a,b) = real(trace( (lieGenerators.get(a)*lieGenerators.get(b) + lieGenerators.get(b)*lieGenerators.get(a)) *(lattice[site][mu] + lattice[LT::sdn(site,mu)][mu]) ));
+					B[site][mu].at(a,b) = 2.*real(trace( lieGenerators.get(b)*lieGenerators.get(a)*lattice[site][mu] ));
+					C[site][mu].at(a,b) = 2.*real(trace( lieGenerators.get(a)*lieGenerators.get(b)*lattice[LT::sdn(site,mu)][mu] ));
+				}
+			}
+		}
+	}
+	A.updateHalo();
+	B.updateHalo();
+	C.updateHalo();
+
+	extended_adjoint_color_vector_t ghost;
+	extended_adjoint_color_vector_t source, tmp, residual, p, s, t, nu, residual_hat;
+#pragma omp parallel for
+	for (int site = 0; site < source.localsize; ++site) {
+		real_t phase = 	   Layout::globalIndexX(site)*momentum[0]
+					+ Layout::globalIndexY(site)*momentum[1] 
+					+ Layout::globalIndexZ(site)*momentum[2] 
+					+ Layout::globalIndexT(site)*momentum[3] ;
+		set_to_zero(source[site]);
+		source[site][c] = std::complex<real_t>(cos(phase),sin(phase));
+	}
+
+	ghost = source;
+	
+	//Use p as temporary vector
+	this->ghostMatrix(p,ghost,A,B,C);
+
+	//Set the initial residual to source-A.solution and residual_hat accordingly
+#pragma omp parallel for
+	for (int site = 0; site < ghost.completesize; ++site) {
+		residual[site] = source[site] - p[site];
+		residual_hat[site] = source[site] + p[site];
+	}
+
+	//Set nu and p to zero
+#pragma omp parallel for
+	for (int site = 0; site < ghost.completesize; ++site) {
+		set_to_zero(p[site]);
+		set_to_zero(nu[site]);
+	}
+
+	//Set the initial parameter of the program
+	std::complex<real_t> alpha = 1., omega = 1.;
+	std::complex<long_real_t> rho = 1.;
+	unsigned int step = 0;
+	real_t minimal_norm = 10000.;
+
+	while (step < max_steps) {
+		//rho[k] = rhat.r[k-1]
+		long_real_t rho_next_re = 0.;
+		long_real_t rho_next_im = 0.;
+#pragma omp parallel for reduction(+:rho_next_re, rho_next_im)
+		for (int site = 0; site < ghost.localsize; ++site) {
+			std::complex<real_t> partial = vector_dot(residual_hat[site],residual[site]);
+			rho_next_re += real(partial);
+			rho_next_im += imag(partial);
+		}
+		reduceAllSum(rho_next_re);
+		reduceAllSum(rho_next_im);
+
+		std::complex<long_real_t> rho_next(rho_next_re,rho_next_im);
+
+		if (norm(rho_next) == 0.) {
+			if (isOutputProcess()) std::cout << "LandauPropagator::Fatal error in norm " << rho_next << " at step " << step << " in BiCGStab!"<< std::endl;
+			return false;//TODO
+		}
+
+		std::complex<real_t> beta = static_cast< std::complex<real_t> >((rho_next/rho))*(alpha/omega);
+		//p = r[[k - 1]] + beta*(p[[k - 1]] - omega[[k - 1]]*nu[[k - 1]])
+#pragma omp parallel for
+		for (int site = 0; site < ghost.completesize; ++site) {
+			p[site] = residual[site] + beta*(p[site] - omega*nu[site]);
+		}
+		//p.updateHalo();
+
+		//nu = A.p[[k]]
+		this->ghostMatrix(nu,p,A,B,C);
+
+		//alpha = rho[[k]]/(rhat[[1]].nu[[k]]);
+		long_real_t alphatmp_re = 0.;
+		long_real_t alphatmp_im = 0.;
+#pragma omp parallel for reduction(+:alphatmp_re, alphatmp_im)
+		for (int site = 0; site < ghost.localsize; ++site) {
+			std::complex<real_t> partial = vector_dot(residual_hat[site],nu[site]);
+			alphatmp_re += real(partial);
+			alphatmp_im += imag(partial);
+		}
+		reduceAllSum(alphatmp_re);
+		reduceAllSum(alphatmp_im);
+
+		std::complex<long_real_t> alphatmp(alphatmp_re,alphatmp_im);
+		alpha = static_cast< std::complex<real_t> >(rho_next/alphatmp);
+
+		//s = r[[k - 1]] - alpha*nu[[k]]
+#pragma omp parallel for
+		for (int site = 0; site < ghost.completesize; ++site) {
+			s[site] = residual[site] - alpha *(nu[site]);
+		}
+		//s.updateHalo();
+
+		//t = A.s;
+		this->ghostMatrix(t,s,A,B,C);
+
+		//omega = (t.s)/(t.t)
+		long_real_t tmp1_re = 0., tmp1_im = 0., tmp2_re = 0., tmp2_im = 0.;
+#pragma omp parallel for reduction(+:tmp1_re, tmp1_im, tmp2_re, tmp2_im)
+		for (int site = 0; site < ghost.localsize; ++site) {
+			std::complex<real_t> partial1 = vector_dot(t[site],s[site]);
+			tmp1_re += real(partial1);
+			tmp1_im += imag(partial1);
+			std::complex<real_t> partial2 = vector_dot(t[site],t[site]);
+			tmp2_re += real(partial2);
+			tmp2_im += imag(partial2);
+		}
+		reduceAllSum(tmp1_re);
+		reduceAllSum(tmp1_im);
+		reduceAllSum(tmp2_re);
+		reduceAllSum(tmp2_im);
+
+		std::complex<long_real_t> tmp1(tmp1_re, tmp1_im), tmp2(tmp2_re, tmp2_im);
+		omega = static_cast< std::complex<real_t> >(tmp1/tmp2);
+
+		if (real(tmp2) == 0) {
+#pragma omp parallel for
+			for (int site = 0; site < ghost.completesize; ++site) {
+				for (unsigned int mu = 0; mu < 4; ++mu) {
+					ghost[site][mu] = source[site][mu];
+				}
+			}
+			//solution.updateHalo();
+			return true;//TODO, identity only?
+		}
+
+		//solution[[k]] = solution[[k - 1]] + alpha*p[[k]] + omega[[k]]*s
+#pragma omp parallel for
+		for (int site = 0; site < ghost.completesize; ++site) {
+			ghost[site] += alpha*(p[site]) + omega*(s[site]);
+		}
+		//solution.updateHalo();
+
+		//residual[[k]] = s - omega[[k]]*t
+		//norm = residual[[k]].residual[[k]]
+		long_real_t norm = 0.;
+#pragma omp parallel for reduction(+:norm)
+		for (int site = 0; site < ghost.localsize; ++site) {
+			residual[site] = s[site] - omega*(t[site]);
+			norm += real(vector_dot(residual[site],residual[site]));
+		}
+		reduceAllSum(norm);
+		residual.updateHalo();//TODO maybe not needed
+
+		if (norm < epsilon) {
+			long_real_t result_re = 0., result_im = 0.;			
+#pragma omp parallel for reduction(+:result_re,result_im)
+			for (int site = 0; site < ghost.localsize; ++site) {
+				real_t phase = 	   Layout::globalIndexX(site)*momentum[0]
+					+ Layout::globalIndexY(site)*momentum[1] 
+					+ Layout::globalIndexZ(site)*momentum[2] 
+					+ Layout::globalIndexT(site)*momentum[3] ;
+				
+				result_re += real(std::complex<real_t>(cos(phase),-sin(phase))*ghost[site][c]);
+				result_im += imag(std::complex<real_t>(cos(phase),-sin(phase))*ghost[site][c]);
+			}
+			reduceAllSum(result_re);
+			reduceAllSum(result_im);
+			result = std::complex<real_t>(result_re,result_im);
+
+
+			this->ghostMatrix(tmp,ghost,A,B,C);
+			long_real_t norm_next = 0.;
+#pragma omp parallel for reduction(+:norm_next)
+			for (int site = 0; site < ghost.localsize; ++site) {
+				for (unsigned int a = 0; a < lieGenerators.numberGenerators(); ++a) {
+					norm_next += real(conj(tmp[site][a]-source[site][a])*(tmp[site][a]-source[site][a]));
+				}
+			}
+			reduceAllSum(norm_next);
+
+			if (isOutputProcess()) std::cout << "LandauPropagator::Final norm for the ghost propagator after " << step << " steps: " << norm_next << std::endl;
+
+			return true;
+		}
+		else if (norm < minimal_norm) {
+			minimal_norm = norm;
+			
+			long_real_t result_re = 0., result_im = 0.;			
+#pragma omp parallel for reduction(+:result_re,result_im)
+			for (int site = 0; site < ghost.localsize; ++site) {
+				real_t phase = 	   Layout::globalIndexX(site)*momentum[0]
+					+ Layout::globalIndexY(site)*momentum[1] 
+					+ Layout::globalIndexZ(site)*momentum[2] 
+					+ Layout::globalIndexT(site)*momentum[3] ;
+				
+				result_re += real(std::complex<real_t>(cos(phase),-sin(phase))*ghost[site][c]);
+				result_im += imag(std::complex<real_t>(cos(phase),-sin(phase))*ghost[site][c]);
+			}
+			reduceAllSum(result_re);
+			reduceAllSum(result_im);
+			result = std::complex<real_t>(result_re,result_im);
+		}
+//#ifdef BICGLOG
+		//else if (isOutputProcess()) std::cout << "Error at step " << step << ": " << norm << std::endl;
+//#endif
+
+		rho = rho_next;
+
+		++step;
+	}
+
+	if (isOutputProcess()) std::cout << "LandauPropagator::Failure in finding convergence after " << max_steps << " bicg cicles, minimal norm found is " << minimal_norm << std::endl;
+	
+	
+	
+	return false;
+
+}
+
 void LandauPropagator::execute(environment_t& environment) {
 	typedef extended_gauge_lattice_t::Layout Layout;//TODO: only vector operations?
 	typedef extended_gauge_lattice_t LT;
@@ -241,8 +471,8 @@ void LandauPropagator::execute(environment_t& environment) {
 		std::vector<real_t> momentum = momenta[i];
 
 		//First we compute the ghost propagator
-		std::complex<real_t> ghost_propagator;
-		this->ghostPropagator(ghost_propagator, environment.gaugeLinkConfiguration, momentum, 0, epsilon, max_steps);
+		std::complex<real_t> ghost_propagator = 0.;
+		if (i != 0) this->ghostPropagatorBiCGStab(ghost_propagator, environment.gaugeLinkConfiguration, momentum, 0, epsilon, max_steps);
 
 
 		std::complex<real_t> resultAk[4][lieGenerators.numberGenerators()], resultAmk[4][lieGenerators.numberGenerators()];
