@@ -59,6 +59,7 @@ bool LandauPropagator::ghostPropagatorCG(std::complex<real_t>& result, const ext
 		set_to_zero(source[site]);
 		source[site][c] = std::complex<real_t>(cos(phase),sin(phase));
 	}
+	source.updateHalo();
 
 	ghost = source;
 	
@@ -211,6 +212,7 @@ bool LandauPropagator::ghostPropagatorBiCGStab(std::complex<real_t>& result, con
 		set_to_zero(source[site]);
 		source[site][c] = std::complex<real_t>(cos(phase),sin(phase));
 	}
+	source.updateHalo();
 
 	ghost = source;
 	
