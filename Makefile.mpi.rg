@@ -7,11 +7,11 @@ else
 endif
 
 CC       = mpigcc
-CPP      = mpig++
+CPP      = mpic++
 OPTIMIZE = -O2 -Wno-unused-local-typedefs -Wall -Wextra -pipe -fopenmp -mssse3
 INC	= -I./extra_libs/Eigen -I./extra_libs/ -I./source/ 
 CFLAGS   = $(OPTIMIZE) $(INC)
-CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/utils/MatrixBaseExtension.h\"" -DNUMCOLORS=$(nc) $(adj) -DEIGEN -DMULTITHREADING -DMPI
+CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/utils/MatrixBaseExtension.h\"" -DNUMCOLORS=$(nc) $(adj) -DEIGEN -DMULTITHREADING -DENABLE_MPI
 
 include Makefile.obj.mk
 

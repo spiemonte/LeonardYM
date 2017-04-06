@@ -452,7 +452,9 @@ void LandauPropagator::execute(environment_t& environment) {
 		delta[mu] = delta_mu;
 	}
 
-	if (isOutputProcess()) std::cout << "LandauPropagator::Deviation from the Landau gauge: " << this->deviation(environment.gaugeLinkConfiguration) << std::endl;
+	real_t convergence = this->deviation(environment.gaugeLinkConfiguration);
+
+	if (isOutputProcess()) std::cout << "LandauPropagator::Deviation from the Landau gauge: " << convergence << std::endl;
 	if (isOutputProcess()) std::cout << "LandauPropagator::Analizing " << momenta.size() << " momenta configurations ..." << std::endl;
 	
 
