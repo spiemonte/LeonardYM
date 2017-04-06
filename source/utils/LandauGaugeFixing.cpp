@@ -311,7 +311,8 @@ long_real_t LandauGaugeFixing::deviation(const extended_gauge_lattice_t& lattice
 	extended_gauge_lattice_t Afield;
 	this->getLieAlgebraField(Afield, lattice);
 
-	real_t convergence = 0.;
+	long_real_t convergence = 0.;
+
 #pragma omp parallel for reduction(+:convergence)
 	for (int site = 0; site < Afield.localsize; ++site) {
 		GaugeGroup dmu;
