@@ -103,9 +103,6 @@ void LandauGaugeFixing::generateOverrelaxationTransformation(extended_matrix_lat
 }
 
 void LandauGaugeFixing::execute(environment_t& environment) {
-	typedef extended_matrix_lattice_t LT;
-	typedef extended_matrix_lattice_t::Layout Layout;
-
 	real_t epsilon1 = environment.configurations.get<real_t>("LandauGaugeFixing::epsilon1");
 	real_t epsilon2 = environment.configurations.get<real_t>("LandauGaugeFixing::epsilon2");
 	real_t epsilon3 = environment.configurations.get<real_t>("LandauGaugeFixing::epsilon3");
@@ -115,13 +112,50 @@ void LandauGaugeFixing::execute(environment_t& environment) {
 	real_t beta3 = environment.configurations.get<real_t>("LandauGaugeFixing::beta3");
 
 	unsigned int steps = environment.configurations.get<unsigned int>("LandauGaugeFixing::steps");
+	unsigned int local_steps = environment.configurations.get<unsigned int>("LandauGaugeFixing::local_steps");
+
+	real_t precision = environment.configurations.get<real_t>("LandauGaugeFixing::precision");
+
+	unsigned int final_steps = environment.configurations.get<unsigned int>("LandauGaugeFixing::final_steps");
+	unsigned int number_copies = environment.configurations.get<unsigned int>("LandauGaugeFixing::number_copies");
+
+	unsigned int output_steps = environment.configurations.get<unsigned int>("LandauGaugeFixing::output_steps");
+
+	std::vector<long_real_t> maximal_values(number_copies);
+	std::vector<extended_gauge_lattice_t> maximals(number_copies);
+	for (unsigned int i = 0; i < number_copies; ++i) {
+		maximals[i] = environment.gaugeLinkConfiguration;
+		maximal_values[i] = this->gaugeFixing(maximals[i], epsilon1, beta1, epsilon2, beta2, epsilon3, beta3, steps, local_steps, precision, output_steps);
+		if (isOutputProcess()) std::cout << "LandauGaugeFixing::Maximal functional for copy " << i << ": " << maximal_values[i] << std::endl;
+	}
+
+	long_real_t maximum = 0.;
+	unsigned int i_maximum = 0;
+	for (unsigned int i = 0; i < number_copies; ++i) {
+		if (maximal_values[i] > maximum) {
+			maximum = maximal_values[i];
+			i_maximum = i;
+		}
+	}
+
+	this->gaugeFixing(maximals[i_maximum], epsilon1, beta1, epsilon2, beta2, epsilon3, beta3, steps, final_steps, precision, output_steps);
+
+	environment.gaugeLinkConfiguration = maximals[i_maximum];
+	environment.synchronize();
+
+	if (isOutputProcess()) std::cout << "LandauGaugeFixing::Final deviation from the Landau gauge: " << this->deviation(environment.gaugeLinkConfiguration) << std::endl;
+}
+
+long_real_t LandauGaugeFixing::gaugeFixing(extended_gauge_lattice_t& lattice, const real_t& epsilon1, const real_t& beta1, const real_t& epsilon2, const real_t& beta2, const real_t& epsilon3, const real_t& beta3, unsigned int steps, unsigned int local_steps, const real_t& precision, unsigned int output_steps) {
+	typedef extended_matrix_lattice_t LT;
+	typedef extended_matrix_lattice_t::Layout Layout;
 
 	real_t acceptance1 = 0., acceptance2 = 0., acceptance3 = 0., acceptancept = 0.;
 
-	extended_gauge_lattice_t gaugeFixed1 = environment.gaugeLinkConfiguration;
-	extended_gauge_lattice_t gaugeFixed2 = environment.gaugeLinkConfiguration;
-	extended_gauge_lattice_t gaugeFixed3 = environment.gaugeLinkConfiguration;
-	extended_gauge_lattice_t maximum     = environment.gaugeLinkConfiguration;
+	extended_gauge_lattice_t gaugeFixed1 = lattice;
+	extended_gauge_lattice_t gaugeFixed2 = lattice;
+	extended_gauge_lattice_t gaugeFixed3 = lattice;
+	extended_gauge_lattice_t maximum     = lattice;
 
 	long_real_t functionalValue1 = functional(gaugeFixed1);
 	long_real_t functionalValue2 = functionalValue1;
@@ -217,15 +251,13 @@ void LandauGaugeFixing::execute(environment_t& environment) {
 
 	acceptance1 = 0., acceptance2 = 0., acceptance3 = 0., acceptancept = 0.;
 
-	unsigned int local_steps = environment.configurations.get<unsigned int>("LandauGaugeFixing::local_steps");
-
 	long_real_t convergence = 0;
 
 	for (unsigned int i = 0; i < local_steps; ++i) {
-		if ((i) % static_cast<int>(local_steps/(environment.configurations.get<unsigned int>("LandauGaugeFixing::output_steps"))) == 0 && isOutputProcess()) {
+		if ((i) % static_cast<int>(local_steps/output_steps) == 0 && isOutputProcess()) {
 			if (isOutputProcess()) std::cout << "LandauGaugeFixing::Maximal functional at step " << i  << ": " << maximalFunctionalValue << std::endl;
 			if (i > 0 && isOutputProcess()) std::cout << "LandauGaugeFixing::   convergence: " << convergence << std::endl;
-			if (fabs(convergence) < environment.configurations.get<real_t>("LandauGaugeFixing::precision") && i > 0) break;
+			if (fabs(convergence) < precision && i > 0) break;
 			convergence = 0;
 		}
 		
@@ -239,55 +271,10 @@ void LandauGaugeFixing::execute(environment_t& environment) {
 			maximalFunctionalValue = newFunctional;
 			maximum = tmp;
 		}
-
-		/*tmp = maximum;
-		this->generateRandomGaugeTransformation(gauge_transformation, epsilon1);
-
-		for (int site = 0; site < tmp.localsize; ++site) {
-			GaugeGroup oldS[4], oldD[4];
-			real_t resultOld = 0.;
-			for (unsigned int mu = 0; mu < 4; ++mu) {
-				resultOld += real(trace(tmp[site][mu]));
-				oldS[mu] = tmp[site][mu];
-				resultOld += real(trace(tmp[LT::sdn(site,mu)][mu]));
-				oldD[mu] = tmp[LT::sdn(site,mu)][mu];
-			}
-	
-			for (unsigned int mu = 0; mu < 4; ++mu) {
-				tmp[site][mu] = htrans(gauge_transformation[site])*tmp[site][mu];
-				tmp[LT::sdn(site,mu)][mu] = tmp[LT::sdn(site,mu)][mu]*gauge_transformation[site];
-			}
-	
-			real_t resultNew = 0.;
-			for (unsigned int mu = 0; mu < 4; ++mu) {
-				resultNew += real(trace(tmp[site][mu]));
-				resultNew += real(trace(tmp[LT::sdn(site,mu)][mu]));
-			}
-
-			if (resultNew < resultOld) {
-				for (unsigned int mu = 0; mu < 4; ++mu) {
-					tmp[site][mu] = oldS[mu];
-					tmp[LT::sdn(site,mu)][mu] = oldD[mu];
-				}
-			}
-			
-		}
-
-		newFunctional = functional(tmp);
-		if (newFunctional - maximalFunctionalValue > 0.) {
-			std::cout << "Giusto per: " << newFunctional - maximalFunctionalValue << std::endl;
-			convergence += newFunctional - maximalFunctionalValue;
-			maximalFunctionalValue = newFunctional;
-			maximum = tmp;
-			acceptance1 += 1.;
-		}*/
-		
 	}
 
-	environment.gaugeLinkConfiguration = maximum;
-	environment.synchronize();
-
-	if (isOutputProcess()) std::cout << "LandauGaugeFixing::Final deviation from the Landau gauge: " << this->deviation(environment.gaugeLinkConfiguration) << std::endl;
+	lattice = maximum;
+	return maximalFunctionalValue;
 }
 
 long_real_t LandauGaugeFixing::functional(const extended_gauge_lattice_t& lattice) {
@@ -339,8 +326,10 @@ void LandauGaugeFixing::registerParameters(po::options_description& desc) {
 
 		("LandauGaugeFixing::steps", po::value<unsigned int>()->default_value(500), "set the number of MC trials")
 		("LandauGaugeFixing::local_steps", po::value<unsigned int>()->default_value(3000), "set the number of local over-relaxation trials")
+		("LandauGaugeFixing::final_steps", po::value<unsigned int>()->default_value(3000), "set the number of final local over-relaxation trials")
 		("LandauGaugeFixing::precision", po::value<real_t>()->default_value(0.000000000001), "Set the covergence precision")
 		("LandauGaugeFixing::output_steps", po::value<unsigned int>()->default_value(100), "Set the step to monitor the output")
+		("LandauGaugeFixing::number_copies", po::value<unsigned int>()->default_value(5), "Set the of copies of maxima to use to search the global maximum")
 		;
 }
 
