@@ -254,7 +254,7 @@ long_real_t LandauGaugeFixing::gaugeFixing(extended_gauge_lattice_t& lattice, co
 	long_real_t convergence = 0;
 
 	for (unsigned int i = 0; i < local_steps; ++i) {
-		if ((i) % static_cast<int>(local_steps/output_steps) == 0 && isOutputProcess()) {
+		if ((i) % static_cast<int>(local_steps/output_steps) == 0) {
 			if (isOutputProcess()) std::cout << "LandauGaugeFixing::Maximal functional at step " << i  << ": " << maximalFunctionalValue << std::endl;
 			if (i > 0 && isOutputProcess()) std::cout << "LandauGaugeFixing::   convergence: " << convergence << std::endl;
 			if (fabs(convergence) < precision && i > 0) break;
