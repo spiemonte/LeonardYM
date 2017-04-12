@@ -139,11 +139,12 @@ void LandauGaugeFixing::execute(environment_t& environment) {
 	}
 
 	this->gaugeFixing(maximals[i_maximum], epsilon1, beta1, epsilon2, beta2, epsilon3, beta3, steps, final_steps, precision, output_steps);
-
 	environment.gaugeLinkConfiguration = maximals[i_maximum];
 	environment.synchronize();
+	
+	long_real_t deviation = this->deviation(environment.gaugeLinkConfiguration);
 
-	if (isOutputProcess()) std::cout << "LandauGaugeFixing::Final deviation from the Landau gauge: " << this->deviation(environment.gaugeLinkConfiguration) << std::endl;
+	if (isOutputProcess()) std::cout << "LandauGaugeFixing::Final deviation from the Landau gauge: " << deviation << std::endl;
 }
 
 long_real_t LandauGaugeFixing::gaugeFixing(extended_gauge_lattice_t& lattice, const real_t& epsilon1, const real_t& beta1, const real_t& epsilon2, const real_t& beta2, const real_t& epsilon3, const real_t& beta3, unsigned int steps, unsigned int local_steps, const real_t& precision, unsigned int output_steps) {
