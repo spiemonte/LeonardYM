@@ -35,7 +35,13 @@ namespace implement {
 
 template<typename T> T get(const boost::program_options::variables_map& vm, const std::string& nameOption) throw(NotFoundOption) {
 	if (vm.count(nameOption)) {
-		return vm[nameOption].as<T>();
+		try {
+			return vm[nameOption].as<T>();
+		}
+		catch (const boost::bad_any_cast& e) {
+			std::cout << "Error, option " << nameOption << " wrongly specified! (bad type?)" << std::endl;
+			exit(133);
+		}
 	}
 	else {
 		throw NotFoundOption(nameOption);
