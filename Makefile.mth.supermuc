@@ -1,4 +1,4 @@
-nc = 2
+nc = 3
 
 ifeq ($(adjoint),false)
 	adj = 
