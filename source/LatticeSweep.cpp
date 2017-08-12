@@ -29,7 +29,8 @@
 #include "utils/LandauGaugeFixing.h"
 #include "utils/MaximalAbelianGaugeFixing.h"
 #include "utils/MaximalAbelianProjection.h"
-#include "utils/LandauPropagator.h"
+#include "utils/LandauGhostPropagator.h"
+#include "utils/LandauGluonPropagator.h"
 #include "hmc_updaters/BandTwoFlavorUpdater.h"
 #include "pure_gauge/PureGaugeWilsonLoops.h"
 #include "tests/TestCommunication.h"
@@ -123,8 +124,10 @@ LatticeSweep* LatticeSweep::getInstance(const std::string& name) {
 		return new MaximalAbelianGaugeFixing();
 	} else if (name == "MaximalAbelianProjection") {
 		return new MaximalAbelianProjection();
-	} else if (name == "LandauPropagator") {
-		return new LandauPropagator();
+	} else if (name == "LandauGluonPropagator") {
+		return new LandauGluonPropagator();
+	} else if (name == "LandauGhostPropagator") {
+		return new LandauGhostPropagator();
 	}
 	else {
 		if (isOutputProcess()) std::cout << "Unknown name sweep: " << name << std::endl;
@@ -236,7 +239,8 @@ void LatticeSweep::addParameters(po::options_description& desc) {
 	LandauGaugeFixing::registerParameters(desc);
 	MaximalAbelianGaugeFixing::registerParameters(desc);
 	MaximalAbelianProjection::registerParameters(desc);
-	LandauPropagator::registerParameters(desc);
+	LandauGluonPropagator::registerParameters(desc);
+	LandauGhostPropagator::registerParameters(desc);
 }
 
 void LatticeSweep::registerParameters(po::options_description&) {
@@ -273,7 +277,8 @@ void LatticeSweep::printSweepsName() {
 		<< "GaugeEnergy" << std::endl
 		<< "MultiStepNFlavorQCD" << std::endl
 		<< "TwistedMultiStepNFlavorQCD" << std::endl
-		<< "LandauPropagator" << std::endl;
+		<< "LandauGhostPropagator" << std::endl
+		<< "LandauGluonPropagator" << std::endl;
 	}
 
 }

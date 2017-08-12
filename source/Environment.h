@@ -175,7 +175,7 @@ template<typename T> void switchOpenBc(T& lattice) {
 
 #ifdef ADJOINT
 inline void switchOpenBc(extended_fermion_lattice_t& lattice) {
-	typedef typename extended_fermion_lattice_t::Layout LT;
+	typedef extended_fermion_lattice_t::Layout LT;
 #pragma omp parallel for
 	for (int site = 0; site < lattice.completesize; ++site) {
 		int t_index = LT::globalIndexT(site);

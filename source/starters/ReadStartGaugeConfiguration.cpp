@@ -57,6 +57,7 @@ bool ReadStartGaugeConfiguration::readConfiguration(environment_t& environment, 
 
 		std::string descriptor_name = directory+input_name+"_"+toString(numberfile)+".descriptor.txt";
 		std::fstream descriptor;
+		if (isOutputProcess())  std::cout << "ReadStartGaugeConfiguration::Reading configuration descriptor " << descriptor_name << std::endl;
 		descriptor.open(descriptor_name.c_str(), std::fstream::in);
 		descriptor >> read_glob_x >> read_glob_y >> read_glob_z >> read_glob_t;
 		descriptor >> read_pgrid_x >> read_pgrid_y >> read_pgrid_z >> read_pgrid_t;
