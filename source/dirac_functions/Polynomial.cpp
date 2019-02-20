@@ -106,6 +106,47 @@ void Polynomial::evaluate(DiracOperator* diracOperator, extended_dirac_vector_t&
 	original_output = output;
 }
 
+/*
+void Polynomial::evaluateRecursive(DiracOperator* diracOperator, extended_dirac_vector_t& original_output, const extended_dirac_vector_t& original_input) {
+	//We work with reduced halos
+	reduced_dirac_vector_t output;
+	reduced_dirac_vector_t input = original_input;
+	reduced_dirac_vector_t phin, phip, phipp = input;
+
+	diracOperator->multiplyAdd(phip, input, input, -s1/s0);
+
+#pragma omp parallel for
+	for (int site = 0; site < input.completesize; ++site) {
+		for (unsigned int mu = 0; mu < 4; ++mu) {
+			output[site][mu] = d[0]*phipp[site][mu] + d[1]*phip[site][mu];
+		}
+	}
+
+	for (int i = 2; i < d.size(); ++i) {
+		//phin = (x + beta[i - 1]) phip + gamma[i - 2] phipp;
+		diracOperator->multiplyAdd(phin, phip, phip, beta[i-1]);
+
+#pragma omp parallel for
+		for (int site = 0; site < input.completesize; ++site) {
+			for (unsigned int mu = 0; mu < 4; ++mu) {
+				phin[site][mu] = phin[site][mu] + gamma[i-2]*phipp[site][mu];
+			}
+		}
+
+		phipp = phip;
+		phip = phin;
+
+		//result = result + d[i]*phip;
+#pragma omp parallel for
+		for (int site = 0; site < input.completesize; ++site) {
+			for (unsigned int mu = 0; mu < 4; ++mu) {
+				output[site][mu] = output[site][mu] + d[i]*phip[site][mu];
+			}
+		}
+	}
+	original_output = output;
+}*/
+
 void Polynomial::evaluate(DiracOperator* diracOperator, extended_dirac_vector_t& original_output, const extended_dirac_vector_t& original_input, DiracOperator* preconditioner) {
 	//We work with reduced halos
 	reduced_dirac_vector_t output;

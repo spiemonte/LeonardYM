@@ -420,10 +420,17 @@ void LandauGhostPropagator::execute(environment_t& environment) {
 	unsigned int max_steps = environment.configurations.get< int >("LandauGhostPropagator::max_steps");
 
 	std::vector< std::vector<real_t> > momenta;
+	std::vector< std::vector<real_t> > pn;
 	for (int i = 0; i < maximal_momentum[0]; ++i) {
 		for (int j = 0; j < maximal_momentum[1]; ++j) {
 			for (int k = 0; k < maximal_momentum[2]; ++k) {
 				for (int l = 0; l < maximal_momentum[3]; ++l) {
+					std::vector<real_t> n(4);
+					n[0] = i;
+					n[1] = j;
+					n[2] = k;
+					n[3] = l;
+
 					std::vector<real_t> momentum(4);
 					momentum[0] = i*2.*PI/Layout::glob_x;
 					momentum[1] = j*2.*PI/Layout::glob_y;
@@ -434,6 +441,7 @@ void LandauGhostPropagator::execute(environment_t& environment) {
 					real_t deviation = fabs(momentum[0] - mean) + fabs(momentum[1] - mean) + fabs(momentum[2] - mean) + fabs(momentum[3] - mean);
 					if (deviation < cut) {
 						momenta.push_back(momentum);
+						pn.push_back(n);
 					}
 				}
 			}
@@ -466,8 +474,6 @@ void LandauGhostPropagator::execute(environment_t& environment) {
 
 	LieGenerator<GaugeGroup> lieGenerators;
 
-
-	std::complex<real_t> Azero[4][lieGenerators.numberGenerators()];
 
 	std::vector< std::vector<real_t> > data;
 
@@ -502,27 +508,14 @@ void LandauGhostPropagator::execute(environment_t& environment) {
 		output->push("ghost_propagator");
 
 		for (unsigned int i = 0; i < data.size(); ++i) {
-			bool already_considered = false;
-			for (unsigned int  j = 0; j < i; ++j) {
-				if (fabs(data[i][0] - data[j][0]) < 0.0000000000000001) {
-					already_considered = true;
-					break;
-				}
-			}
-			if (!already_considered) {
-				int nn = 1;
-				real_t averaged_result = data[i][1];
-				for (unsigned int  j = i + 1; j < data.size(); ++j) {
-					if (fabs(data[i][0] - data[j][0]) < 0.0000000000000001) {
-						++nn;
-						averaged_result += data[j][1];
-					}
-				}
-				output->push("ghost_propagator");
-				output->write("ghost_propagator", data[i][0]);
-				output->write("ghost_propagator", averaged_result/nn);
-				output->pop("ghost_propagator");
-			}
+			output->push("ghost_propagator");
+			output->write("ghost_propagator", data[i][0]);
+			output->write("ghost_propagator", data[i][1]);
+			output->write("ghost_propagator", pn[i][0]);
+			output->write("ghost_propagator", pn[i][1]);
+			output->write("ghost_propagator", pn[i][2]);
+			output->write("ghost_propagator", pn[i][3]);
+			output->pop("ghost_propagator");
 		}
 
 		output->pop("ghost_propagator");

@@ -21,7 +21,11 @@ template<typename T, typename TLayout> class Lattice {
 #ifdef DEBUG_MEMORY_ALLOCATION
 			try {
 #endif
+#ifdef ALIGNED_OPT
+				posix_memalign(reinterpret_cast<void**>(&(localdata)), 64, TLayout::completesize*sizeof(T));
+#else
 				localdata = new T[TLayout::completesize];
+#endif
 #ifdef DEBUG_MEMORY_ALLOCATION
 				++allocationCounter;
 				if (TLayout::this_processor == 0) std::cout << "Memory allocated in lattice constructor!" << std::endl;
@@ -37,7 +41,11 @@ template<typename T, typename TLayout> class Lattice {
 #endif
 		}
 		~Lattice() {
+#ifdef ALIGNED_OPT
+			free(localdata);
+#else
 			delete[] localdata;
+#endif
 #ifdef DEBUG_MEMORY_ALLOCATION
 			--allocationCounter;
 #endif
@@ -46,7 +54,11 @@ template<typename T, typename TLayout> class Lattice {
 #ifdef DEBUG_MEMORY_ALLOCATION
 			try {
 #endif
+#ifdef ALIGNED_OPT
+				posix_memalign(reinterpret_cast<void**>(&(localdata)), 64, TLayout::completesize*sizeof(T));
+#else
 				localdata = new T[TLayout::completesize];
+#endif
 #ifdef DEBUG_MEMORY_ALLOCATION
 				++allocationCounter;
 				if (TLayout::this_processor == 0) std::cout << "Memory allocated in lattice copy constructor!" << std::endl;
@@ -88,7 +100,11 @@ template<typename T, typename TLayout> class Lattice {
 #ifdef DEBUG_MEMORY_ALLOCATION
 			try {
 #endif
+#ifdef ALIGNED_OPT
+				posix_memalign(reinterpret_cast<void**>(&(localdata)), 64, TLayout::completesize*sizeof(T));
+#else
 				localdata = new T[TLayout::completesize];
+#endif
 #ifdef DEBUG_MEMORY_ALLOCATION
 				++allocationCounter;
 				if (TLayout::this_processor == 0) std::cout << "Memory allocated in lattice template copy constructor!" << std::endl;
@@ -204,6 +220,14 @@ template<typename T, typename TLayout> class Lattice {
 
 		T* getRawData() {
 			return localdata;
+		}
+
+		bool operator==(const Lattice& snd) const {
+			return localdata == snd.localdata;
+		}
+
+		bool operator!=(const Lattice& snd) const {
+			return localdata != snd.localdata;
 		}
 		
 	private:

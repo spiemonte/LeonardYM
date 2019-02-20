@@ -14,6 +14,10 @@
 #include "MatrixTypedef.h"
 #include "./MPILattice/Lattice.h"
 
+#ifdef ALIGNED_OPT
+#include "./MPILattice/MDLattice.h"
+#endif
+
 #ifdef ENABLE_MPI
 #include "./MPILattice/MPILayout.h"
 #include "./MPILattice/ReducedStencil.h"
@@ -55,15 +59,19 @@ typedef Lattice::Lattice<Update::AdjointGroup[4], Lattice::MpiLayout<Lattice::Ex
 typedef Lattice::Lattice<Update::AdjointGroup[4], Lattice::MpiLayout<Lattice::StandardStencil> > standard_adjoint_lattice_t;
 typedef Lattice::Lattice<Update::AdjointGroup[4], Lattice::MpiLayout<Lattice::ReducedStencil> > reduced_adjoint_lattice_t;
 
-typedef Lattice::Lattice<Update::GaugeVector, Lattice::MpiLayout<Lattice::ExtendedStencil> > extended_color_vector_t;
-typedef Lattice::Lattice<Update::GaugeVector, Lattice::MpiLayout<Lattice::StandardStencil> > standard_color_vector_t;
-typedef Lattice::Lattice<Update::GaugeVector, Lattice::MpiLayout<Lattice::ReducedStencil> > reduced_color_vector_t;
+typedef Lattice::Lattice<Update::FundamentalVector, Lattice::MpiLayout<Lattice::ExtendedStencil> > extended_color_vector_t;
+typedef Lattice::Lattice<Update::FundamentalVector, Lattice::MpiLayout<Lattice::StandardStencil> > standard_color_vector_t;
+typedef Lattice::Lattice<Update::FundamentalVector, Lattice::MpiLayout<Lattice::ReducedStencil> > reduced_color_vector_t;
 
 typedef Lattice::Lattice<Update::AdjointVector, Lattice::MpiLayout<Lattice::ExtendedStencil> > extended_adjoint_color_vector_t;
 typedef Lattice::Lattice<Update::AdjointVector, Lattice::MpiLayout<Lattice::StandardStencil> > standard_adjoint_color_vector_t;
 typedef Lattice::Lattice<Update::AdjointVector, Lattice::MpiLayout<Lattice::ReducedStencil> > reduced_adjoint_color_vector_t;
 
 typedef Lattice::Lattice<int[4], Lattice::MpiLayout<Lattice::ExtendedStencil> > extended_index_lattice_t;
+
+#ifdef ALIGNED_OPT
+typedef Lattice::ComplexVectorLattice<Update::real_t, Update::GaugeVector[4], Lattice::MpiLayout<Lattice::ReducedStencil>, 4, Update::diracVectorLength> reduced_soa_dirac_vector_t;
+#endif
 
 #endif
 #ifndef ENABLE_MPI
@@ -106,15 +114,19 @@ typedef Lattice::Lattice<Update::AdjointGroup[4], Lattice::LocalLayout > extende
 typedef Lattice::Lattice<Update::AdjointGroup[4], Lattice::LocalLayout > standard_adjoint_lattice_t;
 typedef Lattice::Lattice<Update::AdjointGroup[4], Lattice::LocalLayout > reduced_adjoint_lattice_t;
 
-typedef Lattice::Lattice<Update::GaugeVector, Lattice::LocalLayout > extended_color_vector_t;
-typedef Lattice::Lattice<Update::GaugeVector, Lattice::LocalLayout > standard_color_vector_t;
-typedef Lattice::Lattice<Update::GaugeVector, Lattice::LocalLayout > reduced_color_vector_t;
+typedef Lattice::Lattice<Update::FundamentalVector, Lattice::LocalLayout > extended_color_vector_t;
+typedef Lattice::Lattice<Update::FundamentalVector, Lattice::LocalLayout > standard_color_vector_t;
+typedef Lattice::Lattice<Update::FundamentalVector, Lattice::LocalLayout > reduced_color_vector_t;
 
 typedef Lattice::Lattice<Update::AdjointVector, Lattice::LocalLayout > extended_adjoint_color_vector_t;
 typedef Lattice::Lattice<Update::AdjointVector, Lattice::LocalLayout > standard_adjoint_color_vector_t;
 typedef Lattice::Lattice<Update::AdjointVector, Lattice::LocalLayout > reduced_adjoint_color_vector_t;
 
 typedef Lattice::Lattice<int[4], Lattice::LocalLayout > extended_index_lattice_t;
+
+#ifdef ALIGNED_OPT
+typedef Lattice::ComplexVectorLattice<Update::real_t, Update::GaugeVector[4], Lattice::LocalLayout, 4, Update::diracVectorLength> reduced_soa_dirac_vector_t;
+#endif
 
 #endif
 
@@ -211,9 +223,10 @@ inline bool isOutputProcess() {
 
 class Environment {
 public:
-	Environment() : gaugeLinkConfiguration(), fermionicLinkConfiguration(), sweep(0), iteration(0), measurement(false) { }
-	Environment(const boost::program_options::variables_map& vm) : gaugeLinkConfiguration(), fermionicLinkConfiguration(), configurations(vm), sweep(0), iteration(0), measurement(false) { }
-	Environment(const Environment& toCopy) : gaugeLinkConfiguration(toCopy.gaugeLinkConfiguration), fermionicLinkConfiguration(toCopy.fermionicLinkConfiguration), configurations(toCopy.configurations), sweep(toCopy.sweep), iteration(toCopy.iteration), measurement(toCopy.measurement) { }
+	Environment() : gaugeLinkConfiguration(), fermionicLinkConfiguration(), adjointLinkConfiguration(), sweep(0), iteration(0), measurement(false) { }
+	Environment(const boost::program_options::variables_map& vm) : gaugeLinkConfiguration(), fermionicLinkConfiguration(), adjointLinkConfiguration(), configurations(vm), sweep(0), iteration(0), measurement(false) { }
+	Environment(const Environment& toCopy);
+	Environment& operator=(const Environment& toCopy);
 	~Environment() { }
 
 	void synchronize();
@@ -255,16 +268,6 @@ public:
 		}
 	}
 
-	Environment& operator=(const Environment& toCopy) {
-		configurations = toCopy.configurations;
-		sweep = toCopy.sweep;
-		iteration = toCopy.iteration;
-		measurement = toCopy.measurement;
-		gaugeLinkConfiguration = toCopy.gaugeLinkConfiguration;
-		fermionicLinkConfiguration = toCopy.fermionicLinkConfiguration;
-		return *this;
-	}
-
 	extended_fermion_lattice_t& getFermionLattice() {
 		return fermionicLinkConfiguration;
 	}
@@ -273,8 +276,29 @@ public:
 		return fermionicLinkConfiguration;
 	}
 
+	extended_adjoint_lattice_t& getAdjointLattice() {
+                return adjointLinkConfiguration;
+        }
+
+        const extended_adjoint_lattice_t& getAdjointLattice() const {
+                return adjointLinkConfiguration;
+        }
+
+	extended_gauge_lattice_t& getFundamentalLattice() {
+		return gaugeLinkConfiguration;
+	}
+
+	const extended_gauge_lattice_t& getFundamentalLattice() const {
+		return gaugeLinkConfiguration;
+	}
+
 	extended_gauge_lattice_t gaugeLinkConfiguration;
 	extended_fermion_lattice_t fermionicLinkConfiguration;
+	extended_adjoint_lattice_t adjointLinkConfiguration;
+
+	std::vector<extended_adjoint_color_vector_t> adjoint_scalar_fields;
+	std::vector<extended_color_vector_t> fundamental_scalar_fields;
+
 	StorageParameters configurations;
 	
 	unsigned int sweep;

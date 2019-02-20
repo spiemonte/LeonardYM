@@ -20,6 +20,8 @@ public:
 	~Eigenvalues();
 
 	virtual void execute(environment_t& environment);
+
+	static void registerParameters(po::options_description& desc);
 	
 private:
 	DiracEigenSolver* diracEigenSolver;

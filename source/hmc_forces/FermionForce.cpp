@@ -15,6 +15,17 @@ FermionForce::FermionForce(real_t _kappa) : kappa(_kappa), expMap() { }
 
 FermionForce::~FermionForce() { }
 
+void FermionForce::derivative(extended_fermion_force_lattice_t& fermionForce, const extended_fermion_lattice_t& lattice, const extended_dirac_vector_t& X, const extended_dirac_vector_t& Y, real_t weight) {
+#pragma omp parallel for
+	for (int site = 0; site < fermionForce.localsize; ++site) {
+		for (unsigned int mu = 0; mu < 4; ++mu) {
+			//Minus sign on the fermion force!
+			fermionForce[site][mu] -= weight * (this->derivative(lattice, X, Y, site, mu));
+		}
+	}
+
+}
+
 FermionicForceMatrix FermionForce::tensor(const GaugeVector& x, const GaugeVector& y) const {
 	FermionicForceMatrix result;
 	set_to_zero(result);

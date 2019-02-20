@@ -19,9 +19,15 @@ public:
 	virtual bool solve(DiracOperator* dirac, const extended_dirac_vector_t& source, std::vector<extended_dirac_vector_t>& solutions, const std::vector<real_t>& shifts);
 
 private:
+#ifndef ALIGNED_OPT
 	//Temporary vectors
 	reduced_dirac_vector_t r;
 	reduced_dirac_vector_t p;
+#else
+	//Temporary vectors
+	reduced_soa_dirac_vector_t r;
+	reduced_soa_dirac_vector_t p;
+#endif
 
 	//Omega is the overrelaxation parameter
 	real_t omega;

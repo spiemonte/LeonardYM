@@ -77,12 +77,20 @@ void RationalApproximation::setBetas(const std::vector< real_t >& _betas) {
 	betas = _betas;
 }
 
-std::vector< real_t > RationalApproximation::getAlphas() const {
+std::vector< real_t >& RationalApproximation::getAlphas() {
 	return alphas;
 }
 
-std::vector< real_t > RationalApproximation::getBetas() const {
+std::vector< real_t >& RationalApproximation::getBetas() {
 	return betas;
+}
+
+const std::vector< real_t >& RationalApproximation::getAlphas() const {
+        return alphas;
+}
+
+const std::vector< real_t >& RationalApproximation::getBetas() const {
+        return betas;
 }
 
 void RationalApproximation::setPrecision(const real_t& _precision) {

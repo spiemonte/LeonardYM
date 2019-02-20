@@ -39,6 +39,7 @@ MPI_Datatype MpiType<Update::AdjointGroup[6]>::type = MPI_DOUBLE;
 MPI_Datatype MpiType<Update::FundamentalVector[4]>::type = MPI_DOUBLE;
 MPI_Datatype MpiType<Update::AdjointVector[4]>::type = MPI_DOUBLE;
 MPI_Datatype MpiType<Update::AdjointVector>::type = MPI_DOUBLE;
+MPI_Datatype MpiType<Update::FundamentalVector>::type = MPI_DOUBLE;
 MPI_Datatype MpiType<Update::FundamentalGroup>::type = MPI_DOUBLE;
 MPI_Datatype MpiType<Update::AdjointGroup>::type = MPI_DOUBLE;
 #ifdef ADJOINT
@@ -116,6 +117,7 @@ int main(int ac, char* av[]) {
 	    ("configfile", po::value<std::string>(), "set the configuration file")
 	    ("beta", po::value<Update::real_t>(), "set the \\beta parameter of the simulations")
 	    ("kappa", po::value<Update::real_t>(), "set the \\kappa parameter of the simulations")
+	    ("mass", po::value<Update::real_t>(), "set the mass parameter of the overlap operator")
 		("glob_x", po::value<unsigned int>(), "The x lattice size")
 		("glob_y", po::value<unsigned int>(), "The y lattice size")
 		("glob_z", po::value<unsigned int>(), "The z lattice size")
@@ -131,6 +133,8 @@ int main(int ac, char* av[]) {
 	    ("measurement_sweeps", po::value< std::string >(), "the vector of the measurement sweeps to do (example: {{PureGaugeCM,1,1},{Plaquette,1,1}} )")
 	    ("name_action", po::value<std::string>(), "the name of the gauge part of the action (\"StandardWilson\")")
 	    ("name_integrator", po::value<std::string>(), "the name of the type of integrator (\"second_order\")")
+		("adjoint_nf_scalars", po::value<unsigned int>()->default_value(0), "set the number of the adjoint scalar fields")
+		("fundamental_nf_scalars", po::value<unsigned int>()->default_value(0), "set the number of the fundamental scalar fields")
 	    ("hmc_t_length", po::value<Update::real_t>(), "the length of a single HMC step (examples: 0.1, 0.05 ...)")
 	    ("number_hmc_steps", po::value<std::string>(), "the vector of the numbers of HMC steps for a single trajectory (examples: 2, 7 ...)")
 	    ("dirac_operator", po::value<std::string>(), "the name of the dirac wilson operator that should be used (supported: DiracWilson)")
@@ -147,8 +151,6 @@ int main(int ac, char* av[]) {
 		("preconditioner_recursions", po::value<unsigned int>(), "Number of preconditioner recursions used for evaluating the rational approximations")
 		("preconditioner_precision", po::value<Update::real_t>(), "The precision for the inversion of the preconditioner used for evaluating the rational approximations")
 		("boundary_conditions", po::value<std::string>(), "Boundary conditions to use: periodic (fermions), antiperiodic (fermions), spatialantiperiodic (fermion), open")
-		("number_extra_vectors_eigensolver", po::value<unsigned int>(), "Number of extra vectors for the Arnoldi algorithm, increase this number to increase precision")
-		("number_eigenvalues", po::value<unsigned int>(), "Number of eigenvalues ofthe dirac wilson operator to be computed")
 		("measure_condensate_connected", po::value<bool>(), "Should I measure the connected part of the condensate susceptibility?")		
 		("eigenvalues_map", po::value<std::string>(), "the map used for computing the lowest eigenvalues (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})")
 	    ("output_directory_configurations", po::value<std::string>(), "The directory for the output of the configurations")
@@ -192,6 +194,16 @@ int main(int ac, char* av[]) {
 		("format_name", po::value<std::string>(), "leonard_format/muenster_format for reading and writing configurations")
 		("input_format_name", po::value<std::string>(), "leonard_format/muenster_format only for reading configurations")
 		("output_format_name", po::value<std::string>(), "leonard_format/muenster_format only for writing configurations")
+		("OverlapOperator::squareRootApproximation", po::value<std::string>(), "Approximation of x^(1/2) used for the Overlap fermion sign function (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})")
+		("ExactOverlapOperator::squareRootApproximation", po::value<std::string>()->default_value(""), "Approximation of x^(1/2) used for the Overlap fermion sign function (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})")
+		("ExactOverlapOperator::eigensolver::use_chebyshev", po::value<std::string>()->default_value("false"), "Use Chebyshev acceleration? (true/false)")
+		("ExactOverlapOperator::eigensolver::chebyshev_left", po::value<double>()->default_value(0.2), "Left interval of the Chebyshev polynomial.")
+		("ExactOverlapOperator::eigensolver::chebyshev_right", po::value<double>()->default_value(7.), "Right interval of the Chebyshev polynomial.")
+		("ExactOverlapOperator::eigensolver::chebyshev_order", po::value<unsigned int>()->default_value(15), "Order of the Chebyshev acceleration. It must be an odd number")
+		("ExactOverlapOperator::eigensolver::eigensolver_precision", po::value<double>()->default_value(0.000000001), "set the precision used by the eigensolver")
+		("ExactOverlapOperator::eigensolver::number_extra_vectors", po::value<unsigned int>(), "Number of extra vectors for the Arnoldi algorithm used in the computation of the eigenvectors, increase this number to increase precision")
+		("ExactOverlapOperator::eigensolver::maximal_number_restarts_eigensolver", po::value<unsigned int>()->default_value(50), "Number of restarts for the implicitly restarted Arnoldi algorithm")
+		("ExactOverlapOperator::eigensolver::number_eigenvalues", po::value<unsigned int>(), "Number of eigenvalues of the dirac wilson operator to be computed")
 		("correction_step_breakup_level", po::value<unsigned int>(), "The level of breakup \"lb\" for the correction factors")
 		("correction_approximation_direct_1", po::value<std::string>(), "Approximation of x^(nf/(2lb)) used for the correction step (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})")
 		("correction_approximation_inverse_1", po::value<std::string>(), "Approximation of x^(-nf/(2lb)) used for the correction step (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})")

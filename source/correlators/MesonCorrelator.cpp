@@ -11,6 +11,7 @@
 #include "utils/StoutSmearing.h"
 #include "utils/Gamma.h"
 #include "inverters/PreconditionedBiCGStab.h"
+#include "dirac_operators/Propagator.h"
 #ifndef PI
 #define PI 3.141592653589793238462643
 #endif
@@ -104,6 +105,8 @@ void MesonCorrelator::execute(environment_t& environment) {
 			//biConjugateGradient->solve(squareDiracOperator, source, eta);
 			//diracOperator->multiply(tmp[c*4 + alpha],eta);
 			inverter->solve(diracOperator, source, tmp[c*4 + alpha]);
+			Propagator::constructPropagator(diracOperator, source, tmp[c*4 + alpha]);
+
 			inversionSteps += inverter->getLastSteps();
 		}
 	}

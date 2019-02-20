@@ -7,16 +7,16 @@ else
 endif
 
 CC       = icc
-CPP      = mpiicpc
-OPTIMIZE = -O3 -Wall -Wextra -pipe -openmp -axCORE-AVX2 -ipo -no-prec-div
+CPP      = mpiCC
+OPTIMIZE = -O2 -Wall -Wextra -pipe -qopenmp -xCORE-AVX2 -no-prec-div -qopt-report=4 
 INC     = -I./extra_libs/Eigen -I./extra_libs/ -I./source/
 CFLAGS   = $(OPTIMIZE) $(INC)
-CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/utils/MatrixBaseExtension.h\"" -DNUMCOLORS=$(nc) -DMULTITHREADING -I/lrz/sys/libraries/boost/1.45_icc/include/ $(adj) -DENABLE_MPI -DEIGEN
+CPPFLAGS = $(OPTIMIZE) $(INC) -DALIGNED_OPT -DMBE="\"$(PWD)/source/utils/MatrixBaseExtension.h\"" -DNUMCOLORS=$(nc) -DMULTITHREADING -I/lrz/sys/libraries/boost/1.61_icc/include/ $(adj) -DENABLE_MPI -DEIGEN
 
 include Makefile.obj.mk
 
 all: leonardQCD
-	$(CPP) $(CPPFLAGS) $(OBJECTS) -o leonardQCD.exe /lrz/sys/libraries/boost/1.45_icc/lib/libboost_program_options.a
+	$(CPP) $(CPPFLAGS) $(OBJECTS) -o leonardQCD.exe /lrz/sys/libraries/boost/1.61_icc/lib/libboost_program_options.a
 	@echo "Compiled with NUMCOLORS: " $(nc)
 
 leonardQCD: $(OBJECTS)

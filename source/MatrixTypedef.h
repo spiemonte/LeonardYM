@@ -15,7 +15,7 @@
 #endif
 
 #ifdef MULTITHREADING
-//#include <omp.h>
+#include <omp.h>
 #endif
 
 #ifdef EIGEN
@@ -96,6 +96,7 @@ typedef Eigen::Matrix< complex, 2, 2 > FundamentalSU2Group;
 typedef Eigen::Matrix< real_t, 3, 3 > AdjointSU2Group;
 
 #define htrans(x) ((x).adjoint())
+#define dag(x) ((x).conjugate())
 #define adj(x) ((x).adjoint())
 #define det(x) (x).determinant()
 #define trace(x) (x).trace()

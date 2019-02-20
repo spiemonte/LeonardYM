@@ -123,16 +123,17 @@ void OutputSweep::execute(environment_t& environment) {
 		// Write fundamental gauge field
 #ifdef ENABLE_MPI
 		MPI_Barrier(MPI_COMM_WORLD);
-		float write_field[16]; // 16=4*2*2
+		float *write_field = new float[Layout::glob_x*16]; // 16=4*2*2
 #endif
 		int wrt(0);
 
 		for (int t = 0; t < Layout::glob_t; ++t) {
 			for (int z = 0; z < Layout::glob_z; ++z) {
 				for (int y = 0; y < Layout::glob_y; ++y) {
+#ifndef ENABLE_MPI
 					for (int x = 0; x < Layout::glob_x; ++x) {
 						int globsite = Layout::getGlobalCoordinate(x,y,z,t);
-#ifndef ENABLE_MPI
+
 						for (unsigned int mu = 0; mu < 4; ++mu) {
 							// Assuming now Istvans format with U^dag saved insted of U
 							GaugeGroup tmpl = environment.gaugeLinkConfiguration[globsite][mu];
@@ -146,35 +147,17 @@ void OutputSweep::execute(environment_t& environment) {
 							wrt += xdr_float(&xout, &tmp1);
 							wrt += xdr_float(&xout, &tmp2);
 						}
+					}
 #endif
 #ifdef ENABLE_MPI
-						int localsite = Layout::localIndex[globsite];
-						if (isOutputProcess()) {
+					int count = 0;
+					int rank = Layout::rankTable(0,y,z,t);
+					for (int x = 0; x < Layout::glob_x; ) {
+						while (x < Layout::glob_x && rank == Layout::rankTable(x,y,z,t)) {
+							int globsite = Layout::getGlobalCoordinate(x,y,z,t);
+							int localsite = Layout::localIndex[globsite];
+							
 							if (localsite != -1 && localsite < Layout::localsize) {
-								for (unsigned int mu = 0; mu < 4; ++mu) {
-									// Assuming now Istvans format with U^dag saved insted of U
-									GaugeGroup tmpl = environment.gaugeLinkConfiguration[localsite][mu];
-									GaugeGroup tmp = htrans(tmpl);
-									float tmp1 = static_cast<float>(real(tmp(0,0)));
-									float tmp2 = static_cast<float>(imag(tmp(0,0)));
-									wrt += xdr_float(&xout, &tmp1);
-									wrt += xdr_float(&xout, &tmp2);
-									tmp1 = static_cast<float>(real(tmp(0,1)));
-									tmp2 = static_cast<float>(imag(tmp(0,1)));
-									wrt += xdr_float(&xout, &tmp1);
-									wrt += xdr_float(&xout, &tmp2);
-								}
-							} else {
-								int processor = Layout::rankTable(x,y,z,t);
-								MPI_Recv(write_field, 16, MPI_FLOAT, processor, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-								for (int ii = 0; ii < 16; ++ii) {
-									wrt += xdr_float(&xout, &write_field[ii]);
-								}
-							}
-						}
-						else {
-							if (localsite != -1 && localsite < Layout::localsize) {
-								int count = 0;
 								for (unsigned int mu = 0; mu < 4; ++mu) {
 									//Assuming now Istvans format with U^dag saved insted of U
 									GaugeGroup tmpl = environment.gaugeLinkConfiguration[localsite][mu];
@@ -184,14 +167,46 @@ void OutputSweep::execute(environment_t& environment) {
 									write_field[count++] = static_cast<float>(real(tmp(0,1)));
 									write_field[count++] = static_cast<float>(imag(tmp(0,1)));
 								}
-								MPI_Send(write_field, 16, MPI_FLOAT, 0, 0, MPI_COMM_WORLD);
+							}
+							else {
+								count += 16;
+							}
+
+							++x;
+						}
+						
+						if (isOutputProcess()) {
+							if (rank == Layout::this_processor) {
+								for (int ii = 0; ii < count; ++ii) {
+									wrt += xdr_float(&xout, &write_field[ii]);
+								}
+							}
+							else {
+								MPI_Recv(write_field, count, MPI_FLOAT, rank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+								for (int ii = 0; ii < count; ++ii) {
+									wrt += xdr_float(&xout, &write_field[ii]);
+								}
 							}
 						}
-#endif
+						else {
+							if (rank == Layout::this_processor) {
+								MPI_Send(write_field, count, MPI_FLOAT, 0, 0, MPI_COMM_WORLD);
+							}
+						}
+
+						if (x < Layout::glob_x) {
+							rank = Layout::rankTable(x,y,z,t);
+							count = 0;
+						}
 					}
+#endif
 				}
 			}
 		}
+
+#ifdef ENABLE_MPI
+		delete[] write_field;
+#endif
 
 		if (isOutputProcess()) {
 			if (wrt != 16 * Layout::globalVolume){
@@ -309,16 +324,17 @@ void OutputSweep::execute(environment_t& environment) {
 		// Write fundamental gauge field
 #ifdef ENABLE_MPI
 		MPI_Barrier(MPI_COMM_WORLD);
-		float write_field[48]; // 48=4*6*2
+		float *write_field = new float[Layout::glob_x*48]; // 48=4*6*2
 #endif
 		int wrt(0);
 
 		for (int t = 0; t < Layout::glob_t; ++t) {
 			for (int z = 0; z < Layout::glob_z; ++z) {
 				for (int y = 0; y < Layout::glob_y; ++y) {
+#ifndef ENABLE_MPI
 					for (int x = 0; x < Layout::glob_x; ++x) {
 						int globsite = Layout::getGlobalCoordinate(x,y,z,t);
-#ifndef ENABLE_MPI
+
 						
 						for (unsigned int mu = 0; mu < 4; ++mu) {
 							GaugeGroup mt = environment.gaugeLinkConfiguration[globsite][mu];
@@ -331,35 +347,19 @@ void OutputSweep::execute(environment_t& environment) {
 								}
 							}
 						}
+					}
 #endif
 #ifdef ENABLE_MPI
-						int localsite = Layout::localIndex[globsite];
-						if (isOutputProcess()) {
+					int count = 0;
+					int rank = Layout::rankTable(0,y,z,t);
+					for (int x = 0; x < Layout::glob_x; ) {
+						while (x < Layout::glob_x && rank == Layout::rankTable(x,y,z,t)) {
+							int globsite = Layout::getGlobalCoordinate(x,y,z,t);
+							int localsite = Layout::localIndex[globsite];
+							
 							if (localsite != -1 && localsite < Layout::localsize) {
 								for (unsigned int mu = 0; mu < 4; ++mu) {
-									GaugeGroup mt = environment.gaugeLinkConfiguration[globsite][mu];
-									for (size_t ii = 0; ii < 3; ++ii) {
-										for (size_t jj = 0; jj < 2; ++jj) {
-											/** Assuming now Istvans format with U^* saved insted of U*/
-											float tmp = mt.at(ii,jj).real(), tmp2 = -mt.at(ii,jj).imag();
-											wrt += xdr_float(&xout, &tmp);
-											wrt += xdr_float(&xout, &tmp2);
-										}
-									}
-								}
-							} else {
-								int processor = Layout::rankTable(x,y,z,t);
-								MPI_Recv(write_field, 48, MPI_FLOAT, processor, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-								for (int ii = 0; ii < 48; ++ii) {
-									wrt += xdr_float(&xout, &write_field[ii]);
-								}
-							}
-						}
-						else {
-							if (localsite != -1 && localsite < Layout::localsize) {
-								int count = 0;
-								for (unsigned int mu = 0; mu < 4; ++mu) {
-									GaugeGroup mt = environment.gaugeLinkConfiguration[globsite][mu];
+									GaugeGroup mt = environment.gaugeLinkConfiguration[localsite][mu];
 									for (size_t ii = 0; ii < 3; ++ii) {
 										for (size_t jj = 0; jj < 2; ++jj) {
 											/** Assuming now Istvans format with U^* saved insted of U*/
@@ -369,14 +369,46 @@ void OutputSweep::execute(environment_t& environment) {
 										}
 									}
 								}
-								MPI_Send(write_field, 48, MPI_FLOAT, 0, 0, MPI_COMM_WORLD);
+							}
+							else {
+								count += 48;
+							}
+
+							++x;
+						}
+						
+						if (isOutputProcess()) {
+							if (rank == Layout::this_processor) {
+								for (int ii = 0; ii < count; ++ii) {
+									wrt += xdr_float(&xout, &write_field[ii]);
+								}
+							}
+							else {
+								MPI_Recv(write_field, count, MPI_FLOAT, rank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+								for (int ii = 0; ii < count; ++ii) {
+									wrt += xdr_float(&xout, &write_field[ii]);
+								}
 							}
 						}
-#endif
+						else {
+							if (rank == Layout::this_processor) {
+								MPI_Send(write_field, count, MPI_FLOAT, 0, 0, MPI_COMM_WORLD);
+							}
+						}
+
+						if (x < Layout::glob_x) {
+							rank = Layout::rankTable(x,y,z,t);
+							count = 0;
+						}
 					}
+#endif
 				}
 			}
 		}
+
+#ifdef ENABLE_MPI
+		delete[] write_field;
+#endif
 
 		double t_plaq = Plaquette::temporalPlaquette(environment.gaugeLinkConfiguration);
 

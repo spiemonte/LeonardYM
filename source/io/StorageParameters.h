@@ -14,26 +14,27 @@
 #include <complex>
 #include <sstream>
 #include <exception>
+#include <stdexcept>
 #include "utils/FromString.h"
 
 namespace Update {
 
-class NotFoundOption : public std::exception {
+class NotFoundOption : public std::runtime_error {
 public:
-	NotFoundOption(const std::string& _nameOption) throw () : nameOption(_nameOption) { }
+	NotFoundOption(const std::string& _nameOption) throw () : std::runtime_error((_nameOption+": option not found!").c_str()) { }
 	~NotFoundOption() throw () { };
 private:
-	virtual const char* what() const throw() {
+	/*virtual const char* what() const throw() {
 		std::ostringstream os;
 		os << "No parameter " << nameOption << " found!" << std::endl;
 		return os.str().c_str();
 	}
-	std::string nameOption;
+	std::string nameOption;*/
 };
 
 namespace implement {
 
-template<typename T> T get(const boost::program_options::variables_map& vm, const std::string& nameOption) throw(NotFoundOption) {
+template<typename T> T get(const boost::program_options::variables_map& vm, const std::string& nameOption) {
 	if (vm.count(nameOption)) {
 		try {
 			return vm[nameOption].as<T>();
@@ -42,19 +43,23 @@ template<typename T> T get(const boost::program_options::variables_map& vm, cons
 			std::cout << "Error, option " << nameOption << " wrongly specified! (bad type?)" << std::endl;
 			exit(133);
 		}
+		catch (const Update::NotFoundOption& e) {
+			std::cout << "Error, option " << nameOption << " not found!" << std::endl;
+			exit(113);
+		}
 	}
 	else {
 		throw NotFoundOption(nameOption);
 	}
 }
 
-template<> std::vector< std::complex<double> > get< std::vector< std::complex<double> > >(const boost::program_options::variables_map& vm, const std::string& nameOption) throw(NotFoundOption);
+template<> std::vector< std::complex<double> > get< std::vector< std::complex<double> > >(const boost::program_options::variables_map& vm, const std::string& nameOption);
 
-template<> std::vector< double > get< std::vector< double > >(const boost::program_options::variables_map& vm, const std::string& nameOption) throw(NotFoundOption);
+template<> std::vector< double > get< std::vector< double > >(const boost::program_options::variables_map& vm, const std::string& nameOption);
 
-template<> std::vector< unsigned int > get< std::vector< unsigned int > >(const boost::program_options::variables_map& vm, const std::string& nameOption) throw(NotFoundOption);
+template<> std::vector< unsigned int > get< std::vector< unsigned int > >(const boost::program_options::variables_map& vm, const std::string& nameOption);
 
-template<> std::vector<std::string> get< std::vector<std::string> >(const boost::program_options::variables_map& vm, const std::string& nameOption) throw(NotFoundOption);
+template<> std::vector<std::string> get< std::vector<std::string> >(const boost::program_options::variables_map& vm, const std::string& nameOption);
 
 }
 

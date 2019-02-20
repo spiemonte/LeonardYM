@@ -8,6 +8,7 @@
 #include "MMMRMultishiftSolver.h"
 #include "algebra_utils/AlgebraUtils.h"
 #include "BiConjugateGradient.h"
+#include <stdlib.h>
 #ifdef TEST_PAPI_SPEED
 #include <papi.h>
 
@@ -44,9 +45,17 @@ MMMRMultishiftSolver::MMMRMultishiftSolver(real_t _epsilon, unsigned int _maxSte
 
 MMMRMultishiftSolver::~MMMRMultishiftSolver() { }
 
+
 bool MMMRMultishiftSolver::solve(DiracOperator* dirac, const extended_dirac_vector_t& original_source, std::vector<extended_dirac_vector_t>& original_solutions, const std::vector<real_t>& shifts) {
 	//We work with reduced halos
 	reduced_dirac_vector_t source = original_source;
+
+	//The index of the first solution
+	unsigned int firstSolution = 0;
+	unsigned int length = shifts.size();
+	bool flag = true;
+
+#ifndef ALIGNED_OPT
 	std::vector<reduced_dirac_vector_t> solutions(original_solutions.size());
 
 #ifdef TEST_PAPI_SPEED
@@ -56,10 +65,7 @@ bool MMMRMultishiftSolver::solve(DiracOperator* dirac, const extended_dirac_vect
 	if((retval=PAPI_flops( &real_time, &proc_time, &flpins, &mflops)) < PAPI_OK) test_fail(__FILE__, __LINE__, "PAPI_flops", retval);
 #endif
 	
-	//The index of the first solution
-	unsigned int firstSolution = 0;
-	unsigned int length = shifts.size();
-	bool flag = true;
+	
 	//consider first the negative shifts
 	while (shifts[firstSolution] < 0) {
 		//Solve it separately
@@ -150,17 +156,16 @@ bool MMMRMultishiftSolver::solve(DiracOperator* dirac, const extended_dirac_vect
 				solutions[length - 1][site][mu] = solutions[length - 1][site][mu] + alpha*r[site][mu];
 			}
 		}
-		//solutions[length - 1].updateHalo();//TODO maybe not needed
 
 		for (unsigned int index = firstSolution; index < shifts.size() - 1; ++index) {
 			f[index] = f[index]/(std::complex<real_t>(1.,0.) + (shifts[index] - shifts.back())* alpha);
+
 #pragma omp parallel for
 			for (int site = 0; site < r.localsize; ++site) {
 				for (unsigned int mu = 0; mu < 4; ++mu) {
 					solutions[index][site][mu] = solutions[index][site][mu] + f[index]*alpha*r[site][mu];
 				}
 			}
-			//solutions[index].updateHalo();//not needed anymore
 		}
 
 		//Set the last solution
@@ -177,6 +182,7 @@ bool MMMRMultishiftSolver::solve(DiracOperator* dirac, const extended_dirac_vect
 			for (unsigned int index = 0; index < shifts.size(); ++index) {
 				original_solutions[index] = solutions[index];
 			}
+
 #ifdef TEST_PAPI_SPEED
 			if((retval=PAPI_flops( &real_time, &proc_time, &flpins, &mflops)) < PAPI_OK) test_fail(__FILE__, __LINE__, "PAPI_flops", retval);
 			if (isOutputProcess()) std::cout << "MFLOPS for Single Krilov Space Solver: " << mflops << " MFLOPS. " << std::endl;
@@ -196,6 +202,108 @@ bool MMMRMultishiftSolver::solve(DiracOperator* dirac, const extended_dirac_vect
 	if (isOutputProcess()) std::cout << "Failure in finding convergence in MMMRMultishiftSolver! " << dirac->getKappa() << " " << last_error << std::endl;
 	delete[] f;
 	return false;
+#endif
+
+#ifdef ALIGNED_OPT
+	reduced_soa_dirac_vector_t soa_source = source;
+	std::vector<reduced_soa_dirac_vector_t> solutions(original_solutions.size());
+	
+	//consider first the negative shifts
+	while (shifts[firstSolution] < 0) {
+		//Solve it separately
+		reduced_soa_dirac_vector_t tmp;
+		p = soa_source;
+		r = soa_source;
+
+		AlignedAlgebraUtils::setToZero(solutions[firstSolution]);
+
+		long_real_t normResidual = AlignedAlgebraUtils::squaredNorm(r);
+		for (unsigned int i = 0; i < maxSteps; ++i) {
+			dirac->multiplyAdd(tmp, p, p, shifts[firstSolution]);
+			long_real_t alpha = normResidual/real(AlignedAlgebraUtils::dot(p,tmp));
+
+			AlignedAlgebraUtils::vector_plus_scalar_times_vector(solutions[firstSolution], solutions[firstSolution], alpha, p);
+			AlignedAlgebraUtils::vector_plus_scalar_times_vector(r, r, -alpha, tmp);
+
+			long_real_t error = AlignedAlgebraUtils::squaredNorm(r);
+
+			if (error < epsilon) {
+#ifdef MULTISHIFTLOG
+				std::cout << "Multishift BiCGStab steps: " << i << " for shift " << *shift << std::endl;
+#endif
+				break;
+			}
+
+			long_real_t beta = error / normResidual;
+
+			AlignedAlgebraUtils::vector_plus_scalar_times_vector(p, r, beta, p);
+			p.updateHalo();
+			normResidual = error;
+
+			if (i == maxSteps - 1) flag = false;
+		}
+
+		solutions[firstSolution].updateHalo();
+		//Move to the next solution
+		++firstSolution;
+	}
+
+	std::complex<real_t>* f = new std::complex<real_t>[shifts.size()];
+	for (unsigned int i = 0; i < shifts.size(); ++i) f[i] = 1.;
+
+	//Set the solutions to zero
+	for (unsigned int i = firstSolution; i < shifts.size(); ++i) {
+		AlignedAlgebraUtils::setToZero(solutions[i]);
+	}
+
+	//Set r to b
+	r = soa_source;
+
+	for (unsigned int i = 0; i < maxSteps; ++i) {
+		//Multiply by the last shifts
+		dirac->multiplyAdd(p,r,r,shifts.back());
+		std::complex<real_t> alpha = omega*static_cast< std::complex<real_t> >((AlignedAlgebraUtils::dot(p,r))/(AlignedAlgebraUtils::dot(p,p)));
+
+		//Set the last solution
+		AlignedAlgebraUtils::vector_plus_scalar_times_vector(solutions[length - 1], solutions[length - 1], alpha, r);
+
+		for (unsigned int index = firstSolution; index < shifts.size() - 1; ++index) {
+			f[index] = f[index]/(std::complex<real_t>(1.,0.) + (shifts[index] - shifts.back())* alpha);
+
+			AlignedAlgebraUtils::vector_plus_scalar_times_vector(solutions[index], solutions[index], f[index]*alpha, r);
+		}
+
+
+		//Set the last solution
+		AlignedAlgebraUtils::vector_plus_scalar_times_vector(r, r, -alpha, p);
+		r.updateHalo();
+
+		long_real_t error = AlignedAlgebraUtils::squaredNorm(r);
+		if (error < epsilon) {
+			for (unsigned int index = 0; index < shifts.size(); ++index) {
+				solutions[index].copy_to(original_solutions[index]);
+			}
+
+#ifdef TEST_PAPI_SPEED
+			if((retval=PAPI_flops( &real_time, &proc_time, &flpins, &mflops)) < PAPI_OK) test_fail(__FILE__, __LINE__, "PAPI_flops", retval);
+			if (isOutputProcess()) std::cout << "MFLOPS for Single Krilov Space Solver: " << mflops << " MFLOPS. " << std::endl;
+#endif
+			if (isOutputProcess()) std::cout << "MMMRMultishiftSolver::Convergence in " << i << " steps" << std::endl;
+			delete[] f;
+			return flag;
+		}
+	}
+
+	long_real_t last_error = AlignedAlgebraUtils::squaredNorm(r);
+
+	for (unsigned int index = 0; index < shifts.size(); ++index) {
+		solutions[index].copy_to(original_solutions[index]);
+	}
+
+	if (isOutputProcess()) std::cout << "Failure in finding convergence in MMMRMultishiftSolver! " << dirac->getKappa() << " " << last_error << std::endl;
+	delete[] f;
+	return false;
+#endif
 }
 
 } /* namespace Update */

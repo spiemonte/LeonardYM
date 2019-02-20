@@ -54,8 +54,10 @@ protected:
 	//The fermion action of the theory
 	NFlavorFermionAction** fermionAction;
 	//The dirac operators for the theory
-	DiracOperator* squareDiracOperator;
-	DiracOperator* diracOperator;
+	DiracOperator* squareDiracOperatorMetropolis;
+	DiracOperator* diracOperatorMetropolis;
+	DiracOperator* squareDiracOperatorForce;
+	DiracOperator* diracOperatorForce;
 
 	MultishiftSolver* multishiftSolver;
 	BlockDiracOperator* blackBlockDiracOperator;

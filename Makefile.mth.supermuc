@@ -8,15 +8,15 @@ endif
 
 CC       = gcc
 CPP      = g++
-OPTIMIZE = -O3 -march=native -Wall -Wextra -pipe -fopenmp
+OPTIMIZE = -O1 -g -Wall -Wextra -pipe -fopenmp -Wno-int-in-bool-context -Wno-ignored-attributes -Wno-unused-local-typedefs 
 INC     = -I./extra_libs/Eigen -I./extra_libs/ -I./source/
 CFLAGS   = $(OPTIMIZE) $(INC)
-CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/utils/MatrixBaseExtension.h\"" -DNUMCOLORS=$(nc) -DMULTITHREADING -I/lrz/sys/libraries/boost/1.45_gcc/include $(adj) -DEIGEN
+CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/utils/MatrixBaseExtension.h\"" -DNUMCOLORS=$(nc) -DMULTITHREADING -I/lrz/sys/libraries/boost/1.65_gcc/include $(adj) -DEIGEN
 
 include Makefile.obj.mk
 
 all: leonardQCD
-	$(CPP) $(CPPFLAGS) $(OBJECTS) -o leonardQCD.exe /lrz/sys/libraries/boost/1.45_gcc/lib/libboost_program_options.a
+	$(CPP) $(CPPFLAGS) $(OBJECTS) -o leonardQCD.exe /lrz/sys/libraries/boost/1.65_gcc/lib/libboost_program_options.a
 	@echo "Compiled with NUMCOLORS: " $(nc)
 
 leonardQCD: $(OBJECTS)
@@ -26,4 +26,4 @@ include Makefile.list.mk
 
 clean:
 	-rm ./*.o
-	-rm ./*.exe
+	-rm ./leonardQCD.exe

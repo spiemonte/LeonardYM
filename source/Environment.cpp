@@ -3,6 +3,21 @@
 
 namespace Update {
 
+Environment::Environment(const Environment& toCopy) : gaugeLinkConfiguration(toCopy.gaugeLinkConfiguration), fermionicLinkConfiguration(toCopy.fermionicLinkConfiguration), adjointLinkConfiguration(toCopy.adjointLinkConfiguration), adjoint_scalar_fields(toCopy.adjoint_scalar_fields), fundamental_scalar_fields(toCopy.fundamental_scalar_fields), configurations(toCopy.configurations), sweep(toCopy.sweep), iteration(toCopy.iteration), measurement(toCopy.measurement) { }
+
+Environment& Environment::operator=(const Environment& toCopy) {
+	gaugeLinkConfiguration = toCopy.gaugeLinkConfiguration;
+	fermionicLinkConfiguration = toCopy.fermionicLinkConfiguration;
+	adjointLinkConfiguration = toCopy.adjointLinkConfiguration;
+	adjoint_scalar_fields = toCopy.adjoint_scalar_fields;
+	fundamental_scalar_fields = toCopy.fundamental_scalar_fields;
+	configurations = toCopy.configurations;
+	sweep = toCopy.sweep;
+	iteration = toCopy.iteration;
+	measurement = toCopy.measurement;
+	return *this;
+}
+
 void Environment::synchronize() {
 	try {
 		int levels = configurations.get<int>("stout_smearing_levels");
@@ -42,6 +57,8 @@ void Environment::synchronize() {
 		fermionicLinkConfiguration = gaugeLinkConfiguration;
 #endif
 	}
+
+	ConvertLattice<extended_adjoint_lattice_t,extended_gauge_lattice_t>::convert(adjointLinkConfiguration, gaugeLinkConfiguration);
 
 	try {
 		std::string bc = configurations.get<std::string>("boundary_conditions");

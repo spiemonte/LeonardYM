@@ -107,7 +107,7 @@ void WilsonFlow::integrate(const extended_gauge_lattice_t& initialLattice, exten
 #pragma omp parallel for
 		for (int site = 0; site < Z0.localsize; ++site) {
 			for (unsigned int mu = 0; mu < 4; ++mu) {
-				X1[site][mu] = this->exponential(X0[site][mu], (1/4.)*Z0[site][mu], dt);
+				X1[site][mu] = this->exponential(X0[site][mu], (1./4.)*Z0[site][mu], dt);
 			}
 		}
 		X1.updateHalo();

@@ -31,9 +31,9 @@
 
 namespace Update {
 
-MultiStepNFlavorQCDUpdater::MultiStepNFlavorQCDUpdater() : LatticeSweep(), nFlavorQCDAction(0), gaugeAction(0), fermionAction(0), squareDiracOperator(0), diracOperator(0), multishiftSolver(0), blackBlockDiracOperator(0), redBlockDiracOperator(0) { }
+MultiStepNFlavorQCDUpdater::MultiStepNFlavorQCDUpdater() : LatticeSweep(), nFlavorQCDAction(0), gaugeAction(0), fermionAction(0), squareDiracOperatorMetropolis(0), diracOperatorMetropolis(0), squareDiracOperatorForce(0), diracOperatorForce(0), multishiftSolver(0), blackBlockDiracOperator(0), redBlockDiracOperator(0) { }
 
-MultiStepNFlavorQCDUpdater::MultiStepNFlavorQCDUpdater(const MultiStepNFlavorQCDUpdater& toCopy) : LatticeSweep(toCopy), nFlavorQCDAction(0), gaugeAction(0), fermionAction(0), squareDiracOperator(0), diracOperator(0), multishiftSolver(0) { }
+MultiStepNFlavorQCDUpdater::MultiStepNFlavorQCDUpdater(const MultiStepNFlavorQCDUpdater& toCopy) : LatticeSweep(toCopy), nFlavorQCDAction(0), gaugeAction(0), fermionAction(0), squareDiracOperatorMetropolis(0), diracOperatorMetropolis(0), squareDiracOperatorForce(0), diracOperatorForce(0), multishiftSolver(0) { }
 
 MultiStepNFlavorQCDUpdater::~MultiStepNFlavorQCDUpdater() {
 	if (nFlavorQCDAction != 0) delete nFlavorQCDAction;
@@ -43,6 +43,9 @@ MultiStepNFlavorQCDUpdater::~MultiStepNFlavorQCDUpdater() {
 }
 
 void MultiStepNFlavorQCDUpdater::initializeApproximations(environment_t& environment) {
+	double twist = environment.configurations.get<double>("MultiStepNFlavorQCDUpdater::twist");
+	if (isOutputProcess()) std::cout << "MultiStepNFlavorQCDUpdater::Using twist " << twist << std::endl;	
+
 	if (multishiftSolver == 0) {
 		if (environment.configurations.get<std::string>("MultiStepNFlavorQCDUpdater::multigrid") == "true") {
 			DiracOperator* diracOperator = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations);
@@ -79,7 +82,7 @@ void MultiStepNFlavorQCDUpdater::initializeApproximations(environment_t& environ
 	else {
 		if (environment.configurations.get<std::string>("MultiStepNFlavorQCDUpdater::multigrid") == "true") {
 			MultiGridMEMultishiftSolver* multishiftMultiGridSolver = dynamic_cast<MultiGridMEMultishiftSolver*>(multishiftSolver);
-			multishiftMultiGridSolver->initializeBasis(diracOperator);
+			multishiftMultiGridSolver->initializeBasis(diracOperatorMetropolis);
 		}
 	}
 	//First take the rational function approximation for the heatbath step
@@ -90,6 +93,10 @@ void MultiStepNFlavorQCDUpdater::initializeApproximations(environment_t& environ
 			RationalApproximation rational(multishiftSolver);
 			rational.setAlphas(std::vector<real_t>(rat.begin(), rat.begin() + rat.size()/2));
 			rational.setBetas(std::vector<real_t>(rat.begin() + rat.size()/2, rat.end()));
+			//We apply the twist
+			for (unsigned int k = 0; k < rational.getBetas().size(); ++k) {
+				rational.getBetas()[k] += twist;
+			}
 			rational.setPrecision(environment.configurations.get<double>("metropolis_inverter_precision"));
 			rational.setMaximumRecursion(environment.configurations.get<unsigned int>("metropolis_inverter_max_steps"));
 			rationalApproximationsHeatBath.push_back(rational);
@@ -105,6 +112,10 @@ void MultiStepNFlavorQCDUpdater::initializeApproximations(environment_t& environ
 			RationalApproximation rational(multishiftSolver);
 			rational.setAlphas(std::vector<real_t>(rat.begin(), rat.begin() + rat.size()/2));
 			rational.setBetas(std::vector<real_t>(rat.begin() + rat.size()/2, rat.end()));
+			//We apply the twist
+			for (unsigned int k = 0; k < rational.getBetas().size(); ++k) {
+				rational.getBetas()[k] += twist;
+			}
 			rational.setPrecision(environment.configurations.get<double>("metropolis_inverter_precision"));
 			rational.setMaximumRecursion(environment.configurations.get<unsigned int>("metropolis_inverter_max_steps"));
 			rationalApproximationsMetropolis.push_back(rational);
@@ -136,6 +147,10 @@ void MultiStepNFlavorQCDUpdater::initializeApproximations(environment_t& environ
 				RationalApproximation rational(multishiftSolver);
 				rational.setAlphas(std::vector<real_t>(rat.begin(), rat.begin() + rat.size()/2));
 				rational.setBetas(std::vector<real_t>(rat.begin() + rat.size()/2, rat.end()));
+				//We apply the twist
+				for (unsigned int k = 0; k < rational.getBetas().size(); ++k) {
+					rational.getBetas()[k] += twist;
+				}
 				rational.setPrecision(level_precisions[i - 1]);
 				rational.setMaximumRecursion(environment.configurations.get<unsigned int>("force_inverter_max_steps"));
 				levelRationaApproximationForce.push_back(rational);
@@ -185,13 +200,21 @@ void MultiStepNFlavorQCDUpdater::execute(environment_t& environment) {
 	//Copy the environment
 	environmentNew = environment;
 
-	//Take the Dirac Operator
-	if (diracOperator == 0)  diracOperator = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations);
-	diracOperator->setLattice(environment.getFermionLattice());
+	//Take the Dirac Operator for Metropolis/Heatbath
+	if (diracOperatorMetropolis == 0)  diracOperatorMetropolis = DiracOperator::getInstance(environment.configurations.get<std::string>("MultiStepNFlavorQCDUpdater::dirac_operator_metropolis::dirac_operator"), 1, environment.configurations,  "MultiStepNFlavorQCDUpdater::dirac_operator_metropolis::");
+	diracOperatorMetropolis->setLattice(environment.getFermionLattice());
 
-	//Take the Square Dirac Operator
-	if (squareDiracOperator == 0) squareDiracOperator = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 2, environment.configurations);
-	squareDiracOperator->setLattice(environment.getFermionLattice());
+	//Take the Square Dirac Operator for Metropolis/Heatbath
+	if (squareDiracOperatorMetropolis == 0) squareDiracOperatorMetropolis = DiracOperator::getInstance(environment.configurations.get<std::string>("MultiStepNFlavorQCDUpdater::dirac_operator_metropolis::dirac_operator"), 2, environment.configurations,  "MultiStepNFlavorQCDUpdater::dirac_operator_metropolis::");
+	squareDiracOperatorMetropolis->setLattice(environment.getFermionLattice());
+
+	//Take the Dirac Operator for the force
+	if (diracOperatorForce == 0)  diracOperatorForce = DiracOperator::getInstance(environment.configurations.get<std::string>("MultiStepNFlavorQCDUpdater::dirac_operator_metropolis::dirac_operator"), 1, environment.configurations,  "MultiStepNFlavorQCDUpdater::dirac_operator_force::");
+	diracOperatorForce->setLattice(environment.getFermionLattice());
+
+	//Take the Square Dirac Operator for the force
+	if (squareDiracOperatorForce == 0) squareDiracOperatorForce = DiracOperator::getInstance(environment.configurations.get<std::string>("MultiStepNFlavorQCDUpdater::dirac_operator_metropolis::dirac_operator"), 2, environment.configurations,  "MultiStepNFlavorQCDUpdater::dirac_operator_force::");
+	squareDiracOperatorForce->setLattice(environment.getFermionLattice());
 
 	//Take the gauge action
 	if (gaugeAction == 0) gaugeAction = GaugeAction::getInstance(environment.configurations.get<std::string>("name_action"),environment.configurations.get<double>("beta"));
@@ -205,7 +228,7 @@ void MultiStepNFlavorQCDUpdater::execute(environment_t& environment) {
 		this->generateGaussianDiracVector(tmp_pseudofermion);
 		oldPseudoFermionEnergy += AlgebraUtils::squaredNorm(tmp_pseudofermion);
 		//Heat bath by multiply the tmp_pseudofermion to the polynomial of the dirac operator
-		j->evaluate(squareDiracOperator, *i, tmp_pseudofermion);
+		j->evaluate(squareDiracOperatorMetropolis, *i, tmp_pseudofermion);
 		++j;
 
 
@@ -220,7 +243,7 @@ void MultiStepNFlavorQCDUpdater::execute(environment_t& environment) {
 					//Now we use the better approximation for the metropolis step
 					std::vector<RationalApproximation>::iterator rational = rationalApproximationsMetropolis.begin();
 					//Now we evaluate it with the rational approximation of the inverse
-					rational->evaluate(squareDiracOperator,tmp_pseudofermion,*i);
+					rational->evaluate(squareDiracOperatorMetropolis,tmp_pseudofermion,*i);
 					test += real(AlgebraUtils::dot(*i,tmp_pseudofermion));
 					if (isOutputProcess()) std::cout << "NFlavoQCDUpdater::Consistency check for the metropolis: " << test - oldPseudoFermionEnergy << std::endl;
 
@@ -228,7 +251,7 @@ void MultiStepNFlavorQCDUpdater::execute(environment_t& environment) {
 					rational = rationalApproximationsForce[0].begin();
 					test = 0.;
 					//Now we evaluate it with the rational approximation of the inverse
-					rational->evaluate(squareDiracOperator,tmp_pseudofermion,*i);
+					rational->evaluate(squareDiracOperatorForce,tmp_pseudofermion,*i);
 					test += real(AlgebraUtils::dot(*i,tmp_pseudofermion));
 
 					if (isOutputProcess()) std::cout << "NFlavoQCDUpdater::Consistency check for the first level of the force: " << test - oldPseudoFermionEnergy << std::endl;
@@ -247,15 +270,17 @@ void MultiStepNFlavorQCDUpdater::execute(environment_t& environment) {
 	long_real_t oldLatticeEnergy = gaugeAction->energy(environment);
 
 	//Set the dirac operator to the new environment
-	squareDiracOperator->setLattice(environmentNew.getFermionLattice());
-	diracOperator->setLattice(environmentNew.getFermionLattice());
+	squareDiracOperatorMetropolis->setLattice(environmentNew.getFermionLattice());
+	diracOperatorMetropolis->setLattice(environmentNew.getFermionLattice());
+	squareDiracOperatorForce->setLattice(environmentNew.getFermionLattice());
+	diracOperatorForce->setLattice(environmentNew.getFermionLattice());
 
 	//Take the fermion action
 	if (fermionAction == 0) {
 		int numberLevels = environment.configurations.get< unsigned int >("number_force_levels");
 		fermionAction = new NFlavorFermionAction*[numberLevels];
 		for (int j = 0; j < numberLevels; ++j) {
-			fermionAction[j] = new NFlavorFermionAction(squareDiracOperator, diracOperator, rationalApproximationsForce[j]);
+			fermionAction[j] = new NFlavorFermionAction(squareDiracOperatorForce, diracOperatorForce, rationalApproximationsForce[j]);
 			//TODO dirac operator correctly set?
 			for (i = pseudofermions.begin(); i != pseudofermions.end(); ++i) {
 				//Add the pseudofermions
@@ -328,13 +353,13 @@ void MultiStepNFlavorQCDUpdater::execute(environment_t& environment) {
 	long_real_t newLatticeEnergy = gaugeAction->energy(environmentNew);
 	//Get the final energy of the pseudofermions
 	long_real_t newPseudoFermionEnergy = 0.;
-	diracOperator->setLattice(environmentNew.getFermionLattice());//TODO TODO TODO
-	squareDiracOperator->setLattice(environmentNew.getFermionLattice());
+	diracOperatorMetropolis->setLattice(environmentNew.getFermionLattice());//TODO TODO TODO
+	squareDiracOperatorMetropolis->setLattice(environmentNew.getFermionLattice());
 	//Now we use the better approximation for the metropolis step
 	std::vector<RationalApproximation>::iterator rational = rationalApproximationsMetropolis.begin();
 	for (i = pseudofermions.begin(); i != pseudofermions.end(); ++i) {
 		//Now we evaluate it with the rational approximation of the inverse
-		rational->evaluate(squareDiracOperator,tmp_pseudofermion,*i);
+		rational->evaluate(squareDiracOperatorMetropolis,tmp_pseudofermion,*i);
 		newPseudoFermionEnergy += real(AlgebraUtils::dot(*i,tmp_pseudofermion));
 		++rational;
 	}
@@ -417,6 +442,7 @@ void MultiStepNFlavorQCDUpdater::execute(environment_t& environment) {
 void MultiStepNFlavorQCDUpdater::registerParameters(po::options_description& desc) {
 	static bool single = true;
 	if (single) desc.add_options()
+		("MultiStepNFlavorQCDUpdater::twist", po::value<double>()->default_value(0.0), "set the value of the twist applied to fermions")
 		("MultiStepNFlavorQCDUpdater::inverter_precision", po::value<double>()->default_value(0.0000000001), "set the precision used by the inverter")
 		("MultiStepNFlavorQCDUpdater::inverter_max_steps", po::value<unsigned int>()->default_value(5000), "set the maximum steps used by the inverter")
 		
@@ -431,6 +457,10 @@ void MultiStepNFlavorQCDUpdater::registerParameters(po::options_description& des
 		("MultiStepNFlavorQCDUpdater::gmres_inverter_precision", po::value<double>()->default_value(0.00000000001), "The precision of the GMRES inverter used to initialize the multigrid basis")
 		("MultiStepNFlavorQCDUpdater::gmres_inverter_max_steps", po::value<unsigned int>()->default_value(100), "The maximum number of steps for the GMRES inverter used to initialize the multigrid basis")
 		;
+	if (single) {
+		DiracOperator::registerParameters(desc, "MultiStepNFlavorQCDUpdater::dirac_operator_metropolis::");
+		DiracOperator::registerParameters(desc, "MultiStepNFlavorQCDUpdater::dirac_operator_force::");
+	}
 	single = false;
 }
 

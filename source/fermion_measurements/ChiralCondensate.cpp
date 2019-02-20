@@ -10,6 +10,7 @@
 #include "inverters/PreconditionedBiCGStab.h"
 #include "io/GlobalOutput.h"
 #include "utils/StoutSmearing.h"
+#include "dirac_operators/Propagator.h"
 
 namespace Update {
 
@@ -90,6 +91,8 @@ void ChiralCondensate::execute(environment_t& environment) {
 		this->generateRandomNoise(randomNoise);
 		
 		inverter->solve(diracOperator, randomNoise, tmp);
+		Propagator::constructPropagator(diracOperator, randomNoise, tmp);
+		
 		
 		std::complex<long_real_t> condensate = AlgebraUtils::dot(randomNoise, tmp);
 		chiralCondensateRe.push_back(real(condensate)/volume);
@@ -105,6 +108,15 @@ void ChiralCondensate::execute(environment_t& environment) {
 		
 		if (connected) {
 			inverter->solve(diracOperator, tmp, tmp_square);
+
+			if (diracOperator->getName() == "Overlap") {
+#pragma omp parallel for
+				for (int site = 0; site < tmp.completesize; ++site) {
+					for (unsigned int mu = 0; mu< 4; ++mu) {
+						tmp_square[site][mu] = tmp_square[site][mu] - tmp[site][mu];
+					}
+				}
+			}
 
 			std::complex<long_real_t> condensateConnected = AlgebraUtils::dot(randomNoise, tmp_square);
 			chiralCondensateConnectedRe.push_back(real(condensateConnected)/volume);

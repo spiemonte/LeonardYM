@@ -7,8 +7,8 @@ else
 endif
 
 CC       = mpigcc
-CPP      = mpicxx
-OPTIMIZE =  -fopenmp -O3 -std=c++11 -march=knl -fargument-noalias-global -Wno-ignored-attributes
+CPP      = mpiicpc
+OPTIMIZE = -fopenmp -O3 -std=c++11 -xMIC-AVX512 -fargument-noalias-global -funroll-all-loops -fpeel-loops -finline-limit=50000
 INC	 = -I./extra_libs/Eigen  -I./source/ -I/usr/include/boost/include/
 CFLAGS   = $(OPTIMIZE) $(INC)
 CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/utils/MatrixBaseExtension.h\"" $(adj) -DENABLE_MPI -DNUMCOLORS=$(nc) -DMULTITHREADING -DEIGEN

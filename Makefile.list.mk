@@ -40,6 +40,9 @@ ConjugateGradient.o: ./source/inverters/ConjugateGradient.h ./source/inverters/C
 DiracOperator.o: ./source/dirac_operators/DiracOperator.h ./source/dirac_operators/DiracOperator.cpp
 	$(CPP) $(CPPFLAGS) -c -o DiracOperator.o ./source/dirac_operators/DiracOperator.cpp
 
+Propagator.o: ./source/dirac_operators/Propagator.h ./source/dirac_operators/Propagator.cpp
+	$(CPP) $(CPPFLAGS) -c -o Propagator.o ./source/dirac_operators/Propagator.cpp
+
 BasicDiracWilsonOperator.o: ./source/dirac_operators/BasicDiracWilsonOperator.h ./source/dirac_operators/BasicDiracWilsonOperator.cpp
 	$(CPP) $(CPPFLAGS) -c -o BasicDiracWilsonOperator.o ./source/dirac_operators/BasicDiracWilsonOperator.cpp
 
@@ -51,6 +54,15 @@ DiracWilsonOperator.o: ./source/dirac_operators/DiracWilsonOperator.h ./source/d
 
 SquareDiracWilsonOperator.o: ./source/dirac_operators/SquareDiracWilsonOperator.h ./source/dirac_operators/SquareDiracWilsonOperator.cpp
 	$(CPP) $(CPPFLAGS) -c -o SquareDiracWilsonOperator.o ./source/dirac_operators/SquareDiracWilsonOperator.cpp
+
+OverlapOperator.o: ./source/dirac_operators/OverlapOperator.h ./source/dirac_operators/OverlapOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o OverlapOperator.o ./source/dirac_operators/OverlapOperator.cpp
+
+SquareOverlapOperator.o: ./source/dirac_operators/SquareOverlapOperator.h ./source/dirac_operators/SquareOverlapOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o SquareOverlapOperator.o ./source/dirac_operators/SquareOverlapOperator.cpp
+
+ExactOverlapOperator.o: ./source/dirac_operators/ExactOverlapOperator.h ./source/dirac_operators/ExactOverlapOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o ExactOverlapOperator.o ./source/dirac_operators/ExactOverlapOperator.cpp
 
 BlockDiracOperator.o: ./source/dirac_operators/BlockDiracOperator.h ./source/dirac_operators/BlockDiracOperator.cpp
 	$(CPP) $(CPPFLAGS) -c -o BlockDiracOperator.o ./source/dirac_operators/BlockDiracOperator.cpp
@@ -169,6 +181,9 @@ FermionicAction.o: ./source/actions/FermionicAction.h ./source/actions/Fermionic
 Polynomial.o: ./source/dirac_functions/Polynomial.h ./source/dirac_functions/Polynomial.cpp
 	$(CPP) $(CPPFLAGS) -c -o Polynomial.o ./source/dirac_functions/Polynomial.cpp
 
+ChebyshevRecursion.o: ./source/dirac_functions/ChebyshevRecursion.h ./source/dirac_functions/ChebyshevRecursion.cpp
+	$(CPP) $(CPPFLAGS) -c -o ChebyshevRecursion.o ./source/dirac_functions/ChebyshevRecursion.cpp
+
 RationalApproximation.o: ./source/dirac_functions/RationalApproximation.h ./source/dirac_functions/RationalApproximation.cpp
 	$(CPP) $(CPPFLAGS) -c -o RationalApproximation.o ./source/dirac_functions/RationalApproximation.cpp
 
@@ -271,6 +286,9 @@ SmearingForce.o: ./source/hmc_forces/SmearingForce.h ./source/hmc_forces/Smearin
 DiracWilsonFermionForce.o: ./source/hmc_forces/DiracWilsonFermionForce.h ./source/hmc_forces/DiracWilsonFermionForce.cpp
 	$(CPP) $(CPPFLAGS) -c -o DiracWilsonFermionForce.o ./source/hmc_forces/DiracWilsonFermionForce.cpp
 
+OverlapFermionForce.o: ./source/hmc_forces/OverlapFermionForce.h ./source/hmc_forces/OverlapFermionForce.cpp
+	$(CPP) $(CPPFLAGS) -c -o OverlapFermionForce.o ./source/hmc_forces/OverlapFermionForce.cpp
+
 BlockDiracWilsonFermionForce.o: ./source/hmc_forces/BlockDiracWilsonFermionForce.h ./source/hmc_forces/BlockDiracWilsonFermionForce.cpp
 	$(CPP) $(CPPFLAGS) -c -o BlockDiracWilsonFermionForce.o ./source/hmc_forces/BlockDiracWilsonFermionForce.cpp
 
@@ -279,6 +297,18 @@ ImprovedFermionForce.o: ./source/hmc_forces/ImprovedFermionForce.h ./source/hmc_
 
 TestForce.o: ./source/hmc_forces/TestForce.h ./source/hmc_forces/TestForce.cpp
 	$(CPP) $(CPPFLAGS) -c -o TestForce.o ./source/hmc_forces/TestForce.cpp
+
+ScalarAction.o: ./source/actions/ScalarAction.h ./source/actions/ScalarAction.cpp
+	$(CPP) $(CPPFLAGS) -c -o ScalarAction.o ./source/actions/ScalarAction.cpp
+
+MultiScalarAction.o: ./source/actions/MultiScalarAction.h ./source/actions/MultiScalarAction.cpp
+	$(CPP) $(CPPFLAGS) -c -o MultiScalarAction.o ./source/actions/MultiScalarAction.cpp
+
+FundamentalScalarAction.o: ./source/actions/FundamentalScalarAction.h ./source/actions/FundamentalScalarAction.cpp
+	$(CPP) $(CPPFLAGS) -c -o FundamentalScalarAction.o ./source/actions/FundamentalScalarAction.cpp
+
+AdjointScalarAction.o: ./source/actions/AdjointScalarAction.h ./source/actions/AdjointScalarAction.cpp
+	$(CPP) $(CPPFLAGS) -c -o AdjointScalarAction.o ./source/actions/AdjointScalarAction.cpp
 
 TwoFlavorFermionAction.o: ./source/actions/TwoFlavorFermionAction.h ./source/actions/TwoFlavorFermionAction.cpp
 	$(CPP) $(CPPFLAGS) -c -o TwoFlavorFermionAction.o ./source/actions/TwoFlavorFermionAction.cpp
@@ -289,6 +319,21 @@ TwoFlavorQCDAction.o: ./source/actions/TwoFlavorQCDAction.h ./source/actions/Two
 TwoFlavorHMCUpdater.o: ./source/hmc_updaters/TwoFlavorHMCUpdater.h ./source/hmc_updaters/TwoFlavorHMCUpdater.cpp
 	$(CPP) $(CPPFLAGS) -c -o TwoFlavorHMCUpdater.o ./source/hmc_updaters/TwoFlavorHMCUpdater.cpp
 
+ScalarFermionHMCUpdater.o: ./source/hmc_updaters/ScalarFermionHMCUpdater.h ./source/hmc_updaters/ScalarFermionHMCUpdater.cpp
+	$(CPP) $(CPPFLAGS) -c -o ScalarFermionHMCUpdater.o ./source/hmc_updaters/ScalarFermionHMCUpdater.cpp
+
+RandomScalarUpdater.o: ./source/scalar_updaters/RandomScalarUpdater.h ./source/scalar_updaters/RandomScalarUpdater.cpp
+	$(CPP) $(CPPFLAGS) -c -o RandomScalarUpdater.o ./source/scalar_updaters/RandomScalarUpdater.cpp
+
+MeanScalarField.o: ./source/scalar_measurements/MeanScalarField.cpp ./source/scalar_measurements/MeanScalarField.h
+	$(CPP) $(CPPFLAGS) -c -o MeanScalarField.o ./source/scalar_measurements/MeanScalarField.cpp
+
+AdjointMetropolisScalarUpdater.o: ./source/scalar_updaters/AdjointMetropolisScalarUpdater.h ./source/scalar_updaters/AdjointMetropolisScalarUpdater.cpp
+	$(CPP) $(CPPFLAGS) -c -o AdjointMetropolisScalarUpdater.o ./source/scalar_updaters/AdjointMetropolisScalarUpdater.cpp
+
+FundamentalMetropolisScalarUpdater.o: ./source/scalar_updaters/FundamentalMetropolisScalarUpdater.h ./source/scalar_updaters/FundamentalMetropolisScalarUpdater.cpp
+	$(CPP) $(CPPFLAGS) -c -o FundamentalMetropolisScalarUpdater.o ./source/scalar_updaters/FundamentalMetropolisScalarUpdater.cpp
+
 NFlavorFermionAction.o: ./source/actions/NFlavorFermionAction.h ./source/actions/NFlavorFermionAction.cpp
 	$(CPP) $(CPPFLAGS) -c -o NFlavorFermionAction.o ./source/actions/NFlavorFermionAction.cpp
 
@@ -298,14 +343,14 @@ NFlavorQCDAction.o: ./source/actions/NFlavorQCDAction.h ./source/actions/NFlavor
 NFlavorQCDUpdater.o : ./source/hmc_updaters/NFlavorQCDUpdater.h ./source/hmc_updaters/NFlavorQCDUpdater.cpp
 	$(CPP) $(CPPFLAGS) -c -o NFlavorQCDUpdater.o ./source/hmc_updaters/NFlavorQCDUpdater.cpp
 
+HiggsGaugeHMCUpdater.o : ./source/hmc_updaters/HiggsGaugeHMCUpdater.h ./source/hmc_updaters/HiggsGaugeHMCUpdater.cpp
+	$(CPP) $(CPPFLAGS) -c -o HiggsGaugeHMCUpdater.o ./source/hmc_updaters/HiggsGaugeHMCUpdater.cpp
+
 MultiStepNFlavorQCDUpdater.o : ./source/hmc_updaters/MultiStepNFlavorQCDUpdater.h ./source/hmc_updaters/MultiStepNFlavorQCDUpdater.cpp
 	$(CPP) $(CPPFLAGS) -c -o MultiStepNFlavorQCDUpdater.o ./source/hmc_updaters/MultiStepNFlavorQCDUpdater.cpp
 
 TwistedMultiStepNFlavorQCDUpdater.o : ./source/hmc_updaters/TwistedMultiStepNFlavorQCDUpdater.h ./source/hmc_updaters/TwistedMultiStepNFlavorQCDUpdater.cpp
 	$(CPP) $(CPPFLAGS) -c -o TwistedMultiStepNFlavorQCDUpdater.o ./source/hmc_updaters/TwistedMultiStepNFlavorQCDUpdater.cpp
-
-NFlavorBlockUpdater.o : ./source/hmc_updaters/NFlavorBlockUpdater.h ./source/hmc_updaters/NFlavorBlockUpdater.cpp
-	$(CPP) $(CPPFLAGS) -c -o NFlavorBlockUpdater.o ./source/hmc_updaters/NFlavorBlockUpdater.cpp
 
 DiracEigenSolver.o: ./source/fermion_measurements/DiracEigenSolver.h ./source/fermion_measurements/DiracEigenSolver.cpp
 	$(CPP) $(CPPFLAGS) -c -o DiracEigenSolver.o ./source/fermion_measurements/DiracEigenSolver.cpp

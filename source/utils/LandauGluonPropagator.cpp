@@ -19,10 +19,17 @@ void LandauGluonPropagator::execute(environment_t& environment) {
 	real_t cut =  environment.configurations.get< real_t >("LandauGluonPropagator::anisotropy_cut");
 
 	std::vector< std::vector<real_t> > momenta;
+	std::vector< std::vector<real_t> > pn;
 	for (int i = 0; i < maximal_momentum[0]; ++i) {
 		for (int j = 0; j < maximal_momentum[1]; ++j) {
 			for (int k = 0; k < maximal_momentum[2]; ++k) {
 				for (int l = 0; l < maximal_momentum[3]; ++l) {
+					std::vector<real_t> n(4);
+					n[0] = i;
+					n[1] = j;
+					n[2] = k;
+					n[3] = l;
+
 					std::vector<real_t> momentum(4);
 					momentum[0] = i*2.*PI/Layout::glob_x;
 					momentum[1] = j*2.*PI/Layout::glob_y;
@@ -33,6 +40,7 @@ void LandauGluonPropagator::execute(environment_t& environment) {
 					real_t deviation = fabs(momentum[0] - mean) + fabs(momentum[1] - mean) + fabs(momentum[2] - mean) + fabs(momentum[3] - mean);
 					if (deviation < cut) {
 						momenta.push_back(momentum);
+						pn.push_back(n);
 					}
 				}
 			}
@@ -175,28 +183,11 @@ void LandauGluonPropagator::execute(environment_t& environment) {
 						for (unsigned int mu1 = 0; mu1 < 4; ++mu1) {
 							for (unsigned int mu2 = 0; mu2 < 4; ++mu2) {
 								three_point_function += std::complex<real_t>(0.,-2. ) * trace((lieGenerators.get(c1)*lieGenerators.get(c2) - lieGenerators.get(c2)*lieGenerators.get(c1))*lieGenerators.get(c3)) * resultAk[mu1][c1] * Azero[mu2][c2] * resultAmk[mu1][c3] * p[mu2] / (6.*modulus*modulus);
-								/*std::complex<real_t> che_cazzo = ( std::complex<real_t>(0.,-2.) * trace((lieGenerators.get(c1)*lieGenerators.get(c2) - lieGenerators.get(c2)*lieGenerators.get(c1))*lieGenerators.get(c3)) * resultAk[mu1][c1] * Azero[mu2][c2] * resultAmk[mu1][c3] * p[mu2] / (6.*modulus*modulus) );
-								if (std::abs(che_cazzo) > 0.000000000001) {
-									std::cout << "Giusto per: " << mu2 << " " << mu1 << " " << c1 << " " << c2 << " " << c3 << "  -  " << p[mu2] << "   " << trace((lieGenerators.get(c1)*lieGenerators.get(c2) - lieGenerators.get(c2)*lieGenerators.get(c1))*lieGenerators.get(c3)) << "   " << resultAk[mu1][c1] << "   " << Azero[mu2][c2]  << "   " <<  resultAmk[mu1][c3] << std::endl;
-									std::cout << " E poi: " << che_cazzo << " " << three_point_function << std::endl << std::endl;
-								}*/
 							}
 						}
 					}
 				}
 			}
-
-			/*std::complex<real_t> test1 = 0., test2 = 0.;
-			for (unsigned int c1 = 0; c1 < lieGenerators.numberGenerators(); ++c1) {
-				for (unsigned int c2 = 0; c2 < lieGenerators.numberGenerators(); ++c2) {
-					for (unsigned int c3 = 0; c3 < lieGenerators.numberGenerators(); ++c3) {
-						test1 += 2. * trace((lieGenerators.get(c1)*lieGenerators.get(c2) - lieGenerators.get(c2)*lieGenerators.get(c1))*lieGenerators.get(c3)) * resultAk[0][c1] * Azero[1][c2] * resultAmk[0][c3] * p[1] / (6.*modulus*modulus);
-						test2 += 2. * trace((lieGenerators.get(c1)*lieGenerators.get(c2) - lieGenerators.get(c2)*lieGenerators.get(c1))*lieGenerators.get(c3)) * resultAk[1][c1] * Azero[1][c2] * resultAmk[1][c3] * p[1] / (6.*modulus*modulus);
-					}
-				}
-			}
-
-			std::cout << "                 Test: " << test1/test2 << std::endl;*/
 			
 			result.push_back(imag(three_point_function));
 			if (isOutputProcess()) std::cout << "                     G3(p,0,-p) = " << three_point_function << std::endl;
@@ -209,45 +200,15 @@ void LandauGluonPropagator::execute(environment_t& environment) {
 		GlobalOutput* output = GlobalOutput::getInstance();
 		output->push("gluon_propagator");
 
-		for (unsigned int i = 0; i < data.size(); ++i) {
-			bool already_considered = false;
-			for (unsigned int  j = 0; j < i; ++j) {
-				if (fabs(data[i][0] - data[j][0]) < 0.0000000000000001) {
-					already_considered = true;
-					break;
-				}
-			}
-			if (!already_considered) {
-				std::cout << "{";
-				int nn = 1;
-				real_t averaged_result = data[i][1];
-				
-				std::vector<real_t> p(4);
-				p[0] = sin(momenta[i][0]/2.);
-				p[1] = sin(momenta[i][1]/2.);
-				p[2] = sin(momenta[i][2]/2.);
-				p[3] = sin(momenta[i][3]/2.);
-				real_t normalization = 4.*(p[0]*p[0] + p[1]*p[1] + p[2]*p[2] + p[3]*p[3] + (1./3.)*(p[0]*p[0]*p[0]*p[0] + p[1]*p[1]*p[0]*p[0] + p[2]*p[2]*p[2]*p[2] + p[3]*p[3]*p[3]*p[3]));
-				std::cout << "{" << momenta[i][0] << ", " << momenta[i][1] << ", " << momenta[i][2] << ", " << momenta[i][3] << ", " << normalization << "},";
-
-				for (unsigned int  j = i + 1; j < data.size(); ++j) {
-					if (fabs(data[i][0] - data[j][0]) < 0.0000000000000001) {
-						p[0] = sin(momenta[j][0]/2.);
-						p[1] = sin(momenta[j][1]/2.);
-						p[2] = sin(momenta[j][2]/2.);
-						p[3] = sin(momenta[j][3]/2.);
-						normalization = 4.*(p[0]*p[0] + p[1]*p[1] + p[2]*p[2] + p[3]*p[3] + (1./3.)*(p[0]*p[0]*p[0]*p[0] + p[1]*p[1]*p[0]*p[0] + p[2]*p[2]*p[2]*p[2] + p[3]*p[3]*p[3]*p[3]));
-						std::cout << "{" << momenta[j][0] << ", " << momenta[j][1] << ", " << momenta[j][2] << ", " << momenta[j][3] << ", " << normalization << "},";
-						++nn;
-						averaged_result += data[j][1];
-					}
-				}
-				std::cout << "}," << std::endl;
-				output->push("gluon_propagator");
-				output->write("gluon_propagator", data[i][0]);
-				output->write("gluon_propagator", averaged_result/nn);
-				output->pop("gluon_propagator");
-			}
+		for (unsigned int i = 0; i < data.size(); ++i) {				
+			output->push("gluon_propagator");
+			output->write("gluon_propagator", data[i][0]);
+			output->write("gluon_propagator", data[i][1]);
+			output->write("gluon_propagator", pn[i][0]);
+			output->write("gluon_propagator", pn[i][1]);
+			output->write("gluon_propagator", pn[i][2]);
+			output->write("gluon_propagator", pn[i][2]);
+			output->pop("gluon_propagator");
 		}
 		
 		output->pop("gluon_propagator");
@@ -257,27 +218,14 @@ void LandauGluonPropagator::execute(environment_t& environment) {
 		output->push("three_gluon_vertex");
 
 		for (unsigned int i = 0; i < data.size(); ++i) {
-			bool already_considered = false;
-			for (unsigned int  j = 0; j < i; ++j) {
-				if (fabs(data[i][0] - data[j][0]) < 0.0000000000000001) {
-					already_considered = true;
-					break;
-				}
-			}
-			if (!already_considered) {
-				int nn = 1;
-				real_t averaged_result = data[i][2];
-				for (unsigned int  j = i + 1; j < data.size(); ++j) {
-					if (fabs(data[i][0] - data[j][0]) < 0.0000000000000001) {
-						++nn;
-						averaged_result += data[j][2];
-					}
-				}
-				output->push("three_gluon_vertex");
-				output->write("three_gluon_vertex", data[i][0]);
-				output->write("three_gluon_vertex", averaged_result/nn);
-				output->pop("three_gluon_vertex");
-			}
+			output->push("three_gluon_vertex");
+			output->write("three_gluon_vertex", data[i][0]);
+			output->write("three_gluon_vertex", data[i][2]);
+			output->write("three_gluon_vertex", pn[i][0]);
+			output->write("three_gluon_vertex", pn[i][1]);
+			output->write("three_gluon_vertex", pn[i][2]);
+			output->write("three_gluon_vertex", pn[i][3]);
+			output->pop("three_gluon_vertex");
 		}
 
 		output->pop("three_gluon_vertex");

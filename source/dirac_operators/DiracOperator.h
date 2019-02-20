@@ -13,6 +13,8 @@
 
 #include <string>
 
+namespace po = boost::program_options;
+
 namespace Update {
 
 class DiracOperator {
@@ -20,9 +22,11 @@ public:
 	DiracOperator();
 	DiracOperator(const extended_fermion_lattice_t& _lattice, double _kappa = 0., bool _gamma5 = true);
 	virtual ~DiracOperator();
-	static DiracOperator* getInstance(const std::string& name, unsigned int power, const StorageParameters& parameters);
+	static DiracOperator* getInstance(const std::string& name, unsigned int power, const StorageParameters& parameters, const std::string& basename = "");
 	static DiracOperator* getSquareRoot(DiracOperator* dirac);
 	static DiracOperator* getSquare(DiracOperator* dirac);
+
+	static void registerParameters(po::options_description& desc, const std::string& basename);
 	
 #ifdef ENABLE_MPI
 	void multiply(standard_dirac_vector_t& output, const standard_dirac_vector_t& input) {
@@ -35,6 +39,41 @@ public:
 		reduced_dirac_vector_t _output, _input = input;
 		this->multiply(_output,_input);
 		output = _output;
+	}
+#endif
+
+#ifdef ALIGNED_OPT
+	//Dummy function to be overridden in the most relevant time-consuming cases
+	virtual void multiply(reduced_soa_dirac_vector_t& output, const reduced_soa_dirac_vector_t& input) {
+		reduced_dirac_vector_t d_output, d_input;
+		input.copy_to(d_input);
+
+		this->multiply(d_output, d_input);
+
+		output = d_output;
+	}
+
+	//Dummy function to be overridden in the most relevant time-consuming cases
+	virtual void multiplyAdd(reduced_soa_dirac_vector_t& output, const reduced_soa_dirac_vector_t& vector1, const reduced_soa_dirac_vector_t & vector2, const complex& alpha) {
+		if (vector1 == vector2) {
+			reduced_dirac_vector_t d_output, d_vector;
+			vector1.copy_to(d_vector);
+		
+
+			this->multiplyAdd(d_output, d_vector, d_vector, alpha);
+
+			output = d_output;
+		} 
+		else {
+			reduced_dirac_vector_t d_output, d_vector1, d_vector2;
+			vector1.copy_to(d_vector1);
+			vector2.copy_to(d_vector2);
+		
+
+			this->multiplyAdd(d_output, d_vector1, d_vector2, alpha);
+
+			output = d_output;
+		}
 	}
 #endif
 	
@@ -52,9 +91,9 @@ public:
 	 * @param vector2
 	 * @param alpha
 	 */
-    	virtual void multiplyAdd(reduced_dirac_vector_t& output, const reduced_dirac_vector_t& vector1, const reduced_dirac_vector_t & vector2, const complex& alpha) =0;
+    virtual void multiplyAdd(reduced_dirac_vector_t& output, const reduced_dirac_vector_t& vector1, const reduced_dirac_vector_t & vector2, const complex& alpha) =0;
 
-    	virtual FermionForce* getForce() const = 0;
+    virtual FermionForce* getForce() const = 0;
 
 	/**
 	 * This function sets the kappa parameter of the operator

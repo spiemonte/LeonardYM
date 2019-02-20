@@ -18,6 +18,9 @@ public:
 	FermionForce(real_t _kappa);
 	virtual ~FermionForce();
 
+	//Update only the fermion force, initialization to be called outside!
+	virtual void derivative(extended_fermion_force_lattice_t& fermionForce, const extended_fermion_lattice_t& lattice, const extended_dirac_vector_t& X, const extended_dirac_vector_t& Y, real_t weight);
+
 	virtual FermionicForceMatrix derivative(const extended_fermion_lattice_t& lattice, const extended_dirac_vector_t& X, const extended_dirac_vector_t& Y, int site, int mu) const = 0;
 
 	GaugeGroup force(const environment_t& env, const FermionicForceMatrix& derivative, int site, unsigned int mu);

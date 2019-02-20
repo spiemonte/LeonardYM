@@ -28,8 +28,10 @@ public:
 
 	void setAlphas(const std::vector< real_t >& _alphas);
 	void setBetas(const std::vector< real_t >& _betas);
-	std::vector< real_t > getAlphas() const;
-	std::vector< real_t > getBetas() const;
+	std::vector< real_t >& getAlphas();
+        std::vector< real_t >& getBetas();
+	const std::vector< real_t >& getAlphas() const;
+	const std::vector< real_t >& getBetas() const;
 
 	void setPrecision(const real_t& _precision);
 	real_t getPrecision() const;

@@ -1,3 +1,4 @@
+typedef unsigned int uint;
 inline Scalar at(uint i, uint j) const { return this->operator()(i,j); }
 inline Scalar& at(uint i, uint j) { return this->operator()(i,j); }
 inline Scalar at(uint i) const { return this->operator[](i); }

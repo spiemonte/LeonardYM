@@ -79,10 +79,7 @@ void NPRVertex::execute(environment_t& environment) {
 
 	inverter->setPrecision(environment.configurations.get<double>("NPRVertex::inverter_precision"));
 	inverter->setMaximumSteps(environment.configurations.get<unsigned int>("NPRVertex::inverter_max_steps"));
-	
-	extended_dirac_vector_t source;
 
-	std::complex<long_real_t> propagator[4*diracVectorLength][4*diracVectorLength];
 	std::complex<long_real_t> vertex[16][4*diracVectorLength][4*diracVectorLength];
 
 	int inversionSteps = 0;
@@ -96,36 +93,39 @@ void NPRVertex::execute(environment_t& environment) {
 	
 	for (unsigned int alpha = 0; alpha < 4; ++alpha) {
 		for (int c = 0; c < diracVectorLength; ++c) {
-			this->generateMomentumSource(source, momentum, alpha, c);
+			this->generateMomentumSource(source[c*4 + alpha], momentum, alpha, c);
 			//this->generateSource(source, alpha, c);
-			inverter->solve(diracOperator, source, tmp[c*4 + alpha]);
+			inverter->solve(diracOperator, source[c*4 + alpha], inverse_source[c*4 + alpha]);
 			
 			extended_dirac_vector_t test;
-			diracOperator->multiply(test,tmp[c*4 + alpha]);
-			long_real_t dtest = AlgebraUtils::differenceNorm(test, source);
+			diracOperator->multiply(test,inverse_source[c*4 + alpha]);
+			long_real_t dtest = AlgebraUtils::differenceNorm(test, source[c*4 + alpha]);
 			if (isOutputProcess()) std::cout << "NPRVertex::Convergence test of the inverter : " << dtest << std::endl;
 
 			inversionSteps += inverter->getLastSteps();
-			
-			/*diracOperator->multiply(eta,source);
-			biConjugateGradient->solve(squareDiracOperator, eta, tmp[c*4 + alpha]);
-			AlgebraUtils::gamma5(tmp[c*4 + alpha]);
-			inversionSteps += biConjugateGradient->getLastSteps();*/
-
-			
 		}
 	}
 	
 	if (isOutputProcess()) std::cout << "NPRVertex::Vertex computed with " << inversionSteps << " inversion steps" << std::endl;
 	
+
+	long_real_t factor = 2.*diracOperator->getKappa();
+
+	//First we compute the propagator
+	std::complex<long_real_t> propagator[4*diracVectorLength][4*diracVectorLength];
+	for (int i = 0; i < 4*diracVectorLength; ++i) {
+		for (int j = 0; j < 4*diracVectorLength; ++j) {
+			propagator[i][j] = factor*AlgebraUtils::dot(source[i], inverse_source[j])/static_cast<long_real_t>(Layout::globalVolume);
+		}
+	}
+
+	//Now we compute the vertex
 	//Ugly initialization to zero
 #ifdef MULTITHREADING
-	std::complex<long_real_t> resultPropagator[4*diracVectorLength][4*diracVectorLength][omp_get_max_threads()];
 	std::complex<long_real_t> resultVertex[16][4*diracVectorLength][4*diracVectorLength][omp_get_max_threads()];
 	for (int i = 0; i < 4*diracVectorLength; ++i) {
 		for (int j = 0; j < 4*diracVectorLength; ++j) {
 			for (int k = 0; k < omp_get_max_threads(); ++k) {
-				resultPropagator[i][j][k] = 0.;
 				for (int v = 0; v < 16; ++v) {
 					resultVertex[v][i][j][k] = 0.;
 				}
@@ -134,38 +134,15 @@ void NPRVertex::execute(environment_t& environment) {
 	}
 #endif
 #ifndef MULTITHREADING
-	std::complex<long_real_t> resultPropagator[4*diracVectorLength][4*diracVectorLength];
 	std::complex<long_real_t> resultVertex[16][4*diracVectorLength][4*diracVectorLength];
 	for (int i = 0; i < 4*diracVectorLength; ++i) {
 		for (int j = 0; j < 4*diracVectorLength; ++j) {
-			resultPropagator[i][j] = 0.;
 			for (int v = 0; v < 16; ++v) {
 				resultVertex[v][i][j] = 0.;
 			}
 		}
 	}
 #endif
-	
-	//The core of the computation of the npr vertex
-	//Quark propagator
-	for (unsigned int alpha = 0; alpha < 4; ++alpha) {
-		for (int c = 0; c < diracVectorLength; ++c) {
-#pragma omp parallel for
-			for (int site = 0; site < Layout::localsize; ++site) {
-				real_t phase = - (Layout::globalIndexX(site)*momentum[0] + Layout::globalIndexY(site)*momentum[1] + Layout::globalIndexZ(site)*momentum[2] + Layout::globalIndexT(site)*momentum[3]);
-				for (unsigned int mu = 0; mu < 4; ++mu) {
-					for (int d = 0; d < diracVectorLength; ++d) {
-#ifdef MULTITHREADING
-						resultPropagator[c*4 + alpha][d*4 + mu][omp_get_thread_num()] += std::complex<real_t>(cos(phase),sin(phase))*tmp[c*4+alpha][site][mu][d];
-#endif
-#ifndef MULTITHREADING
-						resultPropagator[c*4 + alpha][d*4 + mu] += std::complex<real_t>(cos(phase),sin(phase))*tmp[c*4+alpha][site][mu][d];
-#endif					
-					}
-				}
-			}
-		}
-	}
 
 	
 #pragma omp parallel for
@@ -176,7 +153,10 @@ void NPRVertex::execute(environment_t& environment) {
 			for (int d = 0; d < diracVectorLength; ++d) {
 				for (int nu = 0; nu < 4; ++nu) {
 					for (int rho = 0; rho < 4; ++rho) {
-						S(c*4+nu,d*4+rho) = tmp[c*4+nu][site][rho][d];
+						S(c*4+nu,d*4+rho) = 0.;
+						for (int mu = 0; mu < 4; ++mu) {
+							S(c*4+nu,d*4+rho) += vector_dot(source[c*4+nu][site][mu],inverse_source[d*4+rho][site][mu]);
+						}
 					}
 				}
 			}
@@ -184,29 +164,15 @@ void NPRVertex::execute(environment_t& environment) {
 
 		for (int v = 0; v < 16; ++v) {
 			matrix_t result = gamma.gamma5()*htrans(S)*gamma.gamma5()*gamma.gammaChromaMatrices(v)*S;
-			for (int c = 0; c < diracVectorLength; ++c) {
-				for (int d = 0; d < diracVectorLength; ++d) {
-					for (int nu = 0; nu < 4; ++nu) {
-						for (int rho = 0; rho < 4; ++rho) {
-							S(c*4+nu,d*4+rho) = tmp[c*4+nu][site][rho][d];
-						}
-					}
-				}
-			}
 
-			for (int c = 0; c < diracVectorLength; ++c) {
-				for (int d = 0; d < diracVectorLength; ++d) {
-					for (int nu = 0; nu < 4; ++nu) {
-						for (int rho = 0; rho < 4; ++rho) {
-
+			for (int i = 0; i < 4*diracVectorLength; ++i) {
+				for (int j = 0; j < 4*diracVectorLength; ++j) {
 #ifdef MULTITHREADING
-							resultVertex[v][c*4+nu][d*4+rho][omp_get_thread_num()] += result(nu,rho);
+					resultVertex[v][i][j][omp_get_thread_num()] += result(i,j);
 #endif
 #ifndef MULTITHREADING
-							resultVertex[v][c*4+nu][d*4+rho] += result(nu,rho);
-#endif					
-						}
-					}
+					resultVertex[v][i][j] += result(i,j);
+#endif	
 				}
 			}
 		}
@@ -217,10 +183,6 @@ void NPRVertex::execute(environment_t& environment) {
 		for (int j = 0; j < 4*diracVectorLength; ++j) {
 			//... from the threads
 #ifdef MULTITHREADING
-			propagator[i][j] = 0;
-			for (int thread = 0; thread < omp_get_max_threads(); ++thread) {
-				propagator[i][j] += resultPropagator[i][j][thread];	
-			}
 			for (int v = 0; v < 16; ++v) {
 				vertex[v][i][j] = 0;
 				for (int thread = 0; thread < omp_get_max_threads(); ++thread) {
@@ -229,7 +191,6 @@ void NPRVertex::execute(environment_t& environment) {
 			}
 #endif
 #ifndef MULTITHREADING
-			propagator[i][j] = resultPropagator[i][j];
 			for (int v = 0; v < 16; ++v) {
 				vertex[v][i][j] = resultVertex[v][i][j];
 			}
@@ -240,10 +201,8 @@ void NPRVertex::execute(environment_t& environment) {
 	//... from the MPI processes
 	for (int i = 0; i < 4*diracVectorLength; ++i) {
 		for (int j = 0; j < 4*diracVectorLength; ++j) {
-			reduceAllSum(propagator[i][j]);
 			//Correct normalization
 			long_real_t factor = 2.*diracOperator->getKappa();
-			propagator[i][j] = factor*propagator[i][j]/static_cast<long_real_t>(Layout::globalVolume);
 			for (int v = 0; v < 16; ++v) {
 				reduceAllSum(vertex[v][i][j]);
 				vertex[v][i][j] = factor*factor*vertex[v][i][j]/static_cast<long_real_t>(Layout::globalVolume);

@@ -12,7 +12,7 @@
 #include "hmc_updaters/PureGaugeHMCUpdater.h"
 #include "hmc_updaters/TwoFlavorHMCUpdater.h"
 #include "hmc_updaters/NFlavorQCDUpdater.h"
-#include "hmc_updaters/NFlavorBlockUpdater.h"
+#include "hmc_updaters/ScalarFermionHMCUpdater.h"
 #include "pure_gauge/PureGaugeOverrelaxation.h"
 #include "io/OutputSweep.h"
 #include "tests/TestLinearAlgebra.h"
@@ -23,6 +23,7 @@
 #include "fermion_measurements/SingletOperators.h"
 #include "fermion_measurements/XSpaceCorrelators.h"
 #include "fermion_measurements/NPRVertex.h"
+#include "scalar_measurements/MeanScalarField.h"
 #include "polyakov_loops/PolyakovLoop.h"
 #include "correlators/Glueball.h"
 #include "utils/ReUnit.h"
@@ -44,6 +45,10 @@
 #include "polyakov_loops/PolyakovLoopEigenvalues.h"
 #include "hmc_updaters/MultiStepNFlavorQCDUpdater.h"
 #include "hmc_updaters/TwistedMultiStepNFlavorQCDUpdater.h"
+#include "scalar_updaters/RandomScalarUpdater.h"
+#include "scalar_updaters/AdjointMetropolisScalarUpdater.h"
+#include "scalar_updaters/FundamentalMetropolisScalarUpdater.h"
+#include "hmc_updaters/HiggsGaugeHMCUpdater.h"
 
 namespace Update {
 
@@ -64,8 +69,6 @@ LatticeSweep* LatticeSweep::getInstance(const std::string& name) {
 		return new TwoFlavorHMCUpdater();
 	} else if (name == "NFlavorQCD") {
 		return new NFlavorQCDUpdater();
-	} else if (name == "NFlavorBlock") {
-		return new NFlavorBlockUpdater();
 	} else if (name == "PureGaugeOverrelaxation") {
 		return new PureGaugeOverrelaxation();
 	} else if (name == "Output") {
@@ -128,7 +131,19 @@ LatticeSweep* LatticeSweep::getInstance(const std::string& name) {
 		return new LandauGluonPropagator();
 	} else if (name == "LandauGhostPropagator") {
 		return new LandauGhostPropagator();
-	}
+	} else if (name == "ScalarFermionHMC") {
+		return new ScalarFermionHMCUpdater();
+	} else if (name == "HiggsGaugeHMC") {
+                return new HiggsGaugeHMCUpdater();
+        } else if (name == "RandomScalarInitializer") {
+		return new RandomScalarUpdater();
+	} else if (name == "AdjointMCScalar") {
+		return new AdjointMetropolisScalarUpdater();
+	} else if (name == "FundamentalMCScalar") {
+                return new FundamentalMetropolisScalarUpdater();
+        } else if (name == "MeanScalarField") {
+		return new MeanScalarField();
+	}	
 	else {
 		if (isOutputProcess()) std::cout << "Unknown name sweep: " << name << std::endl;
 		exit(1);
@@ -209,7 +224,6 @@ void LatticeSweep::addParameters(po::options_description& desc) {
 	PureGaugeHMCUpdater::registerParameters(desc);
 	TwoFlavorHMCUpdater::registerParameters(desc);
 	NFlavorQCDUpdater::registerParameters(desc);
-	NFlavorBlockUpdater::registerParameters(desc);
 	PureGaugeOverrelaxation::registerParameters(desc);
 	OutputSweep::registerParameters(desc);
 	TestLinearAlgebra::registerParameters(desc);
@@ -241,6 +255,10 @@ void LatticeSweep::addParameters(po::options_description& desc) {
 	MaximalAbelianProjection::registerParameters(desc);
 	LandauGluonPropagator::registerParameters(desc);
 	LandauGhostPropagator::registerParameters(desc);
+	ScalarFermionHMCUpdater::registerParameters(desc);
+	HiggsGaugeHMCUpdater::registerParameters(desc);
+	AdjointMetropolisScalarUpdater::registerParameters(desc);
+	FundamentalMetropolisScalarUpdater::registerParameters(desc);
 }
 
 void LatticeSweep::registerParameters(po::options_description&) {
@@ -255,7 +273,6 @@ void LatticeSweep::printSweepsName() {
 		<< "PureGaugeHMC" << std::endl
 		<< "TwoFlavorQCD" << std::endl
 		<< "NFlavorQCD" << std::endl
-		<< "NFlavorBlock" << std::endl
 		<< "PureGaugeOverrelaxation" << std::endl
 		<< "Output" << std::endl
 		<< "TestLinearAlgebra" << std::endl

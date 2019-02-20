@@ -30,7 +30,8 @@ public:
 private:
 	extended_dirac_vector_t randomNoise;
 	extended_dirac_vector_t eta;
-	extended_dirac_vector_t tmp[4*diracVectorLength];
+	extended_dirac_vector_t inverse_source[4*diracVectorLength];
+	extended_dirac_vector_t source[4*diracVectorLength];
 	DiracOperator* diracOperator;
 	Solver* inverter;
 

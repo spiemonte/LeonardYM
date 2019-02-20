@@ -320,7 +320,97 @@ public:
 			}
 		}
 	}
+
 };
+
+#ifdef ALIGNED_OPT
+
+class AlignedAlgebraUtils {
+public:
+	template<typename aligned_vector_t> static void vector_plus_scalar_times_vector(
+		aligned_vector_t& output,
+		const aligned_vector_t& v1, 
+		const std::complex<real_t>& alpha,
+		const aligned_vector_t& v2) {
+
+		real_t factor_real = alpha.real();
+		real_t factor_imag = alpha.imag();
+
+		const int localsize = v1.real_part[0].localsize;
+
+#pragma vector aligned
+#pragma omp parallel for simd
+		for (int site = 0; site < localsize; ++site) {
+			for (unsigned int mu = 0; mu < 4; ++mu) {
+				for (unsigned int c = 0; c < diracVectorLength; ++c) {
+					const int i = 4*c + mu;
+					output.real_part[i][site] = v1.real_part[i][site] + factor_real*v2.real_part[i][site] - factor_imag*v2.imag_part[i][site];
+					output.imag_part[i][site] = v1.imag_part[i][site] + factor_real*v2.imag_part[i][site] + factor_imag*v2.real_part[i][site];
+				}
+			}
+		}
+
+	}
+
+	template<typename aligned_vector_t> static real_t squaredNorm(const aligned_vector_t& v) {
+		real_t result = 0.;
+		const int localsize = v.real_part[0].localsize;
+
+#pragma vector aligned
+#pragma omp parallel for simd reduction(+:result)
+		for (int site = 0; site < localsize; ++site) {
+			for (unsigned int mu = 0; mu < 4; ++mu) {
+				for (unsigned int c = 0; c < diracVectorLength; ++c) {
+					const int i = 4*c + mu;
+					result += v.real_part[i][site]*v.real_part[i][site]+v.imag_part[i][site]*v.imag_part[i][site];
+				}
+			}
+		}
+		reduceAllSum(result);
+
+		return result;
+	}
+
+	template<typename aligned_vector_t> static std::complex<real_t> dot(const aligned_vector_t& v1, const aligned_vector_t& v2) {
+		real_t result_re = 0.;
+		real_t result_im = 0.;
+		const int localsize = v1.real_part[0].localsize;
+
+#pragma vector aligned
+#pragma omp parallel for simd reduction(+:result_re,result_im)
+		for (int site = 0; site < localsize; ++site) {
+			for (unsigned int mu = 0; mu < 4; ++mu) {
+				for (unsigned int c = 0; c < diracVectorLength; ++c) {
+					const int i = 4*c + mu;
+					result_re += v1.real_part[i][site]*v2.real_part[i][site]+v1.imag_part[i][site]*v2.imag_part[i][site];
+					result_im += v1.real_part[i][site]*v2.imag_part[i][site]-v1.imag_part[i][site]*v2.real_part[i][site];
+				}
+			}
+		}
+		reduceAllSum(result_re);
+		reduceAllSum(result_im);
+
+		return std::complex<real_t>(result_re,result_im);
+	}
+
+	template<typename aligned_vector_t> static void setToZero(aligned_vector_t& v) {
+		const int localsize = v.real_part[0].localsize;
+
+#pragma vector aligned
+#pragma omp parallel for simd
+		for (int site = 0; site < localsize; ++site) {
+			for (unsigned int mu = 0; mu < 4; ++mu) {
+				for (unsigned int c = 0; c < diracVectorLength; ++c) {
+					const int i = 4*c + mu;
+					v.real_part[i][site] = 0;
+					v.imag_part[i][site] = 0;
+				}
+			}
+		}
+	}
+};
+
+#endif
 
 } /* namespace Update */
 

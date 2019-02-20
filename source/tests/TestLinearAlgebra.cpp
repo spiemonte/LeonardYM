@@ -13,6 +13,8 @@
 #include "dirac_operators/SquareImprovedDiracWilsonOperator.h"
 #include "dirac_operators/DiracWilsonOperator.h"
 #include "dirac_operators/ImprovedDiracWilsonOperator.h"
+#include "dirac_operators/OverlapOperator.h"
+#include "dirac_operators/ExactOverlapOperator.h"
 #include "dirac_operators/BasicDiracWilsonOperator.h"
 #include "dirac_operators/SquareBlockDiracWilsonOperator.h"
 #include "dirac_operators/ComplementBlockDiracOperator.h"
@@ -1355,6 +1357,42 @@ void TestLinearAlgebra::execute(environment_t& environment) {
 		disastro5->multiply(test4,test2);
 		htest = norm(AlgebraUtils::dot(test2,test3) - AlgebraUtils::dot(test4,test1));
 		if (isOutputProcess()) std::cout << "TestLinearAlgebra::Hermitian test on SquareComplementBlockDiracWilsonOperator: " << htest << std::endl;
+		try {
+			OverlapOperator* disastro6 = new OverlapOperator();
+			disastro6->setLattice(environment.getFermionLattice());
+			disastro6->setKappa(0.12);
+			disastro6->setMass(0.1);
+
+			std::vector< std::complex<real_t> > coeff = environment.configurations.get< std::vector< std::complex<real_t> > >("OverlapOperator::squareRootApproximation");
+			Polynomial squareRootApproximation;
+			squareRootApproximation.setScaling(coeff.front());
+			coeff.erase(coeff.begin(),coeff.begin()+1);
+			squareRootApproximation.setRoots(coeff);
+
+			disastro6->setSquareRootApproximation(squareRootApproximation);
+
+			disastro6->multiply(test3,test1);
+			disastro6->multiply(test4,test2);
+			htest = norm(AlgebraUtils::dot(test2,test3) - AlgebraUtils::dot(test4,test1));
+			if (isOutputProcess()) std::cout << "TestLinearAlgebra::Hermitian test on OverlapOperator: " << htest << std::endl;
+			delete disastro6;
+
+			ExactOverlapOperator* disastro7 = new ExactOverlapOperator();
+			disastro7->setLattice(environment.getFermionLattice());
+			disastro7->setKappa(0.2);
+			disastro7->setMass(0.1);
+
+			disastro7->setSquareRootApproximation(squareRootApproximation);
+
+			disastro7->multiply(test3,test1);
+			disastro7->multiply(test4,test2);
+			htest = norm(AlgebraUtils::dot(test2,test3) - AlgebraUtils::dot(test4,test1));
+			if (isOutputProcess()) std::cout << "TestLinearAlgebra::Hermitian test on ExactOverlapOperator: " << htest << std::endl;
+			delete disastro7;
+		}
+		catch (Update::NotFoundOption& e) {
+			std::cout << "TestLinearAlgebra::Proceeding without Hermitian test on Overlap operator" << std::endl;
+		}
 		delete disastro;
 		delete disastro2;
 		delete disastro3;
