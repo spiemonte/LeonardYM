@@ -7,16 +7,16 @@ else
 endif
 
 CC       = $(MPICC)
-CPP      = $(MPICXX)
-OPTIMIZE = -O2 -pipe -openmp  
+CPP      = mpigxx 
+OPTIMIZE = -O2 -mavx2 -pipe -fopenmp  
 INC	= -I./extra_libs/Eigen -I./source/
 CFLAGS   = $(OPTIMIZE) $(INC)
-CPPFLAGS = $(OPTIMIZE) $(INC) $(adj) -DENABLE_MPI -DNUMCOLORS=$(nc) -DMULTITHREADING -DMBE="\"$(PWD)/source/utils/MatrixBaseExtension.h\"" -I/share/Applic.PALMA/boost/boost-trunk/ -DEIGEN
+CPPFLAGS = $(OPTIMIZE) $(INC) $(adj) -DENABLE_MPI -DNUMCOLORS=$(nc) -DMULTITHREADING -DMBE="\"$(PWD)/source/utils/MatrixBaseExtension.h\"" -DEIGEN
 
 include Makefile.obj.mk
 
 all: leonardQCD
-	$(CPP) $(CPPFLAGS) $(OBJECTS) -o leonardQCD.exe /share/Applic.PALMA/boost/boost-trunk/stage/lib/libboost_program_options.a
+	$(CPP) $(CPPFLAGS) $(OBJECTS) -o leonardQCD.exe -lboost_program_options
 	@echo "Compiled with NUMCOLORS: " $(nc)
 
 leonardQCD: $(OBJECTS)

@@ -23,8 +23,8 @@ public:
 	virtual void derivative(extended_fermion_force_lattice_t& fermionForce, const extended_fermion_lattice_t& lattice, const extended_dirac_vector_t& X, const extended_dirac_vector_t& Y, real_t weight);
 private:
 	real_t mass;
-	DiracWilsonOperator* diracWilsonOperator;
-	SquareDiracWilsonOperator* squareDiracWilsonOperator;
+	DiracOperator* diracWilsonOperator;
+	DiracOperator* squareDiracWilsonOperator;
 	Polynomial const* squareRootApproximation;
 
 	std::vector<extended_dirac_vector_t> left_dirac_vectors;
