@@ -40,6 +40,20 @@ public:
 		this->multiply(_output,_input);
 		output = _output;
 	}
+
+	virtual void multiplyAdd(standard_dirac_vector_t& output, const standard_dirac_vector_t& vector1, const standard_dirac_vector_t & vector2, const complex& alpha) {
+		reduced_dirac_vector_t _output, _vector1 = vector1, _vector2 = vector2;
+                this->multiplyAdd(_output, _vector1, _vector2, alpha);
+                output = _output;
+	}
+
+	virtual void multiplyAdd(extended_dirac_vector_t& output, const extended_dirac_vector_t& vector1, const extended_dirac_vector_t & vector2, const complex& alpha) {
+		reduced_dirac_vector_t _output, _vector1 = vector1, _vector2 = vector2;
+		//if (isOutputProcess()) std::cout << "Vai a sapere" << std::endl;
+		this->multiplyAdd(_output, _vector1, _vector2, alpha);
+		//if (isOutputProcess()) std::cout << "Vai a sapere" << std::endl;
+		output = _output;
+        }
 #endif
 
 #ifdef ALIGNED_OPT
