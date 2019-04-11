@@ -11,6 +11,8 @@ int LocalLayout::glob_t = 0;
 int LocalLayout::glob_x = 0;
 int LocalLayout::glob_y = 0;
 int LocalLayout::glob_z = 0;
+
+int LocalLayout::glob[4];
 		
 int LocalLayout::loc_t = 0;
 int LocalLayout::loc_x = 0;

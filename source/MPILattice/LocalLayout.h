@@ -20,6 +20,7 @@ class LocalLayout {
 		static int glob_x;
 		static int glob_y;
 		static int glob_z;
+		static int glob[4];
 		//The local size
 		static int loc_t;
 		static int loc_x;
@@ -35,6 +36,11 @@ class LocalLayout {
 			this_processor = 0;
 			globalVolume = glob_x*glob_y*glob_z*glob_t;
 			glob_spatial_volume = glob_x*glob_y*glob_z;
+		
+			glob[0] = glob_x;
+			glob[1] = glob_y;
+			glob[2] = glob_z;
+			glob[3] = glob_t;
 			
 			pgrid_x = 1;
 			pgrid_y = 1;
@@ -130,6 +136,10 @@ class LocalLayout {
 
 		static int globalIndexT(int site) {
 			return globalCoordinate[site].t;
+		}
+
+		static int globalIndex(int site, int mu) {
+			return (reinterpret_cast<int*>(&(globalCoordinate[site])))[mu];
 		}
 		
 		static void printReport() {

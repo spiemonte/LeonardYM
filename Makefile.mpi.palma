@@ -1,4 +1,4 @@
-nc = 2
+nc = 3
 
 ifeq ($(adjoint),false)
 	adj = 
@@ -7,8 +7,8 @@ else
 endif
 
 CC       = $(MPICC)
-CPP      = mpigxx 
-OPTIMIZE = -O2 -mavx2 -pipe -fopenmp  
+CPP      = mpiicpc
+OPTIMIZE = -O3 -xAVX2 -qopenmp  
 INC	= -I./extra_libs/Eigen -I./source/
 CFLAGS   = $(OPTIMIZE) $(INC)
 CPPFLAGS = $(OPTIMIZE) $(INC) $(adj) -DENABLE_MPI -DNUMCOLORS=$(nc) -DMULTITHREADING -DMBE="\"$(PWD)/source/utils/MatrixBaseExtension.h\"" -DEIGEN
