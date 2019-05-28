@@ -10,6 +10,7 @@
 #include "actions/WilsonGaugeAction.h"
 #include "io/GlobalOutput.h"
 #include "wilson_loops/Plaquette.h"
+#include "utils/MultiThreadSummator.h"
 
 namespace Update {
 
@@ -21,7 +22,7 @@ WilsonFlow::~WilsonFlow() { }
 
 void WilsonFlow::execute(environment_t& environment) {
 	extended_gauge_lattice_t initialLattice = environment.gaugeLinkConfiguration, finalLattice;
-	std::string flow_type = environment.configurations.get<std::string>("flow_type");
+	std::string flow_type = environment.configurations.get<std::string>("WilsonFlow::flow_type");
 	GaugeAction* action;
 	if (flow_type == "Wilson") {
 		action = new WilsonGaugeAction(2*numberColors);
@@ -46,17 +47,14 @@ void WilsonFlow::execute(environment_t& environment) {
 		output->push("topological_correlator");
 	}
 
-	real_t step = environment.configurations.get<real_t>("flow_step");
-	real_t flow_time = environment.configurations.get<real_t>("flow_time");
-	unsigned int integration_intervals = environment.configurations.get<unsigned int>("flow_integration_intervals");
+	real_t step = environment.configurations.get<real_t>("WilsonFlow::flow_step");
+	real_t flow_time = environment.configurations.get<real_t>("WilsonFlow::flow_time");
+	unsigned int integration_intervals = environment.configurations.get<unsigned int>("WilsonFlow::flow_integration_intervals");
 
 	for (real_t t = 0; t < flow_time; t += step) {
 		this->measureEnergy(initialLattice);
 		if (isOutputProcess()) std::cout << "WilsonFlow::t*t*Energy at t " << t << ": " << t*t*gaugeEnergy << std::endl;
 		if (isOutputProcess()) std::cout << "WilsonFlow::Topological charge at t " << t << ": " << topologicalCharge << std::endl;
-		/*if (fabs(t - Layout::glob_x*Layout::glob_x/(8.*9.)) < step/2.) {
-			this->threeDimensionalEnergyTopologicalPlot(initialLattice,environment);
-		}*/
 		
 		this->integrate(initialLattice, finalLattice, action, step, integration_intervals);
 		initialLattice = finalLattice;
@@ -206,69 +204,38 @@ std::pair<long_real_t,long_real_t> WilsonFlow::measureEnergyAndTopologicalCharge
 void WilsonFlow::measureEnergy(const extended_gauge_lattice_t& _lattice) {
 	typedef extended_fermion_lattice_t LT;
 	typedef extended_fermion_lattice_t::Layout Layout;
-	long_real_t energy = 0.;
-	long_real_t topological = 0.;
-
-#ifdef MULTITHREADING
-	long_real_t result_energy[Layout::glob_t][omp_get_max_threads()];
-	long_real_t result_topological[Layout::glob_t][omp_get_max_threads()];
-	for (int i = 0; i < Layout::glob_t; ++i) {
-		for (int j = 0; j < omp_get_max_threads(); ++j) {
-			result_energy[i][j] = 0.;
-			result_topological[i][j] = 0.;
-		}
+	MultiThreadSummator<long_real_t> energy;
+	MultiThreadSummator<long_real_t> topological;
+	
+	MultiThreadSummator<long_real_t>* e_correlator = new MultiThreadSummator<long_real_t>[Layout::glob_t];
+	MultiThreadSummator<long_real_t>* t_correlator = new MultiThreadSummator<long_real_t>[Layout::glob_t];
+	for (int t = 0; t < Layout::glob_t; ++t) {
+		e_correlator[t].reset();
+		t_correlator[t].reset();
 	}
-#endif
-#ifndef MULTITHREADING
-	long_real_t result_energy[Layout::glob_t];
-	long_real_t result_topological[Layout::glob_t];
-	for (int i = 0; i < Layout::glob_t; ++i) {
-		result_energy[i] = 0.;
-		result_topological[i] = 0.;
-	}
-#endif
 
-#pragma omp parallel for reduction(+:energy,topological)
+#pragma omp parallel for 
 	for (int site = 0; site < _lattice.localsize; ++site) {
 		std::pair<long_real_t,long_real_t> result = measureEnergyAndTopologicalCharge(_lattice,site);
 
-#ifndef MULTITHREADING
-		result_energy[Layout::globalIndexT(site)] += result.first;
-		result_topological[Layout::globalIndexT(site)] += result.second;
-#endif
-#ifdef MULTITHREADING
-		result_energy[Layout::globalIndexT(site)][omp_get_thread_num()] += result.first;
-		result_topological[Layout::globalIndexT(site)][omp_get_thread_num()] += result.second;
-#endif
-		energy += result.first;
-		topological += result.second;
+		e_correlator[Layout::globalIndexT(site)].add(result.first);
+		t_correlator[Layout::globalIndexT(site)].add(result.second);
+
+		energy.add(result.first);
+		topological.add(result.second);
 	}
 	
-	reduceAllSum(energy);
-	reduceAllSum(topological);
-	topologicalCharge = topological;
-	gaugeEnergy = -energy/Layout::globalVolume;
+	topologicalCharge = topological.getResult();
+	gaugeEnergy = -energy.getResult()/Layout::globalVolume;
 
 	//We collect the results
 	for (int t = 0; t < Layout::glob_t; ++t) {
-#ifdef MULTITHREADING
-		energy_correlator[t] = 0;
-		topological_correlator[t] = 0;
-		for (int thread = 0; thread < omp_get_max_threads(); ++thread) {
-			energy_correlator[t] += result_energy[t][thread];
-			topological_correlator[t] += result_topological[t][thread];
-		}
-#endif
-#ifndef MULTITHREADING
-		energy_correlator[t] = result_energy[t];
-		topological_correlator[t] = result_topological[t];
-#endif
+		energy_correlator[t] = e_correlator[t].computeResult();
+		topological_correlator[t] = t_correlator[t].computeResult();
 	}
 
-	for (int t = 0; t < Layout::glob_t; ++t) {
-		reduceAllSum(energy_correlator[t]);
-		reduceAllSum(topological_correlator[t]);
-	}
+	delete[] e_correlator;
+	delete[] t_correlator;
 }
 
 void WilsonFlow::threeDimensionalEnergyTopologicalPlot(const extended_gauge_lattice_t& lattice, environment_t& environment) {
@@ -316,6 +283,15 @@ void WilsonFlow::threeDimensionalEnergyTopologicalPlot(const extended_gauge_latt
 		output->pop("energy_plot");
 		output->pop("topological_plot");
 	}
+}
+
+void WilsonFlow::registerParameters(po::options_description& desc) {
+	desc.add_options()
+		("WilsonFlow::flow_type", po::value<std::string>(), "The type of flow equations (Wilson/Symanzik)")
+		("WilsonFlow::flow_step", po::value<Update::real_t>(), "The integration step of the flow")
+		("WilsonFlow::flow_integration_intervals", po::value<unsigned int>(), "The number of intervals for each flow integration step")
+		("WilsonFlow::flow_time", po::value<Update::real_t>(), "The total time of the flow")
+	;
 }
 
 } /* namespace Update */

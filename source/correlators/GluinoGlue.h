@@ -16,11 +16,13 @@ public:
 
 	virtual void execute(environment_t& environment);
 
+	static void registerParameters(po::options_description& desc);
+
 private:
 	extended_dirac_vector_t source;
 	extended_dirac_vector_t rho;
-	extended_dirac_vector_t eta;//[4];
-	extended_dirac_vector_t psi;//[4];
+	extended_dirac_vector_t eta;
+	extended_dirac_vector_t psi;
 	extended_dirac_vector_t randomNoise;
 	DiracOperator* diracOperator;
 	BiConjugateGradient* biConjugateGradient;

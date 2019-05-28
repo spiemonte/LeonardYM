@@ -27,6 +27,7 @@ public:
 
 private:
 	extended_dirac_vector_t randomNoise;
+	extended_dirac_vector_t inverse;
 	extended_dirac_vector_t tmp;
 	extended_dirac_vector_t tmp_square;
 	DiracOperator* diracOperator;

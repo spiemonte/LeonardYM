@@ -26,8 +26,9 @@ public:
 	static void registerParameters(po::options_description& desc);
 
 private:
-	extended_dirac_vector_t randomNoise;
-	extended_dirac_vector_t tmp[4*diracVectorLength];
+	reduced_dirac_vector_t randomNoise;
+	reduced_dirac_vector_t propagator[4*diracVectorLength];
+	reduced_dirac_vector_t tmp;
 	DiracOperator* diracOperator;
 	Solver* inverter;
 };

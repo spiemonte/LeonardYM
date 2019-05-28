@@ -1,5 +1,5 @@
 #include "MaximalAbelianGaugeFixing.h"
-#include "LieGenerators.h"
+#include "utils/LieGenerators.h"
 
 namespace Update {
 

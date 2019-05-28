@@ -294,7 +294,7 @@ void MultiStepNFlavorQCDUpdater::execute(environment_t& environment) {
 
 
 	//Take the global action
-	if (nFlavorQCDAction == 0) nFlavorQCDAction = new NFlavorAction(gaugeAction, fermionAction[0]);//TODO, we skip the other forces
+	if (nFlavorQCDAction == 0) nFlavorQCDAction = new NFlavorAction(gaugeAction, fermionAction[0]);//Here we skip the other forces
 
 	//The t-length of a single integration step
 	real_t t_length = environment.configurations.get<double>("hmc_t_length");
@@ -353,7 +353,7 @@ void MultiStepNFlavorQCDUpdater::execute(environment_t& environment) {
 	long_real_t newLatticeEnergy = gaugeAction->energy(environmentNew);
 	//Get the final energy of the pseudofermions
 	long_real_t newPseudoFermionEnergy = 0.;
-	diracOperatorMetropolis->setLattice(environmentNew.getFermionLattice());//TODO TODO TODO
+	diracOperatorMetropolis->setLattice(environmentNew.getFermionLattice());
 	squareDiracOperatorMetropolis->setLattice(environmentNew.getFermionLattice());
 	//Now we use the better approximation for the metropolis step
 	std::vector<RationalApproximation>::iterator rational = rationalApproximationsMetropolis.begin();
@@ -394,49 +394,6 @@ void MultiStepNFlavorQCDUpdater::execute(environment_t& environment) {
 	}
 
 	delete integrate;
-
-	/*
-	DiracOperator* diracOperator2 = new SquareDiracWilsonOperator(&environment.gaugeLinkConfiguration, environment.configurations.get<double>("kappa"));
-
-	dirac_vector_t tmp1, tmp2, tmp3, tmp_pseudofermion;
-
-	std::vector<complex> pol = environment.configurations.get< std::vector<complex> >("heatbath_polynomial");
-	Polynomial polynomial;
-	polynomial.setScaling(pol.front());
-	pol.erase(pol.begin());
-	polynomial.setRoots(pol);
-
-	std::cout << "Rational 1/sqrt(1): " << std::setprecision(15) << rational.evaluate(complex(1,0.)) << std::endl;
-
-	//std::cout << "Vediamo la nostra morte 0: " << std::endl << pseudofermions.front()[5][3] << std::endl;
-
-	//polynomial.evaluate(diracOperator, tmp1, pseudofermions.front());
-
-	this->generateGaussianDiracVector(tmp_pseudofermion);
-
-	//polynomial.evaluate(diracOperator, tmp1, tmp_pseudofermion);
-
-	BiConjugateGradient* biConjugateGradient = BiConjugateGradient::getInstance();
-	//
-	biConjugateGradient->solve(diracOperator, tmp_pseudofermion, tmp3);
-
-	diracOperator = new SquareDiracWilsonOperator();
-	diracOperator->setLattice(&environment.gaugeLinkConfiguration);
-	diracOperator->setKappa(environment.configurations.get<double>("kappa"));
-
-	//std::cout << "Vediamo la nostra morte 01: " << std::endl << tmp_pseudofermion[5][3] << std::endl;
-
-	rational.evaluate(diracOperator, tmp1, tmp_pseudofermion);
-	//rational.evaluate(diracOperator, tmp2, tmp1);
-	polynomial.evaluate(diracOperator, tmp2, tmp1);
-	//biConjugateGradient->setPrecision(0.00000000000001);
-	biConjugateGradient->solve(diracOperator, tmp_pseudofermion, tmp3);
-	//diracOperator->multiply(tmp3,tmp2);
-
-	std::cout << "Vediamo la nostra morte 1: " << std::endl << tmp1[5][3] << std::endl;
-	std::cout << "Vediamo la nostra morte 2: " << std::endl << tmp2[5][3] << std::endl;
-	std::cout << "Vediamo la nostra morte 3: " << std::endl << tmp_pseudofermion[5][3] << std::endl;
-	*/
 }
 
 void MultiStepNFlavorQCDUpdater::registerParameters(po::options_description& desc) {

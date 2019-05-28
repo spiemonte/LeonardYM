@@ -163,12 +163,6 @@ Energy.o: ./source/actions/Energy.h ./source/actions/Energy.cpp
 Force.o: ./source/hmc_forces/Force.h ./source/hmc_forces/Force.cpp
 	$(CPP) $(CPPFLAGS) -c -o Force.o ./source/hmc_forces/Force.cpp
 
-BandAction.o: ./source/actions/BandAction.h ./source/actions/BandAction.cpp
-	$(CPP) $(CPPFLAGS) -c -o BandAction.o ./source/actions/BandAction.cpp
-
-BandTwoFlavorUpdater.o: ./source/hmc_updaters/BandTwoFlavorUpdater.h ./source/hmc_updaters/BandTwoFlavorUpdater.cpp
-	$(CPP) $(CPPFLAGS) -c -o BandTwoFlavorUpdater.o ./source/hmc_updaters/BandTwoFlavorUpdater.cpp
-
 HMCUpdater.o: ./source/hmc_updaters/HMCUpdater.h ./source/hmc_updaters/HMCUpdater.cpp
 	$(CPP) $(CPPFLAGS) -c -o HMCUpdater.o ./source/hmc_updaters/HMCUpdater.cpp
 
@@ -187,23 +181,23 @@ ChebyshevRecursion.o: ./source/dirac_functions/ChebyshevRecursion.h ./source/dir
 RationalApproximation.o: ./source/dirac_functions/RationalApproximation.h ./source/dirac_functions/RationalApproximation.cpp
 	$(CPP) $(CPPFLAGS) -c -o RationalApproximation.o ./source/dirac_functions/RationalApproximation.cpp
 
-GaugeFixing.o: ./source/utils/GaugeFixing.h ./source/utils/GaugeFixing.cpp
-	$(CPP) $(CPPFLAGS) -c -o GaugeFixing.o ./source/utils/GaugeFixing.cpp
+GaugeFixing.o: ./source/gauge_fixing/GaugeFixing.h ./source/gauge_fixing/GaugeFixing.cpp
+	$(CPP) $(CPPFLAGS) -c -o GaugeFixing.o ./source/gauge_fixing/GaugeFixing.cpp
 
-LandauGaugeFixing.o: ./source/utils/LandauGaugeFixing.h ./source/utils/LandauGaugeFixing.cpp
-	$(CPP) $(CPPFLAGS) -c -o LandauGaugeFixing.o ./source/utils/LandauGaugeFixing.cpp
+LandauGaugeFixing.o: ./source/gauge_fixing/LandauGaugeFixing.h ./source/gauge_fixing/LandauGaugeFixing.cpp
+	$(CPP) $(CPPFLAGS) -c -o LandauGaugeFixing.o ./source/gauge_fixing/LandauGaugeFixing.cpp
 
-LandauGluonPropagator.o: ./source/utils/LandauGluonPropagator.h ./source/utils/LandauGluonPropagator.cpp
-	$(CPP) $(CPPFLAGS) -c -o LandauGluonPropagator.o ./source/utils/LandauGluonPropagator.cpp
+LandauGluonPropagator.o: ./source/gauge_fixing/LandauGluonPropagator.h ./source/gauge_fixing/LandauGluonPropagator.cpp
+	$(CPP) $(CPPFLAGS) -c -o LandauGluonPropagator.o ./source/gauge_fixing/LandauGluonPropagator.cpp
 
-LandauGhostPropagator.o: ./source/utils/LandauGhostPropagator.h ./source/utils/LandauGhostPropagator.cpp
-	$(CPP) $(CPPFLAGS) -c -o LandauGhostPropagator.o ./source/utils/LandauGhostPropagator.cpp
+LandauGhostPropagator.o: ./source/gauge_fixing/LandauGhostPropagator.h ./source/gauge_fixing/LandauGhostPropagator.cpp
+	$(CPP) $(CPPFLAGS) -c -o LandauGhostPropagator.o ./source/gauge_fixing/LandauGhostPropagator.cpp
 
-MaximalAbelianGaugeFixing.o: ./source/utils/MaximalAbelianGaugeFixing.h ./source/utils/MaximalAbelianGaugeFixing.cpp
-	$(CPP) $(CPPFLAGS) -c -o MaximalAbelianGaugeFixing.o ./source/utils/MaximalAbelianGaugeFixing.cpp
+MaximalAbelianGaugeFixing.o: ./source/gauge_fixing/MaximalAbelianGaugeFixing.h ./source/gauge_fixing/MaximalAbelianGaugeFixing.cpp
+	$(CPP) $(CPPFLAGS) -c -o MaximalAbelianGaugeFixing.o ./source/gauge_fixing/MaximalAbelianGaugeFixing.cpp
 
-MaximalAbelianProjection.o: ./source/utils/MaximalAbelianProjection.h ./source/utils/MaximalAbelianProjection.cpp
-	$(CPP) $(CPPFLAGS) -c -o MaximalAbelianProjection.o ./source/utils/MaximalAbelianProjection.cpp
+MaximalAbelianProjection.o: ./source/gauge_fixing/MaximalAbelianProjection.h ./source/gauge_fixing/MaximalAbelianProjection.cpp
+	$(CPP) $(CPPFLAGS) -c -o MaximalAbelianProjection.o ./source/gauge_fixing/MaximalAbelianProjection.cpp
 
 ReUnit.o: ./source/utils/ReUnit.h ./source/utils/ReUnit.cpp
 	$(CPP) $(CPPFLAGS) -c -o ReUnit.o ./source/utils/ReUnit.cpp
@@ -267,6 +261,9 @@ StochasticEstimator.o: ./source/fermion_measurements/StochasticEstimator.h ./sou
 
 MesonCorrelator.o: ./source/correlators/MesonCorrelator.h ./source/correlators/MesonCorrelator.cpp
 	$(CPP) $(CPPFLAGS) -c -o MesonCorrelator.o ./source/correlators/MesonCorrelator.cpp
+
+OverlapResidualMass.o: ./source/fermion_measurements/OverlapResidualMass.h ./source/fermion_measurements/OverlapResidualMass.cpp
+	$(CPP) $(CPPFLAGS) -c -o OverlapResidualMass.o ./source/fermion_measurements/OverlapResidualMass.cpp
 
 ChiralCondensate.o: ./source/fermion_measurements/ChiralCondensate.h ./source/fermion_measurements/ChiralCondensate.cpp
 	$(CPP) $(CPPFLAGS) -c -o ChiralCondensate.o ./source/fermion_measurements/ChiralCondensate.cpp
@@ -340,17 +337,11 @@ NFlavorFermionAction.o: ./source/actions/NFlavorFermionAction.h ./source/actions
 NFlavorQCDAction.o: ./source/actions/NFlavorQCDAction.h ./source/actions/NFlavorQCDAction.cpp
 	$(CPP) $(CPPFLAGS) -c -o NFlavorQCDAction.o ./source/actions/NFlavorQCDAction.cpp
 
-NFlavorQCDUpdater.o : ./source/hmc_updaters/NFlavorQCDUpdater.h ./source/hmc_updaters/NFlavorQCDUpdater.cpp
-	$(CPP) $(CPPFLAGS) -c -o NFlavorQCDUpdater.o ./source/hmc_updaters/NFlavorQCDUpdater.cpp
-
 HiggsGaugeHMCUpdater.o : ./source/hmc_updaters/HiggsGaugeHMCUpdater.h ./source/hmc_updaters/HiggsGaugeHMCUpdater.cpp
 	$(CPP) $(CPPFLAGS) -c -o HiggsGaugeHMCUpdater.o ./source/hmc_updaters/HiggsGaugeHMCUpdater.cpp
 
 MultiStepNFlavorQCDUpdater.o : ./source/hmc_updaters/MultiStepNFlavorQCDUpdater.h ./source/hmc_updaters/MultiStepNFlavorQCDUpdater.cpp
 	$(CPP) $(CPPFLAGS) -c -o MultiStepNFlavorQCDUpdater.o ./source/hmc_updaters/MultiStepNFlavorQCDUpdater.cpp
-
-TwistedMultiStepNFlavorQCDUpdater.o : ./source/hmc_updaters/TwistedMultiStepNFlavorQCDUpdater.h ./source/hmc_updaters/TwistedMultiStepNFlavorQCDUpdater.cpp
-	$(CPP) $(CPPFLAGS) -c -o TwistedMultiStepNFlavorQCDUpdater.o ./source/hmc_updaters/TwistedMultiStepNFlavorQCDUpdater.cpp
 
 DiracEigenSolver.o: ./source/fermion_measurements/DiracEigenSolver.h ./source/fermion_measurements/DiracEigenSolver.cpp
 	$(CPP) $(CPPFLAGS) -c -o DiracEigenSolver.o ./source/fermion_measurements/DiracEigenSolver.cpp

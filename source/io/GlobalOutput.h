@@ -16,6 +16,12 @@
 
 namespace Update {
 
+inline bool file_exists(const char *fileName) {
+	std::ifstream infile(fileName);
+	return infile.good();
+}
+
+//Singleton class to manage to output of the measurements
 class GlobalOutput {
 	GlobalOutput();
 
@@ -37,57 +43,115 @@ public:
 
 	void push(const std::string& name) {
 		std::map<std::string, std::string>::iterator it = output_streams.find(name);
-		if (it != output_streams.end()) {
-			output_status[name] = false;
-			it->second.append("\t{");
+		if (format == "txt") {
+			if (it != output_streams.end()) {
+				output_status[name] = false;
+				it->second.append("\t{");
+			}
+			else {
+				output_streams[name] = "{\n\t{";
+				output_status[name] = false;
+			}
 		}
-		else {
-			output_streams[name] = "{\n\t{";
+		else if (format == "xml")  {
 			output_status[name] = false;
+			it->second.append(std::string("<")+name+">");
 		}
 	}
 
 	void pop(const std::string& name) {
 		std::map<std::string, std::string>::iterator it = output_streams.find(name);
-		if (it != output_streams.end()) {
-			output_status[name] = false;
-			it->second.append("},\n");
+		if (format == "txt") {
+			if (it != output_streams.end()) {
+				output_status[name] = false;
+				it->second.append("},\n");
+			}
+			else {
+				std::cout << "Fatal error in output, probably pop called without push" << std::endl;
+				exit(1);
+			}
 		}
-		else {
-			std::cout << "Fatal error in output" << std::endl;
-			exit(1);
+		else if (format == "xml") {
+			if (it != output_streams.end()) {
+				output_status[name] = false;
+				it->second.append(std::string("</")+name+">");
+			}
+			else {
+				std::cout << "Fatal error in output, probably pop called without push" << std::endl;
+				exit(1);
+			}
 		}
 	}
 
 	template<typename T> void write(const std::string& name, const T& what) {
 		std::map<std::string, std::string>::iterator it = output_streams.find(name);
-		if (it != output_streams.end()) {
-			if (output_status[name] == true) {
-				it->second.append(", ");
+		if (format == "txt") {
+			if (it != output_streams.end()) {
+				if (output_status[name] == true) {
+					it->second.append(", ");
+				}
+				else {
+					output_status[name] = true;
+				}
+				std::ostringstream oss;
+				oss << std::setprecision(23) << what;
+				it->second.append(oss.str());
 			}
 			else {
+				std::ostringstream oss;
+				oss << "{" << std::setprecision(23) << what;
+				output_streams[name] = oss.str();
 				output_status[name] = true;
 			}
-			std::ostringstream oss;
-			oss << std::setprecision(23) << what;
-			it->second.append(oss.str());
 		}
 		else {
-			std::ostringstream oss;
-			oss << "{" << std::setprecision(23) << what;
-			output_streams[name] = oss.str();
-			output_status[name] = true;
+			if (it != output_streams.end()) {
+				if (output_status[name] == true) {
+					it->second.append(" ");
+				}
+				else {
+					output_status[name] = true;
+				}
+				std::ostringstream oss;
+				oss << "<" << name << "_data>" << std::setprecision(23) << what << "</" << name << "_data>";
+				it->second.append(oss.str());
+			}
+			else {
+				std::ostringstream oss;
+				oss << "<" << name << "_data>" << std::setprecision(23) << what << "</" << name << "_data>";
+				output_streams[name] = oss.str();
+				output_status[name] = true;
+			}
 		}
 	}
 
 	void print() {
 		std::map<std::string, std::string>::iterator it;
 		for (it=output_streams.begin(); it != output_streams.end(); ++it) {
-			std::ofstream ofs;
-			ofs.open((baseFolder+baseName+"_"+it->first+".txt").c_str(), std::fstream::out | std::fstream::app);
-			ofs << it->second;
-			it->second.clear();
-			ofs.close();
+			if (format == "txt") {
+				std::ofstream ofs;
+				ofs.open((baseFolder+baseName+"_"+it->first+".txt").c_str(), std::fstream::out | std::fstream::app);
+				ofs << it->second;
+				it->second.clear();
+				ofs.close();
+			}
+			else if (format == "xml") {
+				if (file_exists((baseFolder+baseName+"_"+it->first+".xml").c_str())) {
+					std::ofstream ofs;
+					ofs.open((baseFolder+baseName+"_"+it->first+".xml").c_str(), std::fstream::out | std::fstream::app);
+					ofs << it->second;
+					it->second.clear();
+					ofs.close();
+				}
+				else {
+					std::ofstream ofs;
+					ofs.open((baseFolder+baseName+"_"+it->first+".xml").c_str(), std::fstream::out | std::fstream::app);
+					ofs << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n";
+					ofs << it->second;
+					it->second.clear();
+					ofs.close();
+				}
+			}
 		}
 	}
 
@@ -98,11 +162,24 @@ public:
 	static void setBaseFolder(const std::string& _baseFolder) {
 		baseFolder = _baseFolder;
 	}
+
+	static void setFormat(const std::string& _format) {
+		if (_format == "xml") {
+			format = "xml";
+		}
+		else if (_format == "txt") {
+			format = "txt";
+		}
+		else {
+			std::cout << "Ouput format " << _format << " unsupported!" << std::endl;
+		}
+	}
 private:
 	std::map<std::string, std::string> output_streams;
 	std::map<std::string, bool> output_status;
 	static std::string baseName;
 	static std::string baseFolder;
+	static std::string format;
 };
 
 } /* namespace Update */

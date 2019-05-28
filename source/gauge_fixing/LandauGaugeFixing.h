@@ -3,7 +3,7 @@
 
 #include "LatticeSweep.h"
 #include "utils/RandomSeed.h"
-#include "utils/GaugeFixing.h"
+#include "gauge_fixing/GaugeFixing.h"
 
 namespace Update {
 

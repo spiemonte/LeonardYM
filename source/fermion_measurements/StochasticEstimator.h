@@ -36,7 +36,7 @@ protected:
 		for (i = v.begin(); i != v.end(); ++i) {
 			res += *i;
 		}
-		return res/v.size();
+		return res/static_cast<T>(v.size());
 	}
 
 	template<typename T> T standardDeviation(const std::vector<T>& v) {
@@ -46,7 +46,7 @@ protected:
 		for (i = v.begin(); i != v.end(); ++i) {
 			res += ((*i) - mn)*((*i) - mn);
 		}
-		return sqrt(res/(v.size()-1));
+		return sqrt(res/static_cast<T>(v.size()-1));
 	}
 
 #ifndef MULTITHREADING

@@ -12,12 +12,16 @@ public:
 	GaugeFixing(const GaugeFixing&);
 	~GaugeFixing();
 
+	//Create a random gauge transformation
 	void generateRandomGaugeTransformation(extended_matrix_lattice_t& gauge_transformation, real_t epsilon);
 
+	//Apply a given gauge transformation gauge_transformation to the lattice
 	void transform(extended_gauge_lattice_t& lattice, const extended_matrix_lattice_t& gauge_transformation) const;
 
+	//Compute the A_\mu field from a given gauge fixed configuration
 	void getLieAlgebraField(extended_gauge_lattice_t& Afield, const extended_gauge_lattice_t& lattice) const;
 
+	//Metropolis for parellel tempering
 	bool metropolis(real_t delta);
 
 private:

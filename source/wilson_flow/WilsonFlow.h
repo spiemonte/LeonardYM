@@ -21,6 +21,8 @@ public:
 
 
 	virtual void execute(environment_t& environment);
+
+	static void registerParameters(po::options_description& desc);
 protected:
 	void integrate(const extended_gauge_lattice_t& initialLattice, extended_gauge_lattice_t& finalLattice, GaugeAction* action, real_t time, int nSteps);
 	void getForce(const extended_gauge_lattice_t& lattice, extended_gauge_lattice_t& force, GaugeAction* action);

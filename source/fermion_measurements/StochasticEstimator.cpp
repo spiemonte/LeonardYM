@@ -124,6 +124,7 @@ void StochasticEstimator::generateRandomNoise(extended_dirac_vector_t& vector, i
 
 void StochasticEstimator::generateSource(extended_dirac_vector_t& vector, int alpha, int c) {
 	typedef extended_dirac_vector_t::Layout Layout;
+
 #pragma omp parallel for
 	for (int site = 0; site < vector.localsize; ++site) {
 		for (unsigned int mu = 0; mu < 4; ++mu) set_to_zero(vector[site][mu]);

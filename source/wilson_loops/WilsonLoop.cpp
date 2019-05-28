@@ -38,8 +38,8 @@ void WilsonLoop::execute(environment_t& environment) {
 		if (isOutputProcess()) std::cout << "WilsonLoop::No smearing options found, proceeding without!" << std::endl;
 	}
 
-	RMax = environment.configurations.get<unsigned int>("WilsonLoop::max_r_wilsonloop");
-	TMax = environment.configurations.get<unsigned int>("WilsonLoop::max_t_wilsonloop");
+	RMax = environment.configurations.get<unsigned int>("WilsonLoop::max_r");
+	TMax = environment.configurations.get<unsigned int>("WilsonLoop::max_t");
 
 	int t_dir = environment.configurations.get<unsigned int>("WilsonLoop::t_dir");
 
@@ -148,8 +148,8 @@ void WilsonLoop::execute(environment_t& environment) {
 
 void WilsonLoop::registerParameters(po::options_description& desc) {
 	desc.add_options()
-		("WilsonLoop::max_t_wilsonloop", po::value<unsigned int>()->default_value(6), "The maximum dimension of the Wilson loop in the R direction")
-		("WilsonLoop::max_r_wilsonloop", po::value<unsigned int>()->default_value(6), "The maximum dimension of the Wilson loop in the R direction")
+		("WilsonLoop::max_t", po::value<unsigned int>()->default_value(6), "The maximum dimension of the Wilson loop in the R direction")
+		("WilsonLoop::max_r", po::value<unsigned int>()->default_value(6), "The maximum dimension of the Wilson loop in the R direction")
 		("WilsonLoop::t_dir", po::value<unsigned int>()->default_value(3), "The time direction of the loops")
 		("WilsonLoop::level_stout_smearing", po::value<unsigned int>()->default_value(10), "Number of levels of the stout smearing")
 		("WilsonLoop::rho_stout_smearing", po::value<double>()->default_value(0.05), "Rho stout smearing");

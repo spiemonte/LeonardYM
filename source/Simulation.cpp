@@ -86,7 +86,7 @@ void Simulation::measurement() {
 		timersub(&stop,&start,&result);
 		if (isOutputProcess()) {
 			std::cout << "Sweep cicle " << i << " done in: " << (double)result.tv_sec + result.tv_usec/1000000.0 << " sec" << std::endl;
-			//Save the datas
+			//Save the data
 			globalOutput->print();
 		}
 		++environment.sweep;

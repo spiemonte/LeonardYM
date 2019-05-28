@@ -2,7 +2,7 @@
 #define LANDAUGHOSTPROPAGATOR_H
 
 #include "LatticeSweep.h"
-#include "utils/LandauGaugeFixing.h"
+#include "gauge_fixing/LandauGaugeFixing.h"
 
 namespace Update {
 

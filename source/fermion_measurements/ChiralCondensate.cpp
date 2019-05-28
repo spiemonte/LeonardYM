@@ -26,6 +26,7 @@ ChiralCondensate::~ChiralCondensate() {
 void ChiralCondensate::execute(environment_t& environment) {
 	extended_fermion_lattice_t lattice;
 
+	//Smear the configuration if so required
 	try {
 		unsigned int numberLevelSmearing = environment.configurations.get<unsigned int>("ChiralCondensate::levels_stout_smearing");
 		double smearingRho = environment.configurations.get<double>("ChiralCondensate::rho_stout_smearing");
@@ -44,6 +45,7 @@ void ChiralCondensate::execute(environment_t& environment) {
 		if (isOutputProcess()) std::cout << "ChiralCondensate::No smearing options found, proceeding without!" << std::endl;
 	}
 	
+	//Take the Dirac operator
 	if (diracOperator == 0) {
 		diracOperator = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations);
 	}
@@ -90,8 +92,8 @@ void ChiralCondensate::execute(environment_t& environment) {
 	for (unsigned int step = 0; step < max_step; ++step) {
 		this->generateRandomNoise(randomNoise);
 		
-		inverter->solve(diracOperator, randomNoise, tmp);
-		Propagator::constructPropagator(diracOperator, randomNoise, tmp);
+		inverter->solve(diracOperator, randomNoise, inverse);
+		Propagator::constructPropagator(diracOperator, inverse, tmp);
 		
 		
 		std::complex<long_real_t> condensate = AlgebraUtils::dot(randomNoise, tmp);
@@ -109,7 +111,7 @@ void ChiralCondensate::execute(environment_t& environment) {
 		if (connected) {
 			inverter->solve(diracOperator, tmp, tmp_square);
 
-			if (diracOperator->getName() == "Overlap") {
+			if (diracOperator->getName() == "Overlap" || diracOperator->getName() == "ExactOverlap") {
 #pragma omp parallel for
 				for (int site = 0; site < tmp.completesize; ++site) {
 					for (unsigned int mu = 0; mu< 4; ++mu) {

@@ -11,7 +11,6 @@
 #include "utils/FromString.h"
 #include "hmc_updaters/PureGaugeHMCUpdater.h"
 #include "hmc_updaters/TwoFlavorHMCUpdater.h"
-#include "hmc_updaters/NFlavorQCDUpdater.h"
 #include "hmc_updaters/ScalarFermionHMCUpdater.h"
 #include "pure_gauge/PureGaugeOverrelaxation.h"
 #include "io/OutputSweep.h"
@@ -27,12 +26,11 @@
 #include "polyakov_loops/PolyakovLoop.h"
 #include "correlators/Glueball.h"
 #include "utils/ReUnit.h"
-#include "utils/LandauGaugeFixing.h"
-#include "utils/MaximalAbelianGaugeFixing.h"
-#include "utils/MaximalAbelianProjection.h"
-#include "utils/LandauGhostPropagator.h"
-#include "utils/LandauGluonPropagator.h"
-#include "hmc_updaters/BandTwoFlavorUpdater.h"
+#include "gauge_fixing/LandauGaugeFixing.h"
+#include "gauge_fixing/MaximalAbelianGaugeFixing.h"
+#include "gauge_fixing/MaximalAbelianProjection.h"
+#include "gauge_fixing/LandauGhostPropagator.h"
+#include "gauge_fixing/LandauGluonPropagator.h"
 #include "pure_gauge/PureGaugeWilsonLoops.h"
 #include "tests/TestCommunication.h"
 #include "correlators/GluinoGlue.h"
@@ -44,7 +42,6 @@
 #include "polyakov_loops/PolyakovLoopCorrelator.h"
 #include "polyakov_loops/PolyakovLoopEigenvalues.h"
 #include "hmc_updaters/MultiStepNFlavorQCDUpdater.h"
-#include "hmc_updaters/TwistedMultiStepNFlavorQCDUpdater.h"
 #include "scalar_updaters/RandomScalarUpdater.h"
 #include "scalar_updaters/AdjointMetropolisScalarUpdater.h"
 #include "scalar_updaters/FundamentalMetropolisScalarUpdater.h"
@@ -59,6 +56,7 @@ LatticeSweep::LatticeSweep(unsigned int _numberTimes, unsigned int _sweepToJump)
 LatticeSweep::~LatticeSweep() { }
 
 LatticeSweep* LatticeSweep::getInstance(const std::string& name) {
+	//Factory for the Lattice sweep
 	if (name == "PureGaugeCM") {
 		return new PureGaugeUpdater();
 	} else if (name == "Plaquette") {
@@ -67,8 +65,6 @@ LatticeSweep* LatticeSweep::getInstance(const std::string& name) {
 		return new PureGaugeHMCUpdater();
 	} else if (name == "TwoFlavorQCD") {
 		return new TwoFlavorHMCUpdater();
-	} else if (name == "NFlavorQCD") {
-		return new NFlavorQCDUpdater();
 	} else if (name == "PureGaugeOverrelaxation") {
 		return new PureGaugeOverrelaxation();
 	} else if (name == "Output") {
@@ -97,8 +93,6 @@ LatticeSweep* LatticeSweep::getInstance(const std::string& name) {
 		return new GluinoGlue();
 	} else if (name == "ReUnit") {
 		return new ReUnit();
-	} else if (name == "BandTwoFlavorHMCUpdater") {
-		return new BandTwoFlavorUpdater();
 	} else if (name == "PureGaugeWilsonLoops") {
 		return new PureGaugeWilsonLoops();
 	} else if (name == "WilsonLoop") {
@@ -113,8 +107,6 @@ LatticeSweep* LatticeSweep::getInstance(const std::string& name) {
 		return new GaugeEnergy();
 	} else if (name == "MultiStepNFlavorQCD") {
 		return new MultiStepNFlavorQCDUpdater();
-	} else if (name == "TwistedMultiStepNFlavorQCD") {
-		return new TwistedMultiStepNFlavorQCDUpdater();
 	} else if (name == "SingletOperators") {
 		return new SingletOperators();
 	} else if (name == "XSpaceCorrelators") {
@@ -151,6 +143,7 @@ LatticeSweep* LatticeSweep::getInstance(const std::string& name) {
 }
 
 void LatticeSweep::call(environment_t& environment) {
+	//Execute the sweeps in the order given
 	if ((environment.sweep % sweepToJump) == 0) {
 		environment.iteration = 0;
 		for (unsigned int i = 0; i < numberTimes; ++i) {
@@ -223,7 +216,6 @@ void LatticeSweep::addParameters(po::options_description& desc) {
 	Plaquette::registerParameters(desc);
 	PureGaugeHMCUpdater::registerParameters(desc);
 	TwoFlavorHMCUpdater::registerParameters(desc);
-	NFlavorQCDUpdater::registerParameters(desc);
 	PureGaugeOverrelaxation::registerParameters(desc);
 	OutputSweep::registerParameters(desc);
 	TestLinearAlgebra::registerParameters(desc);
@@ -238,7 +230,6 @@ void LatticeSweep::addParameters(po::options_description& desc) {
 	Glueball::registerParameters(desc);
 	GluinoGlue::registerParameters(desc);
 	ReUnit::registerParameters(desc);
-	BandTwoFlavorUpdater::registerParameters(desc);
 	PureGaugeWilsonLoops::registerParameters(desc);
 	WilsonLoop::registerParameters(desc);
 	TestCommunication::registerParameters(desc);
@@ -246,7 +237,6 @@ void LatticeSweep::addParameters(po::options_description& desc) {
 	WilsonFlow::registerParameters(desc);
 	GaugeEnergy::registerParameters(desc);
 	MultiStepNFlavorQCDUpdater::registerParameters(desc);
-	TwistedMultiStepNFlavorQCDUpdater::registerParameters(desc);
 	SingletOperators::registerParameters(desc);
 	XSpaceCorrelators::registerParameters(desc);
 	NPRVertex::registerParameters(desc);
@@ -269,33 +259,44 @@ void LatticeSweep::printSweepsName() {
 		std::cout << "List of the possible Sweeps name:" << std::endl;
 		std::cout
 		<< "PureGaugeCM" << std::endl
-		<< "Plaquette" << std::endl
-		<< "PureGaugeHMC" << std::endl
-		<< "TwoFlavorQCD" << std::endl
-		<< "NFlavorQCD" << std::endl
-		<< "PureGaugeOverrelaxation" << std::endl
-		<< "Output" << std::endl
-		<< "TestLinearAlgebra" << std::endl
-		<< "TestSpeedDiracOperators" << std::endl
-		<< "Eigenvalues" << std::endl
-		<< "MesonCorrelator" << std::endl
-		<< "ChiralCondensate" << std::endl
-		<< "PolyakovLoop" << std::endl
-		<< "AdjointPolyakovLoop" << std::endl
-		<< "Glueball" << std::endl
-		<< "GluinoGlue" << std::endl
-		<< "ReUnit" << std::endl
-		<< "BandTwoFlavorHMCUpdater" << std::endl
-		<< "PureGaugeWilsonLoops" << std::endl
-		<< "WilsonLoop" << std::endl
-		<< "TestCommunication" << std::endl
-		<< "ReadGaugeConfiguration" << std::endl
-		<< "WilsonFlow" << std::endl
-		<< "GaugeEnergy" << std::endl
-		<< "MultiStepNFlavorQCD" << std::endl
-		<< "TwistedMultiStepNFlavorQCD" << std::endl
-		<< "LandauGhostPropagator" << std::endl
-		<< "LandauGluonPropagator" << std::endl;
+		<<  "Plaquette" << std::endl
+		<<  "PureGaugeHMC" << std::endl
+		<<  "TwoFlavorQCD" << std::endl
+		<<  "PureGaugeOverrelaxation" << std::endl
+		<<  "Output" << std::endl
+		<<  "TestLinearAlgebra" << std::endl
+		<<  "TestSpeedDiracOperators" << std::endl
+		<<  "Eigenvalues" << std::endl
+		<<  "MesonCorrelator" << std::endl
+		<<  "ChiralCondensate" << std::endl
+		<<  "PolyakovLoop" << std::endl
+		<<  "PolyakovLoopEigenvalues" << std::endl
+		<<  "PolyakovLoopCorrelator" << std::endl
+		<<  "AdjointPolyakovLoop" << std::endl
+		<<  "Glueball" << std::endl
+		<<  "GluinoGlue" << std::endl
+		<<  "ReUnit" << std::endl
+		<<  "PureGaugeWilsonLoops" << std::endl
+		<<  "WilsonLoop" << std::endl
+		<<  "TestCommunication" << std::endl
+		<<  "ReadGaugeConfiguration" << std::endl
+		<<  "WilsonFlow" << std::endl
+		<<  "GaugeEnergy" << std::endl
+		<<  "MultiStepNFlavorQCD" << std::endl
+		<<  "SingletOperators" << std::endl
+		<<  "XSpaceCorrelators" << std::endl
+		<<  "NPRVertex" << std::endl
+		<<  "LandauGaugeFixing" << std::endl
+		<<  "MaximalAbelianGaugeFixing" << std::endl
+		<<  "MaximalAbelianProjection" << std::endl
+		<<  "LandauGluonPropagator" << std::endl
+		<<  "LandauGhostPropagator" << std::endl
+		<<  "ScalarFermionHMC" << std::endl
+		<<  "HiggsGaugeHMC" << std::endl
+                <<  "RandomScalarInitializer" << std::endl
+		<<  "AdjointMCScalar" << std::endl
+		<<  "FundamentalMCScalar" << std::endl
+                <<  "MeanScalarField" << std::endl;
 	}
 
 }

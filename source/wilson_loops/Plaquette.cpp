@@ -43,7 +43,7 @@ void Plaquette::execute(environment_t& environment) {
 		output->push("plaquette");
 
 		typedef extended_gauge_lattice_t::Layout Layout;
-		std::cout << "Plaquette expectation value: " << plaquette/(6.*numberColors*Layout::globalVolume) << std::endl; //TODO
+		std::cout << "Plaquette expectation value: " << plaquette/(6.*numberColors*Layout::globalVolume) << std::endl;
 		output->write("plaquette", plaquette/(6.*numberColors*Layout::globalVolume));
 		output->write("plaquette", plaquette_s/(3.*numberColors*Layout::globalVolume));
 		output->write("plaquette", plaquette_t/(3.*numberColors*Layout::globalVolume));
@@ -67,9 +67,9 @@ long_real_t Plaquette::temporalPlaquette(const extended_gauge_lattice_t& gaugeLi
 	if (isOutputProcess()) {
 		typedef extended_gauge_lattice_t::Layout Layout;
 		plaquette = plaquette/(3.*numberColors*Layout::globalVolume);
-		std::cout << "Temporal Plaquette expectation value: " << plaquette << std::endl; //TODO
+		std::cout << "Temporal Plaquette expectation value: " << plaquette << std::endl;
 	}
-	return plaquette; //TODO
+	return plaquette;
 }
 
 } /* namespace Update */

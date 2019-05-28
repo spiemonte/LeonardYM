@@ -23,13 +23,6 @@ class NotFoundOption : public std::runtime_error {
 public:
 	NotFoundOption(const std::string& _nameOption) throw () : std::runtime_error((_nameOption+": option not found!").c_str()) { }
 	~NotFoundOption() throw () { };
-private:
-	/*virtual const char* what() const throw() {
-		std::ostringstream os;
-		os << "No parameter " << nameOption << " found!" << std::endl;
-		return os.str().c_str();
-	}
-	std::string nameOption;*/
 };
 
 namespace implement {

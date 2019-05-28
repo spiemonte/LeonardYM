@@ -1,5 +1,5 @@
 #include "LandauGaugeFixing.h"
-#include "ToString.h"
+#include "utils/ToString.h"
 
 namespace Update {
 
@@ -45,44 +45,8 @@ void LandauGaugeFixing::generateOverrelaxationTransformation(extended_matrix_lat
 				}
 			}
 
-			/*GaugeGroup Q, R;
-			qr(Q,R,staple);//Compute the QR decomposition
-			//Now set the det(Q) to 1:
-			std::complex<real_t> determinant = det(Q);
-			// by multiply the first row with the complex conjugate of det:
-			for (int i = 0; i < numberColors; ++i) {
-				for (int j = 0; j < numberColors; ++j) {
-					Q(i,j) /= pow(determinant,1./numberColors);
-				}
-			}
-			if (real(trace(htrans(Q)*staple)) > real(trace(staple))) {
-				gauge_transformation[site] = htrans(Q);
-			}
-			else {
-				set_to_identity(gauge_transformation[site]);
-			}
-			if (site == 0) std::cout << "S: "<< toString(staple) << std::endl;
-			if (site == 0) std::cout << "S: "<< toString(gauge_transformation[site]) << std::endl;
-			if (site == 0) exit(13);*/
-/*
-#ifdef EIGEN
-			Eigen::ComplexEigenSolver<GaugeGroup> es(htrans(staple)*staple);
-			GaugeGroup inverse_square_root;
-			inverse_square_root.zeros();
-			for (int i = 0; i < numberColors; ++i) {
-				inverse_square_root.at(i,i) = 1./sqrt(es.eigenvalues()[i]);
-			}
-			GaugeGroup m = es.eigenvectors();
-			gauge_transformation[site] = staple * m * inverse_square_root * htrans(m);
-			if (real(trace(gauge_transformation[site]*staple)) < real(trace(staple))) {
-				set_to_identity(gauge_transformation[site]);
-			}
-#endif
-*/
-
 #endif
 #if NUMCOLORS == 2
-			//if (site == 0) std::cout << "S: "<< toString(staple) << std::endl;
 			std::complex<real_t> determinant = det(staple);
 			for (int i = 0; i < numberColors; ++i) {
 				for (int j = 0; j < numberColors; ++j) {
@@ -90,8 +54,6 @@ void LandauGaugeFixing::generateOverrelaxationTransformation(extended_matrix_lat
 				}
 			}
 			gauge_transformation[site] = htrans(staple);
-			//if (site == 0) std::cout << "G: "<< toString(gauge_transformation[site]) << std::endl;
-			//if (site == 0) exit(13);
 #endif
 		}
 		else {

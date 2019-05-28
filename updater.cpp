@@ -24,8 +24,9 @@
 
 int Update::RandomSeed::counter = -1;
 boost::mt19937 Update::RandomSeed::rng;
-boost::uniform_int<> Update::RandomSeed::dist = boost::uniform_int<>(-1000000,1000000);//TODO
+boost::uniform_int<> Update::RandomSeed::dist = boost::uniform_int<>(-10000000,10000000);
 
+//MPI Datatype initilialization
 #ifdef ENABLE_MPI
 MPI_Datatype MpiType<short int>::type = MPI_SHORT;
 MPI_Datatype MpiType<int>::type = MPI_INT;
@@ -62,62 +63,32 @@ inline bool testBasicMatrixFunctions(){
 
 
 int main(int ac, char* av[]) {
-	//feenableexcept(FE_ALL_EXCEPT & ~FE_INEXACT);
-	/*Update::LieGenerator<Update::GaugeGroup> lieGenerator;
-	Update::LieGenerator<Update::AdjointGroup> adjointLieGenerator;
-	for (unsigned int t = 0; t < Update::numberColors*Update::numberColors - 1; ++t) std::cout << lieGenerator.get(t) << std::endl << std::endl;
-	std::cout << std::endl << std::endl;
-	for (unsigned int t = 0; t < Update::numberColors*Update::numberColors - 1; ++t) std::cout << adjointLieGenerator.get(t) << std::endl << std::endl;*/
-	/*Update::AdjointGroup* test = new Update::AdjointGroup[3];
-	test[0] = Update::AdjointGroup::Identity();
-	set_to_zero(test[1]);
-	test[2] = Update::AdjointGroup::Identity();
-
-	typedef Update::GaugeVector vt4[4];
-
-	vt4* vect = new vt4[11];
-	for (unsigned int i = 0; i < 11; ++i) {
-		for (unsigned int k = 0; k < 4; ++k)
-		for (unsigned int j = 0; j < 3; ++j) {
-			vect[i][k][j] = i+ j + 2*k;
-		}
-	}
-	std::cout << "Qui ci arrivo!" << std::endl;
-	std::complex<Update::real_t>* test2 = reinterpret_cast<std::complex<Update::real_t>*>(vect);
-	//((Update::real_t (*)[5])test)[1][2]
-	std::cout << ((std::complex<Update::real_t> (*)[4][3])test2)[7][2][2] << " " << vect[7][2][2] << std::endl;
-
-	exit(0);
-	Update::GaugeGroup test1, test2;
-	for (int i = 0; i < 2; ++i) {
-		for (int j = 0; j < 2; ++j) {
-			test1.at(i,j) = (static_cast<Update::real_t>(i+ 2*j +1 ))/7.;
-			test2.at(i,j) = (static_cast<Update::real_t>(3*i- 2*j +1) )/2.;
-		}
-	}
-	Update::GaugeGroup test3(test1*test2);
-	Update::complex res1 = trace(test1*test2);
-	Update::complex res2 = trace(test3);
-	std::cout << "Test: " << res1 << " " << res2 << std::endl;
-	std::cout << Update::toString(test1) << std::endl;
-	std::cout << Update::toString(test2) << std::endl;
-	std::cout << Update::toString(test3) << std::endl;
-
-	testBasicMatrixFunctions<5>();*/
-
 #ifdef ENABLE_MPI
+	//Initialize MPI if in MPI mode
 	MPI_Init(&ac, &av);
 #endif
 
-	//The descriptor for the options
+	//The descriptor for the global options
 	po::options_description desc("Allowed options");
 	desc.add_options()
-	    ("help", "produce help message")
-	    ("list_sweeps", "produce the list of all the available sweeps")
-	    ("configfile", po::value<std::string>(), "set the configuration file")
-	    ("beta", po::value<Update::real_t>(), "set the \\beta parameter of the simulations")
-	    ("kappa", po::value<Update::real_t>(), "set the \\kappa parameter of the simulations")
-	    ("mass", po::value<Update::real_t>(), "set the mass parameter of the overlap operator")
+		("help", "produce help message")
+		("list_sweeps", "produce the list of all the available sweeps")
+		("configfile", po::value<std::string>(), "set the configuration file")
+		("version", "Version message")
+
+		//Action specifications
+		("name_action", po::value<std::string>(), "the name of the gauge part of the action (\"StandardWilson/Improved\")")
+		("dirac_operator", po::value<std::string>(), "the name of the dirac wilson operator that should be used (supported: DiracWilson/Improved/Overlap/ExactOverlap)")
+		
+		//Action and dirac operator options
+		("beta", po::value<Update::real_t>(), "set the \\beta parameter of the simulations")
+		("kappa", po::value<Update::real_t>(), "set the \\kappa parameter of the simulations")
+		("mass", po::value<Update::real_t>(), "set the mass parameter of the overlap operator")
+		("csw", po::value<Update::real_t>(), "The clover term coefficient")
+		("stout_smearing_levels", po::value<int>(), "The levels for the stout smearing of the dirac operator")
+		("stout_smearing_rho", po::value<Update::real_t>(), "The rho for the stout smearing of the dirac operator")
+		
+		//GRID parallelization and lattice options
 		("glob_x", po::value<unsigned int>(), "The x lattice size")
 		("glob_y", po::value<unsigned int>(), "The y lattice size")
 		("glob_z", po::value<unsigned int>(), "The z lattice size")
@@ -126,20 +97,53 @@ int main(int ac, char* av[]) {
 		("pgrid_y", po::value<unsigned int>(), "The grid subdivision in the y direction")
 		("pgrid_z", po::value<unsigned int>(), "The grid subdivision in the z direction")
 		("pgrid_t", po::value<unsigned int>(), "The grid subdivision in the t direction")
-	    ("start", po::value<std::string>(), "the start method of the gauge configuration for the simulations (hotstart/coldstart/readstart)")
-	    ("number_warm_up_sweeps", po::value<unsigned int>(), "the number of warm-up sweeps")
-	    ("number_measurement_sweeps", po::value<unsigned int>(), "the number of measurement sweeps")
-	    ("warm_up_sweeps", po::value< std::string >(), "the vector of the warm up sweeps to do (example: {{PureGaugeCM,1,1},{Plaquette,1,1}} )")
-	    ("measurement_sweeps", po::value< std::string >(), "the vector of the measurement sweeps to do (example: {{PureGaugeCM,1,1},{Plaquette,1,1}} )")
-	    ("name_action", po::value<std::string>(), "the name of the gauge part of the action (\"StandardWilson\")")
-	    ("name_integrator", po::value<std::string>(), "the name of the type of integrator (\"second_order\")")
+		("number_threads", po::value<unsigned int>(), "The number of threads for openmp")
+		("load_layout", "If the MPI layout should be loaded from the disk")
+		("print_report_layout", "If the full report of the MPI layout should be printed")
+
+		//Boundary conditions
+		("boundary_conditions", po::value<std::string>(), "Boundary conditions to use: periodic (fermions), antiperiodic (fermions), spatialantiperiodic (fermion), open")
+
+		//Input-output options
+		("output_directory_configurations", po::value<std::string>(), "The directory for the output of the configurations")
+		("output_directory_measurements", po::value<std::string>(), "The directory for the output of the measurements")
+		("output_name", po::value<std::string>(), "The name for the beginning part of the file of the output")
+		("input_directory_configurations", po::value<std::string>(), "The directory for the input of the configurations")
+		("input_name", po::value<std::string>(), "The name for the beginning part of the file of the input")
+		("input_number", po::value<unsigned int>(), "The number of the file of the input")
+		("output_configuration_name", po::value<std::string>(), "The name of the output of the field")
+		("output_offset", po::value<unsigned int>(), "The offset for the number of the output configurations")
+		("format_name", po::value<std::string>(), "leonard_format/muenster_format for reading and writing configurations")
+		("input_format_name", po::value<std::string>(), "leonard_format/muenster_format only for reading configurations")
+		("output_format_name", po::value<std::string>(), "leonard_format/muenster_format only for writing configurations")
+		("measurement_output_format", po::value<std::string>()->default_value("txt"), "output format for the measurements (xml/txt)")
+		
+		//Start, warm up and measurement specifications
+		("start", po::value<std::string>(), "the start gauge configuration for the simulations (hotstart/coldstart/readstart)")
+		("start_gauge_configuration_file", po::value<std::string>(), "The name of the beginning file with the gauge configuration for reading")
+		("start_configuration_number", po::value<unsigned int>(), "The beginning number of the output configuration written (zero as default)")
+		("number_warm_up_sweeps", po::value<unsigned int>(), "the number of warm-up sweeps")
+		("number_measurement_sweeps", po::value<unsigned int>(), "the number of measurement sweeps")
+		("warm_up_sweeps", po::value< std::string >(), "the vector of the warm up sweeps to do (example: {{PureGaugeCM,1,1},{Plaquette,1,1}} )")
+		("measurement_sweeps", po::value< std::string >(), "the vector of the measurement sweeps to do (example: {{PureGaugeCM,1,1},{Plaquette,1,1}} )")
+		
+		//Scalar field options
 		("adjoint_nf_scalars", po::value<unsigned int>()->default_value(0), "set the number of the adjoint scalar fields")
 		("fundamental_nf_scalars", po::value<unsigned int>()->default_value(0), "set the number of the fundamental scalar fields")
-	    ("hmc_t_length", po::value<Update::real_t>(), "the length of a single HMC step (examples: 0.1, 0.05 ...)")
-	    ("number_hmc_steps", po::value<std::string>(), "the vector of the numbers of HMC steps for a single trajectory (examples: 2, 7 ...)")
-	    ("dirac_operator", po::value<std::string>(), "the name of the dirac wilson operator that should be used (supported: DiracWilson)")
-	    ("number_pseudofermions", po::value<unsigned int>(), "the number of pseudofermions used")
-	    ("number_force_levels", po::value<unsigned int>(), "the number of levels used for the force")
+		
+		//HMC options
+		("name_integrator", po::value<std::string>(), "the name of the type of integrator (\"second_order, omelyan, fourth_order, fourth_omelyan\")")
+		("hmc_t_length", po::value<Update::real_t>(), "the length of a single HMC step (examples: 0.1, 0.05 ...)")
+		("number_hmc_steps", po::value<std::string>(), "the vector of the numbers of HMC steps for a single trajectory (examples: 2, 7 ...)")
+		
+		
+		//RHMC options
+		("force_inverter_precision", po::value<Update::real_t>(), "The precision for the inverter in the force step")
+		("metropolis_inverter_precision", po::value<Update::real_t>(), "The precision for the inverter in the metropolis step")
+		("metropolis_inverter_max_steps", po::value<unsigned int>(),"maximum level of steps used by the inverters for computing the energy of the metropolis step")
+		("force_inverter_max_steps", po::value<unsigned int>(),"maximum level of steps used by the inverters for computing the force")
+		("number_pseudofermions", po::value<unsigned int>(), "the number of pseudofermions used")
+		("number_force_levels", po::value<unsigned int>(), "the number of levels used for the force")
 		("check_rational_approximations", po::value< std::string >(), "Set to true for checking the approximations in the beginning of the simulation")
 		("twisted_mass_squared", po::value<Update::real_t>(), "The twisted mass squared used by twisted updater to regularize to RHMC")
 		("number_twisted_correction_noise_vectors", po::value<unsigned int>(), "Number of noise vectors used to estimate the correction factor")
@@ -147,53 +151,22 @@ int main(int ac, char* av[]) {
 		("theory_power_factor", po::value<Update::real_t>(), "The half of the number of fermion (1/4 for SUSY, 1 for two flavor, etc)")
 		("twisted_breakup", po::value<unsigned int>(), "The value of the determinant breakup used in the correction step")
 		("deflation_block_size", po::value<std::string>(), "The vector of the block size {lx,ly,lz,lt}")
-		("t_source_origin", po::value<unsigned int>(), "The t-origin for the source of the pion and gluino correlators")
 		("preconditioner_recursions", po::value<unsigned int>(), "Number of preconditioner recursions used for evaluating the rational approximations")
 		("preconditioner_precision", po::value<Update::real_t>(), "The precision for the inversion of the preconditioner used for evaluating the rational approximations")
-		("boundary_conditions", po::value<std::string>(), "Boundary conditions to use: periodic (fermions), antiperiodic (fermions), spatialantiperiodic (fermion), open")
-		("measure_condensate_connected", po::value<bool>(), "Should I measure the connected part of the condensate susceptibility?")		
+				
 		("eigenvalues_map", po::value<std::string>(), "the map used for computing the lowest eigenvalues (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})")
-	    ("output_directory_configurations", po::value<std::string>(), "The directory for the output of the configurations")
-		("output_directory_measurements", po::value<std::string>(), "The directory for the output of the measurements")
-	    ("output_name", po::value<std::string>(), "The name for the beginning part of the file of the output")
-		("input_directory_configurations", po::value<std::string>(), "The directory for the input of the configurations")
-	    ("input_name", po::value<std::string>(), "The name for the beginning part of the file of the input")
-		("input_number", po::value<unsigned int>(), "The number of the file of the input")
-	    ("number_threads", po::value<unsigned int>(), "The number of threads for openmp")
-	    ("number_stochastic_estimators", po::value<unsigned int>(), "The number of stochastic estimators")
-	    ("generic_inverter_precision", po::value<Update::real_t>(), "The precision for the inverter")
-	    ("force_inverter_precision", po::value<Update::real_t>(), "The precision for the inverter in the force step")
-	    ("metropolis_inverter_precision", po::value<Update::real_t>(), "The precision for the inverter in the metropolis step")
-	    ("start_gauge_configuration_file", po::value<std::string>(), "The name of the beginning file with the gauge configuration for reading")
-	    ("start_configuration_number", po::value<unsigned int>(), "The beginning number of the output configuration written (zero as default)")
-	    ("output_configuration_name", po::value<std::string>(), "The name of the output of the field")
-	    ("csw", po::value<Update::real_t>(), "The clover term coefficient")
-	    ("version", "Version message")
-	    ("momentum_operator", po::value<std::string>(),"\"true\" if the operators will be measured also with momentum")
-	    ("maximum_momentum", po::value<unsigned int>(),"maximum momentum measured")
-	    ("generic_inverter_max_steps", po::value<unsigned int>(),"maximum level of steps used by the inverters")
-	    ("metropolis_inverter_max_steps", po::value<unsigned int>(),"maximum level of steps used by the inverters for computing the energy of the metropolis step")
-	    ("force_inverter_max_steps", po::value<unsigned int>(),"maximum level of steps used by the inverters for computing the force")
-	    ("max_r_wilsonloop", po::value<unsigned int>(),"maximum R for the wilson loops")
-	    ("min_r_wilsonloop", po::value<unsigned int>(),"minimum R for the wilson loops")
-	    ("max_t_wilsonloop", po::value<unsigned int>(),"maximum T for the wilson loops")
-	    ("min_t_wilsonloop", po::value<unsigned int>(),"minimum T for the wilson loops")
-		("number_subsweeps_luescher", po::value<unsigned int>(),"number of subsweeps of the luescher algorithm")
-		("size_slice_luescher", po::value<unsigned int>(),"the size of a slice of the luescher algorithm")
-	    ("level_stout_smearing_meson", po::value<unsigned int>(), "The number of levels for stout smearing in measuring meson masses")
-		("level_stout_smearing_glueball", po::value<unsigned int>(), "The number of levels for stout smearing in measuring glueball masses")
-		("level_stout_smearing_gluinoglue", po::value<unsigned int>(), "The number of levels for stout smearing in measuring gluinoglue masses")
-		("level_stout_smearing_wilson_loop", po::value<unsigned int>(), "The number of levels for stout smearing in measuring the wilson loop")
-		("level_stout_smearing_polyakov_correlator", po::value<unsigned int>(), "The number of levels for stout smearing in measuring the Polyakov loop correlator")
-	    ("rho_stout_smearing", po::value<Update::real_t>(), "The rho parameter for stout smearing in measuring masses")
-	    ("calculate_disconnected_contributions", po::value<bool>(), "Should the program calculate disconnected contributions?")
-	    ("number_multiplication_test_speed", po::value<unsigned int>(), "How many multiplications should I use in the tests?")
-		("output_offset", po::value<unsigned int>(), "The offset for the number of the output configurations")
-		("load_layout", "If the layout should be loaded from the disk")
-		("print_report_layout", "If the full report of the layout should be printed")
-		("format_name", po::value<std::string>(), "leonard_format/muenster_format for reading and writing configurations")
-		("input_format_name", po::value<std::string>(), "leonard_format/muenster_format only for reading configurations")
-		("output_format_name", po::value<std::string>(), "leonard_format/muenster_format only for writing configurations")
+		
+		("number_stochastic_estimators", po::value<unsigned int>(), "The number of stochastic estimators")
+		("generic_inverter_precision", po::value<Update::real_t>(), "The precision for the inverter")
+		
+		
+
+		//Options for the ReadGaugeConfiguration sweep
+		("read_start_number", po::value<unsigned int>(), "From which configurations start to read again for the analysis")
+		("read_step", po::value<unsigned int>(), "The step in the reading analysis")
+
+
+		//Overlap operator options
 		("OverlapOperator::squareRootApproximation", po::value<std::string>(), "Approximation of x^(1/2) used for the Overlap fermion sign function (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})")
 		("ExactOverlapOperator::squareRootApproximation", po::value<std::string>()->default_value(""), "Approximation of x^(1/2) used for the Overlap fermion sign function (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})")
 		("ExactOverlapOperator::eigensolver::use_chebyshev", po::value<std::string>()->default_value("false"), "Use Chebyshev acceleration? (true/false)")
@@ -204,6 +177,15 @@ int main(int ac, char* av[]) {
 		("ExactOverlapOperator::eigensolver::number_extra_vectors", po::value<unsigned int>(), "Number of extra vectors for the Arnoldi algorithm used in the computation of the eigenvectors, increase this number to increase precision")
 		("ExactOverlapOperator::eigensolver::maximal_number_restarts_eigensolver", po::value<unsigned int>()->default_value(50), "Number of restarts for the implicitly restarted Arnoldi algorithm")
 		("ExactOverlapOperator::eigensolver::number_eigenvalues", po::value<unsigned int>(), "Number of eigenvalues of the dirac wilson operator to be computed")
+
+	    
+	    ("generic_inverter_max_steps", po::value<unsigned int>(),"maximum level of steps used by the inverters")
+		("number_subsweeps_luescher", po::value<unsigned int>(),"number of subsweeps of the luescher algorithm")
+		("size_slice_luescher", po::value<unsigned int>(),"the size of a slice of the luescher algorithm")
+	    ("rho_stout_smearing", po::value<Update::real_t>(), "The rho parameter for stout smearing in measuring masses")
+	    ("number_multiplication_test_speed", po::value<unsigned int>(), "How many multiplications should I use in the tests?")
+		
+		
 		("correction_step_breakup_level", po::value<unsigned int>(), "The level of breakup \"lb\" for the correction factors")
 		("correction_approximation_direct_1", po::value<std::string>(), "Approximation of x^(nf/(2lb)) used for the correction step (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})")
 		("correction_approximation_inverse_1", po::value<std::string>(), "Approximation of x^(-nf/(2lb)) used for the correction step (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})")
@@ -213,14 +195,7 @@ int main(int ac, char* av[]) {
 		("correction_approximation_inverse_3", po::value<std::string>(), "Approximation of x^(-nf/(2lb)) used for the correction step (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})")
 		("correction_approximation_direct_4", po::value<std::string>(), "Approximation of x^(nf/(2lb)) used for the correction step (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})")
 		("correction_approximation_inverse_4", po::value<std::string>(), "Approximation of x^(-nf/(2lb)) used for the correction step (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})")
-		("read_start_number", po::value<unsigned int>(), "From which configurations start to read again for the analysis")
-		("read_step", po::value<unsigned int>(), "The step in the reading analysis")
-		("flow_type", po::value<std::string>(), "The type of flow equations (Wilson/Symanzik)")
-		("flow_step", po::value<Update::real_t>(), "The integration step of the flow")
-		("flow_integration_intervals", po::value<unsigned int>(), "The number of intervals for each flow integration step")
-		("flow_time", po::value<Update::real_t>(), "The total time of the flow")
-		("stout_smearing_levels", po::value<int>(), "The levels for the stout smearing of the dirac operator")
-		("stout_smearing_rho", po::value<Update::real_t>(), "The rho for the stout smearing of the dirac operator")
+		
 	;
 
 	for (int level = 1; level < 4; ++level) {
@@ -253,7 +228,7 @@ int main(int ac, char* av[]) {
 		std::cout << "type --list_sweeps for having a list of all the possible sweeps" << std::endl;
 		return 0;
 	} else if (vm.count("version")) {
-		std::cout << "Updater Muenster version " << 1932 << std::endl;
+		std::cout << "LeonardQCD version: 1.0" << std::endl;
 #ifdef ADJOINT
 		std::cout << " with adjoint fermions" << std::endl;
 #endif
@@ -264,29 +239,18 @@ int main(int ac, char* av[]) {
 #ifdef ENABLE_MPI
 		std::cout << " with mpi enabled" << std::endl;
 #endif
-#ifdef TESTLATTICE
-		std::cout << " with test lattice";
-#endif
-#ifndef TESTLATTICE
-		std::cout << " with standard lattice";
-#endif
-		std::cout << " of size: " << 5 << "^3 x " << 3 << std::endl;
 		return 0;
 	} else if (vm.count("list_sweeps")) {
 		Update::LatticeSweep::printSweepsName();
 		return 0;
 	}
 
-#ifndef TESTLATTICE
-	//Initialize the layout of the program
-	//Math::StandardLayout::startup_initialize(ac, av);
-	//Math::StandardLayout::Env::gcor().
-#endif
-
+	//Initialized up/down stencil
 	Lattice::StandardStencil::initializeNeighbourSites();
 	Lattice::ExtendedStencil::initializeNeighbourSites();
 	Lattice::ReducedStencil::initializeNeighbourSites();
 
+	//Initialize lattice layout
 #ifndef ENABLE_MPI
 	Lattice::LocalLayout::pgrid_t = 1;
 	Lattice::LocalLayout::pgrid_x = 1;
@@ -339,21 +303,15 @@ int main(int ac, char* av[]) {
 		Lattice::MpiLayout<Lattice::ExtendedStencil>::load(basename+"extended_layout");
 		Lattice::MpiLayout<Lattice::StandardStencil>::load(basename+"standard_layout");
 		Lattice::MpiLayout<Lattice::ReducedStencil>::load(basename+"reduced_layout");
-		//Lattice::MpiLayout<Lattice::ReducedUpStencil>::load(basename+"reduced_up_layout");
-		//Lattice::MpiLayout<Lattice::ReducedDownStencil>::load(basename+"reduced_down_layout");
 	} else {
 		Lattice::MpiLayout<Lattice::ExtendedStencil>::initialize();
 		Lattice::MpiLayout<Lattice::StandardStencil>::initialize();
 		Lattice::MpiLayout<Lattice::ReducedStencil>::initialize();
-		//Lattice::MpiLayout<Lattice::ReducedUpStencil>::initialize();
-		//Lattice::MpiLayout<Lattice::ReducedDownStencil>::initialize();
 		
 		std::string basename = vm["output_directory_configurations"].as<std::string>();
 		Lattice::MpiLayout<Lattice::ExtendedStencil>::save(basename+"extended_layout");
 		Lattice::MpiLayout<Lattice::StandardStencil>::save(basename+"standard_layout");
 		Lattice::MpiLayout<Lattice::ReducedStencil>::save(basename+"reduced_layout");
-		//Lattice::MpiLayout<Lattice::ReducedUpStencil>::save(basename+"reduced_up_layout");
-		//Lattice::MpiLayout<Lattice::ReducedDownStencil>::save(basename+"reduced_down_layout");
 	}
 
 	if (vm.count("print_report_layout")) {
@@ -377,15 +335,23 @@ int main(int ac, char* av[]) {
 #endif
 	}
 
+	//Set the output to format
+	Update::GlobalOutput* output = Update::GlobalOutput::getInstance();
+	output->setFormat(vm["measurement_output_format"].as<std::string>());
+
+	//Finally create the simulation
 	Update::Simulation simulation(*environment);
+	//Start and run warmup
 	simulation.starter();
 	simulation.warmUp();
+	//Perform the measurements
 	simulation.measurement();
 
-	Update::GlobalOutput* output = Update::GlobalOutput::getInstance();
+	//Print and finalize the output to file
 	output->print();
 	output->destroy();
 
+	//destroy the environment
 	delete environment;
 
 #ifdef ENABLE_MPI

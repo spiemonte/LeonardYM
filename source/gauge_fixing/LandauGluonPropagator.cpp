@@ -1,5 +1,5 @@
 #include "LandauGluonPropagator.h"
-#include "ToString.h"
+#include "utils/ToString.h"
 #include "io/GlobalOutput.h"
 #include "utils/LieGenerators.h"
 

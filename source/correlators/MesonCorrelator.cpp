@@ -12,9 +12,7 @@
 #include "utils/Gamma.h"
 #include "inverters/PreconditionedBiCGStab.h"
 #include "dirac_operators/Propagator.h"
-#ifndef PI
-#define PI 3.141592653589793238462643
-#endif
+#include "utils/MultiThreadSummator.h"
 
 namespace Update {
 
@@ -28,9 +26,8 @@ MesonCorrelator::~MesonCorrelator() {
 }
 
 void MesonCorrelator::execute(environment_t& environment) {
-	typedef extended_dirac_vector_t::Layout Layout;//TODO: only vector operations?
+	typedef extended_dirac_vector_t::Layout Layout;
 
-	//unsigned int max_step = environment.configurations.get<unsigned int>("number_stochastic_estimators");
 	if (diracOperator == 0) {
 		diracOperator = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations);
 	}
@@ -88,13 +85,13 @@ void MesonCorrelator::execute(environment_t& environment) {
 
 	extended_dirac_vector_t source;
 
-	long_real_t pionOperator[Layout::glob_t];
-	long_real_t scalarOperator[Layout::glob_t];
-	long_real_t PSOperator[Layout::glob_t];
+	MultiThreadSummator<long_real_t>* pionOperator = new MultiThreadSummator<long_real_t>[Layout::glob_t];
+	MultiThreadSummator<long_real_t>* scalarOperator = new MultiThreadSummator<long_real_t>[Layout::glob_t];
+	MultiThreadSummator<long_real_t>* PSOperator = new MultiThreadSummator<long_real_t>[Layout::glob_t];
 	for (int t = 0; t < Layout::glob_t; ++t) {
-		pionOperator[t] = 0.;
-		scalarOperator[t] = 0.;
-		PSOperator[t] = 0.;
+		pionOperator[t].reset();
+		scalarOperator[t].reset();
+		PSOperator[t].reset();
 	}
 
 	int inversionSteps = 0;
@@ -102,40 +99,14 @@ void MesonCorrelator::execute(environment_t& environment) {
 	for (unsigned int alpha = 0; alpha < 4; ++alpha) {
 		for (int c = 0; c < diracVectorLength; ++c) {
 			this->generateSource(source, alpha, c);
-			//biConjugateGradient->solve(squareDiracOperator, source, eta);
-			//diracOperator->multiply(tmp[c*4 + alpha],eta);
-			inverter->solve(diracOperator, source, tmp[c*4 + alpha]);
-			Propagator::constructPropagator(diracOperator, source, tmp[c*4 + alpha]);
+			inverter->solve(diracOperator, source, tmp);
+			Propagator::constructPropagator(diracOperator, tmp, propagator[c*4 + alpha]);
 
 			inversionSteps += inverter->getLastSteps();
 		}
 	}
 	
 	if (isOutputProcess()) std::cout << "MesonCorrelator::Correlators computed with " << inversionSteps << " inversion steps" << std::endl;
-	
-	//Ugly initialization to zero
-#ifdef MULTITHREADING
-	long_real_t resultPion[Layout::glob_t][omp_get_max_threads()];
-	long_real_t resultScalar[Layout::glob_t][omp_get_max_threads()];
-	long_real_t resultPS[Layout::glob_t][omp_get_max_threads()];
-	for (int i = 0; i < Layout::glob_t; ++i) {
-		for (int j = 0; j < omp_get_max_threads(); ++j) {
-			resultPion[i][j] = 0.;
-			resultScalar[i][j] = 0.;
-			resultPS[i][j] = 0.;
-		}
-	}
-#endif
-#ifndef MULTITHREADING
-	long_real_t resultPion[Layout::glob_t];
-	long_real_t resultScalar[Layout::glob_t];
-	long_real_t resultPS[Layout::glob_t];
-	for (int i = 0; i < Layout::glob_t; ++i) {
-		resultPion[i] = 0.;
-		resultScalar[i] = 0.;
-		resultPS[i] = 0.;
-	}
-#endif
 	
 	//The core of the computation of the connected correlators
 	//Pion correlator first
@@ -145,13 +116,9 @@ void MesonCorrelator::execute(environment_t& environment) {
 			for (int site = 0; site < Layout::localsize; ++site) {
 				for (unsigned int mu = 0; mu < 4; ++mu) {
 					for (int d = 0; d < diracVectorLength; ++d) {
-						std::complex<real_t> dottmp = conj(tmp[c*4+alpha][site][mu][d])*tmp[c*4+alpha][site][mu][d];
-#ifdef MULTITHREADING
-						resultPion[Layout::globalIndexT(site)][omp_get_thread_num()] += real(dottmp);
-#endif
-#ifndef MULTITHREADING
-						resultPion[Layout::globalIndexT(site)] += real(dottmp);
-#endif					
+						std::complex<real_t> dottmp = conj(propagator[c*4+alpha][site][mu][d])*propagator[c*4+alpha][site][mu][d];
+
+						pionOperator[Layout::globalIndexT(site)].add(real(dottmp));
 					}
 				}
 			}
@@ -167,13 +134,8 @@ void MesonCorrelator::execute(environment_t& environment) {
 					for (unsigned int mu = 0; mu < 4; ++mu) {
 						for (unsigned int nu = 0; nu < 4; ++nu) {
 							for (int d = 0; d < diracVectorLength; ++d) {
-								std::complex<real_t> dottmp = Gamma::gamma5_gamma(3,mu,nu)*Gamma::gamma5_gamma(3,alpha,beta)*conj(tmp[c*4+alpha][site][mu][d])*tmp[c*4+beta][site][nu][d];
-#ifdef MULTITHREADING
-								resultScalar[Layout::globalIndexT(site)][omp_get_thread_num()] += real(dottmp);
-#endif
-#ifndef MULTITHREADING
-								resultScalar[Layout::globalIndexT(site)] += real(dottmp);
-#endif						
+								std::complex<real_t> dottmp = Gamma::gamma5_gamma(3,mu,nu)*Gamma::gamma5_gamma(3,alpha,beta)*conj(propagator[c*4+alpha][site][mu][d])*propagator[c*4+beta][site][nu][d];
+								scalarOperator[Layout::globalIndexT(site)].add(real(dottmp));				
 							}
 						}
 					}
@@ -192,14 +154,10 @@ void MesonCorrelator::execute(environment_t& environment) {
 					
 						for (int d = 0; d < diracVectorLength; ++d) {
 							std::complex<real_t> dottmp(0.,0.);
-							dottmp -= Gamma::gamma(3,alpha,beta)*conj(tmp[c*4+alpha][site][mu][d])*tmp[c*4+beta][site][mu][d];
-							dottmp += Gamma::gamma(3,alpha,beta)*conj(tmp[c*4+mu][site][alpha][d])*tmp[c*4+mu][site][beta][d];
-#ifdef MULTITHREADING
-							resultPS[Layout::globalIndexT(site)][omp_get_thread_num()] += real(dottmp);
-#endif
-#ifndef MULTITHREADING
-							resultPS[Layout::globalIndexT(site)] += real(dottmp);
-#endif						
+							dottmp -= Gamma::gamma(3,alpha,beta)*conj(propagator[c*4+alpha][site][mu][d])*propagator[c*4+beta][site][mu][d];
+							dottmp += Gamma::gamma(3,alpha,beta)*conj(propagator[c*4+mu][site][alpha][d])*propagator[c*4+mu][site][beta][d];
+
+							PSOperator[Layout::globalIndexT(site)].add(real(dottmp));					
 						}
 					}
 				}
@@ -209,58 +167,38 @@ void MesonCorrelator::execute(environment_t& environment) {
 	
 	//Now we collect all the results
 	for (int t = 0; t < Layout::glob_t; ++t) {
-		//... from the threads
-#ifdef MULTITHREADING
-		for (int thread = 0; thread < omp_get_max_threads(); ++thread) {
-			pionOperator[t] += resultPion[t][thread];
-			scalarOperator[t] += resultScalar[t][thread];
-			PSOperator[t] += resultPS[t][thread];
-		}
-#endif
-#ifndef MULTITHREADING
-		pionOperator[t] += resultPion[t];
-		scalarOperator[t] += resultScalar[t];
-		PSOperator[t] += resultPS[t];
-#endif
+		pionOperator[t].computeResult();
+		scalarOperator[t].computeResult();
+		PSOperator[t].computeResult();
 	}
-	
-	//... from the MPI processes
-	for (int t = 0; t < Layout::glob_t; ++t) {
-		reduceAllSum(pionOperator[t]);
-		reduceAllSum(scalarOperator[t]);
-		reduceAllSum(PSOperator[t]);
-		//Correct normalization
-		real_t factor = 4.*diracOperator->getKappa()*diracOperator->getKappa();
-		pionOperator[t] = factor*pionOperator[t];
-		scalarOperator[t] = factor*scalarOperator[t];
-		PSOperator[t] = factor*PSOperator[t];
-	}
-
 	
 	if (environment.measurement && isOutputProcess()) {
+		//Correct normalization
+		real_t factor = 4.*diracOperator->getKappa()*diracOperator->getKappa();
+
 		GlobalOutput* output = GlobalOutput::getInstance();
 
 		output->push("pion_exact");
 		for (int t = 0; t < Layout::pgrid_t*Layout::loc_t; ++t) {
-			std::cout << "MesonCorrelator::Pion Exact Correlator at t " << t << " is " << pionOperator[t] << std::endl;
+			std::cout << "MesonCorrelator::Pion Exact Correlator at t " << t << " is " << factor*pionOperator[t].getResult() << std::endl;
 
-			output->write("pion_exact", pionOperator[t]);
+			output->write("pion_exact", factor*pionOperator[t].getResult());
 		}
 		output->pop("pion_exact");
 
 		output->push("scalar_exact");
 		for (int t = 0; t < Layout::pgrid_t*Layout::loc_t; ++t) {
-			std::cout << "MesonCorrelator::Scalar Exact Correlator at t " << t << " is " << scalarOperator[t] << std::endl;
+			std::cout << "MesonCorrelator::Scalar Exact Correlator at t " << t << " is " << factor*scalarOperator[t].getResult() << std::endl;
 
-			output->write("scalar_exact", scalarOperator[t]);
+			output->write("scalar_exact", factor*scalarOperator[t].getResult());
 		}
 		output->pop("scalar_exact");
 		
 		output->push("ps_exact");
 		for (int t = 0; t < Layout::pgrid_t*Layout::loc_t; ++t) {
-			std::cout << "MesonCorrelator::PS Exact Correlator at t " << t << " is " << PSOperator[t] << std::endl;
+			std::cout << "MesonCorrelator::PS Exact Correlator at t " << t << " is " << factor*PSOperator[t].getResult() << std::endl;
 
-			output->write("ps_exact", PSOperator[t]);
+			output->write("ps_exact", factor*PSOperator[t].getResult());
 		}
 		output->pop("ps_exact");
 		
@@ -268,164 +206,103 @@ void MesonCorrelator::execute(environment_t& environment) {
 		for (int t = 0; t < Layout::glob_t; ++t) {
 			int mindex = (t == 0) ? Layout::glob_t - 1 : t - 1;
 			int pindex = (t == Layout::glob_t -1) ? 0 : t + 1;
-			std::cout << "MesonCorrelator::PCAC mass at t " << t << " is " << (PSOperator[mindex] - PSOperator[pindex])/(4.*pionOperator[t]) << std::endl;
+			std::cout << "MesonCorrelator::PCAC mass at t " << t << " is " << (PSOperator[mindex].getResult() - PSOperator[pindex].getResult())/(4.*pionOperator[t].getResult()) << std::endl;
 			
-			output->write("pcac_mass", (PSOperator[mindex] - PSOperator[pindex])/(4.*pionOperator[t]));
+			output->write("pcac_mass", (PSOperator[mindex].getResult() - PSOperator[pindex].getResult())/(4.*pionOperator[t].getResult()));
 		}
 		output->pop("pcac_mass");
+	}	
+	
+	bool compute_disconnected;
+	try {
+		compute_disconnected = environment.configurations.get<bool>("MesonCorrelator::compute_disconnected_contributions");
+	} catch (NotFoundOption& ex) {
+		compute_disconnected = false;
 	}
 
+	if (compute_disconnected) {
+		MultiThreadSummator< std::complex<long_real_t> >* etaDisconnectedOperator = new MultiThreadSummator< std::complex<long_real_t> >[Layout::glob_t];
+		MultiThreadSummator< std::complex<long_real_t> >* scalarDisconnectedOperator = new MultiThreadSummator< std::complex<long_real_t> >[Layout::glob_t];
+		
 
-/*
-	for (int t = 0; t < Layout::glob_t; ++t) pionOperator2[t] = 0.;
+		unsigned int numberStochasticEstimators = environment.configurations.get<unsigned int>("MesonCorrelator::number_stochastic_estimators");
 
-	for (unsigned int step = 0; step < max_step; ++step) {
-		this->generateRandomNoise(randomNoiseD, 0);
-		for (unsigned int mu = 0; mu < 4; ++mu) {
-			biConjugateGradient->solve(squareDiracOperator,randomNoiseD[mu], tmpb);
-			diracOperator->multiply(tmpD[mu],tmpb);
-		}
+		reduced_dirac_vector_t randomNoise[4], inverse[4];
 
-#ifdef MULTITHREADING
-		long_real_t result[Layout::glob_t][omp_get_max_threads()];
-		for (int i = 0; i < Layout::glob_t; ++i) {
-			for (int j = 0; j < omp_get_max_threads(); ++j) {
-				result[i][j] = 0.;
+		for (unsigned int step = 0; step < numberStochasticEstimators; ++step) {
+			for (int t = 0; t < Layout::glob_t; ++t) {
+				etaDisconnectedOperator[t].reset();
+				scalarDisconnectedOperator[t].reset();
 			}
-		}
-#endif
-#ifndef MULTITHREADING
-		long_real_t result[Layout::glob_t];
-		for (int i = 0; i < Layout::glob_t; ++i) {
-			result[i] = 0.;
-		}
-#endif
+
+			for (unsigned int mu = 0; mu < 4; ++mu) {
+				this->generateRandomNoise(randomNoise[mu]);
+				inverter->solve(diracOperator,randomNoise[mu], inverse[mu]);
+			}
 
 #pragma omp parallel for
-		for (int site = 0; site < Layout::localsize; ++site) {
-			for (unsigned int nu = 0; nu < 4; ++nu) {
+			for (int site = 0; site < Layout::localsize; ++site) {
 				for (unsigned int mu = 0; mu < 4; ++mu) {
-#ifdef MULTITHREADING
-					result[Layout::globalIndexT(site)][omp_get_thread_num()] += real(vector_dot(tmpD[nu][site][mu],tmpD[nu][site][mu]));
-#endif
-#ifndef MULTITHREADING
-					result[Layout::globalIndexT(site)] += real(vector_dot(tmpD[nu][site][mu],tmpD[nu][site][mu]));
-#endif					
-				}
-			}
-		}
-
-		for (int t = 0; t < Layout::glob_t; ++t) {
-#ifdef MULTITHREADING
-			pionOperator2[t] = 0;
-			for (int thread = 0; thread < omp_get_max_threads(); ++thread) {
-				pionOperator2[t] += result[t][thread];
-			}
-#endif
-#ifndef MULTITHREADING
-			pionOperator2[t] = result[t];
-#endif
-		}
-	}		
-
-	for (int t = 0; t < Layout::glob_t; ++t) {
-		reduceAllSum(pionOperator2[t]);
-	}
-
-	
-	if (environment.measurement && isOutputProcess()) {
-		GlobalOutput* output = GlobalOutput::getInstance();
-
-		output->push("pion_stoch");
-		for (int t = 0; t < Layout::pgrid_t*Layout::loc_t; ++t) {
-			std::cout << "Pion Stochastic Correlator at t " << t << " is " << pionOperator2[t] << std::endl;
-
-			output->write("pion_stoch", pionOperator2[t]);
-		}
-		output->pop("pion_stoch");
-	}
-
-*/
-
-
-
-	
-
-
-	
-	
-	/*bool calculate_disconnected;
-	try {
-		calculate_disconnected = environment.configurations.get<bool>("calculate_disconnected_contributions");
-	} catch (NotFoundOption& ex) {
-		calculate_disconnected = false;
-	}
-
-	if (calculate_disconnected) {
-		for (unsigned int t = 0; t < Layout::glob_t; ++t) {
-			for (unsigned int step = 0; step < max_step; ++step) {
-				this->generateRandomNoise(randomNoiseD, t);
-				for (unsigned int mu = 0; mu < 4; ++mu) {
-					biConjugateGradient->solve(diracOperator,randomNoiseD[mu], tmpD[mu]);
-				}
-
-				//Local eta operator
-				long_real_t result_re = 0.;
-
-				//only for this t
-				if (t/Layout::loc_t == Layout::rankT()) {
-					int local_t = (t % Layout::loc_t);
-					//calculate the result
-#ifdef MULTITHREADING
-#pragma omp parallel for reduction(+:result_re)
-#endif
-					for (int x = 0; x < Layout::loc_x; ++x) {
-						for (int y = 0; y < Layout::loc_y; ++y) {
-							for (int z = 0; z < Layout::loc_z; ++z) {
-								int site = Layout::index(x,y,z,local_t);
-								for (unsigned int mu = 0; mu < 4; ++mu) {
-									result_re += real(vector_dot(randomNoiseD[mu][site][mu],tmpD[mu][site][mu]));
-								}
-							}
-						}
+					for (unsigned int nu = 0; nu < 4; ++nu) {
+						std::complex<real_t> dotr = 0.;
+						for (unsigned int c = 0; c < diracVectorLength; ++c) dotr += conj(randomNoise[mu][site][nu][c])*inverse[mu][site][nu][c];
+						if (nu < 2) etaDisconnectedOperator[Layout::globalIndexT(site)].add(dotr);
+						else etaDisconnectedOperator[Layout::globalIndexT(site)].add(-dotr);
+						scalarDisconnectedOperator[Layout::globalIndexT(site)].add(dotr);
 					}
 				}
-#ifdef ENABLE_MPI
-				::MpiExt::reduceAllSum(result_re);
-#endif
-				etaOperatorRe[t].push_back(result_re);
-				//
-				//Layout::tIndex(site);
-				//Layout::toGlobalCoordinateT(t)
-				//reduceAllSumArray
+			}
+
+			for (int t = 0; t < Layout::glob_t; ++t) {
+				etaDisconnectedOperator[t].computeResult();
+				scalarDisconnectedOperator[t].computeResult();
+			}
+
+
+			if (environment.measurement && isOutputProcess()) {
+				long_real_t factor = 2.*diracOperator->getKappa();
+
+				GlobalOutput* output = GlobalOutput::getInstance();
+
+				output->push("eta_disconnected");
+				for (int t = 1; t < Layout::glob_t; ++t) {
+					std::cout << "Eta disconneted real contribution t " << t << " for random source " << step << " is: " << factor*etaDisconnectedOperator[t].getResult() << std::endl;
+
+					output->write("eta_disconnected", factor*etaDisconnectedOperator[t].getResult()/static_cast<long_real_t>(Layout::glob_spatial_volume));
+				}
+				output->pop("eta_disconnected");
+
+				output->push("scalar_disconnected");
+				for (int t = 1; t < Layout::glob_t; ++t) {
+					std::cout << "Scalar disconneted real contribution t " << t << " for random source " << step << " is: " << factor*scalarDisconnectedOperator[t].getResult() << std::endl;
+
+					output->write("scalar_disconnected", factor*scalarDisconnectedOperator[t].getResult()/static_cast<long_real_t>(Layout::glob_spatial_volume));
+				}
+				output->pop("scalar_disconnected");
 			}
 		}
 
-		if (environment.measurement && isOutputProcess()) {
-			GlobalOutput* output = GlobalOutput::getInstance();
+		delete[] etaDisconnectedOperator;
+		delete[] scalarDisconnectedOperator;
+	}
 
-			output->push("eta_disconnected");
-			for (int t = 1; t < Layout::glob_t; ++t) {
-				std::cout << "Eta disconneted real contribution diluited at t " << t << " is " << this->mean(etaOperatorRe[t]) << " +/- " << this->standardDeviation(etaOperatorRe[t]) << std::endl;
-
-				output->write("eta_disconnected", this->mean(etaOperatorRe[t]));
-			}
-			output->pop("eta_disconnected");
-		}
-	}*/
-	//delete[] pionOperator;
-	//delete[] etaOperatorRe;
-	//delete[] etaOperatorIm;
+	delete[] pionOperator;
+	delete[] scalarOperator;
+	delete[] PSOperator;
 }
 
 void MesonCorrelator::registerParameters(po::options_description& desc) {
-	desc.add_options()
+	static bool single = true;
+	if (single) desc.add_options()
 		("MesonCorrelator::inverter_precision", po::value<real_t>()->default_value(0.0000000001), "set the inverter precision")
 		("MesonCorrelator::inverter_max_steps", po::value<unsigned int>()->default_value(10000), "maximum number of inverter steps")
 		("MesonCorrelator::t_source_origin", po::value<unsigned int>()->default_value(0), "T origin for the wall source")
 		("MesonCorrelator::rho_stout_smearing", po::value<real_t>(), "set the stout smearing parameter")
 		("MesonCorrelator::levels_stout_smearing", po::value<unsigned int>(), "levels of stout smearing")
+		("MesonCorrelator::number_stochastic_estimators", po::value<unsigned int>()->default_value(50), "number of stochastic estimators")
+		("MesonCorrelator::compute_disconnected_contributions", po::value<bool>()->default_value(false), "Compute the disconnected contributions of the eta'?")
 		;
+	single = false;
 }
 
 } /* namespace Update */
