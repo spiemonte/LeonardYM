@@ -19,7 +19,10 @@ public:
 	Polynomial(const std::vector< complex >& roots, const complex& scaling);
 	~Polynomial();
 
+#ifdef ENABLE_MPI
 	void evaluate(DiracOperator* diracOperator, extended_dirac_vector_t& output, const extended_dirac_vector_t& input);
+#endif
+	void evaluate(DiracOperator* diracOperator, reduced_dirac_vector_t& output, const reduced_dirac_vector_t& input);	
 
 	void evaluate(DiracOperator* diracOperator, extended_dirac_vector_t& output, const extended_dirac_vector_t& input, DiracOperator* preconditioner);
 

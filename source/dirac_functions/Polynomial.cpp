@@ -15,11 +15,19 @@ Polynomial::Polynomial(const std::vector< complex >& _roots, const complex& _sca
 
 Polynomial::~Polynomial() { }
 
+#ifdef ENABLE_MPI
 void Polynomial::evaluate(DiracOperator* diracOperator, extended_dirac_vector_t& original_output, const extended_dirac_vector_t& original_input) {
 	//We work with reduced halos
 	reduced_dirac_vector_t output;
 	reduced_dirac_vector_t input = original_input;
-	
+
+	this->evaluate(diracOperator, output, input);
+
+	original_output = output;
+}
+#endif
+
+void Polynomial::evaluate(DiracOperator* diracOperator, reduced_dirac_vector_t& output, const reduced_dirac_vector_t& input) {	
 	if (roots.size() % 2 == 0) {//TODO minus sign
 		std::vector<complex>::iterator i = roots.begin();
 
@@ -103,7 +111,6 @@ void Polynomial::evaluate(DiracOperator* diracOperator, extended_dirac_vector_t&
 			output = tmp1;
 		}
 	}
-	original_output = output;
 }
 
 /*

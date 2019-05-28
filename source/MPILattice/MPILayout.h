@@ -30,6 +30,7 @@ template<typename Stencil> class MpiLayout {
 		static int glob_x;
 		static int glob_y;
 		static int glob_z;
+		static int glob[4];
 		//The local size
 		static int loc_t;
 		static int loc_x;
@@ -44,6 +45,11 @@ template<typename Stencil> class MpiLayout {
 			numberProcessors = pgrid_x*pgrid_y*pgrid_z*pgrid_t;
 			globalVolume = glob_x*glob_y*glob_z*glob_t;
 			glob_spatial_volume = glob_x*glob_y*glob_z;
+
+			glob[0] = glob_x;
+			glob[1] = glob_y;
+			glob[2] = glob_z;
+			glob[3] = glob_t;
 #ifdef ENABLE_MPI
 			int sizeCommunicator = 0;
 			MPI_Comm_size(MPI_COMM_WORLD, &sizeCommunicator);
@@ -475,6 +481,10 @@ template<typename Stencil> class MpiLayout {
 			return globalCoordinate[site].t;
 		}
 
+		static int globalIndex(int site, int mu) {
+			return (reinterpret_cast<int*>(&(globalCoordinate[site])))[mu];
+		}
+
 		static void save(const std::string& basename) {
 			FILE* fout(NULL);
 			//First we save the sup table
@@ -592,6 +602,11 @@ template<typename Stencil> class MpiLayout {
 			numberProcessors = pgrid_x*pgrid_y*pgrid_z*pgrid_t;
 			globalVolume = glob_x*glob_y*glob_z*glob_t;
 			glob_spatial_volume = glob_x*glob_y*glob_z;
+
+			glob[0] = glob_x;
+                        glob[1] = glob_y;
+                        glob[2] = glob_z;
+                        glob[3] = glob_t;
 #ifdef ENABLE_MPI
 			int sizeCommunicator = 0;
 			MPI_Comm_size(MPI_COMM_WORLD, &sizeCommunicator);
@@ -784,6 +799,7 @@ template<typename Stencil> int MpiLayout<Stencil>::glob_t = 0;
 template<typename Stencil> int MpiLayout<Stencil>::glob_x = 0;
 template<typename Stencil> int MpiLayout<Stencil>::glob_y = 0;
 template<typename Stencil> int MpiLayout<Stencil>::glob_z = 0;
+template<typename Stencil> int MpiLayout<Stencil>::glob[4];
 		
 template<typename Stencil> int MpiLayout<Stencil>::loc_t = 0;
 template<typename Stencil> int MpiLayout<Stencil>::loc_x = 0;

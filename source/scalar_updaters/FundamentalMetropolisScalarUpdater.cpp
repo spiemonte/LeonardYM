@@ -14,7 +14,7 @@ namespace Update {
 
 FundamentalMetropolisScalarUpdater::FundamentalMetropolisScalarUpdater()
 #ifndef MULTITHREADING
-: LatticeSweep() randomGenerator(RandomSeed::randomSeed()), randomNormal(RandomSeed::getNormalNumberGenerator(randomGenerator,sqrt(0.5))), randomUniform(RandomSeed::getRandomNumberGenerator(randomGenerator)) { }
+: LatticeSweep(), randomGenerator(RandomSeed::randomSeed()), randomNormal(RandomSeed::getNormalNumberGenerator(randomGenerator,sqrt(0.5))), randomUniform(RandomSeed::getRandomNumberGenerator(randomGenerator)) { }
 #endif
 #ifdef MULTITHREADING
 : LatticeSweep()

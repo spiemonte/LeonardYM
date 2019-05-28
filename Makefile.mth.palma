@@ -8,15 +8,15 @@ endif
 
 CC       = gcc
 CPP      = g++
-OPTIMIZE = -O2 -pipe -march=corei7 -fomit-frame-pointer -fopenmp -I/share/Applic.PALMA/boost/boost-trunk
+OPTIMIZE = -O2 -pipe -mavx2 -fomit-frame-pointer -fopenmp 
 INC	= -I./extra_libs/Eigen -I./source/
 CFLAGS   = $(OPTIMIZE) $(INC)
-CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/utils/MatrixBaseExtension.h\"" $(adj) -DNUMCOLORS=$(nc) -DMULTITHREADING -DEIGEN
+CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/utils/MatrixBaseExtension.h\"" $(adj) -DNUMCOLORS=$(nc) -DEIGEN -DMULTITHREADING
 
 include Makefile.obj.mk
 
 all: leonardQCD
-	$(CPP) $(CPPFLAGS) $(OBJECTS) -o leonardQCD.exe /share/Applic.PALMA/boost/boost-trunk/stage/lib/libboost_program_options.a
+	$(CPP) $(CPPFLAGS) $(OBJECTS) -o leonardQCD.exe -lboost_program_options
 	@echo "Compiled with NUMCOLORS: " $(nc)
 
 leonardQCD: $(OBJECTS)
