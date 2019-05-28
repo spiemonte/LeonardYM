@@ -29,4 +29,4 @@ OBJECTS  = ReducedStencil.o StandardStencil.o ExtendedStencil.o LocalLayout.o \
 			StorageParameters.o \
 			WilsonFlow.o \
 			Environment.o updater.o \
-			#MultiGridDiracOperator.o MultiGridSolver.o \
+

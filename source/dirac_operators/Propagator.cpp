@@ -5,7 +5,7 @@ namespace Update {
 
 #ifdef ENABLE_MPI
 void Propagator::constructPropagator(DiracOperator* diracOperator, const extended_dirac_vector_t& source, extended_dirac_vector_t& solution) {
-        if (diracOperator->getName() == "Overlap") {
+        if (diracOperator->getName() == "Overlap" || diracOperator->getName() == "ExactOverlap") {
                 OverlapOperator* overlap = dynamic_cast<OverlapOperator*>(diracOperator);
 
                 real_t mass = overlap->getMass();

@@ -15,205 +15,6 @@ BiConjugateGradient::BiConjugateGradient() : Solver("BiConjugateGradient") { }
 
 BiConjugateGradient::~BiConjugateGradient() { }
 
-/*bool BiConjugateGradient::solve(DiracOperator* dirac, const dirac_vector_t& source, dirac_vector_t& solution) {
-	std::cout << "Norma soluzione: " << AlgebraUtils::squaredNorm(source) << std::endl;
-	//First set the initial solution, nu and p to zero
-#ifdef MULTITHREADING
-	#pragma omp parallel for
-#endif
-	for (unsigned int site = 0; site < solution.localsize; ++site) {
-		for (unsigned int mu = 0; mu < 4; ++mu) {
-			solution[site][mu].zeros();
-			p[site][mu].zeros();
-			nu[site][mu].zeros();
-		}
-	}
-
-	solution.updateHalo();
-	p.updateHalo();
-	nu.updateHalo();
-
-	//Set the initial residual to source-A.solution (that is to source) and residual_hat accordingly
-#ifdef MULTITHREADING
-	#pragma omp parallel for
-#endif
-	for (unsigned int site = 0; site < solution.localsize; ++site) {
-		for (unsigned int mu = 0; mu < 4; ++mu) {
-			residual[site][mu] = source[site][mu];
-			residual_hat[site][mu] = residual[site][mu];
-		}
-	}
-
-	residual.updateHalo();
-	residual_hat.updateHalo();
-
-	//Set the initial parameter of the program
-	std::complex<real_t> alpha = 1., omega = 1.;
-	std::complex<long_real_t> rho = 1.;
-	unsigned int step = 0;
-
-	while (step < maxSteps) {
-		//rho[k] = rhat.r[k-1]
-		long_real_t rho_next_re = 0.;
-		long_real_t rho_next_im = 0.;
-#ifdef MULTITHREADING
-		#pragma omp parallel for reduction(+:rho_next_re, rho_next_im)
-#endif
-		for (unsigned int site = 0; site < solution.localsize; ++site) {
-			for (unsigned int mu = 0; mu < 4; ++mu) {
-				complex partial = vector_dot(residual_hat[site][mu],residual[site][mu]);
-				rho_next_re += real(partial);
-				rho_next_im += imag(partial);
-			}
-		}
-#ifdef ENABLE_MPI
-		::MpiExt::reduceAllSum(rho_next_re);
-		::MpiExt::reduceAllSum(rho_next_im);
-#endif
-		std::complex<long_real_t> rho_next(rho_next_re,rho_next_im);
-
-		if (norm(rho_next) == 0.) {
-			std::cout << resisula
-			if (isOutputProcess()) std::cout << "BiConjugateGradient::Fatal error in norm " << rho_next << " at step " << step << " " << AlgebraUtils::dot(residual_hat,residual) << " " << AlgebraUtils::squaredNorm(residual_hat) << " " << AlgebraUtils::squaredNorm(residual) << std::endl;
-			return false;//TODO
-		}
-
-		std::complex<real_t> beta = static_cast< std::complex<real_t> >((rho_next/rho))*(alpha/omega);
-		//p = r[[k - 1]] + beta*(p[[k - 1]] - omega[[k - 1]]*nu[[k - 1]])
-#ifdef MULTITHREADING
-		#pragma omp parallel for
-#endif
-		for (unsigned int site = 0; site < solution.localsize; ++site) {
-			for (unsigned int mu = 0; mu < 4; ++mu) {
-				p[site][mu] = residual[site][mu] + beta*(p[site][mu] - omega*nu[site][mu]);
-			}
-		}
-		p.updateHalo();
-
-		//nu = A.p[[k]]
-		dirac->multiply(nu,p);
-
-		//alpha = rho[[k]]/(rhat[[1]].nu[[k]]);
-		long_real_t alphatmp_re = 0.;
-		long_real_t alphatmp_im = 0.;
-#ifdef MULTITHREADING
-		#pragma omp parallel for reduction(+:alphatmp_re, alphatmp_im)
-#endif
-		for (unsigned int site = 0; site < solution.localsize; ++site) {
-			for (unsigned int mu = 0; mu < 4; ++mu) {
-				complex partial = vector_dot(residual_hat[site][mu],nu[site][mu]);
-				alphatmp_re += real(partial);
-				alphatmp_im += imag(partial);
-			}
-		}
-#ifdef ENABLE_MPI
-		::MpiExt::reduceAllSum(alphatmp_re);
-		::MpiExt::reduceAllSum(alphatmp_im);
-#endif
-		std::complex<long_real_t> alphatmp(alphatmp_re,alphatmp_im);
-		alpha = static_cast< std::complex<real_t> >(rho_next/alphatmp);
-
-		//s = r[[k - 1]] - alpha*nu[[k]]
-#ifdef MULTITHREADING
-		#pragma omp parallel for
-#endif
-		for (unsigned int site = 0; site < solution.localsize; ++site) {
-			for (unsigned int mu = 0; mu < 4; ++mu) {
-				s[site][mu] = residual[site][mu] - alpha *(nu[site][mu]);
-			}
-		}
-		s.updateHalo();
-
-		//t = A.s;
-		dirac->multiply(t,s);
-
-		//omega = (t.s)/(t.t)
-		long_real_t tmp1_re = 0., tmp1_im = 0., tmp2_re = 0., tmp2_im = 0.;
-#ifdef MULTITHREADING
-		#pragma omp parallel for reduction(+:tmp1_re, tmp1_im, tmp2_re, tmp2_im)
-#endif
-		for (unsigned int site = 0; site < solution.localsize; ++site) {
-			for (unsigned int mu = 0; mu < 4; ++mu) {
-				complex partial1 = vector_dot(t[site][mu],s[site][mu]);
-				tmp1_re += real(partial1);
-				tmp1_im += imag(partial1);
-				complex partial2 = vector_dot(t[site][mu],t[site][mu]);
-				tmp2_re += real(partial2);
-				tmp2_im += imag(partial2);
-			}
-		}
-#ifdef ENABLE_MPI
-		::MpiExt::reduceAllSum(tmp1_re);
-		::MpiExt::reduceAllSum(tmp1_im);
-		::MpiExt::reduceAllSum(tmp2_re);
-		::MpiExt::reduceAllSum(tmp2_im);
-#endif
-		std::complex<long_real_t> tmp1(tmp1_re, tmp1_im), tmp2(tmp2_re, tmp2_im);
-		omega = static_cast< std::complex<real_t> >(tmp1/tmp2);
-
-		if (real(tmp2) == 0) {
-#ifdef MULTITHREADING
-			#pragma omp parallel for
-#endif
-			for (unsigned int site = 0; site < solution.localsize; ++site) {
-				for (unsigned int mu = 0; mu < 4; ++mu) {
-					solution[site][mu] = source[site][mu];
-				}
-			}
-			solution.updateHalo();
-			return true;//TODO, identity only?
-		}
-
-		//solution[[k]] = solution[[k - 1]] + alpha*p[[k]] + omega[[k]]*s
-#ifdef MULTITHREADING
-		#pragma omp parallel for
-#endif
-		for (unsigned int site = 0; site < solution.localsize; ++site) {
-			for (unsigned int mu = 0; mu < 4; ++mu) {
-				solution[site][mu] += alpha*(p[site][mu]) + omega*(s[site][mu]);
-			}
-		}
-		solution.updateHalo();
-
-		//residual[[k]] = s - omega[[k]]*t
-		//norm = residual[[k]].residual[[k]]
-		long_real_t norm = 0.;
-#ifdef MULTITHREADING
-		#pragma omp parallel for reduction(+:norm)
-#endif
-		for (unsigned int site = 0; site < solution.localsize; ++site) {
-			for (unsigned int mu = 0; mu < 4; ++mu) {
-				residual[site][mu] = s[site][mu] - omega*(t[site][mu]);
-				norm += real(vector_dot(residual[site][mu],residual[site][mu]));
-			}
-		}
-#ifdef ENABLE_MPI
-		::MpiExt::reduceAllSum(norm);
-#endif
-		residual.updateHalo();//TODO maybe not needed
-
-
-		if (norm < epsilon) {
-			lastSteps = step;
-			lastError = norm;
-#ifdef BICGLOG
-			if (isOutputProcess()) std::cout << "BiCGStab steps: " << step << " - final error norm: " << real(norm) << std::endl;
-#endif
-			return true;
-		}
-//#ifdef BICGLOG
-//		else if (isOutputProcess()) std::cout << "Error at step " << step << ": " << real(norm) << std::endl;
-//#endif
-
-		rho = rho_next;
-
-		++step;
-	}
-
-	std::cout << "Failure in finding convergence after " << maxSteps << " cicles!" << std::endl;
-	return false;
-}*/
-
 bool BiConjugateGradient::solve(DiracOperator* dirac, const reduced_dirac_vector_t& source, reduced_dirac_vector_t& solution, DiracOperator* preconditioner, reduced_dirac_vector_t const* initial_guess) {
 	//First set the initial solution
 	if (initial_guess == 0) {
@@ -522,118 +323,7 @@ bool BiConjugateGradient::solve(DiracOperator* dirac, const reduced_dirac_vector
 	return false;
 }
 
-/*bool BiConjugateGradient::solve(DiracOperator* dirac, const reduced_dirac_vector_t& source, reduced_dirac_vector_t& solution, DiracOperator* preconditioner, reduced_dirac_vector_t const* initial_guess) {
-	//First set the initial solution
-	if (initial_guess == 0) {
-		long_real_t normSource = AlgebraUtils::squaredNorm(source);
-		if (normSource > epsilon) {
-			solution = source;
-		}
-		else {
-			AlgebraUtils::generateRandomVector(solution);
-		}
-	} else {
-		solution = *initial_guess;
-	}
-	
-	//Use p as temporary vector
-	dirac->multiply(p,solution);
-	
-	//Set the initial residual to source-A.solution and residual_hat accordingly
-#pragma omp parallel for
-	for (int site = 0; site < solution.completesize; ++site) {
-		for (unsigned int mu = 0; mu < 4; ++mu) {
-			residual[site][mu] = source[site][mu] - p[site][mu];
-			residual_hat[site][mu] = source[site][mu] + p[site][mu];
-		}
-	}
 
-	//Set p to residual
-	p = residual;
-
-	//Set the initial parameter of the program
-	unsigned int step = 0;
-
-	while (step < maxSteps) {
-		//p_tilde = P.p
-		//preconditioner->multiply(p_tilde,p);
-		p_tilde = p;
-		
-		//nu = A.p_tilde
-		dirac->multiply(nu,p_tilde);
-		//std::cout << AlgebraUtils::squaredNorm(nu) << std::endl;
-		//alpha = (residual,residual_hat)/(nu,residual_hat)
-		std::complex<real_t> alpha = static_cast< std::complex<real_t> >(AlgebraUtils::dot(residual,residual_hat)/AlgebraUtils::dot(nu,residual_hat));
-		
-		//s = residual - alpha*nu
-#pragma omp parallel for
-		for (int site = 0; site < solution.localsize; ++site) {
-			for (unsigned int mu = 0; mu < 4; ++mu) {
-				s[site][mu] = residual[site][mu] - alpha*nu[site][mu];
-			}
-		}
-		
-		//s_tilde = P.s
-		//preconditioner->multiply(s_tilde,s);
-		s_tilde = s;
-		
-		//t = A.s_tilde
-		dirac->multiply(t,s_tilde);
-		
-		//omega = (t,s)/(t,t)
-		std::complex<real_t> omega = static_cast< std::complex<real_t> >(AlgebraUtils::dot(t,s)/AlgebraUtils::squaredNorm(t));
-		
-		//x = x + alpha*p_tilde + omega*s_tilde
-#pragma omp parallel for
-		for (int site = 0; site < solution.localsize; ++site) {
-			for (unsigned int mu = 0; mu < 4; ++mu) {
-				solution[site][mu] = solution[site][mu] + alpha*p_tilde[site][mu] + omega*s_tilde[site][mu];
-			}
-		}
-		
-		//gamma = (residual,residual_hat)
-		std::complex<real_t> gamma = static_cast< std::complex<real_t> >(AlgebraUtils::dot(residual,residual_hat));
-		
-		//r = s - omega * t
-#pragma omp parallel for
-		for (int site = 0; site < solution.localsize; ++site) {
-			for (unsigned int mu = 0; mu < 4; ++mu) {
-				residual[site][mu] = s[site][mu] - omega*t[site][mu];
-			}
-		}
-		
-		long_real_t norm = AlgebraUtils::squaredNorm(residual);
-		if (norm < epsilon) {
-			lastSteps = step;
-#ifdef BICGLOG
-			if (isOutputProcess()) std::cout << "BiCGStab steps: " << step << " - final error norm: " << real(norm) << std::endl;
-#endif
-			return true;
-		}
-		else {
-			std::cout << "Norm at step " << step << " : " << norm << std::endl;
-		}
-		
-		//beta = (residual,residual_hat)*alpha/(omega*gamma)
-		std::complex<real_t> beta = static_cast< std::complex<real_t> >(AlgebraUtils::dot(residual,residual_hat))*alpha/(omega*gamma);
-		
-		//p = residual + beta*(p - omega*nu)
-#pragma omp parallel for
-		for (int site = 0; site < solution.localsize; ++site) {
-			for (unsigned int mu = 0; mu < 4; ++mu) {
-				p[site][mu] = residual[site][mu] + beta*(p[site][mu] - omega*nu[site][mu]);
-			}
-		}
-
-		lastError = norm;
-		++step;
-	}
-
-	lastSteps = maxSteps;
-	if (isOutputProcess()) std::cout << "BiConjugateGradient::Failure in finding convergence after " << maxSteps << " cicles, last error: " << lastError << std::endl;
-	
-	return false;
-}*/
 
 bool BiConjugateGradient::solve(DiracOperator* dirac, const reduced_dirac_vector_t& source, reduced_dirac_vector_t& solution, reduced_dirac_vector_t const* initial_guess) {
 	//First set the initial solution
@@ -697,7 +387,7 @@ bool BiConjugateGradient::solve(DiracOperator* dirac, const reduced_dirac_vector
 
 		if (norm(rho_next) == 0.) {
 			if (isOutputProcess()) std::cout << "BiConjugateGradient::Fatal error in norm " << rho_next << " at step " << step << std::endl;
-			return false;//TODO
+			return false;
 		}
 
 		std::complex<real_t> beta = static_cast< std::complex<real_t> >((rho_next/rho))*(alpha/omega);
@@ -810,9 +500,6 @@ bool BiConjugateGradient::solve(DiracOperator* dirac, const reduced_dirac_vector
 #endif
 			return true;
 		}
-//#ifdef BICGLOG
-//		else if (isOutputProcess()) std::cout << "Error at step " << step << ": " << real(norm) << std::endl;
-//#endif
 
 		rho = rho_next;
 
@@ -986,7 +673,7 @@ bool BiConjugateGradient::solve(DiracOperator* dirac, const reduced_dirac_vector
 			}
 		}
 		reduceAllSum(norm);
-		residual.updateHalo();//TODO maybe not needed
+		residual.updateHalo();
 
 
 		if (norm < precision) {
@@ -996,9 +683,6 @@ bool BiConjugateGradient::solve(DiracOperator* dirac, const reduced_dirac_vector
 #endif
 			return true;
 		}
-//#ifdef BICGLOG
-//		else if (isOutputProcess()) std::cout << "Error at step " << step << ": " << real(norm) << std::endl;
-//#endif
 
 		rho = rho_next;
 
