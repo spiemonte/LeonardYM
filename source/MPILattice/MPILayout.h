@@ -86,8 +86,6 @@ template<typename Stencil> class MpiLayout {
 				std::cout << "The global size " << glob_t << " is not divisible in the grid size " << pgrid_t << std::endl;
 				exit(3);
 			}
-			
-//			for (int site = 0; site < globalVolume; ++site) processorNumberLattice[site] = -1;
 	
 			//First we partition the lattice in processor and we set the coordinate
 #pragma omp parallel for

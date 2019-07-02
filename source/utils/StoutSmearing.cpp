@@ -29,6 +29,9 @@ void StoutSmearing::smearing(const extended_gauge_lattice_t& input, extended_gau
 void StoutSmearing::spatialSmearing(const extended_gauge_lattice_t& initialInput, extended_gauge_lattice_t& output, unsigned int numberLevels, real_t rho) {
 	extended_gauge_lattice_t input = initialInput;
 	typedef extended_gauge_lattice_t LT;
+
+	output = input;
+
 	for (unsigned int level = 0; level < numberLevels; ++level) {
 #pragma omp parallel for
 		for (int site = 0; site < input.localsize; ++site) {
@@ -41,7 +44,7 @@ void StoutSmearing::spatialSmearing(const extended_gauge_lattice_t& initialInput
 						staple += htrans(input[LT::sup(LT::sdn(site,nu),mu)][nu])*htrans(input[LT::sdn(site,nu)][mu])*input[LT::sdn(site,nu)][nu];
 					}
 				}
-				GaugeGroup omega = rho*staple*htrans(input[site][mu]);
+				GaugeGroup omega = rho*htrans(staple)*htrans(input[site][mu]);
 				GaugeGroup iStout = 0.5*(htrans(omega) - omega);
 				GaugeGroup toExp = -(iStout - (trace(iStout)/static_cast<real_t>(numberColors))*identity);
 				output[site][mu] = this->exp(toExp)*input[site][mu];

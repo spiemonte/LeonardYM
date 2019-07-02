@@ -26,7 +26,7 @@ public:
 		typedef extended_gauge_lattice_t::Layout Layout;
 		int site = Layout::getGlobalCoordinate(x0,y0,z0,t0);
 #ifdef ENABLE_MPI
-		exit(255); //TODO
+		exit(255); //Working only in multithreading mode
 #endif
 		for (int dx = 0; dx < R; ++dx) {
 			result *= lattice[site][0];
@@ -66,6 +66,8 @@ public:
 	~PureGaugeWilsonLoops();
 
 	virtual void execute(environment_t& environment);
+
+	static void registerParameters(po::options_description& desc);
 
 protected:
 	void updateSlices(environment_t& environment, GaugeAction* action, int sliceSize);

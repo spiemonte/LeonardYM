@@ -161,7 +161,6 @@ void BlockImprovedDiracWilsonOperator::multiply(reduced_dirac_vector_t& output, 
 #endif
 #ifndef ADJOINT
 		//We store the result of the clover term in an intermediate vector
-		//GaugeVector clover[4];
 		for (int i = 0; i < diracVectorLength; ++i) {
 			for (int j = 0; j < diracVectorLength; ++j) {
 				clover[0][i] += (+F[site][1].at(i,j)+F[site][4].at(i,j)+multiply_by_I(+F[site][2].at(i,j)-F[site][3].at(i,j)))*input[site][1][j];

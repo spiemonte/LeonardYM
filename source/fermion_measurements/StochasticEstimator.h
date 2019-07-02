@@ -20,7 +20,23 @@ public:
 	~StochasticEstimator();
 
 protected:
-	void generateRandomNoise(extended_dirac_vector_t& vector);
+	template<typename TVector> void generateRandomNoise(TVector& vector) {
+#pragma omp parallel for
+		for (int site = 0; site < vector.localsize; ++site) {
+			for (unsigned int mu = 0; mu < 4; ++mu) {
+				for (int i = 0; i < diracVectorLength; ++i) {
+#ifndef MULTITHREADING
+					real_t realPart = (randomInteger() == 0 ? -1 : 1);
+#endif
+#ifdef MULTITHREADING
+					real_t realPart = ((*randomInteger[omp_get_thread_num()])() == 0 ? -1 : 1);
+#endif
+					vector[site][mu][i] = std::complex<real_t>(realPart,0.);
+				}
+			}
+		}
+		vector.updateHalo();
+	}
 
 	void generateRandomNoise(extended_dirac_vector_t* vector, int t);
 
@@ -29,6 +45,8 @@ protected:
 	void generateSource(extended_dirac_vector_t& vector, int alpha, int c);
 
 	void generateMomentumSource(extended_dirac_vector_t& vector, std::vector<real_t> p, int alpha, int c);
+
+	void smearSource(extended_dirac_vector_t& vector, const extended_fermion_lattice_t& lattice, unsigned int levels, const real_t& alpha);
 
 	template<typename T> T mean(const std::vector<T>& v) {
 		typename std::vector<T>::const_iterator i;

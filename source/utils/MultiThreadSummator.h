@@ -6,7 +6,7 @@ namespace Update {
 template<typename T> class MultiThreadSummator {
 	public:
 		MultiThreadSummator() : result(0.0) {
-#ifdef ENABLE_OMP
+#ifdef MULTITHREADING
 			data = new T[omp_get_max_threads()];
 			for (int i = 0; i < omp_get_max_threads(); ++i) data[i] = 0;
 #else
@@ -15,7 +15,7 @@ template<typename T> class MultiThreadSummator {
 		}
 
 		MultiThreadSummator(const MultiThreadSummator& toCopy) {
-#ifdef ENABLE_OMP
+#ifdef MULTITHREADING
 			data = new T[omp_get_max_threads()];
 			for (int i = 0; i < omp_get_max_threads(); ++i) data[i] = toCopy.data[i];
 #else
@@ -25,13 +25,13 @@ template<typename T> class MultiThreadSummator {
 		}
 
 		~MultiThreadSummator() {
-#ifdef ENABLE_OMP
+#ifdef MULTITHREADING
 			delete[] data;
 #endif
 		}
 
 		inline void add(const T& value) {
-#ifdef ENABLE_OMP
+#ifdef MULTITHREADING
 			data[omp_get_thread_num()] += value;
 #else
 			data += value;
@@ -41,7 +41,7 @@ template<typename T> class MultiThreadSummator {
 		
 
 		void reset() {
-#ifdef ENABLE_OMP
+#ifdef MULTITHREADING
 			for (int i = 0; i < omp_get_max_threads(); ++i) data[i] = 0;
 #else
 			data = 0;
@@ -51,22 +51,21 @@ template<typename T> class MultiThreadSummator {
 
 		//Compute and return the result of the sum
 		T computeResult() {
-#ifdef ENABLE_OMP
+#ifdef MULTITHREADING
 			result = T(0.0);
 			for (int i = 0; i < omp_get_max_threads(); ++i) result += data[i];
-
 #ifdef ENABLE_MPI
 			this->reduceAllSum(result);
 			
 #endif
 			return result;
 #else
-#ifdef ENABLE_MPI
 			result = data;
+#ifdef ENABLE_MPI
 			this->reduceAllSum(result);
 			return result;
 #else
-			return data;
+			return result;
 #endif
 #endif
 		}
@@ -77,7 +76,7 @@ template<typename T> class MultiThreadSummator {
 		}
 		
 	private:
-#ifdef ENABLE_OMP
+#ifdef MULTITHREADING
 		T* data;
 #else
 		T data;
@@ -91,6 +90,14 @@ template<typename T> class MultiThreadSummator {
 			double valueIm = value.imag(), resultIm = value.imag();
 			MPI_Allreduce(&valueRe, &resultRe, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 			MPI_Allreduce(&valueIm, &resultIm, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+			value = std::complex<double>(resultRe,resultIm);
+		}
+
+		void reduceAllSum(std::complex<long double>& value) const {
+			long double valueRe = value.real(), resultRe = value.real();
+			long double valueIm = value.imag(), resultIm = value.imag();
+			MPI_Allreduce(&valueRe, &resultRe, 1, MPI_LONG_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+			MPI_Allreduce(&valueIm, &resultIm, 1, MPI_LONG_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 			value = std::complex<double>(resultRe,resultIm);
 		}
 

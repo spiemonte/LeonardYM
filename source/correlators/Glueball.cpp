@@ -63,7 +63,7 @@ void Glueball::execute(environment_t& environment) {
 
 		output->push("glueball_zero");
 		for (int t = 0; t < Layout::glob_t; ++t) {
-			std::cout << "Glueball::O++ Operator at t " << t << " is " << zero_glueball[t].getResult()/Layout::glob_spatial_volume << std::endl;
+			std::cout << "Glueball::0++ Operator at t " << t << " is " << zero_glueball[t].getResult()/Layout::glob_spatial_volume << std::endl;
 
 			output->write("glueball_zero", zero_glueball[t].getResult()/Layout::glob_spatial_volume);
 		}

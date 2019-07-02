@@ -54,8 +54,14 @@ public:
 			}
 		}
 		else if (format == "xml")  {
-			output_status[name] = false;
-			it->second.append(std::string("<")+name+">");
+			if (it != output_streams.end()) {
+				output_status[name] = false;
+				it->second.append(std::string("<")+name+">");
+			}
+			else {
+				output_streams[name] = std::string("<")+name+">";
+				output_status[name] = false;
+			}
 		}
 	}
 
@@ -139,7 +145,7 @@ public:
 				if (file_exists((baseFolder+baseName+"_"+it->first+".xml").c_str())) {
 					std::ofstream ofs;
 					ofs.open((baseFolder+baseName+"_"+it->first+".xml").c_str(), std::fstream::out | std::fstream::app);
-					ofs << it->second;
+					ofs << "\n\n" << it->second;
 					it->second.clear();
 					ofs.close();
 				}

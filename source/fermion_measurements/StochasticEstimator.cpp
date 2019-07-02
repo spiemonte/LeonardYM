@@ -47,24 +47,6 @@ StochasticEstimator::~StochasticEstimator() {
 
 #endif
 
-void StochasticEstimator::generateRandomNoise(extended_dirac_vector_t& vector) {
-#pragma omp parallel for
-	for (int site = 0; site < vector.localsize; ++site) {
-		for (unsigned int mu = 0; mu < 4; ++mu) {
-			for (int i = 0; i < diracVectorLength; ++i) {
-#ifndef MULTITHREADING
-				real_t realPart = (randomInteger() == 0 ? -1 : 1);
-#endif
-#ifdef MULTITHREADING
-				real_t realPart = ((*randomInteger[omp_get_thread_num()])() == 0 ? -1 : 1);
-#endif
-				vector[site][mu][i] = std::complex<real_t>(realPart,0.);
-			}
-		}
-	}
-	vector.updateHalo();
-}
-
 void StochasticEstimator::generateRandomNoise(extended_dirac_vector_t* vector, int t0) {
 	typedef extended_dirac_vector_t::Layout Layout;
 #pragma omp parallel for
@@ -146,6 +128,25 @@ void StochasticEstimator::generateMomentumSource(extended_dirac_vector_t& vector
 	}
 
 	vector.updateHalo();
+}
+
+void StochasticEstimator::smearSource(extended_dirac_vector_t& vector, const extended_fermion_lattice_t& lattice, unsigned int levels, const real_t& alpha) {
+	typedef extended_dirac_vector_t Layout;
+	
+	extended_dirac_vector_t swap = vector;
+	for (unsigned int level = 0; level < levels; ++level) {
+#pragma omp parallel for
+		for (int site = 0; site < lattice.localsize; ++site) {
+			for (unsigned int mu = 0; mu < 4; ++mu) {
+				for (unsigned int nu = 0; nu < 3; ++nu) {
+					vector[site][mu] -= alpha*lattice[site][nu]*swap[Layout::sup(site,nu)][mu] + alpha*htrans(lattice[Layout::sdn(site,nu)][nu])*swap[Layout::sdn(site,nu)][mu];
+				}
+			}
+		}
+
+		vector.updateHalo();
+		swap = vector;
+	}
 }
 
 } /* namespace Update */

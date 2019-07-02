@@ -19,6 +19,7 @@
 #include "fermion_measurements/Eigenvalues.h"
 #include "correlators/MesonCorrelator.h"
 #include "fermion_measurements/ChiralCondensate.h"
+#include "fermion_measurements/OverlapChiralRotation.h"
 #include "fermion_measurements/SingletOperators.h"
 #include "fermion_measurements/XSpaceCorrelators.h"
 #include "fermion_measurements/NPRVertex.h"
@@ -46,6 +47,7 @@
 #include "scalar_updaters/AdjointMetropolisScalarUpdater.h"
 #include "scalar_updaters/FundamentalMetropolisScalarUpdater.h"
 #include "hmc_updaters/HiggsGaugeHMCUpdater.h"
+#include "utils/RandomGaugeTransformation.h"
 
 namespace Update {
 
@@ -77,6 +79,8 @@ LatticeSweep* LatticeSweep::getInstance(const std::string& name) {
 		return new Eigenvalues();
 	} else if (name == "MesonCorrelator") {
 		return new MesonCorrelator();
+	} else if (name == "OverlapChiralRotation") {
+		return new OverlapChiralRotation();
 	} else if (name == "ChiralCondensate") {
 		return new ChiralCondensate();
 	} else if (name == "PolyakovLoop") {
@@ -135,7 +139,9 @@ LatticeSweep* LatticeSweep::getInstance(const std::string& name) {
                 return new FundamentalMetropolisScalarUpdater();
         } else if (name == "MeanScalarField") {
 		return new MeanScalarField();
-	}	
+	} else if (name == "RandomGaugeTransformation") {
+		return new RandomGaugeTransformation();
+	}
 	else {
 		if (isOutputProcess()) std::cout << "Unknown name sweep: " << name << std::endl;
 		exit(1);
@@ -223,6 +229,7 @@ void LatticeSweep::addParameters(po::options_description& desc) {
 	Eigenvalues::registerParameters(desc);
 	MesonCorrelator::registerParameters(desc);
 	ChiralCondensate::registerParameters(desc);
+	OverlapChiralRotation::registerParameters(desc);
 	PolyakovLoop::registerParameters(desc);
 	PolyakovLoopEigenvalues::registerParameters(desc);
 	PolyakovLoopCorrelator::registerParameters(desc);
@@ -249,6 +256,7 @@ void LatticeSweep::addParameters(po::options_description& desc) {
 	HiggsGaugeHMCUpdater::registerParameters(desc);
 	AdjointMetropolisScalarUpdater::registerParameters(desc);
 	FundamentalMetropolisScalarUpdater::registerParameters(desc);
+	RandomGaugeTransformation::registerParameters(desc);
 }
 
 void LatticeSweep::registerParameters(po::options_description&) {
@@ -268,6 +276,7 @@ void LatticeSweep::printSweepsName() {
 		<<  "TestSpeedDiracOperators" << std::endl
 		<<  "Eigenvalues" << std::endl
 		<<  "MesonCorrelator" << std::endl
+		<<  "OverlapChiralRotation" << std::endl
 		<<  "ChiralCondensate" << std::endl
 		<<  "PolyakovLoop" << std::endl
 		<<  "PolyakovLoopEigenvalues" << std::endl
@@ -296,6 +305,7 @@ void LatticeSweep::printSweepsName() {
                 <<  "RandomScalarInitializer" << std::endl
 		<<  "AdjointMCScalar" << std::endl
 		<<  "FundamentalMCScalar" << std::endl
+		<<  "RandomGaugeTransformation" << std::endl
                 <<  "MeanScalarField" << std::endl;
 	}
 

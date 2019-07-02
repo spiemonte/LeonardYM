@@ -9,10 +9,6 @@
 #include "MatrixTypedef.h"
 #include "Checkerboard.h"
 #include "utils/RandomSeed.h"
-#ifndef PI
-#define PI 3.14159265358979323846264338327950288419
-#endif
-#include <omp.h>
 
 namespace Update {
 
@@ -74,7 +70,7 @@ void PureGaugeUpdater::execute(environment_t & environment) {
 #ifdef MULTITHREADING
 	for (int color = 0; color < checkerboard->getNumberLoops(); ++color) {
 #endif
-#pragma omp parallel for //shared(beta, color, environment) firstprivate(action, checkerboard) default(none) schedule(dynamic)
+#pragma omp parallel for
 		for (int site = 0; site < environment.gaugeLinkConfiguration.localsize; ++site) {
 			for (unsigned int mu = 0; mu < 4; ++mu) {
 #ifdef MULTITHREADING
@@ -97,7 +93,7 @@ void PureGaugeUpdater::execute(environment_t & environment) {
 	for (int processor = 0; processor < Layout::numberProcessors; ++processor) {
 		for (int color = 0; color < checkerboard->getNumberLoops(); ++color) {
 			if (processor == Layout::this_processor) {
-#pragma omp parallel for //shared(beta, color, environment) firstprivate(action, checkerboard) default(none) schedule(dynamic)
+#pragma omp parallel for
 				for (int site = 0; site < environment.gaugeLinkConfiguration.localsize; ++site) {
 					for (unsigned int mu = 0; mu < 4; ++mu) {
 						if (checkerboard->getColor(site,mu) == color) {
@@ -107,7 +103,7 @@ void PureGaugeUpdater::execute(environment_t & environment) {
 				}
 			}
 			else {
-#pragma omp parallel for //shared(beta, color, environment) firstprivate(action, checkerboard) default(none) schedule(dynamic)
+#pragma omp parallel for 
 				for (int site = environment.gaugeLinkConfiguration.sharedsize; site < environment.gaugeLinkConfiguration.localsize; ++site) {
 					for (unsigned int mu = 0; mu < 4; ++mu) {
 						if (checkerboard->getColor(site,mu) == color) {
@@ -183,7 +179,7 @@ void PureGaugeUpdater::updateLink(extended_gauge_lattice_t& lattice, int site, i
 	GaugeGroup plaquette = lattice[site][mu]*(staple);
 	for (unsigned int k = 0; k < numberColors-1; ++k) {
 		for (int l = k+1; l < numberColors; ++l) {
-			//Take the su2 subgroup matrix for the cabibbo marinari update
+			//Take the su2 subgroup matrix for the Cabibbo Marinari update
 			real_t aeff = (imag(plaquette.at(k,k))-imag(plaquette.at(l,l)))/2.;
 			real_t beff = (imag(plaquette.at(k,l))+imag(plaquette.at(l,k)))/2.;
 			real_t ceff = (real(plaquette.at(k,l))-real(plaquette.at(l,k)))/2.;

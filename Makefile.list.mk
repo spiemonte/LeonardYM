@@ -202,6 +202,9 @@ MaximalAbelianProjection.o: ./source/gauge_fixing/MaximalAbelianProjection.h ./s
 ReUnit.o: ./source/utils/ReUnit.h ./source/utils/ReUnit.cpp
 	$(CPP) $(CPPFLAGS) -c -o ReUnit.o ./source/utils/ReUnit.cpp
 
+RandomGaugeTransformation.o: ./source/utils/RandomGaugeTransformation.h ./source/utils/RandomGaugeTransformation.cpp
+	$(CPP) $(CPPFLAGS) -c -o RandomGaugeTransformation.o ./source/utils/RandomGaugeTransformation.cpp
+
 StoutSmearing.o: ./source/utils/StoutSmearing.h ./source/utils/StoutSmearing.cpp
 	$(CPP) $(CPPFLAGS) -c -o StoutSmearing.o ./source/utils/StoutSmearing.cpp
 
@@ -262,8 +265,8 @@ StochasticEstimator.o: ./source/fermion_measurements/StochasticEstimator.h ./sou
 MesonCorrelator.o: ./source/correlators/MesonCorrelator.h ./source/correlators/MesonCorrelator.cpp
 	$(CPP) $(CPPFLAGS) -c -o MesonCorrelator.o ./source/correlators/MesonCorrelator.cpp
 
-OverlapResidualMass.o: ./source/fermion_measurements/OverlapResidualMass.h ./source/fermion_measurements/OverlapResidualMass.cpp
-	$(CPP) $(CPPFLAGS) -c -o OverlapResidualMass.o ./source/fermion_measurements/OverlapResidualMass.cpp
+OverlapChiralRotation.o: ./source/fermion_measurements/OverlapChiralRotation.h ./source/fermion_measurements/OverlapChiralRotation.cpp
+	$(CPP) $(CPPFLAGS) -c -o OverlapChiralRotation.o ./source/fermion_measurements/OverlapChiralRotation.cpp
 
 ChiralCondensate.o: ./source/fermion_measurements/ChiralCondensate.h ./source/fermion_measurements/ChiralCondensate.cpp
 	$(CPP) $(CPPFLAGS) -c -o ChiralCondensate.o ./source/fermion_measurements/ChiralCondensate.cpp

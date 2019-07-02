@@ -9,8 +9,12 @@
 #include "io/GlobalOutput.h"
 #include "Checkerboard.h"
 
+#include <boost/multi_array.hpp>
+#include <boost/array.hpp>
+
 namespace Update {
 
+//Two link operator to be contracted for computing Wilson loops
 class TwoLinkOperator {
 	public:
 		TwoLinkOperator() { }
@@ -98,10 +102,10 @@ void PureGaugeWilsonLoops::execute(environment_t& environment) {
 
 #ifndef ENABLE_MPI
 
-	int RMax = environment.configurations.get<unsigned int>("max_r_wilsonloop");
-	int RMin = environment.configurations.get<unsigned int>("min_r_wilsonloop");
-	int TMax = environment.configurations.get<unsigned int>("max_t_wilsonloop");
-	int TMin = environment.configurations.get<unsigned int>("min_t_wilsonloop");
+	int RMax = environment.configurations.get<unsigned int>("PureGaugeWilsonLoops::max_r");
+	int RMin = 2;
+	int TMax = environment.configurations.get<unsigned int>("PureGaugeWilsonLoops::max_t");
+	int TMin = 2;
 
 	//Collect together all the wilson loop that should be measured
 	if (wilsonLoops == 0) {
@@ -153,8 +157,8 @@ void PureGaugeWilsonLoops::execute(environment_t& environment) {
 		output->pop("wilson_loops");
 	}
 
-	int numberSubSweeps = environment.configurations.get<unsigned int>("number_subsweeps_luescher");
-	int sliceSize = environment.configurations.get<unsigned int>("size_slice_luescher");
+	int numberSubSweeps = environment.configurations.get<unsigned int>("PureGaugeWilsonLoops::number_subsweeps_luescher");
+	int sliceSize = environment.configurations.get<unsigned int>("PureGaugeWilsonLoops::size_slice_luescher");
 	if (isOutputProcess() && (LT::glob_y % sliceSize) != 0) std::cout << "PureGaugeWilsonLoops::Warning, the Polyakov loop correlator will not work with these settings, sliceSize is not a multiple of LT::glob_y!" << std::endl;
 
 	//Get the gauge action
@@ -274,36 +278,15 @@ void PureGaugeWilsonLoops::updateSlices(environment_t& environment, GaugeAction*
 #ifdef MULTITHREADING
 	}
 #endif
+}
 
-	/*//Overrelaxation
-	for (int i = 0; i < 2; ++i) {
-#ifdef MULTITHREADING
-		for (unsigned int color = 0; color < checkerboard->getNumberLoops(); ++color) {
-#pragma omp parallel for //shared(beta, color, environment) firstprivate(action, checkerboard) default(none) schedule(dynamic)
-#endif
-			for (int site = 0; site < environment.gaugeLinkConfiguration.localsize; ++site) {
-				for (unsigned int mu = 0; mu < 4; ++mu) {
-#ifdef MULTITHREADING
-					if (checkerboard->getColor(site,mu) == color) {
-#endif
-						if ((LT::globalIndexY(site) % sliceSize) != (sliceSize - 1) && (LT::globalIndexY(site) % sliceSize) != 0) pureGaugeOverrelaxation->updateLink(environment.gaugeLinkConfiguration, site, mu, action);
-#ifdef MULTITHREADING
-					}
-#endif
-				}
-#ifdef MULTITHREADING
-				if (checkerboard->getColor(site,1) == color) {
-#endif
-					if ((LT::globalIndexY(site) % sliceSize) == 0) pureGaugeOverrelaxation->updateLink(environment.gaugeLinkConfiguration, site, 1, action);
-#ifdef MULTITHREADING
-				}
-#endif
-			}
-			environment.gaugeLinkConfiguration.updateHalo();
-#ifdef MULTITHREADING
-		}
-#endif
-	}*/
+void PureGaugeWilsonLoops::registerParameters(po::options_description& desc) {
+	desc.add_options()
+		("PureGaugeWilsonLoops::max_r", po::value<unsigned int>(), "The maximal R to be measured")
+		("PureGaugeWilsonLoops::max_r", po::value<unsigned int>(), "The maximal T to be measured")
+		("PureGaugeWilsonLoops::number_subsweeps_luescher", po::value<unsigned int>(), "Number of subsweeps of the luescher algorithm")
+		("PureGaugeWilsonLoops::size_slice_luescher", po::value<unsigned int>(), "The size of a slice of the luescher algorithm")
+		;
 }
 
 } /* namespace Update */

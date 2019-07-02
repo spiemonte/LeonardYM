@@ -24,6 +24,9 @@ void Propagator::constructPropagator(DiracOperator* diracOperator, const extende
 
 		overlap->setMass(mass);
 	}
+	else {
+		solution = source;
+	}
 }
 #endif
 
@@ -47,6 +50,9 @@ void Propagator::constructPropagator(DiracOperator* diracOperator, const reduced
 		}
 
 		overlap->setMass(mass);
+	}
+	else {
+		solution = source;
 	}
 }
 

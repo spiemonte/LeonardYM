@@ -35,8 +35,8 @@ void MesonCorrelator::execute(environment_t& environment) {
 	extended_fermion_lattice_t lattice;
 
 	try {
-		unsigned int numberLevelSmearing = environment.configurations.get<unsigned int>("MesonCorrelator::levels_stout_smearing");
-		double smearingRho = environment.configurations.get<double>("MesonCorrelator::rho_stout_smearing");
+		unsigned int numberLevelSmearing = environment.configurations.get<unsigned int>("MesonCorrelator::stout_smearing_levels");
+		double smearingRho = environment.configurations.get<double>("MesonCorrelator::stout_smearing_rho");
 		StoutSmearing stoutSmearing;
 #ifdef ADJOINT
 		extended_gauge_lattice_t smearedConfiguration;
@@ -227,7 +227,7 @@ void MesonCorrelator::execute(environment_t& environment) {
 
 		unsigned int numberStochasticEstimators = environment.configurations.get<unsigned int>("MesonCorrelator::number_stochastic_estimators");
 
-		reduced_dirac_vector_t randomNoise[4], inverse[4];
+		extended_dirac_vector_t randomNoise[4], inverse[4];
 
 		for (unsigned int step = 0; step < numberStochasticEstimators; ++step) {
 			for (int t = 0; t < Layout::glob_t; ++t) {
@@ -294,11 +294,11 @@ void MesonCorrelator::execute(environment_t& environment) {
 void MesonCorrelator::registerParameters(po::options_description& desc) {
 	static bool single = true;
 	if (single) desc.add_options()
-		("MesonCorrelator::inverter_precision", po::value<real_t>()->default_value(0.0000000001), "set the inverter precision")
+		("MesonCorrelator::inverter_precision", po::value<real_t>()->default_value(0.00000000001), "set the inverter precision")
 		("MesonCorrelator::inverter_max_steps", po::value<unsigned int>()->default_value(10000), "maximum number of inverter steps")
 		("MesonCorrelator::t_source_origin", po::value<unsigned int>()->default_value(0), "T origin for the wall source")
-		("MesonCorrelator::rho_stout_smearing", po::value<real_t>(), "set the stout smearing parameter")
-		("MesonCorrelator::levels_stout_smearing", po::value<unsigned int>(), "levels of stout smearing")
+		("MesonCorrelator::stout_smearing_rho", po::value<real_t>(), "set the stout smearing parameter")
+		("MesonCorrelator::stout_smearing_levels", po::value<unsigned int>(), "levels of stout smearing")
 		("MesonCorrelator::number_stochastic_estimators", po::value<unsigned int>()->default_value(50), "number of stochastic estimators")
 		("MesonCorrelator::compute_disconnected_contributions", po::value<bool>()->default_value(false), "Compute the disconnected contributions of the eta'?")
 		;

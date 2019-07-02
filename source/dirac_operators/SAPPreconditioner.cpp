@@ -36,7 +36,7 @@ void SAPPreconditioner::multiply(reduced_dirac_vector_t& output, const reduced_d
 }
 
 void SAPPreconditioner::multiplyAdd(reduced_dirac_vector_t& , const reduced_dirac_vector_t& , const reduced_dirac_vector_t& , const std::complex<real_t>& ) {
-	//TODO: to be implemented
+	//TODO: to be implemented, not needed for computation of propagators
 	
 }
 

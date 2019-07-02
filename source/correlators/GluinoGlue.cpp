@@ -5,6 +5,9 @@
 #include "io/GlobalOutput.h"
 #include "algebra_utils/AlgebraUtils.h"
 #include "utils/MultiThreadSummator.h"
+#include "dirac_operators/Propagator.h"
+#include "utils/RandomGaugeTransformation.h"
+#include "wilson_loops/Plaquette.h"
 
 namespace Update {
 
@@ -26,63 +29,92 @@ void GluinoGlue::execute(environment_t& environment) {
 	}
 
 	extended_gauge_lattice_t lattice;
+	extended_fermion_lattice_t smearedFermionLattice = environment.getFermionLattice();
 
 	try {
-		unsigned int numberLevelSmearing = environment.configurations.get<unsigned int>("GluinoGlue::level_stout_smearing");
-		double smearingRho = environment.configurations.get<double>("GluinoGlue::rho_stout_smearing");
+		unsigned int numberLevelSmearing = environment.configurations.get<unsigned int>("GluinoGlue::stout_smearing_levels");
+		double smearingRho = environment.configurations.get<double>("GluinoGlue::stout_smearing_rho");
 		StoutSmearing stoutSmearing;
 		stoutSmearing.spatialSmearing(environment.gaugeLinkConfiguration, lattice, numberLevelSmearing, smearingRho);
 	} catch (NotFoundOption& ex) {
 		if (isOutputProcess()) std::cout << "GluinoGlue::No smearing options found, proceeding without!" << std::endl;
+		lattice = environment.gaugeLinkConfiguration;
 	}
 
-	extended_fermion_lattice_t result = environment.getFermionLattice();
+	extended_fermion_lattice_t fermionLattice = environment.getFermionLattice();
 
 	try {
 		unsigned int t = environment.configurations.get<unsigned int>("GluinoGlue::t_source_origin");
-		extended_fermion_lattice_t swaplinkconfig;
-		typedef extended_fermion_lattice_t LT;
+		
 		if (t != 0) {
+			extended_fermion_lattice_t swaplinkconfig;
+			typedef extended_fermion_lattice_t LT;
 			for (unsigned int n = 0; n < t; ++n) {
 				//We do a swap
-				for(int site = 0; site < (result.localsize); ++site){
-					for (unsigned int mu = 0; mu < 4; ++mu) swaplinkconfig[site][mu] = result[site][mu];
+				for(int site = 0; site < (fermionLattice.localsize); ++site){
+					for (unsigned int mu = 0; mu < 4; ++mu) swaplinkconfig[site][mu] = fermionLattice[site][mu];
 				}
 				swaplinkconfig.updateHalo();
 				//We wrap
-				for(int site = 0; site < (result.localsize); ++site){
-					for (unsigned int mu = 0; mu < 4; ++mu) result[site][mu] = swaplinkconfig[LT::sup(site,3)][mu];
+				for(int site = 0; site < (fermionLattice.localsize); ++site){
+					for (unsigned int mu = 0; mu < 4; ++mu) fermionLattice[site][mu] = swaplinkconfig[LT::sup(site,3)][mu];
 				}
-				result.updateHalo();
+				fermionLattice.updateHalo();
+			}
+		}
+		
+		if (t != 0) {
+			extended_gauge_lattice_t swaplinkconfig;
+			typedef extended_gauge_lattice_t LT;
+			for (unsigned int n = 0; n < t; ++n) {
+				//We do a swap
+				for(int site = 0; site < (lattice.localsize); ++site){
+					for (unsigned int mu = 0; mu < 4; ++mu) swaplinkconfig[site][mu] = lattice[site][mu];
+				}
+				swaplinkconfig.updateHalo();
+				//We wrap
+				for(int site = 0; site < (lattice.localsize); ++site){
+					for (unsigned int mu = 0; mu < 4; ++mu) lattice[site][mu] = swaplinkconfig[LT::sup(site,3)][mu];
+				}
+				lattice.updateHalo();
 			}
 		}
 	} catch (NotFoundOption& ex) {
 	}
 
-	diracOperator->setLattice(result);
+	diracOperator->setLattice(fermionLattice);
 	diracOperator->setGamma5(false);
 
 	if (biConjugateGradient == 0) biConjugateGradient = new BiConjugateGradient();
 	biConjugateGradient->setPrecision(environment.configurations.get<double>("GluinoGlue::inverter_precision"));
 	biConjugateGradient->setMaximumSteps(environment.configurations.get<unsigned int>("GluinoGlue::inverter_max_steps"));
+
+	real_t source_smearing_rho = environment.configurations.get<double>("GluinoGlue::source_smearing_rho");
+	unsigned int source_smearing_levels = environment.configurations.get<unsigned int>("GluinoGlue::source_smearing_levels");
 	
 	MultiThreadSummator<long_real_t>* gluinoGlueCorrelator = new MultiThreadSummator<long_real_t>[Layout::glob_t];
 	for (int t = 0; t < Layout::glob_t; ++t) {
 		gluinoGlueCorrelator[t].reset();
 	}
 
-	
-	for (unsigned int alpha = 0; alpha < 4; ++alpha) {
+	extended_dirac_vector_t tmp;
+
+	int inversionSteps = 0;
+
+	//First we generate the propagator
+	for (unsigned int alpha = 0; alpha < 4; ++alpha) {			
 		//First we generate the source
 #pragma omp parallel for
-		for (int site = 0; site < environment.gaugeLinkConfiguration.localsize; ++site) {
-			for (unsigned int mu = 0; mu < 4; ++mu) {
-				for (int c = 0; c < diracVectorLength; ++c) {
-					source[site][mu][c] = 0.;
-					if (Layout::globalIndexT(site) == 0 && Layout::globalIndexX(site) == 0 && Layout::globalIndexY(site) == 0 && Layout::globalIndexZ(site) == 0) {
-						for (unsigned int i = 0; i < diracVectorLength; ++i) {
-							for (unsigned int j = 0; j < diracVectorLength; ++j) {
-								if (Sigma::sigma(i,j,alpha,mu) != static_cast<real_t>(0.)) source[site][mu][c] += Sigma::sigma(i,j,alpha,mu)*trace(cloverPlaquette(lattice,site,i,j)*tau.get(c));
+		for (int site = 0; site < source.localsize; ++site) {
+			for (unsigned int rho = 0; rho < 4; ++rho) {
+				set_to_zero(source[site][rho]);
+				if (Layout::globalIndexT(site) == 0) {
+					for (unsigned int k = 0; k < 3; ++k) {
+						for (unsigned int l = 0; l < 3; ++l) {
+							if (Sigma::sigma(k,l,alpha,rho) != static_cast<real_t>(0.)) {
+								for (int b = 0; b < diracVectorLength; ++b) {
+									source[site][rho][b] += Sigma::sigma(k,l,alpha,rho)*trace(cloverPlaquette(lattice,site,k,l)*tau.get(b));
+								}
 							}
 						}
 					}
@@ -90,31 +122,30 @@ void GluinoGlue::execute(environment_t& environment) {
 			}
 		}
 
-		biConjugateGradient->solve(diracOperator, source, psi);
+		this->smearSource(source, smearedFermionLattice, source_smearing_levels, source_smearing_rho);
 
-		for (int t = 0; t < Layout::glob_t; ++t) {
+	
+		biConjugateGradient->solve(diracOperator, source, tmp);
+		Propagator::constructPropagator(diracOperator, tmp, psi[alpha]);
+
+		this->smearSource(psi[alpha], smearedFermionLattice, source_smearing_levels, source_smearing_rho);
+
+		inversionSteps += biConjugateGradient->getLastSteps();
+	}
+
+	if (isOutputProcess()) std::cout << "GluinoGlue::Correlators computed with " << inversionSteps << " inversion steps" << std::endl;
+
+	//Now we compute the contraction at the sink
 #pragma omp parallel for
-			for (int site = 0; site < environment.gaugeLinkConfiguration.localsize; ++site) {
-				for (unsigned int mu = 0; mu < 4; ++mu) {
-					for (int c = 0; c < diracVectorLength; ++c) {
-						eta[site][mu][c] = 0.;
-						if (Layout::globalIndexT(site) == t) {
-							for (unsigned int i = 0; i < diracVectorLength; ++i) {
-								for (unsigned int j = 0; j < diracVectorLength; ++j) {
-									if (Sigma::sigma(i,j,alpha,mu) != static_cast<real_t>(0.)) eta[site][mu][c] += Sigma::sigma(i,j,alpha,mu)*trace(cloverPlaquette(lattice,site,i,j)*tau.get(c));
-								}
+	for (int site = 0; site < environment.gaugeLinkConfiguration.localsize; ++site) {
+		for (unsigned int alpha = 0; alpha < 4; ++alpha) {
+			for (unsigned int beta = 0; beta < 4; ++beta) {
+				for (unsigned int i = 0; i < 3; ++i) {
+					for (unsigned int j = 0; j < 3; ++j) {
+						if (Sigma::sigma(i,j,alpha,beta) != static_cast<real_t>(0.)) {
+							for (int a = 0; a < diracVectorLength; ++a) {
+								gluinoGlueCorrelator[Layout::globalIndexT(site)].add(real( Sigma::sigma(i,j,alpha,beta)*trace(cloverPlaquette(lattice,site,i,j)*tau.get(a))*psi[alpha][site][beta][a] ));
 							}
-						}
-					}
-				}
-			}
-
-#pragma omp parallel for
-			for (int site = 0; site < Layout::localsize; ++site) {
-				if (Layout::globalIndexT(site) == 0) {
-					for (unsigned int beta = 0; beta < 4; ++beta) {
-						for (int a = 0; a < diracVectorLength; ++a) {
-							gluinoGlueCorrelator[t].add(real(eta[site][beta][a]*psi[site][beta][a]));
 						}
 					}
 				}
@@ -131,9 +162,9 @@ void GluinoGlue::execute(environment_t& environment) {
 
 		output->push("gluinoglue");
 		for (int t = 0; t < Layout::glob_t; ++t) {
-			std::cout << "GluinoGlue::Correlator at t " << t << " is " << -gluinoGlueCorrelator[t].getResult() << std::endl;
+			std::cout << "GluinoGlue::Correlator at t " << t << " is " << -gluinoGlueCorrelator[t].getResult()/4. << std::endl;
 
-			output->write("gluinoglue", -gluinoGlueCorrelator[t].getResult());
+			output->write("gluinoglue", -gluinoGlueCorrelator[t].getResult()/4.);
 		}
 		output->pop("gluinoglue");
 	}
@@ -154,18 +185,20 @@ GaugeGroup GluinoGlue::cloverPlaquette(const extended_gauge_lattice_t& lattice, 
 		result += htrans(lattice[LT::sdn(site,mu)][mu])*htrans(lattice[LT::sdn(LT::sdn(site,mu),nu)][nu])*lattice[LT::sdn(LT::sdn(site,mu),nu)][mu]*lattice[LT::sdn(site,nu)][nu];
 	}
 	GaugeGroup hresult = htrans(result);
-	GaugeGroup cplaq = std::complex<real_t>(0,+1./8.)*(result-hresult);
+	GaugeGroup cplaq = std::complex<real_t>(0.,-1./8.)*(result-hresult);
 	return cplaq;
 }
 
 void GluinoGlue::registerParameters(po::options_description& desc) {
 	static bool single = true;
 	if (single) desc.add_options()
-		("GluinoGlue::inverter_precision", po::value<real_t>()->default_value(0.0000000001), "set the inverter precision")
+		("GluinoGlue::inverter_precision", po::value<real_t>()->default_value(0.000000000001), "set the inverter precision")
 		("GluinoGlue::inverter_max_steps", po::value<unsigned int>()->default_value(10000), "maximum number of inverter steps")
 		("GluinoGlue::t_source_origin", po::value<unsigned int>()->default_value(0), "T origin for the wall source")
-		("GluinoGlue::rho_stout_smearing", po::value<real_t>(), "set the stout smearing parameter")
-		("GluinoGlue::levels_stout_smearing", po::value<unsigned int>(), "levels of stout smearing")
+		("GluinoGlue::stout_smearing_rho", po::value<real_t>()->default_value(0.15), "set the stout smearing parameter")
+		("GluinoGlue::stout_smearing_levels", po::value<unsigned int>()->default_value(15), "levels of stout smearing")
+		("GluinoGlue::source_smearing_rho", po::value<real_t>()->default_value(0.15), "set the Jacoby smearing rho for the source/sink")
+		("GluinoGlue::source_smearing_levels", po::value<unsigned int>()->default_value(5), "set the Jacoby smearing levels for the source/sink")
 		;
 	single = false;
 }

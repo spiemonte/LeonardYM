@@ -51,16 +51,6 @@ MPI_Datatype MpiType<Update::FermionicForceMatrix[4]>::type = MPI_DOUBLE;
 
 namespace po = boost::program_options;
 
-template<int N>
-inline bool testBasicMatrixFunctions(){
-    typedef Eigen::Matrix<Update::complex, N, N> TMatrix;
-    TMatrix tmp1(TMatrix::Zero());
-    TMatrix tmp2(TMatrix::Zero());
-    TMatrix tmp3(TMatrix::Zero());
-    std::cout<< trace(tmp1*tmp2) <<std::endl;
-    return true;
-}
-
 
 int main(int ac, char* av[]) {
 #ifdef ENABLE_MPI
@@ -136,7 +126,6 @@ int main(int ac, char* av[]) {
 		("hmc_t_length", po::value<Update::real_t>(), "the length of a single HMC step (examples: 0.1, 0.05 ...)")
 		("number_hmc_steps", po::value<std::string>(), "the vector of the numbers of HMC steps for a single trajectory (examples: 2, 7 ...)")
 		
-		
 		//RHMC options
 		("force_inverter_precision", po::value<Update::real_t>(), "The precision for the inverter in the force step")
 		("metropolis_inverter_precision", po::value<Update::real_t>(), "The precision for the inverter in the metropolis step")
@@ -153,18 +142,10 @@ int main(int ac, char* av[]) {
 		("deflation_block_size", po::value<std::string>(), "The vector of the block size {lx,ly,lz,lt}")
 		("preconditioner_recursions", po::value<unsigned int>(), "Number of preconditioner recursions used for evaluating the rational approximations")
 		("preconditioner_precision", po::value<Update::real_t>(), "The precision for the inversion of the preconditioner used for evaluating the rational approximations")
-				
-		("eigenvalues_map", po::value<std::string>(), "the map used for computing the lowest eigenvalues (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})")
-		
-		("number_stochastic_estimators", po::value<unsigned int>(), "The number of stochastic estimators")
-		("generic_inverter_precision", po::value<Update::real_t>(), "The precision for the inverter")
-		
-		
 
 		//Options for the ReadGaugeConfiguration sweep
 		("read_start_number", po::value<unsigned int>(), "From which configurations start to read again for the analysis")
 		("read_step", po::value<unsigned int>(), "The step in the reading analysis")
-
 
 		//Overlap operator options
 		("OverlapOperator::squareRootApproximation", po::value<std::string>(), "Approximation of x^(1/2) used for the Overlap fermion sign function (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})")
@@ -178,24 +159,9 @@ int main(int ac, char* av[]) {
 		("ExactOverlapOperator::eigensolver::maximal_number_restarts_eigensolver", po::value<unsigned int>()->default_value(50), "Number of restarts for the implicitly restarted Arnoldi algorithm")
 		("ExactOverlapOperator::eigensolver::number_eigenvalues", po::value<unsigned int>(), "Number of eigenvalues of the dirac wilson operator to be computed")
 
-	    
-	    ("generic_inverter_max_steps", po::value<unsigned int>(),"maximum level of steps used by the inverters")
-		("number_subsweeps_luescher", po::value<unsigned int>(),"number of subsweeps of the luescher algorithm")
-		("size_slice_luescher", po::value<unsigned int>(),"the size of a slice of the luescher algorithm")
-	    ("rho_stout_smearing", po::value<Update::real_t>(), "The rho parameter for stout smearing in measuring masses")
-	    ("number_multiplication_test_speed", po::value<unsigned int>(), "How many multiplications should I use in the tests?")
-		
-		
-		("correction_step_breakup_level", po::value<unsigned int>(), "The level of breakup \"lb\" for the correction factors")
-		("correction_approximation_direct_1", po::value<std::string>(), "Approximation of x^(nf/(2lb)) used for the correction step (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})")
-		("correction_approximation_inverse_1", po::value<std::string>(), "Approximation of x^(-nf/(2lb)) used for the correction step (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})")
-		("correction_approximation_direct_2", po::value<std::string>(), "Approximation of x^(nf/2) used for the correction step (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})")
-		("correction_approximation_inverse_2", po::value<std::string>(), "Approximation of x^(-nf/(2lb)) used for the correction step (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})")
-		("correction_approximation_direct_3", po::value<std::string>(), "Approximation of x^(nf/(2lb)) used for the correction step (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})")
-		("correction_approximation_inverse_3", po::value<std::string>(), "Approximation of x^(-nf/(2lb)) used for the correction step (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})")
-		("correction_approximation_direct_4", po::value<std::string>(), "Approximation of x^(nf/(2lb)) used for the correction step (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})")
-		("correction_approximation_inverse_4", po::value<std::string>(), "Approximation of x^(-nf/(2lb)) used for the correction step (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})")
-		
+	    	//Options for the inverter
+		("generic_inverter_max_steps", po::value<unsigned int>(),"maximum level of steps used by the inverters")
+		("generic_inverter_precision", po::value<Update::real_t>(), "The precision for the inverter")
 	;
 
 	for (int level = 1; level < 4; ++level) {
@@ -264,7 +230,7 @@ int main(int ac, char* av[]) {
 
 	Lattice::LocalLayout::initialize();
 
-	if (Update::isOutputProcess()) std::cout << "Lattice size (x,y,z,t): (" << Lattice::LocalLayout::glob_x << "," << Lattice::LocalLayout::glob_y << "," << Lattice::LocalLayout::glob_z << "," << Lattice::LocalLayout::glob_t << ")" << std::endl;
+	if (isOutputProcess()) std::cout << "Lattice size (x,y,z,t): (" << Lattice::LocalLayout::glob_x << "," << Lattice::LocalLayout::glob_y << "," << Lattice::LocalLayout::glob_z << "," << Lattice::LocalLayout::glob_t << ")" << std::endl;
 #endif
 #ifdef ENABLE_MPI
 	Lattice::MpiLayout<Lattice::ExtendedStencil>::pgrid_t = vm["pgrid_t"].as<unsigned int>();
@@ -315,12 +281,12 @@ int main(int ac, char* av[]) {
 	}
 
 	if (vm.count("print_report_layout")) {
-		if (Update::isOutputProcess()) Lattice::MpiLayout<Lattice::ExtendedStencil>::printReport();
-		if (Update::isOutputProcess()) Lattice::MpiLayout<Lattice::ReducedStencil>::printReport();
+		if (isOutputProcess()) Lattice::MpiLayout<Lattice::ExtendedStencil>::printReport();
+		if (isOutputProcess()) Lattice::MpiLayout<Lattice::ReducedStencil>::printReport();
 	}
 
-	if (Update::isOutputProcess()) std::cout << "Lattice size (x,y,z,t): (" << Lattice::MpiLayout<Lattice::ReducedStencil>::glob_x << "," << Lattice::MpiLayout<Lattice::ReducedStencil>::glob_y << "," << Lattice::MpiLayout<Lattice::ReducedStencil>::glob_z << "," << Lattice::MpiLayout<Lattice::ReducedStencil>::glob_t << ")" << std::endl;
-	if (Update::isOutputProcess()) std::cout << "Mpi grid (px,py,pz,pt): (" << Lattice::MpiLayout<Lattice::ReducedStencil>::pgrid_x << "," << Lattice::MpiLayout<Lattice::ReducedStencil>::pgrid_y << "," << Lattice::MpiLayout<Lattice::ReducedStencil>::pgrid_z << "," << Lattice::MpiLayout<Lattice::ReducedStencil>::pgrid_t << ")" << std::endl;
+	if (isOutputProcess()) std::cout << "Lattice size (x,y,z,t): (" << Lattice::MpiLayout<Lattice::ReducedStencil>::glob_x << "," << Lattice::MpiLayout<Lattice::ReducedStencil>::glob_y << "," << Lattice::MpiLayout<Lattice::ReducedStencil>::glob_z << "," << Lattice::MpiLayout<Lattice::ReducedStencil>::glob_t << ")" << std::endl;
+	if (isOutputProcess()) std::cout << "Mpi grid (px,py,pz,pt): (" << Lattice::MpiLayout<Lattice::ReducedStencil>::pgrid_x << "," << Lattice::MpiLayout<Lattice::ReducedStencil>::pgrid_y << "," << Lattice::MpiLayout<Lattice::ReducedStencil>::pgrid_z << "," << Lattice::MpiLayout<Lattice::ReducedStencil>::pgrid_t << ")" << std::endl;
 #endif
 
 	//Initialize the enviroment of the program
@@ -331,7 +297,7 @@ int main(int ac, char* av[]) {
 #ifdef MULTITHREADING
 		omp_set_num_threads(vm["number_threads"].as<unsigned int>());
 		int num_threads = omp_get_max_threads();
-		if (Update::isOutputProcess()) std::cout << "Number of threads: " << num_threads << std::endl;
+		if (isOutputProcess()) std::cout << "Number of threads: " << num_threads << std::endl;
 #endif
 	}
 

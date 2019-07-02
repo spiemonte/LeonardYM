@@ -15,16 +15,17 @@ namespace Update {
 
 class Simulation {
 public:
+	//Create a Monte Carlo simulation for a given environment
 	Simulation(const environment_t& _environment);
 	~Simulation();
 
-	/**
-	 * This function starts the lattice, the environment and all other factors for the simulation
-	 */
+	//This function set the lattice, the environment and all other factors for the simulation
 	void starter();
 
+	//Execute the warm-up sweeps to thermalize the lattice
 	void warmUp();
 
+	//Run the main measurement-update sweeps
 	void measurement();
 
 private:

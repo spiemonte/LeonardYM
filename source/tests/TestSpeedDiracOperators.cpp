@@ -69,7 +69,7 @@ void TestSpeedDiracOperators::execute(environment_t& environment) {
 
 	int numberTests;
 	try {
-		numberTests = environment.configurations.get<unsigned int>("number_multiplication_test_speed");
+		numberTests = environment.configurations.get<unsigned int>("TestSpeedDiracOperators::number_multiplication_test_speed");
 	} catch (NotFoundOption& e) {
 		numberTests = 300;
 	}
@@ -112,22 +112,7 @@ void TestSpeedDiracOperators::execute(environment_t& environment) {
 	if (isOutputProcess()) std::cout << "MFLOPS for DiracWilsonOperator: " << mflops << " MFLOPS. " << std::endl;
 #endif
 	if (isOutputProcess()) std::cout << "Timing for DiracWilsonOperator: " << (elapsed*1000)/numberTests << " ms."<< std::endl;
-	clock_gettime(CLOCK_REALTIME, &start);
-	for (int i = 0; i < numberTests; ++i) {
-		diracWilsonOperator->multiply(test2,test4,test1,test3);
-	}
-	clock_gettime(CLOCK_REALTIME, &finish);
-	elapsed = (finish.tv_sec - start.tv_sec);
-	elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
-	if (isOutputProcess()) std::cout << "Timing for double DiracWilsonOperator: " << (elapsed*1000)/numberTests << " ms."<< std::endl;
-	clock_gettime(CLOCK_REALTIME, &start);
-	for (int i = 0; i < numberTests; ++i) {
-		diracWilsonOperator->multiply(test2,test4,test6,test8,test1,test3,test5,test7);
-	}
-	clock_gettime(CLOCK_REALTIME, &finish);
-	elapsed = (finish.tv_sec - start.tv_sec);
-	elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
-	if (isOutputProcess()) std::cout << "Timing for quad DiracWilsonOperator: " << (elapsed*1000)/numberTests << " ms."<< std::endl;
+	
 	clock_gettime(CLOCK_REALTIME, &start);
 	for (int i = 0; i < numberTests; ++i) {
 		basicDiracWilsonOperator->multiply(test2,test1);
@@ -179,18 +164,6 @@ void TestSpeedDiracOperators::execute(environment_t& environment) {
 	if (isOutputProcess()) std::cout << "MFLOPS for AlgebraUtils::dot: " << mflops << " MFLOPS. " << std::endl;
 #endif
 	if (isOutputProcess()) std::cout << "Timing for AlgebraUtils::dot: " << (elapsed*1000)/numberTests << " ms." << std::endl;
-
-	/*std::complex<long_real_t> result_slow;
-		clock_gettime(CLOCK_REALTIME, &start);
-		for (int i = 0; i < numberTests; ++i) {
-			result_slow = AlgebraUtils::slow_dot(test3,test1);
-		}
-		clock_gettime(CLOCK_REALTIME, &finish);
-		elapsed = (finish.tv_sec - start.tv_sec);
-		elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
-		if (isOutputProcess()) std::cout << "Timing for AlgebraUtils::slow_dot: " << (elapsed*1000)/numberTests << " ms." << std::endl;
-		if (isOutputProcess()) std::cout << result_fast - result_slow << std::endl;*/
-
 	delete diracWilsonOperator;
 	delete improvedDiracWilsonOperator;
 	delete basicDiracWilsonOperator;
@@ -200,6 +173,12 @@ void TestSpeedDiracOperators::execute(environment_t& environment) {
 #endif
 	environment.gaugeLinkConfiguration.updateHalo();
 	environment.synchronize();
+}
+
+void TestSpeedDiracOperators::registerParameters(po::options_description& desc) {
+	desc.add_options()
+		("TestSpeedDiracOperators::number_multiplication_test_speed", po::value<unsigned int>(), "How many multiplications should I use in the tests?")
+		;
 }
 
 } /* namespace Update */

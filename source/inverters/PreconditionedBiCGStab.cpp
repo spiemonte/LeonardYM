@@ -37,7 +37,7 @@ bool PreconditionedBiCGStab::solve(DiracOperator* dirac, const extended_dirac_ve
 
 #endif
 
-bool PreconditionedBiCGStab::solve(DiracOperator* dirac, const reduced_dirac_vector_t& source, reduced_dirac_vector_t& solution, DiracOperator* preconditioner, reduced_dirac_vector_t const* initial_guess) {
+bool PreconditionedBiCGStab::solve(DiracOperator* dirac, const reduced_dirac_vector_t& source, reduced_dirac_vector_t& solution, DiracOperator* , reduced_dirac_vector_t const* initial_guess) {
 	typedef reduced_dirac_vector_t::Layout Layout;
 	bool res = false;
 
@@ -59,26 +59,6 @@ bool PreconditionedBiCGStab::solve(DiracOperator* dirac, const reduced_dirac_vec
 		eo->setKappa(dirac_improved->getKappa());
 		eo->setCSW(dirac_improved->getCSW());
 		eo->setLattice(*dirac->getLattice());
-
-		/*reduced_dirac_vector_t prd1 = source, prd2;
-		eo->multiply(prd2, source);
-		std::cout << "Vediamo: " << AlgebraUtils::differenceNorm(source,  prd2) << " " <<  AlgebraUtils::dot(source, source)  << std::endl;
-		prd2 = source;
-		eo->multiplyEvenEvenInverse(prd2);
-		eo->multiplyOddOdd(prd2, EVEN);
-		std::cout << "Vediamo: " << AlgebraUtils::differenceNorm(source,  prd2) << " " <<  AlgebraUtils::dot(prd2, source)  << std::endl;
-		std::cout << "1) " << prd2[1][0] << std::endl;
-		std::cout << "2) " << prd2[1][1] << std::endl;
-		std::cout << "3) " << prd2[1][2] << std::endl;
-		std::cout << "4) " << prd2[1][3] << std::endl;
-
-		std::cout << "1) " << prd2[30][0] << std::endl;
-		std::cout << "2) " << prd2[30][1] << std::endl;
-		std::cout << "3) " << prd2[30][2] << std::endl;
-		std::cout << "4) " << prd2[30][3] << std::endl;
-		exit(5);*/
-		/*eo->multiply(prd1, tmp);
-		std::cout << "Vediamo: " << AlgebraUtils::dot(prd1, source) << std::endl;*/
 	
 		reduced_dirac_vector_t even_inverse, odd_source = source, odd_source_eo, odd_inverse;
 		//We construct the source for the odd
@@ -118,17 +98,8 @@ bool PreconditionedBiCGStab::solve(DiracOperator* dirac, const reduced_dirac_vec
 		delete eo_sq;
 	} else {
 		if (isOutputProcess()) std::cout << "PreconditionedBiCGStab::Not using even-odd preconditioning ... " << std::endl;
-		solution = source;
-		AlgebraUtils::gamma5(solution);
-		reduced_dirac_vector_t tmp;
-		dirac->multiply(tmp, solution);
-		AlgebraUtils::gamma5(tmp);
 
-		DiracOperator* squareDiracOperator = DiracOperator::getSquare(dirac);
-		squareDiracOperator->setGamma5(true);
-
-		res = biConjugateGradient->solve(squareDiracOperator, tmp, solution, initial_guess);
-		delete squareDiracOperator;
+		res = biConjugateGradient->solve(dirac, source, solution, initial_guess);
 	}
 
 	lastSteps = biConjugateGradient->getLastSteps();

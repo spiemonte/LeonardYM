@@ -24,9 +24,6 @@ public:
 	 */
 	virtual void multiply(reduced_dirac_vector_t& output, const reduced_dirac_vector_t& input);
 
-	void multiply(reduced_dirac_vector_t& output1, reduced_dirac_vector_t& output2, const reduced_dirac_vector_t& input1, const reduced_dirac_vector_t& input2);
-	void multiply(reduced_dirac_vector_t& output1, reduced_dirac_vector_t& output2, reduced_dirac_vector_t& output3, reduced_dirac_vector_t& output4, const reduced_dirac_vector_t& input1, const reduced_dirac_vector_t& input2, const reduced_dirac_vector_t& input3, const reduced_dirac_vector_t& input4);
-
 	/**
 	 * This routine multiplies the DiracWilson operator to vector1 and stores the result in output adding to it alpha*vector2
 	 * @param output
