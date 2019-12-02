@@ -119,12 +119,12 @@ public:
 					output_status[name] = true;
 				}
 				std::ostringstream oss;
-				oss << "<" << name << "_data>" << std::setprecision(23) << what << "</" << name << "_data>";
+				oss << std::setprecision(23) << what << " ";
 				it->second.append(oss.str());
 			}
 			else {
 				std::ostringstream oss;
-				oss << "<" << name << "_data>" << std::setprecision(23) << what << "</" << name << "_data>";
+				oss << std::setprecision(23) << what << " ";
 				output_streams[name] = oss.str();
 				output_status[name] = true;
 			}
@@ -143,17 +143,29 @@ public:
 			}
 			else if (format == "xml") {
 				if (file_exists((baseFolder+baseName+"_"+it->first+".xml").c_str())) {
+					std::ifstream ifs;
+					ifs.open((baseFolder+baseName+"_"+it->first+".xml").c_str(), std::fstream::in);
+					std::stringstream buffer;
+					buffer << ifs.rdbuf();
+					std::string contents = buffer.str();
+					contents.erase(contents.end()-9,contents.end());
+					ifs.close();
+
+
 					std::ofstream ofs;
-					ofs.open((baseFolder+baseName+"_"+it->first+".xml").c_str(), std::fstream::out | std::fstream::app);
+					ofs.open((baseFolder+baseName+"_"+it->first+".xml").c_str(), std::fstream::trunc);
+					ofs << contents;	
 					ofs << "\n\n" << it->second;
+					ofs << "\n</root>\n";
 					it->second.clear();
 					ofs.close();
 				}
 				else {
 					std::ofstream ofs;
 					ofs.open((baseFolder+baseName+"_"+it->first+".xml").c_str(), std::fstream::out | std::fstream::app);
-					ofs << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n";
+					ofs << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n<root>\n";
 					ofs << it->second;
+					ofs << "\n</root>\n";
 					it->second.clear();
 					ofs.close();
 				}
