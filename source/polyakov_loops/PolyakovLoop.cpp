@@ -211,7 +211,7 @@ void PolyakovLoop::write_polyakov_loop_config(const extended_gauge_lattice_t& po
 
 	if (isOutputProcess()) {
 		if (wrt != 2 * numberColors*numberColors * Layout::glob_spatial_volume){
-			std::cout << "OutputSweep::write error for gauge fields on lattice "	<< 0 << ": " << (wrt / (2 * numberColors*numberColors)) << " : " << static_cast<size_t>(2 * numberColors*numberColors * Layout::glob_spatial_volume) << std::endl;
+			std::cout << "OutputSweep::write error for gauge fields on lattice "	<< 0 << ": " << (wrt / (2. * numberColors*numberColors)) << " : " << static_cast<size_t>(Layout::glob_spatial_volume) << std::endl;
 		}
 		else {
 			std::cout << "OutputSweep::number of gauge fields written: " << wrt / (2 * numberColors*numberColors) << " using XDR-format " << std::endl;
