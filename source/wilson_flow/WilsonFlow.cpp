@@ -225,8 +225,8 @@ void WilsonFlow::measureEnergy(const extended_gauge_lattice_t& _lattice) {
 		topological.add(result.second);
 	}
 	
-	topologicalCharge = topological.getResult();
-	gaugeEnergy = -energy.getResult()/Layout::globalVolume;
+	topologicalCharge = topological.computeResult();
+	gaugeEnergy = -energy.computeResult()/Layout::globalVolume;
 
 	//We collect the results
 	for (int t = 0; t < Layout::glob_t; ++t) {
@@ -286,12 +286,15 @@ void WilsonFlow::threeDimensionalEnergyTopologicalPlot(const extended_gauge_latt
 }
 
 void WilsonFlow::registerParameters(po::options_description& desc) {
+	static bool single = true;
+	if (single)
 	desc.add_options()
-		("WilsonFlow::flow_type", po::value<std::string>(), "The type of flow equations (Wilson/Symanzik)")
-		("WilsonFlow::flow_step", po::value<Update::real_t>(), "The integration step of the flow")
-		("WilsonFlow::flow_integration_intervals", po::value<unsigned int>(), "The number of intervals for each flow integration step")
-		("WilsonFlow::flow_time", po::value<Update::real_t>(), "The total time of the flow")
+		("WilsonFlow::flow_type", po::value<std::string>()->default_value("Wilson"), "The type of flow equations (Wilson/Symanzik)")
+		("WilsonFlow::flow_step", po::value<Update::real_t>()->default_value(0.2), "The integration step of the flow")
+		("WilsonFlow::flow_integration_intervals", po::value<unsigned int>()->default_value(20), "The number of intervals for each flow integration step")
+		("WilsonFlow::flow_time", po::value<Update::real_t>()->default_value(5.0), "The total time of the flow")
 	;
+	single = false;
 }
 
 } /* namespace Update */

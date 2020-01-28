@@ -7,6 +7,8 @@
 
 #include "PolyakovLoop.h"
 #include "io/GlobalOutput.h"
+#include <rpc/rpc.h>
+#include <rpc/xdr.h>
 
 namespace Update {
 
@@ -87,7 +89,10 @@ void PolyakovLoop::execute(environment_t& environment) {
 
 		if (write_3D_config == "true" && nu == 3) {
 			std::string config_name = environment.configurations.get<std::string>("PolyakovLoop::output_configuration_name");
-			write_polyakov_loop_config(polyakov, config_name, std::complex<real_t>(polyakovLoopRe/(numberColors*spatialVolume), polyakovLoopIm/(numberColors*spatialVolume)));
+			int offset = environment.configurations.get<unsigned int>("output_offset");
+			std::string output_directory = environment.configurations.get<std::string>("output_directory_configurations");
+
+			write_polyakov_loop_config(polyakov, config_name, output_directory, environment.sweep+offset, std::complex<real_t>(polyakovLoopRe/(numberColors*spatialVolume), polyakovLoopIm/(numberColors*spatialVolume)));
 		}
 	}
 
@@ -97,18 +102,15 @@ void PolyakovLoop::execute(environment_t& environment) {
 	}
 }
 
-void PolyakovLoop::write_polyakov_loop_config(const extended_gauge_lattice_t& polyakov, const std::string& output_name, const std::complex<real_t>& average_polyakov_loop) const {
+void PolyakovLoop::write_polyakov_loop_config(const extended_gauge_lattice_t& polyakov, const std::string& output_name, const std::string& output_directory, int offset, const std::complex<real_t>& average_polyakov_loop) const {
 	typedef extended_gauge_lattice_t::Layout Layout;
 	typedef extended_gauge_lattice_t LT;
-
-	std::string output_directory = environment.configurations.get<std::string>("output_directory_configurations");
-	int offset = environment.configurations.get<unsigned int>("output_offset");
 
 
 	FILE* fout(NULL);
 	if (isOutputProcess()) {
 		std::ostringstream filenamestream;
-		filenamestream << output_directory << output_name << "-polyakov_config-" << environment.sweep+offset;
+		filenamestream << output_directory << output_name << "-polyakov_config-" << offset;
 		if (isOutputProcess()) std::cout << "OutputSweep::Starting field write on file " << filenamestream.str() << std::endl;
 		fout = fopen(filenamestream.str().c_str(), "w");
 
@@ -139,7 +141,7 @@ void PolyakovLoop::write_polyakov_loop_config(const extended_gauge_lattice_t& po
 			for (int x = 0; x < Layout::glob_x; ++x) {
 				int globsite = Layout::getGlobalCoordinate(x,y,z,0);
 
-				GaugeGroup tmp = environment.gaugeLinkConfiguration[globsite][t_dir];
+				GaugeGroup tmp = polyakov[globsite][3];
 				for (unsigned int c1 = 0; c1 < numberColors; ++c1) {
 					for (unsigned int c2 = 0; c2 < numberColors; ++c2) {
 						float tmp1 = static_cast<float>(real(tmp(c1,c2)));
@@ -159,7 +161,7 @@ void PolyakovLoop::write_polyakov_loop_config(const extended_gauge_lattice_t& po
 					int localsite = Layout::localIndex[globsite];
 							
 					if (localsite != -1 && localsite < Layout::localsize) {
-						GaugeGroup tmp = environment.gaugeLinkConfiguration[localsite][t_dir];
+						GaugeGroup tmp = polyakov[localsite][3];
 
 						for (unsigned int c1 = 0; c1 < numberColors; ++c1) {
 							for (unsigned int c2 = 0; c2 < numberColors; ++c2) {
@@ -218,10 +220,15 @@ void PolyakovLoop::write_polyakov_loop_config(const extended_gauge_lattice_t& po
 		}
 	}
 
-	float tmp1 = static_cast<float>(real(polyakov_loop_average));
-	float tmp2 = static_cast<float>(imag(polyakov_loop_average));
+	float tmp1 = static_cast<float>(real(average_polyakov_loop));
+	float tmp2 = static_cast<float>(imag(average_polyakov_loop));
 	wrt += xdr_float(&xout, &tmp1);
 	wrt += xdr_float(&xout, &tmp2);
+
+	if (isOutputProcess()) {
+		xdr_destroy(&xout);
+		fclose(fout);
+	}
 }
 
 void PolyakovLoop::registerParameters(po::options_description& desc) {
