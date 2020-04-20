@@ -16,7 +16,7 @@ Details and instructions on how to run and compile the code can be found in the 
 
 * **Stefano Piemonte** - *Initial work* - [spiemonte](https://github.com/spiemonte)
 
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/spiemonte/LeonardYM/contributors) who participated in this project.
 
 ## License
 
