@@ -130,7 +130,7 @@ void StochasticEstimator::generateMomentumSource(extended_dirac_vector_t& vector
 	vector.updateHalo();
 }
 
-void StochasticEstimator::smearSource(extended_dirac_vector_t& vector, const extended_fermion_lattice_t& lattice, unsigned int levels, const real_t& alpha) {
+void StochasticEstimator::smearSource(extended_dirac_vector_t& vector, const extended_fermion_lattice_t& lattice, unsigned int levels, const real_t& alpha, int no_smear_dir, const real_t& K) {
 	typedef extended_dirac_vector_t Layout;
 	
 	extended_dirac_vector_t swap = vector;
@@ -138,9 +138,12 @@ void StochasticEstimator::smearSource(extended_dirac_vector_t& vector, const ext
 #pragma omp parallel for
 		for (int site = 0; site < lattice.localsize; ++site) {
 			for (unsigned int mu = 0; mu < 4; ++mu) {
-				for (unsigned int nu = 0; nu < 3; ++nu) {
-					vector[site][mu] -= alpha*lattice[site][nu]*swap[Layout::sup(site,nu)][mu] + alpha*htrans(lattice[Layout::sdn(site,nu)][nu])*swap[Layout::sdn(site,nu)][mu];
+				for (unsigned int nu = 0; nu < 4; ++nu) {
+					if (nu != no_smear_dir) {
+						vector[site][mu] += alpha*lattice[site][nu]*swap[Layout::sup(site,nu)][mu] + alpha*htrans(lattice[Layout::sdn(site,nu)][nu])*swap[Layout::sdn(site,nu)][mu];
+					}
 				}
+				vector[site][mu] = K*vector[site][mu];
 			}
 		}
 

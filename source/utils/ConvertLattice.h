@@ -25,7 +25,7 @@ public:
 				toAdjoint(fundamentalLattice[site][mu],adjointLattice[site][mu]);
 			}
 		}
-		adjointLattice.updateHalo();//TODO is needed?
+		adjointLattice.updateHalo();
 	}
 
 	static void toAdjoint(const FundamentalGroup& fundamental, AdjointGroup& adjoint) {

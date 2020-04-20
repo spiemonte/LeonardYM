@@ -260,7 +260,7 @@ void NPRVertex::registerParameters(po::options_description& desc) {
 		("NPRVertex::inverter_max_steps", po::value<unsigned int>()->default_value(5000), "set the maximum steps used by the inverter")
 		("NPRVertex::momentum", po::value<std::string>()->default_value("{2,2,2,2}"), "Momentum for the measure of the vertex function (syntax: {px,py,pz,pt})")
 		
-		("NPRVertex::multigrid", po::value<std::string>()->default_value("true"), "Should we use the multigrid inverter? true/false")
+		("NPRVertex::multigrid", po::value<std::string>()->default_value("false"), "Should we use the multigrid inverter? true/false")
 		("NPRVertex::multigrid_basis_dimension", po::value<unsigned int>()->default_value(20), "The dimension of the basis for multigrid")
 		("NPRVertex::multigrid_block_size", po::value<std::string>()->default_value("{4,4,4,4}"), "Block size for Multigrid (syntax: {bx,by,bz,bt})")
 
