@@ -1,10 +1,3 @@
-/*
- * GaugeForce.cpp
- *
- *  Created on: Mar 21, 2012
- *      Author: spiem_01
- */
-
 #include "GaugeForce.h"
 
 namespace Update {

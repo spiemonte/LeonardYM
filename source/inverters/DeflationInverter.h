@@ -1,10 +1,3 @@
-/*
- * DeflationInverter.h
- *
- *  Created on: Mar 18, 2013
- *      Author: spiem_01
- */
-
 #ifndef DEFLATIONINVERTER_H_
 #define DEFLATIONINVERTER_H_
 #include "dirac_operators/DiracOperator.h"

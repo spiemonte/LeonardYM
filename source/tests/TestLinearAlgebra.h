@@ -1,10 +1,3 @@
-/*
- * TestLinearAlgebra.h
- *
- *  Created on: Jul 3, 2012
- *      Author: spiem_01
- */
-
 #ifndef TESTLINEARALGEBRA_H_
 #define TESTLINEARALGEBRA_H_
 

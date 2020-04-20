@@ -1,10 +1,3 @@
-/*
- * RandomScalarUpdater.cpp
- *
- *  Created on: Apr 2, 2012
- *      Author: spiem_01
- */
-
 #include "RandomScalarUpdater.h"
 #include "utils/RandomSeed.h"
 #include <omp.h>

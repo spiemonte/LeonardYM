@@ -1,10 +1,3 @@
-/*
- * DiracEigenSolver.h
- *
- *  Created on: Jun 26, 2012
- *      Author: spiem_01
- */
-
 #ifndef DIRACEIGENSOLVER_H_
 #define DIRACEIGENSOLVER_H_
 #include "dirac_operators/DiracOperator.h"

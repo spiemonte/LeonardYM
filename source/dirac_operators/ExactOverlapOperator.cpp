@@ -1,10 +1,3 @@
-/*
- * ExactOperator.cpp
- *
- *  Created on: Apr 2, 2012
- *      Author: spiem_01
- */
-
 #include "ExactOverlapOperator.h"
 #include "hmc_forces/OverlapFermionForce.h"
 #include "fermion_measurements/DiracEigenSolver.h"
@@ -138,7 +131,7 @@ void ExactOverlapOperator::computeEigenvalues() {
 				real_t sum = 0.;
 				for (unsigned int mu = 0; mu < 4; ++mu) {
 					for (unsigned int c = 0; c < diracVectorLength; ++c) {
-					sum += std::fabs(tmp1[site][mu][c]-computed_eigenvalues[i]*computed_eigenvectors[i][site][mu][c]);
+					sum += std::abs(tmp1[site][mu][c]-computed_eigenvalues[i]*computed_eigenvectors[i][site][mu][c]);
 					}
 				}
 				convergence += sum;
@@ -164,7 +157,7 @@ bool ExactOverlapOperator::checkEigenvalues() {
 			real_t sum = 0.;
 			for (unsigned int mu = 0; mu < 4; ++mu) {
 				for (unsigned int c = 0; c < diracVectorLength; ++c) {
-					sum += std::fabs(tmp1[site][mu][c]-computed_eigenvalues[i]*computed_eigenvectors[i][site][mu][c]);
+					sum += std::abs(tmp1[site][mu][c]-computed_eigenvalues[i]*computed_eigenvectors[i][site][mu][c]);
 				}
 			}
 			convergence += sum;

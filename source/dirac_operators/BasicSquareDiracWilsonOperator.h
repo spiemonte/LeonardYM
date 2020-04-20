@@ -1,10 +1,3 @@
-/*
- * BasicSquareDiracWilsonOperator.h
- *
- *  Created on: Feb 25, 2013
- *      Author: spiem_01
- */
-
 #ifndef BASICSQUAREDIRACWILSONOPERATOR_H_
 #define BASICSQUAREDIRACWILSONOPERATOR_H_
 #include "DiracOperator.h"

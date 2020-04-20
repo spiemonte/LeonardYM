@@ -1,10 +1,3 @@
-/*
- * HiggsGaugeHMCUpdater.cpp
- *
- *  Created on: Mar 21, 2012
- *      Author: spiem_01
- */
-
 #include "HiggsGaugeHMCUpdater.h"
 #include "hmc_integrators/Integrate.h"
 #include "actions/GaugeAction.h"

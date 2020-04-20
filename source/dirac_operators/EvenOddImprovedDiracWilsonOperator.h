@@ -1,10 +1,3 @@
-/*
- * ImprovedDiracWilsonOperator.h
- *
- *  Created on: May 4, 2012
- *      Author: spiem_01
- */
-
 #ifndef EVENODDIMPROVEDDIRACWILSONOPERATOR_H_
 #define EVENODDIMPROVEDDIRACWILSONOPERATOR_H_
 
@@ -47,7 +40,7 @@ public:
 
 private:
 	//The field strength
-	clover_matrix_t *cloverMatrixInverse;//TODO
+	clover_matrix_t *cloverMatrixInverse;
 
 	void calculateInverseEvenEven();
 

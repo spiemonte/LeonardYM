@@ -1,10 +1,3 @@
-/*
- * ImprovedGaugeAction.h
- *
- *  Created on: May 16, 2012
- *      Author: spiem_01
- */
-
 #ifndef IMPROVEDGAUGEACTION_H_
 #define IMPROVEDGAUGEACTION_H_
 

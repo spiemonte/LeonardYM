@@ -1,10 +1,3 @@
-/*
- * MMMRMultishiftSolver.h
- *
- *  Created on: Oct 30, 2012
- *      Author: spiem_01
- */
-
 #ifndef MMMRMULTISHIFTSOLVER_H_
 #define MMMRMULTISHIFTSOLVER_H_
 #include "MultishiftSolver.h"

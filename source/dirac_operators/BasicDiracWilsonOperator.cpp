@@ -1,10 +1,3 @@
-/*
- * BasicDiracWilsonOperator.cpp
- *
- *  Created on: Feb 25, 2013
- *      Author: spiem_01
- */
-
 #include "BasicDiracWilsonOperator.h"
 #include "hmc_forces/DiracWilsonFermionForce.h"
 

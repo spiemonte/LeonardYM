@@ -1,10 +1,3 @@
-/*
- * ComplementBlockDiracWilsonOperator.h
- *
- *  Created on: Mar 18, 2013
- *      Author: spiem_01
- */
-
 #ifndef SAPPRECONDITIONER_H_
 #define SAPPRECONDITIONER_H_
 #include "ComplementBlockDiracOperator.h"

@@ -1,10 +1,3 @@
-/*
- * ReadStartGaugeConfiguration.h
- *
- *  Created on: May 28, 2012
- *      Author: spiem_01
- */
-
 #ifndef READSTARTGAUGECONFIGURATION_H_
 #define READSTARTGAUGECONFIGURATION_H_
 

@@ -1,10 +1,3 @@
-/*
- * GMRESR.h
- *
- *  Created on: Apr 3, 2012
- *      Author: spiem_01
- */
-
 #ifndef PRECONDITIONEDBICGSTAB_H_
 #define PRECONDITIONEDBICGSTAB_H_
 #include "dirac_operators/DiracOperator.h"

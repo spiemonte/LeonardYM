@@ -1,10 +1,3 @@
-/*
- * Polynomial.h
- *
- *  Created on: Apr 30, 2012
- *      Author: spiem_01
- */
-
 #ifndef POLYNOMIAL_H_
 #define POLYNOMIAL_H_
 #include "Environment.h"

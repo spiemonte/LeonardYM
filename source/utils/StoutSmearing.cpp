@@ -1,10 +1,3 @@
-/*
- * StoutSmearing.cpp
- *
- *  Created on: Oct 30, 2012
- *      Author: spiem_01
- */
-
 #include "StoutSmearing.h"
 #include "actions/WilsonGaugeAction.h"
 #include "utils/ToString.h"

@@ -1,10 +1,3 @@
-/*
- * TestForce.cpp
- *
- *  Created on: Jun 4, 2012
- *      Author: spiem_01
- */
-
 #include "TestForce.h"
 
 namespace Update {

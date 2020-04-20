@@ -1,15 +1,5 @@
-/*
- * DiracWilsonOperator.cpp
- *
- *  Created on: Mar 28, 2012
- *      Author: spiem_01
- */
-
 #include "DiracWilsonOperator.h"
 #include "hmc_forces/DiracWilsonFermionForce.h"
-/*#include <x86intrin.h>
-#include <immintrin.h>
-#include <malloc.h>*/
 
 namespace Update {
 

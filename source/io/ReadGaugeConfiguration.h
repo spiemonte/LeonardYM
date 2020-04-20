@@ -1,10 +1,3 @@
-/*
- * ReadGaugeConfiguration.h
- *
- *  Created on: Oct 22, 2013
- *      Author: spiem_01
- */
-
 #ifndef READGAUGECONFIGURATION_H_
 #define READGAUGECONFIGURATION_H_
 #include "LatticeSweep.h"

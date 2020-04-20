@@ -1,10 +1,3 @@
-/*
- * FourthOmelyanLeapFrog.h
- *
- *  Created on: Mar 21, 2012
- *      Author: spiem_01
- */
-
 #ifndef FOURTHOMELYANLEAPFROG_H_
 #define FOURTHOMELYANLEAPFROG_H_
 

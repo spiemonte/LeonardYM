@@ -1,10 +1,3 @@
-/*
- * ExpMap.h
- *
- *  Created on: Oct 30, 2012
- *      Author: spiem_01
- */
-
 #ifndef EXPMAP_H
 #define EXPMAP_H
 #include "MatrixTypedef.h"

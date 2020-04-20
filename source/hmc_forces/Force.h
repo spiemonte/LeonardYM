@@ -1,10 +1,3 @@
-/*
- * Force.h
- *
- *  Created on: Mar 21, 2012
- *      Author: spiem_01
- */
-
 #ifndef FORCE_H_
 #define FORCE_H_
 #include "Environment.h"

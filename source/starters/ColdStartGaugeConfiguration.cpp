@@ -1,10 +1,3 @@
-/*
- * RandomStartGaugeConfiguration.cpp
- *
- *  Created on: Feb 28, 2012
- *      Author: spiem_01
- */
-
 #include "ColdStartGaugeConfiguration.h"
 #include "MatrixTypedef.h"
 

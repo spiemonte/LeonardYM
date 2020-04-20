@@ -1,10 +1,3 @@
-/*
- * ConjugateGradient.h
- *
- *  Created on: Sep 27, 2012
- *      Author: spiem_01
- */
-
 #ifndef CONJUGATEGRADIENT_H_
 #define CONJUGATEGRADIENT_H_
 #include "Environment.h"

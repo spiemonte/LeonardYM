@@ -1,10 +1,3 @@
-/*
- * ReadGaugeConfiguration.cpp
- *
- *  Created on: Oct 22, 2013
- *      Author: spiem_01
- */
-
 #include "ReadGaugeConfiguration.h"
 #include "starters/ReadStartGaugeConfiguration.h"
 

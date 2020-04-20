@@ -1,10 +1,3 @@
-/*
- * FundamentalMetropolisScalarUpdater.cpp
- *
- *  Created on: Apr 2, 2012
- *      Author: spiem_01
- */
-
 #include "FundamentalMetropolisScalarUpdater.h"
 #include "utils/RandomSeed.h"
 #include "actions/FundamentalScalarAction.h"

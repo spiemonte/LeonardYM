@@ -1,10 +1,3 @@
-/*
- * ChronologicalMultishiftSolver.h
- *
- *  Created on: Jul 24, 2012
- *      Author: spiem_01
- */
-
 #ifndef CHRONOLOGICALMULTISHIFTSOLVER_H_
 #define CHRONOLOGICALMULTISHIFTSOLVER_H_
 #include "MultishiftSolver.h"

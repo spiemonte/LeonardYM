@@ -1,10 +1,3 @@
-/*
- * HotStartGaugeConfiguration.h
- *
- *  Created on: Feb 28, 2012
- *      Author: spiem_01
- */
-
 #ifndef HOTSTARTGAUGECONFIGURATION_H_
 #define HOTSTARTGAUGECONFIGURATION_H_
 

@@ -1,10 +1,3 @@
-/*
- * AugConjugateGradientSolver.h
- *
- *  Created on: Nov 4, 2013
- *      Author: spiem_01
- */
-
 #ifndef AUGCONJUGATEGRADIENT_H_
 #define AUGCONJUGATEGRADIENT_H_
 

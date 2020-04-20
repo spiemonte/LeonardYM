@@ -1,10 +1,3 @@
-/*
- * ConverLattice.cpp
- *
- *  Created on: Jul 8, 2012
- *      Author: spiem_01
- */
-
 #include "ConvertLattice.h"
 #include "Environment.h"
 #include <iomanip>

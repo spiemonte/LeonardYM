@@ -1,10 +1,3 @@
-/*
- * PureGaugeHMCUpdater.h
- *
- *  Created on: Mar 21, 2012
- *      Author: spiem_01
- */
-
 #ifndef PUREGAUGEHMCUPDATER_H_
 #define PUREGAUGEHMCUPDATER_H_
 

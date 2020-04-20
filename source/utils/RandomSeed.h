@@ -1,10 +1,3 @@
-/*
- * RandomSeed.h
- *
- *  Created on: Feb 28, 2012
- *      Author: spiem_01
- */
-
 #ifndef RANDOMSEED_H_
 #define RANDOMSEED_H_
 #include <boost/random/mersenne_twister.hpp>

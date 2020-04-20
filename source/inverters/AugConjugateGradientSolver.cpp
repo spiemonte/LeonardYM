@@ -1,10 +1,3 @@
-/*
- * AugConjugateGradientSolver.cpp
- *
- *  Created on: Nov 4, 2013
- *      Author: spiem_01
- */
-
 #include "AugConjugateGradientSolver.h"
 
 namespace Update {

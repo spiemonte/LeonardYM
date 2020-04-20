@@ -1,10 +1,3 @@
-/*
- * ToString.h
- *
- *  Created on: May 24, 2012
- *      Author: spiem_01
- */
-
 #ifndef TOSTRING_H_
 #define TOSTRING_H_
 #include "MatrixTypedef.h"

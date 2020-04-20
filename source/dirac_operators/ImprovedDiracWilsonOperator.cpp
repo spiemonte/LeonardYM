@@ -1,10 +1,3 @@
-/*
- * ImprovedDiracWilsonOperator.cpp
- *
- *  Created on: May 4, 2012
- *      Author: spiem_01
- */
-
 #include "ImprovedDiracWilsonOperator.h"
 #include "hmc_forces/ImprovedFermionForce.h"
 

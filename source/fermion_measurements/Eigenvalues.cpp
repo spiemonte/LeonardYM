@@ -1,10 +1,3 @@
-/*
- * Eigenvalues.cpp
- *
- *  Created on: Jul 16, 2012
- *      Author: spiem_01
- */
-
 #include "Eigenvalues.h"
 #include "DiracEigenSolver.h"
 #include "io/GlobalOutput.h"

@@ -1,10 +1,3 @@
-/*
- * Checkerbord.h
- *
- *  Created on: Apr 11, 2012
- *      Author: spiem_01
- */
-
 #ifndef CHECKERBOARD_H_
 #define CHECKERBOARD_H_
 #include "Environment.h"

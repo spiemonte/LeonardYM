@@ -1,10 +1,3 @@
-/*
- * SquareDiracWilsonOperator.h
- *
- *  Created on: Apr 2, 2012
- *      Author: spiem_01
- */
-
 #ifndef SQUARETWISTEDDIRACOPERATOR_H_
 #define SQUARETWISTEDDIRACOPERATOR_H_
 

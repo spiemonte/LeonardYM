@@ -1,421 +1,421 @@
-updater.o: updater.cpp
-	$(CPP) $(CPPFLAGS) -c -o updater.o updater.cpp
+./build/main.o: ./source/main.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/main.o ./source/main.cpp
 
-Environment.o: ./source/Environment.cpp ./source/Environment.h
-	$(CPP) $(CPPFLAGS) -c -o Environment.o ./source/Environment.cpp
+./build/Environment.o: ./source/Environment.cpp ./source/Environment.h
+	$(CPP) $(CPPFLAGS) -c -o ./build/Environment.o ./source/Environment.cpp
 
-LocalLayout.o: ./source/MPILattice/LocalLayout.h ./source/MPILattice/LocalLayout.cpp
-	$(CPP) $(CPPFLAGS) -c -o LocalLayout.o ./source/MPILattice/LocalLayout.cpp
+./build/LocalLayout.o: ./source/MPILattice/LocalLayout.h ./source/MPILattice/LocalLayout.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/LocalLayout.o ./source/MPILattice/LocalLayout.cpp
 
-ReducedStencil.o: ./source/MPILattice/ReducedStencil.h ./source/MPILattice/ReducedStencil.cpp
-	$(CPP) $(CPPFLAGS) -c -o ReducedStencil.o ./source/MPILattice/ReducedStencil.cpp
+./build/ReducedStencil.o: ./source/MPILattice/ReducedStencil.h ./source/MPILattice/ReducedStencil.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/ReducedStencil.o ./source/MPILattice/ReducedStencil.cpp
 
-StandardStencil.o: ./source/MPILattice/StandardStencil.h ./source/MPILattice/StandardStencil.cpp
-	$(CPP) $(CPPFLAGS) -c -o StandardStencil.o ./source/MPILattice/StandardStencil.cpp
+./build/StandardStencil.o: ./source/MPILattice/StandardStencil.h ./source/MPILattice/StandardStencil.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/StandardStencil.o ./source/MPILattice/StandardStencil.cpp
 
-ExtendedStencil.o: ./source/MPILattice/ExtendedStencil.h ./source/MPILattice/ExtendedStencil.cpp
-	$(CPP) $(CPPFLAGS) -c -o ExtendedStencil.o ./source/MPILattice/ExtendedStencil.cpp
+./build/ExtendedStencil.o: ./source/MPILattice/ExtendedStencil.h ./source/MPILattice/ExtendedStencil.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/ExtendedStencil.o ./source/MPILattice/ExtendedStencil.cpp
 	
-AlgebraUtils.o: ./source/algebra_utils/AlgebraUtils.h ./source/algebra_utils/AlgebraUtils.cpp
-	$(CPP) $(CPPFLAGS) -c -o AlgebraUtils.o ./source/algebra_utils/AlgebraUtils.cpp
+./build/AlgebraUtils.o: ./source/algebra_utils/AlgebraUtils.h ./source/algebra_utils/AlgebraUtils.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/AlgebraUtils.o ./source/algebra_utils/AlgebraUtils.cpp
 
-LatticeSweep.o: ./source/LatticeSweep.h ./source/LatticeSweep.cpp
-	$(CPP) $(CPPFLAGS) -c -o LatticeSweep.o ./source/LatticeSweep.cpp
+./build/LatticeSweep.o: ./source/LatticeSweep.h ./source/LatticeSweep.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/LatticeSweep.o ./source/LatticeSweep.cpp
 
-Simulation.o: ./source/Simulation.h ./source/Simulation.cpp
-	$(CPP) $(CPPFLAGS) -c -o Simulation.o ./source/Simulation.cpp
+./build/Simulation.o: ./source/Simulation.h ./source/Simulation.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/Simulation.o ./source/Simulation.cpp
 
-BiConjugateGradient.o: ./source/inverters/BiConjugateGradient.h ./source/inverters/BiConjugateGradient.cpp
-	$(CPP) $(CPPFLAGS) -c -o BiConjugateGradient.o ./source/inverters/BiConjugateGradient.cpp
+./build/BiConjugateGradient.o: ./source/inverters/BiConjugateGradient.h ./source/inverters/BiConjugateGradient.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/BiConjugateGradient.o ./source/inverters/BiConjugateGradient.cpp
 
-PreconditionedBiCGStab.o: ./source/inverters/PreconditionedBiCGStab.h ./source/inverters/PreconditionedBiCGStab.cpp
-	$(CPP) $(CPPFLAGS) -c -o PreconditionedBiCGStab.o ./source/inverters/PreconditionedBiCGStab.cpp
+./build/PreconditionedBiCGStab.o: ./source/inverters/PreconditionedBiCGStab.h ./source/inverters/PreconditionedBiCGStab.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/PreconditionedBiCGStab.o ./source/inverters/PreconditionedBiCGStab.cpp
 
-GMRESR.o: ./source/inverters/GMRESR.h ./source/inverters/GMRESR.cpp
-	$(CPP) $(CPPFLAGS) -c -o GMRESR.o ./source/inverters/GMRESR.cpp
+./build/GMRESR.o: ./source/inverters/GMRESR.h ./source/inverters/GMRESR.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/GMRESR.o ./source/inverters/GMRESR.cpp
 
-ConjugateGradient.o: ./source/inverters/ConjugateGradient.h ./source/inverters/ConjugateGradient.cpp
-	$(CPP) $(CPPFLAGS) -c -o ConjugateGradient.o ./source/inverters/ConjugateGradient.cpp
+./build/ConjugateGradient.o: ./source/inverters/ConjugateGradient.h ./source/inverters/ConjugateGradient.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/ConjugateGradient.o ./source/inverters/ConjugateGradient.cpp
 
-DiracOperator.o: ./source/dirac_operators/DiracOperator.h ./source/dirac_operators/DiracOperator.cpp
-	$(CPP) $(CPPFLAGS) -c -o DiracOperator.o ./source/dirac_operators/DiracOperator.cpp
+./build/DiracOperator.o: ./source/dirac_operators/DiracOperator.h ./source/dirac_operators/DiracOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/DiracOperator.o ./source/dirac_operators/DiracOperator.cpp
 
-Propagator.o: ./source/dirac_operators/Propagator.h ./source/dirac_operators/Propagator.cpp
-	$(CPP) $(CPPFLAGS) -c -o Propagator.o ./source/dirac_operators/Propagator.cpp
+./build/Propagator.o: ./source/dirac_operators/Propagator.h ./source/dirac_operators/Propagator.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/Propagator.o ./source/dirac_operators/Propagator.cpp
 
-BasicDiracWilsonOperator.o: ./source/dirac_operators/BasicDiracWilsonOperator.h ./source/dirac_operators/BasicDiracWilsonOperator.cpp
-	$(CPP) $(CPPFLAGS) -c -o BasicDiracWilsonOperator.o ./source/dirac_operators/BasicDiracWilsonOperator.cpp
+./build/BasicDiracWilsonOperator.o: ./source/dirac_operators/BasicDiracWilsonOperator.h ./source/dirac_operators/BasicDiracWilsonOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/BasicDiracWilsonOperator.o ./source/dirac_operators/BasicDiracWilsonOperator.cpp
 
-BasicSquareDiracWilsonOperator.o: ./source/dirac_operators/BasicSquareDiracWilsonOperator.h ./source/dirac_operators/BasicSquareDiracWilsonOperator.cpp
-	$(CPP) $(CPPFLAGS) -c -o BasicSquareDiracWilsonOperator.o ./source/dirac_operators/BasicSquareDiracWilsonOperator.cpp
+./build/BasicSquareDiracWilsonOperator.o: ./source/dirac_operators/BasicSquareDiracWilsonOperator.h ./source/dirac_operators/BasicSquareDiracWilsonOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/BasicSquareDiracWilsonOperator.o ./source/dirac_operators/BasicSquareDiracWilsonOperator.cpp
 
-DiracWilsonOperator.o: ./source/dirac_operators/DiracWilsonOperator.h ./source/dirac_operators/DiracWilsonOperator.cpp
-	$(CPP) $(CPPFLAGS) -c -o DiracWilsonOperator.o ./source/dirac_operators/DiracWilsonOperator.cpp
+./build/DiracWilsonOperator.o: ./source/dirac_operators/DiracWilsonOperator.h ./source/dirac_operators/DiracWilsonOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/DiracWilsonOperator.o ./source/dirac_operators/DiracWilsonOperator.cpp
 
-SquareDiracWilsonOperator.o: ./source/dirac_operators/SquareDiracWilsonOperator.h ./source/dirac_operators/SquareDiracWilsonOperator.cpp
-	$(CPP) $(CPPFLAGS) -c -o SquareDiracWilsonOperator.o ./source/dirac_operators/SquareDiracWilsonOperator.cpp
+./build/SquareDiracWilsonOperator.o: ./source/dirac_operators/SquareDiracWilsonOperator.h ./source/dirac_operators/SquareDiracWilsonOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/SquareDiracWilsonOperator.o ./source/dirac_operators/SquareDiracWilsonOperator.cpp
 
-OverlapOperator.o: ./source/dirac_operators/OverlapOperator.h ./source/dirac_operators/OverlapOperator.cpp
-	$(CPP) $(CPPFLAGS) -c -o OverlapOperator.o ./source/dirac_operators/OverlapOperator.cpp
+./build/OverlapOperator.o: ./source/dirac_operators/OverlapOperator.h ./source/dirac_operators/OverlapOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/OverlapOperator.o ./source/dirac_operators/OverlapOperator.cpp
 
-SquareOverlapOperator.o: ./source/dirac_operators/SquareOverlapOperator.h ./source/dirac_operators/SquareOverlapOperator.cpp
-	$(CPP) $(CPPFLAGS) -c -o SquareOverlapOperator.o ./source/dirac_operators/SquareOverlapOperator.cpp
+./build/SquareOverlapOperator.o: ./source/dirac_operators/SquareOverlapOperator.h ./source/dirac_operators/SquareOverlapOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/SquareOverlapOperator.o ./source/dirac_operators/SquareOverlapOperator.cpp
 
-ExactOverlapOperator.o: ./source/dirac_operators/ExactOverlapOperator.h ./source/dirac_operators/ExactOverlapOperator.cpp
-	$(CPP) $(CPPFLAGS) -c -o ExactOverlapOperator.o ./source/dirac_operators/ExactOverlapOperator.cpp
+./build/ExactOverlapOperator.o: ./source/dirac_operators/ExactOverlapOperator.h ./source/dirac_operators/ExactOverlapOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/ExactOverlapOperator.o ./source/dirac_operators/ExactOverlapOperator.cpp
 
-BlockDiracOperator.o: ./source/dirac_operators/BlockDiracOperator.h ./source/dirac_operators/BlockDiracOperator.cpp
-	$(CPP) $(CPPFLAGS) -c -o BlockDiracOperator.o ./source/dirac_operators/BlockDiracOperator.cpp
+./build/BlockDiracOperator.o: ./source/dirac_operators/BlockDiracOperator.h ./source/dirac_operators/BlockDiracOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/BlockDiracOperator.o ./source/dirac_operators/BlockDiracOperator.cpp
 
-BlockDiracWilsonOperator.o: ./source/dirac_operators/BlockDiracWilsonOperator.h ./source/dirac_operators/BlockDiracWilsonOperator.cpp
-	$(CPP) $(CPPFLAGS) -c -o BlockDiracWilsonOperator.o ./source/dirac_operators/BlockDiracWilsonOperator.cpp
+./build/BlockDiracWilsonOperator.o: ./source/dirac_operators/BlockDiracWilsonOperator.h ./source/dirac_operators/BlockDiracWilsonOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/BlockDiracWilsonOperator.o ./source/dirac_operators/BlockDiracWilsonOperator.cpp
 
-BlockImprovedDiracWilsonOperator.o: ./source/dirac_operators/BlockImprovedDiracWilsonOperator.h ./source/dirac_operators/BlockImprovedDiracWilsonOperator.cpp
-	$(CPP) $(CPPFLAGS) -c -o BlockImprovedDiracWilsonOperator.o ./source/dirac_operators/BlockImprovedDiracWilsonOperator.cpp
+./build/BlockImprovedDiracWilsonOperator.o: ./source/dirac_operators/BlockImprovedDiracWilsonOperator.h ./source/dirac_operators/BlockImprovedDiracWilsonOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/BlockImprovedDiracWilsonOperator.o ./source/dirac_operators/BlockImprovedDiracWilsonOperator.cpp
 
-SquareBlockDiracWilsonOperator.o: ./source/dirac_operators/SquareBlockDiracWilsonOperator.h ./source/dirac_operators/SquareBlockDiracWilsonOperator.cpp
-	$(CPP) $(CPPFLAGS) -c -o SquareBlockDiracWilsonOperator.o ./source/dirac_operators/SquareBlockDiracWilsonOperator.cpp
+./build/SquareBlockDiracWilsonOperator.o: ./source/dirac_operators/SquareBlockDiracWilsonOperator.h ./source/dirac_operators/SquareBlockDiracWilsonOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/SquareBlockDiracWilsonOperator.o ./source/dirac_operators/SquareBlockDiracWilsonOperator.cpp
 
-SquareTwistedDiracOperator.o: ./source/dirac_operators/SquareTwistedDiracOperator.h ./source/dirac_operators/SquareTwistedDiracOperator.cpp
-	$(CPP) $(CPPFLAGS) -c -o SquareTwistedDiracOperator.o ./source/dirac_operators/SquareTwistedDiracOperator.cpp
+./build/SquareTwistedDiracOperator.o: ./source/dirac_operators/SquareTwistedDiracOperator.h ./source/dirac_operators/SquareTwistedDiracOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/SquareTwistedDiracOperator.o ./source/dirac_operators/SquareTwistedDiracOperator.cpp
 
-TwistedDiracOperator.o: ./source/dirac_operators/TwistedDiracOperator.h ./source/dirac_operators/TwistedDiracOperator.cpp
-	$(CPP) $(CPPFLAGS) -c -o TwistedDiracOperator.o ./source/dirac_operators/TwistedDiracOperator.cpp
+./build/TwistedDiracOperator.o: ./source/dirac_operators/TwistedDiracOperator.h ./source/dirac_operators/TwistedDiracOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/TwistedDiracOperator.o ./source/dirac_operators/TwistedDiracOperator.cpp
 
-ComplementBlockDiracOperator.o: ./source/dirac_operators/ComplementBlockDiracOperator.h ./source/dirac_operators/ComplementBlockDiracOperator.cpp
-	$(CPP) $(CPPFLAGS) -c -o ComplementBlockDiracOperator.o ./source/dirac_operators/ComplementBlockDiracOperator.cpp
+./build/ComplementBlockDiracOperator.o: ./source/dirac_operators/ComplementBlockDiracOperator.h ./source/dirac_operators/ComplementBlockDiracOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/ComplementBlockDiracOperator.o ./source/dirac_operators/ComplementBlockDiracOperator.cpp
 
-SquareComplementBlockDiracWilsonOperator.o: ./source/dirac_operators/SquareComplementBlockDiracWilsonOperator.h ./source/dirac_operators/SquareComplementBlockDiracWilsonOperator.cpp
-	$(CPP) $(CPPFLAGS) -c -o SquareComplementBlockDiracWilsonOperator.o ./source/dirac_operators/SquareComplementBlockDiracWilsonOperator.cpp
+./build/SquareComplementBlockDiracWilsonOperator.o: ./source/dirac_operators/SquareComplementBlockDiracWilsonOperator.h ./source/dirac_operators/SquareComplementBlockDiracWilsonOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/SquareComplementBlockDiracWilsonOperator.o ./source/dirac_operators/SquareComplementBlockDiracWilsonOperator.cpp
 
-HoppingOperator.o: ./source/dirac_operators/HoppingOperator.h ./source/dirac_operators/HoppingOperator.cpp
-	$(CPP) $(CPPFLAGS) -c -o HoppingOperator.o ./source/dirac_operators/HoppingOperator.cpp
+./build/HoppingOperator.o: ./source/dirac_operators/HoppingOperator.h ./source/dirac_operators/HoppingOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/HoppingOperator.o ./source/dirac_operators/HoppingOperator.cpp
 
-GammaOperators.o: ./source/dirac_operators/GammaOperators.h ./source/dirac_operators/GammaOperators.cpp
-	$(CPP) $(CPPFLAGS) -c -o GammaOperators.o ./source/dirac_operators/GammaOperators.cpp
+./build/GammaOperators.o: ./source/dirac_operators/GammaOperators.h ./source/dirac_operators/GammaOperators.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/GammaOperators.o ./source/dirac_operators/GammaOperators.cpp
 
-SquareComplementBlockDiracOperator.o: ./source/dirac_operators/SquareComplementBlockDiracOperator.h ./source/dirac_operators/SquareComplementBlockDiracOperator.cpp
-	$(CPP) $(CPPFLAGS) -c -o SquareComplementBlockDiracOperator.o ./source/dirac_operators/SquareComplementBlockDiracOperator.cpp
+./build/SquareComplementBlockDiracOperator.o: ./source/dirac_operators/SquareComplementBlockDiracOperator.h ./source/dirac_operators/SquareComplementBlockDiracOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/SquareComplementBlockDiracOperator.o ./source/dirac_operators/SquareComplementBlockDiracOperator.cpp
 
-ImprovedDiracWilsonOperator.o: ./source/dirac_operators/ImprovedDiracWilsonOperator.h ./source/dirac_operators/ImprovedDiracWilsonOperator.cpp
-	$(CPP) $(CPPFLAGS) -c -o ImprovedDiracWilsonOperator.o ./source/dirac_operators/ImprovedDiracWilsonOperator.cpp
+./build/ImprovedDiracWilsonOperator.o: ./source/dirac_operators/ImprovedDiracWilsonOperator.h ./source/dirac_operators/ImprovedDiracWilsonOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/ImprovedDiracWilsonOperator.o ./source/dirac_operators/ImprovedDiracWilsonOperator.cpp
 
-EvenOddImprovedDiracWilsonOperator.o: ./source/dirac_operators/EvenOddImprovedDiracWilsonOperator.h ./source/dirac_operators/EvenOddImprovedDiracWilsonOperator.cpp
-	$(CPP) $(CPPFLAGS) -c -o EvenOddImprovedDiracWilsonOperator.o ./source/dirac_operators/EvenOddImprovedDiracWilsonOperator.cpp
+./build/EvenOddImprovedDiracWilsonOperator.o: ./source/dirac_operators/EvenOddImprovedDiracWilsonOperator.h ./source/dirac_operators/EvenOddImprovedDiracWilsonOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/EvenOddImprovedDiracWilsonOperator.o ./source/dirac_operators/EvenOddImprovedDiracWilsonOperator.cpp
 
-SquareEvenOddImprovedDiracWilsonOperator.o: ./source/dirac_operators/SquareEvenOddImprovedDiracWilsonOperator.h ./source/dirac_operators/EvenOddImprovedDiracWilsonOperator.cpp
-	$(CPP) $(CPPFLAGS) -c -o SquareEvenOddImprovedDiracWilsonOperator.o ./source/dirac_operators/SquareEvenOddImprovedDiracWilsonOperator.cpp
+./build/SquareEvenOddImprovedDiracWilsonOperator.o: ./source/dirac_operators/SquareEvenOddImprovedDiracWilsonOperator.h ./source/dirac_operators/EvenOddImprovedDiracWilsonOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/SquareEvenOddImprovedDiracWilsonOperator.o ./source/dirac_operators/SquareEvenOddImprovedDiracWilsonOperator.cpp
 
-SquareImprovedDiracWilsonOperator.o: ./source/dirac_operators/SquareImprovedDiracWilsonOperator.h ./source/dirac_operators/SquareImprovedDiracWilsonOperator.cpp
-	$(CPP) $(CPPFLAGS) -c -o SquareImprovedDiracWilsonOperator.o ./source/dirac_operators/SquareImprovedDiracWilsonOperator.cpp
+./build/SquareImprovedDiracWilsonOperator.o: ./source/dirac_operators/SquareImprovedDiracWilsonOperator.h ./source/dirac_operators/SquareImprovedDiracWilsonOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/SquareImprovedDiracWilsonOperator.o ./source/dirac_operators/SquareImprovedDiracWilsonOperator.cpp
 
-MMMRMultishiftSolver.o: ./source/inverters/MMMRMultishiftSolver.h ./source/inverters/MMMRMultishiftSolver.cpp
-	$(CPP) $(CPPFLAGS) -c -o MMMRMultishiftSolver.o ./source/inverters/MMMRMultishiftSolver.cpp
+./build/MMMRMultishiftSolver.o: ./source/inverters/MMMRMultishiftSolver.h ./source/inverters/MMMRMultishiftSolver.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/MMMRMultishiftSolver.o ./source/inverters/MMMRMultishiftSolver.cpp
 
-MEMultishiftSolver.o: ./source/inverters/MEMultishiftSolver.h ./source/inverters/MEMultishiftSolver.cpp
-	$(CPP) $(CPPFLAGS) -c -o MEMultishiftSolver.o ./source/inverters/MEMultishiftSolver.cpp
+./build/MEMultishiftSolver.o: ./source/inverters/MEMultishiftSolver.h ./source/inverters/MEMultishiftSolver.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/MEMultishiftSolver.o ./source/inverters/MEMultishiftSolver.cpp
 
-MultishiftSolver.o: ./source/inverters/MultishiftSolver.h ./source/inverters/MultishiftSolver.cpp
-	$(CPP) $(CPPFLAGS) -c -o MultishiftSolver.o ./source/inverters/MultishiftSolver.cpp
+./build/MultishiftSolver.o: ./source/inverters/MultishiftSolver.h ./source/inverters/MultishiftSolver.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/MultishiftSolver.o ./source/inverters/MultishiftSolver.cpp
 
-ChronologicalMultishiftSolver.o: ./source/inverters/ChronologicalMultishiftSolver.h ./source/inverters/ChronologicalMultishiftSolver.cpp
-	$(CPP) $(CPPFLAGS) -c -o ChronologicalMultishiftSolver.o ./source/inverters/ChronologicalMultishiftSolver.cpp
+./build/ChronologicalMultishiftSolver.o: ./source/inverters/ChronologicalMultishiftSolver.h ./source/inverters/ChronologicalMultishiftSolver.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/ChronologicalMultishiftSolver.o ./source/inverters/ChronologicalMultishiftSolver.cpp
 
-MultiGridMEMultishiftSolver.o: ./source/inverters/MultiGridMEMultishiftSolver.h ./source/inverters/MultiGridMEMultishiftSolver.cpp
-	$(CPP) $(CPPFLAGS) -c -o MultiGridMEMultishiftSolver.o ./source/inverters/MultiGridMEMultishiftSolver.cpp
+./build/MultiGridMEMultishiftSolver.o: ./source/inverters/MultiGridMEMultishiftSolver.h ./source/inverters/MultiGridMEMultishiftSolver.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/MultiGridMEMultishiftSolver.o ./source/inverters/MultiGridMEMultishiftSolver.cpp
 
-DeflationInverter.o: ./source/inverters/DeflationInverter.h ./source/inverters/DeflationInverter.cpp
-	$(CPP) $(CPPFLAGS) -c -o DeflationInverter.o ./source/inverters/DeflationInverter.cpp
+./build/DeflationInverter.o: ./source/inverters/DeflationInverter.h ./source/inverters/DeflationInverter.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/DeflationInverter.o ./source/inverters/DeflationInverter.cpp
 
-WilsonGaugeAction.o: ./source/actions/WilsonGaugeAction.h ./source/actions/WilsonGaugeAction.cpp
-	$(CPP) $(CPPFLAGS) -c -o WilsonGaugeAction.o ./source/actions/WilsonGaugeAction.cpp
+./build/WilsonGaugeAction.o: ./source/actions/WilsonGaugeAction.h ./source/actions/WilsonGaugeAction.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/WilsonGaugeAction.o ./source/actions/WilsonGaugeAction.cpp
 
-ImprovedGaugeAction.o: ./source/actions/ImprovedGaugeAction.h ./source/actions/ImprovedGaugeAction.cpp
-	$(CPP) $(CPPFLAGS) -c -o ImprovedGaugeAction.o ./source/actions/ImprovedGaugeAction.cpp
+./build/ImprovedGaugeAction.o: ./source/actions/ImprovedGaugeAction.h ./source/actions/ImprovedGaugeAction.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/ImprovedGaugeAction.o ./source/actions/ImprovedGaugeAction.cpp
 
-GaugeForce.o: ./source/hmc_forces/GaugeForce.h ./source/hmc_forces/GaugeForce.cpp
-	$(CPP) $(CPPFLAGS) -c -o GaugeForce.o ./source/hmc_forces/GaugeForce.cpp
+./build/GaugeForce.o: ./source/hmc_forces/GaugeForce.h ./source/hmc_forces/GaugeForce.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/GaugeForce.o ./source/hmc_forces/GaugeForce.cpp
 
-GaugeAction.o: ./source/actions/GaugeAction.h ./source/actions/GaugeAction.cpp
-	$(CPP) $(CPPFLAGS) -c -o GaugeAction.o ./source/actions/GaugeAction.cpp
+./build/GaugeAction.o: ./source/actions/GaugeAction.h ./source/actions/GaugeAction.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/GaugeAction.o ./source/actions/GaugeAction.cpp
 
-Integrate.o: ./source/hmc_integrators/Integrate.h ./source/hmc_integrators/Integrate.cpp
-	$(CPP) $(CPPFLAGS) -c -o Integrate.o ./source/hmc_integrators/Integrate.cpp
+./build/Integrate.o: ./source/hmc_integrators/Integrate.h ./source/hmc_integrators/Integrate.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/Integrate.o ./source/hmc_integrators/Integrate.cpp
 
-LeapFrog.o: ./source/hmc_integrators/LeapFrog.h ./source/hmc_integrators/LeapFrog.cpp
-	$(CPP) $(CPPFLAGS) -c -o LeapFrog.o ./source/hmc_integrators/LeapFrog.cpp
+./build/LeapFrog.o: ./source/hmc_integrators/LeapFrog.h ./source/hmc_integrators/LeapFrog.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/LeapFrog.o ./source/hmc_integrators/LeapFrog.cpp
 
-FourthOrderLeapFrog.o: ./source/hmc_integrators/FourthOrderLeapFrog.h ./source/hmc_integrators/FourthOrderLeapFrog.cpp
-	$(CPP) $(CPPFLAGS) -c -o FourthOrderLeapFrog.o ./source/hmc_integrators/FourthOrderLeapFrog.cpp
+./build/FourthOrderLeapFrog.o: ./source/hmc_integrators/FourthOrderLeapFrog.h ./source/hmc_integrators/FourthOrderLeapFrog.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/FourthOrderLeapFrog.o ./source/hmc_integrators/FourthOrderLeapFrog.cpp
 
-SixthOrderLeapFrog.o: ./source/hmc_integrators/SixthOrderLeapFrog.h ./source/hmc_integrators/SixthOrderLeapFrog.cpp
-	$(CPP) $(CPPFLAGS) -c -o SixthOrderLeapFrog.o ./source/hmc_integrators/SixthOrderLeapFrog.cpp
+./build/SixthOrderLeapFrog.o: ./source/hmc_integrators/SixthOrderLeapFrog.h ./source/hmc_integrators/SixthOrderLeapFrog.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/SixthOrderLeapFrog.o ./source/hmc_integrators/SixthOrderLeapFrog.cpp
 
-OmelyanLeapFrog.o: ./source/hmc_integrators/OmelyanLeapFrog.h ./source/hmc_integrators/OmelyanLeapFrog.cpp
-	$(CPP) $(CPPFLAGS) -c -o OmelyanLeapFrog.o ./source/hmc_integrators/OmelyanLeapFrog.cpp
+./build/OmelyanLeapFrog.o: ./source/hmc_integrators/OmelyanLeapFrog.h ./source/hmc_integrators/OmelyanLeapFrog.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/OmelyanLeapFrog.o ./source/hmc_integrators/OmelyanLeapFrog.cpp
 
-FourthOmelyanLeapFrog.o: ./source/hmc_integrators/FourthOmelyanLeapFrog.h ./source/hmc_integrators/FourthOmelyanLeapFrog.cpp
-	$(CPP) $(CPPFLAGS) -c -o FourthOmelyanLeapFrog.o ./source/hmc_integrators/FourthOmelyanLeapFrog.cpp
+./build/FourthOmelyanLeapFrog.o: ./source/hmc_integrators/FourthOmelyanLeapFrog.h ./source/hmc_integrators/FourthOmelyanLeapFrog.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/FourthOmelyanLeapFrog.o ./source/hmc_integrators/FourthOmelyanLeapFrog.cpp
 
-Energy.o: ./source/actions/Energy.h ./source/actions/Energy.cpp
-	$(CPP) $(CPPFLAGS) -c -o Energy.o ./source/actions/Energy.cpp
+./build/Energy.o: ./source/actions/Energy.h ./source/actions/Energy.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/Energy.o ./source/actions/Energy.cpp
 
-Force.o: ./source/hmc_forces/Force.h ./source/hmc_forces/Force.cpp
-	$(CPP) $(CPPFLAGS) -c -o Force.o ./source/hmc_forces/Force.cpp
+./build/Force.o: ./source/hmc_forces/Force.h ./source/hmc_forces/Force.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/Force.o ./source/hmc_forces/Force.cpp
 
-HMCUpdater.o: ./source/hmc_updaters/HMCUpdater.h ./source/hmc_updaters/HMCUpdater.cpp
-	$(CPP) $(CPPFLAGS) -c -o HMCUpdater.o ./source/hmc_updaters/HMCUpdater.cpp
+./build/HMCUpdater.o: ./source/hmc_updaters/HMCUpdater.h ./source/hmc_updaters/HMCUpdater.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/HMCUpdater.o ./source/hmc_updaters/HMCUpdater.cpp
 
-FermionHMCUpdater.o: ./source/hmc_updaters/FermionHMCUpdater.h ./source/hmc_updaters/FermionHMCUpdater.cpp
-	$(CPP) $(CPPFLAGS) -c -o FermionHMCUpdater.o ./source/hmc_updaters/FermionHMCUpdater.cpp
+./build/FermionHMCUpdater.o: ./source/hmc_updaters/FermionHMCUpdater.h ./source/hmc_updaters/FermionHMCUpdater.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/FermionHMCUpdater.o ./source/hmc_updaters/FermionHMCUpdater.cpp
 
-FermionicAction.o: ./source/actions/FermionicAction.h ./source/actions/FermionicAction.cpp
-	$(CPP) $(CPPFLAGS) -c -o FermionicAction.o ./source/actions/FermionicAction.cpp
+./build/FermionicAction.o: ./source/actions/FermionicAction.h ./source/actions/FermionicAction.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/FermionicAction.o ./source/actions/FermionicAction.cpp
 
-Polynomial.o: ./source/dirac_functions/Polynomial.h ./source/dirac_functions/Polynomial.cpp
-	$(CPP) $(CPPFLAGS) -c -o Polynomial.o ./source/dirac_functions/Polynomial.cpp
+./build/Polynomial.o: ./source/dirac_functions/Polynomial.h ./source/dirac_functions/Polynomial.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/Polynomial.o ./source/dirac_functions/Polynomial.cpp
 
-ChebyshevRecursion.o: ./source/dirac_functions/ChebyshevRecursion.h ./source/dirac_functions/ChebyshevRecursion.cpp
-	$(CPP) $(CPPFLAGS) -c -o ChebyshevRecursion.o ./source/dirac_functions/ChebyshevRecursion.cpp
+./build/ChebyshevRecursion.o: ./source/dirac_functions/ChebyshevRecursion.h ./source/dirac_functions/ChebyshevRecursion.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/ChebyshevRecursion.o ./source/dirac_functions/ChebyshevRecursion.cpp
 
-RationalApproximation.o: ./source/dirac_functions/RationalApproximation.h ./source/dirac_functions/RationalApproximation.cpp
-	$(CPP) $(CPPFLAGS) -c -o RationalApproximation.o ./source/dirac_functions/RationalApproximation.cpp
+./build/RationalApproximation.o: ./source/dirac_functions/RationalApproximation.h ./source/dirac_functions/RationalApproximation.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/RationalApproximation.o ./source/dirac_functions/RationalApproximation.cpp
 
-GaugeFixing.o: ./source/gauge_fixing/GaugeFixing.h ./source/gauge_fixing/GaugeFixing.cpp
-	$(CPP) $(CPPFLAGS) -c -o GaugeFixing.o ./source/gauge_fixing/GaugeFixing.cpp
+./build/GaugeFixing.o: ./source/gauge_fixing/GaugeFixing.h ./source/gauge_fixing/GaugeFixing.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/GaugeFixing.o ./source/gauge_fixing/GaugeFixing.cpp
 
-LandauGaugeFixing.o: ./source/gauge_fixing/LandauGaugeFixing.h ./source/gauge_fixing/LandauGaugeFixing.cpp
-	$(CPP) $(CPPFLAGS) -c -o LandauGaugeFixing.o ./source/gauge_fixing/LandauGaugeFixing.cpp
+./build/LandauGaugeFixing.o: ./source/gauge_fixing/LandauGaugeFixing.h ./source/gauge_fixing/LandauGaugeFixing.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/LandauGaugeFixing.o ./source/gauge_fixing/LandauGaugeFixing.cpp
 
-LandauGluonPropagator.o: ./source/gauge_fixing/LandauGluonPropagator.h ./source/gauge_fixing/LandauGluonPropagator.cpp
-	$(CPP) $(CPPFLAGS) -c -o LandauGluonPropagator.o ./source/gauge_fixing/LandauGluonPropagator.cpp
+./build/LandauGluonPropagator.o: ./source/gauge_fixing/LandauGluonPropagator.h ./source/gauge_fixing/LandauGluonPropagator.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/LandauGluonPropagator.o ./source/gauge_fixing/LandauGluonPropagator.cpp
 
-LandauGhostPropagator.o: ./source/gauge_fixing/LandauGhostPropagator.h ./source/gauge_fixing/LandauGhostPropagator.cpp
-	$(CPP) $(CPPFLAGS) -c -o LandauGhostPropagator.o ./source/gauge_fixing/LandauGhostPropagator.cpp
+./build/LandauGhostPropagator.o: ./source/gauge_fixing/LandauGhostPropagator.h ./source/gauge_fixing/LandauGhostPropagator.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/LandauGhostPropagator.o ./source/gauge_fixing/LandauGhostPropagator.cpp
 
-MaximalAbelianGaugeFixing.o: ./source/gauge_fixing/MaximalAbelianGaugeFixing.h ./source/gauge_fixing/MaximalAbelianGaugeFixing.cpp
-	$(CPP) $(CPPFLAGS) -c -o MaximalAbelianGaugeFixing.o ./source/gauge_fixing/MaximalAbelianGaugeFixing.cpp
+./build/MaximalAbelianGaugeFixing.o: ./source/gauge_fixing/MaximalAbelianGaugeFixing.h ./source/gauge_fixing/MaximalAbelianGaugeFixing.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/MaximalAbelianGaugeFixing.o ./source/gauge_fixing/MaximalAbelianGaugeFixing.cpp
 
-MaximalAbelianProjection.o: ./source/gauge_fixing/MaximalAbelianProjection.h ./source/gauge_fixing/MaximalAbelianProjection.cpp
-	$(CPP) $(CPPFLAGS) -c -o MaximalAbelianProjection.o ./source/gauge_fixing/MaximalAbelianProjection.cpp
+./build/MaximalAbelianProjection.o: ./source/gauge_fixing/MaximalAbelianProjection.h ./source/gauge_fixing/MaximalAbelianProjection.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/MaximalAbelianProjection.o ./source/gauge_fixing/MaximalAbelianProjection.cpp
 
-ReUnit.o: ./source/utils/ReUnit.h ./source/utils/ReUnit.cpp
-	$(CPP) $(CPPFLAGS) -c -o ReUnit.o ./source/utils/ReUnit.cpp
+./build/ReUnit.o: ./source/utils/ReUnit.h ./source/utils/ReUnit.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/ReUnit.o ./source/utils/ReUnit.cpp
 
-RandomGaugeTransformation.o: ./source/utils/RandomGaugeTransformation.h ./source/utils/RandomGaugeTransformation.cpp
-	$(CPP) $(CPPFLAGS) -c -o RandomGaugeTransformation.o ./source/utils/RandomGaugeTransformation.cpp
+./build/RandomGaugeTransformation.o: ./source/utils/RandomGaugeTransformation.h ./source/utils/RandomGaugeTransformation.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/RandomGaugeTransformation.o ./source/utils/RandomGaugeTransformation.cpp
 
-StoutSmearing.o: ./source/utils/StoutSmearing.h ./source/utils/StoutSmearing.cpp
-	$(CPP) $(CPPFLAGS) -c -o StoutSmearing.o ./source/utils/StoutSmearing.cpp
+./build/StoutSmearing.o: ./source/utils/StoutSmearing.h ./source/utils/StoutSmearing.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/StoutSmearing.o ./source/utils/StoutSmearing.cpp
 
-Gamma.o: ./source/utils/Gamma.h ./source/utils/Gamma.cpp
-	$(CPP) $(CPPFLAGS) -c -o Gamma.o ./source/utils/Gamma.cpp
+./build/Gamma.o: ./source/utils/Gamma.h ./source/utils/Gamma.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/Gamma.o ./source/utils/Gamma.cpp
 
-PureGaugeUpdater.o: ./source/pure_gauge/PureGaugeUpdater.h ./source/pure_gauge/PureGaugeUpdater.cpp
-	$(CPP) $(CPPFLAGS) -c -o PureGaugeUpdater.o ./source/pure_gauge/PureGaugeUpdater.cpp
+./build/PureGaugeUpdater.o: ./source/pure_gauge/PureGaugeUpdater.h ./source/pure_gauge/PureGaugeUpdater.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/PureGaugeUpdater.o ./source/pure_gauge/PureGaugeUpdater.cpp
 
-PureGaugeOverrelaxation.o: ./source/pure_gauge/PureGaugeOverrelaxation.h ./source/pure_gauge/PureGaugeOverrelaxation.cpp
-	$(CPP) $(CPPFLAGS) -c -o PureGaugeOverrelaxation.o ./source/pure_gauge/PureGaugeOverrelaxation.cpp
+./build/PureGaugeOverrelaxation.o: ./source/pure_gauge/PureGaugeOverrelaxation.h ./source/pure_gauge/PureGaugeOverrelaxation.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/PureGaugeOverrelaxation.o ./source/pure_gauge/PureGaugeOverrelaxation.cpp
 
-PureGaugeHMCUpdater.o: ./source/hmc_updaters/PureGaugeHMCUpdater.h ./source/hmc_updaters/PureGaugeHMCUpdater.cpp
-	$(CPP) $(CPPFLAGS) -c -o PureGaugeHMCUpdater.o ./source/hmc_updaters/PureGaugeHMCUpdater.cpp
+./build/PureGaugeHMCUpdater.o: ./source/hmc_updaters/PureGaugeHMCUpdater.h ./source/hmc_updaters/PureGaugeHMCUpdater.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/PureGaugeHMCUpdater.o ./source/hmc_updaters/PureGaugeHMCUpdater.cpp
 
-Checkerboard.o: ./source/pure_gauge/Checkerboard.h ./source/pure_gauge/Checkerboard.cpp
-	$(CPP) $(CPPFLAGS) -c -o Checkerboard.o ./source/pure_gauge/Checkerboard.cpp
+./build/Checkerboard.o: ./source/pure_gauge/Checkerboard.h ./source/pure_gauge/Checkerboard.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/Checkerboard.o ./source/pure_gauge/Checkerboard.cpp
 
-RandomSeed.o: ./source/utils/RandomSeed.h ./source/utils/RandomSeed.cpp
-	$(CPP) $(CPPFLAGS) -c -o RandomSeed.o ./source/utils/RandomSeed.cpp
+./build/RandomSeed.o: ./source/utils/RandomSeed.h ./source/utils/RandomSeed.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/RandomSeed.o ./source/utils/RandomSeed.cpp
 
-Plaquette.o: ./source/wilson_loops/Plaquette.h ./source/wilson_loops/Plaquette.cpp
-	$(CPP) $(CPPFLAGS) -c -o Plaquette.o ./source/wilson_loops/Plaquette.cpp
+./build/Plaquette.o: ./source/wilson_loops/Plaquette.h ./source/wilson_loops/Plaquette.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/Plaquette.o ./source/wilson_loops/Plaquette.cpp
 
-PolyakovLoop.o: ./source/polyakov_loops/PolyakovLoop.h ./source/polyakov_loops/PolyakovLoop.cpp
-	$(CPP) $(CPPFLAGS) -c -o PolyakovLoop.o ./source/polyakov_loops/PolyakovLoop.cpp
+./build/PolyakovLoop.o: ./source/polyakov_loops/PolyakovLoop.h ./source/polyakov_loops/PolyakovLoop.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/PolyakovLoop.o ./source/polyakov_loops/PolyakovLoop.cpp
 
-PolyakovLoopEigenvalues.o: ./source/polyakov_loops/PolyakovLoopEigenvalues.h ./source/polyakov_loops/PolyakovLoopEigenvalues.cpp
-	$(CPP) $(CPPFLAGS) -c -o PolyakovLoopEigenvalues.o ./source/polyakov_loops/PolyakovLoopEigenvalues.cpp
+./build/PolyakovLoopEigenvalues.o: ./source/polyakov_loops/PolyakovLoopEigenvalues.h ./source/polyakov_loops/PolyakovLoopEigenvalues.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/PolyakovLoopEigenvalues.o ./source/polyakov_loops/PolyakovLoopEigenvalues.cpp
 
-PolyakovLoopCorrelator.o: ./source/polyakov_loops/PolyakovLoopCorrelator.h ./source/polyakov_loops/PolyakovLoopCorrelator.cpp
-	$(CPP) $(CPPFLAGS) -c -o PolyakovLoopCorrelator.o ./source/polyakov_loops/PolyakovLoopCorrelator.cpp
+./build/PolyakovLoopCorrelator.o: ./source/polyakov_loops/PolyakovLoopCorrelator.h ./source/polyakov_loops/PolyakovLoopCorrelator.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/PolyakovLoopCorrelator.o ./source/polyakov_loops/PolyakovLoopCorrelator.cpp
 
-AdjointPolyakovLoop.o: ./source/polyakov_loops/AdjointPolyakovLoop.h ./source/polyakov_loops/AdjointPolyakovLoop.cpp
-	$(CPP) $(CPPFLAGS) -c -o AdjointPolyakovLoop.o ./source/polyakov_loops/AdjointPolyakovLoop.cpp
+./build/AdjointPolyakovLoop.o: ./source/polyakov_loops/AdjointPolyakovLoop.h ./source/polyakov_loops/AdjointPolyakovLoop.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/AdjointPolyakovLoop.o ./source/polyakov_loops/AdjointPolyakovLoop.cpp
 
-WilsonLoop.o: ./source/wilson_loops/WilsonLoop.h ./source/wilson_loops/WilsonLoop.cpp
-	$(CPP) $(CPPFLAGS) -c -o WilsonLoop.o ./source/wilson_loops/WilsonLoop.cpp
+./build/WilsonLoop.o: ./source/wilson_loops/WilsonLoop.h ./source/wilson_loops/WilsonLoop.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/WilsonLoop.o ./source/wilson_loops/WilsonLoop.cpp
 
-PureGaugeWilsonLoops.o: ./source/pure_gauge/PureGaugeWilsonLoops.h ./source/pure_gauge/PureGaugeWilsonLoops.cpp
-	$(CPP) $(CPPFLAGS) -c -o PureGaugeWilsonLoops.o ./source/pure_gauge/PureGaugeWilsonLoops.cpp 
+./build/PureGaugeWilsonLoops.o: ./source/pure_gauge/PureGaugeWilsonLoops.h ./source/pure_gauge/PureGaugeWilsonLoops.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/PureGaugeWilsonLoops.o ./source/pure_gauge/PureGaugeWilsonLoops.cpp 
 
-StartGaugeConfiguration.o: ./source/starters/StartGaugeConfiguration.h ./source/starters/StartGaugeConfiguration.cpp
-	$(CPP) $(CPPFLAGS) -c -o StartGaugeConfiguration.o ./source/starters/StartGaugeConfiguration.cpp
+./build/StartGaugeConfiguration.o: ./source/starters/StartGaugeConfiguration.h ./source/starters/StartGaugeConfiguration.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/StartGaugeConfiguration.o ./source/starters/StartGaugeConfiguration.cpp
 
-ReadStartGaugeConfiguration.o: ./source/starters/ReadStartGaugeConfiguration.h ./source/starters/ReadStartGaugeConfiguration.cpp
-	$(CPP) $(CPPFLAGS) -c -o ReadStartGaugeConfiguration.o ./source/starters/ReadStartGaugeConfiguration.cpp
+./build/ReadStartGaugeConfiguration.o: ./source/starters/ReadStartGaugeConfiguration.h ./source/starters/ReadStartGaugeConfiguration.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/ReadStartGaugeConfiguration.o ./source/starters/ReadStartGaugeConfiguration.cpp
 
-HotStartGaugeConfiguration.o: ./source/starters/HotStartGaugeConfiguration.h ./source/starters/HotStartGaugeConfiguration.cpp
-	$(CPP) $(CPPFLAGS) -c -o HotStartGaugeConfiguration.o ./source/starters/HotStartGaugeConfiguration.cpp
+./build/HotStartGaugeConfiguration.o: ./source/starters/HotStartGaugeConfiguration.h ./source/starters/HotStartGaugeConfiguration.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/HotStartGaugeConfiguration.o ./source/starters/HotStartGaugeConfiguration.cpp
 
-ColdStartGaugeConfiguration.o: ./source/starters/ColdStartGaugeConfiguration.h ./source/starters/ColdStartGaugeConfiguration.cpp
-	$(CPP) $(CPPFLAGS) -c -o ColdStartGaugeConfiguration.o ./source/starters/ColdStartGaugeConfiguration.cpp
+./build/ColdStartGaugeConfiguration.o: ./source/starters/ColdStartGaugeConfiguration.h ./source/starters/ColdStartGaugeConfiguration.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/ColdStartGaugeConfiguration.o ./source/starters/ColdStartGaugeConfiguration.cpp
 
-StochasticEstimator.o: ./source/fermion_measurements/StochasticEstimator.h ./source/fermion_measurements/StochasticEstimator.cpp
-	$(CPP) $(CPPFLAGS) -c -o StochasticEstimator.o ./source/fermion_measurements/StochasticEstimator.cpp
+./build/StochasticEstimator.o: ./source/fermion_measurements/StochasticEstimator.h ./source/fermion_measurements/StochasticEstimator.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/StochasticEstimator.o ./source/fermion_measurements/StochasticEstimator.cpp
 
-MesonCorrelator.o: ./source/correlators/MesonCorrelator.h ./source/correlators/MesonCorrelator.cpp
-	$(CPP) $(CPPFLAGS) -c -o MesonCorrelator.o ./source/correlators/MesonCorrelator.cpp
+./build/MesonCorrelator.o: ./source/correlators/MesonCorrelator.h ./source/correlators/MesonCorrelator.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/MesonCorrelator.o ./source/correlators/MesonCorrelator.cpp
 
-OverlapChiralRotation.o: ./source/fermion_measurements/OverlapChiralRotation.h ./source/fermion_measurements/OverlapChiralRotation.cpp
-	$(CPP) $(CPPFLAGS) -c -o OverlapChiralRotation.o ./source/fermion_measurements/OverlapChiralRotation.cpp
+./build/OverlapChiralRotation.o: ./source/fermion_measurements/OverlapChiralRotation.h ./source/fermion_measurements/OverlapChiralRotation.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/OverlapChiralRotation.o ./source/fermion_measurements/OverlapChiralRotation.cpp
 
-ChiralCondensate.o: ./source/fermion_measurements/ChiralCondensate.h ./source/fermion_measurements/ChiralCondensate.cpp
-	$(CPP) $(CPPFLAGS) -c -o ChiralCondensate.o ./source/fermion_measurements/ChiralCondensate.cpp
+./build/ChiralCondensate.o: ./source/fermion_measurements/ChiralCondensate.h ./source/fermion_measurements/ChiralCondensate.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/ChiralCondensate.o ./source/fermion_measurements/ChiralCondensate.cpp
 
-NPRVertex.o: ./source/fermion_measurements/NPRVertex.h ./source/fermion_measurements/NPRVertex.cpp
-	$(CPP) $(CPPFLAGS) -c -o NPRVertex.o ./source/fermion_measurements/NPRVertex.cpp
+./build/NPRVertex.o: ./source/fermion_measurements/NPRVertex.h ./source/fermion_measurements/NPRVertex.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/NPRVertex.o ./source/fermion_measurements/NPRVertex.cpp
 	
-GluinoGlue.o: ./source/correlators/GluinoGlue.h ./source/correlators/GluinoGlue.cpp
-	$(CPP) $(CPPFLAGS) -c -o GluinoGlue.o ./source/correlators/GluinoGlue.cpp
+./build/GluinoGlue.o: ./source/correlators/GluinoGlue.h ./source/correlators/GluinoGlue.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/GluinoGlue.o ./source/correlators/GluinoGlue.cpp
 
-FermionForce.o: ./source/hmc_forces/FermionForce.h ./source/hmc_forces/FermionForce.cpp
-	$(CPP) $(CPPFLAGS) -c -o FermionForce.o ./source/hmc_forces/FermionForce.cpp
+./build/FermionForce.o: ./source/hmc_forces/FermionForce.h ./source/hmc_forces/FermionForce.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/FermionForce.o ./source/hmc_forces/FermionForce.cpp
 
-SmearingForce.o: ./source/hmc_forces/SmearingForce.h ./source/hmc_forces/SmearingForce.cpp
-	$(CPP) $(CPPFLAGS) -c -o SmearingForce.o ./source/hmc_forces/SmearingForce.cpp
+./build/SmearingForce.o: ./source/hmc_forces/SmearingForce.h ./source/hmc_forces/SmearingForce.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/SmearingForce.o ./source/hmc_forces/SmearingForce.cpp
 
-DiracWilsonFermionForce.o: ./source/hmc_forces/DiracWilsonFermionForce.h ./source/hmc_forces/DiracWilsonFermionForce.cpp
-	$(CPP) $(CPPFLAGS) -c -o DiracWilsonFermionForce.o ./source/hmc_forces/DiracWilsonFermionForce.cpp
+./build/DiracWilsonFermionForce.o: ./source/hmc_forces/DiracWilsonFermionForce.h ./source/hmc_forces/DiracWilsonFermionForce.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/DiracWilsonFermionForce.o ./source/hmc_forces/DiracWilsonFermionForce.cpp
 
-OverlapFermionForce.o: ./source/hmc_forces/OverlapFermionForce.h ./source/hmc_forces/OverlapFermionForce.cpp
-	$(CPP) $(CPPFLAGS) -c -o OverlapFermionForce.o ./source/hmc_forces/OverlapFermionForce.cpp
+./build/OverlapFermionForce.o: ./source/hmc_forces/OverlapFermionForce.h ./source/hmc_forces/OverlapFermionForce.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/OverlapFermionForce.o ./source/hmc_forces/OverlapFermionForce.cpp
 
-BlockDiracWilsonFermionForce.o: ./source/hmc_forces/BlockDiracWilsonFermionForce.h ./source/hmc_forces/BlockDiracWilsonFermionForce.cpp
-	$(CPP) $(CPPFLAGS) -c -o BlockDiracWilsonFermionForce.o ./source/hmc_forces/BlockDiracWilsonFermionForce.cpp
+./build/BlockDiracWilsonFermionForce.o: ./source/hmc_forces/BlockDiracWilsonFermionForce.h ./source/hmc_forces/BlockDiracWilsonFermionForce.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/BlockDiracWilsonFermionForce.o ./source/hmc_forces/BlockDiracWilsonFermionForce.cpp
 
-ImprovedFermionForce.o: ./source/hmc_forces/ImprovedFermionForce.h ./source/hmc_forces/ImprovedFermionForce.cpp
-	$(CPP) $(CPPFLAGS) -c -o ImprovedFermionForce.o ./source/hmc_forces/ImprovedFermionForce.cpp
+./build/ImprovedFermionForce.o: ./source/hmc_forces/ImprovedFermionForce.h ./source/hmc_forces/ImprovedFermionForce.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/ImprovedFermionForce.o ./source/hmc_forces/ImprovedFermionForce.cpp
 
-TestForce.o: ./source/hmc_forces/TestForce.h ./source/hmc_forces/TestForce.cpp
-	$(CPP) $(CPPFLAGS) -c -o TestForce.o ./source/hmc_forces/TestForce.cpp
+./build/TestForce.o: ./source/hmc_forces/TestForce.h ./source/hmc_forces/TestForce.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/TestForce.o ./source/hmc_forces/TestForce.cpp
 
-ScalarAction.o: ./source/actions/ScalarAction.h ./source/actions/ScalarAction.cpp
-	$(CPP) $(CPPFLAGS) -c -o ScalarAction.o ./source/actions/ScalarAction.cpp
+./build/ScalarAction.o: ./source/actions/ScalarAction.h ./source/actions/ScalarAction.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/ScalarAction.o ./source/actions/ScalarAction.cpp
 
-MultiScalarAction.o: ./source/actions/MultiScalarAction.h ./source/actions/MultiScalarAction.cpp
-	$(CPP) $(CPPFLAGS) -c -o MultiScalarAction.o ./source/actions/MultiScalarAction.cpp
+./build/MultiScalarAction.o: ./source/actions/MultiScalarAction.h ./source/actions/MultiScalarAction.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/MultiScalarAction.o ./source/actions/MultiScalarAction.cpp
 
-FundamentalScalarAction.o: ./source/actions/FundamentalScalarAction.h ./source/actions/FundamentalScalarAction.cpp
-	$(CPP) $(CPPFLAGS) -c -o FundamentalScalarAction.o ./source/actions/FundamentalScalarAction.cpp
+./build/FundamentalScalarAction.o: ./source/actions/FundamentalScalarAction.h ./source/actions/FundamentalScalarAction.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/FundamentalScalarAction.o ./source/actions/FundamentalScalarAction.cpp
 
-AdjointScalarAction.o: ./source/actions/AdjointScalarAction.h ./source/actions/AdjointScalarAction.cpp
-	$(CPP) $(CPPFLAGS) -c -o AdjointScalarAction.o ./source/actions/AdjointScalarAction.cpp
+./build/AdjointScalarAction.o: ./source/actions/AdjointScalarAction.h ./source/actions/AdjointScalarAction.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/AdjointScalarAction.o ./source/actions/AdjointScalarAction.cpp
 
-TwoFlavorFermionAction.o: ./source/actions/TwoFlavorFermionAction.h ./source/actions/TwoFlavorFermionAction.cpp
-	$(CPP) $(CPPFLAGS) -c -o TwoFlavorFermionAction.o ./source/actions/TwoFlavorFermionAction.cpp
+./build/TwoFlavorFermionAction.o: ./source/actions/TwoFlavorFermionAction.h ./source/actions/TwoFlavorFermionAction.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/TwoFlavorFermionAction.o ./source/actions/TwoFlavorFermionAction.cpp
 
-TwoFlavorQCDAction.o: ./source/actions/TwoFlavorQCDAction.h ./source/actions/TwoFlavorQCDAction.cpp
-	$(CPP) $(CPPFLAGS) -c -o TwoFlavorQCDAction.o ./source/actions/TwoFlavorQCDAction.cpp
+./build/TwoFlavorQCDAction.o: ./source/actions/TwoFlavorQCDAction.h ./source/actions/TwoFlavorQCDAction.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/TwoFlavorQCDAction.o ./source/actions/TwoFlavorQCDAction.cpp
 
-TwoFlavorHMCUpdater.o: ./source/hmc_updaters/TwoFlavorHMCUpdater.h ./source/hmc_updaters/TwoFlavorHMCUpdater.cpp
-	$(CPP) $(CPPFLAGS) -c -o TwoFlavorHMCUpdater.o ./source/hmc_updaters/TwoFlavorHMCUpdater.cpp
+./build/TwoFlavorHMCUpdater.o: ./source/hmc_updaters/TwoFlavorHMCUpdater.h ./source/hmc_updaters/TwoFlavorHMCUpdater.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/TwoFlavorHMCUpdater.o ./source/hmc_updaters/TwoFlavorHMCUpdater.cpp
 
-ScalarFermionHMCUpdater.o: ./source/hmc_updaters/ScalarFermionHMCUpdater.h ./source/hmc_updaters/ScalarFermionHMCUpdater.cpp
-	$(CPP) $(CPPFLAGS) -c -o ScalarFermionHMCUpdater.o ./source/hmc_updaters/ScalarFermionHMCUpdater.cpp
+./build/ScalarFermionHMCUpdater.o: ./source/hmc_updaters/ScalarFermionHMCUpdater.h ./source/hmc_updaters/ScalarFermionHMCUpdater.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/ScalarFermionHMCUpdater.o ./source/hmc_updaters/ScalarFermionHMCUpdater.cpp
 
-RandomScalarUpdater.o: ./source/scalar_updaters/RandomScalarUpdater.h ./source/scalar_updaters/RandomScalarUpdater.cpp
-	$(CPP) $(CPPFLAGS) -c -o RandomScalarUpdater.o ./source/scalar_updaters/RandomScalarUpdater.cpp
+./build/RandomScalarUpdater.o: ./source/scalar_updaters/RandomScalarUpdater.h ./source/scalar_updaters/RandomScalarUpdater.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/RandomScalarUpdater.o ./source/scalar_updaters/RandomScalarUpdater.cpp
 
-MeanScalarField.o: ./source/scalar_measurements/MeanScalarField.cpp ./source/scalar_measurements/MeanScalarField.h
-	$(CPP) $(CPPFLAGS) -c -o MeanScalarField.o ./source/scalar_measurements/MeanScalarField.cpp
+./build/MeanScalarField.o: ./source/scalar_measurements/MeanScalarField.cpp ./source/scalar_measurements/MeanScalarField.h
+	$(CPP) $(CPPFLAGS) -c -o ./build/MeanScalarField.o ./source/scalar_measurements/MeanScalarField.cpp
 
-AdjointMetropolisScalarUpdater.o: ./source/scalar_updaters/AdjointMetropolisScalarUpdater.h ./source/scalar_updaters/AdjointMetropolisScalarUpdater.cpp
-	$(CPP) $(CPPFLAGS) -c -o AdjointMetropolisScalarUpdater.o ./source/scalar_updaters/AdjointMetropolisScalarUpdater.cpp
+./build/AdjointMetropolisScalarUpdater.o: ./source/scalar_updaters/AdjointMetropolisScalarUpdater.h ./source/scalar_updaters/AdjointMetropolisScalarUpdater.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/AdjointMetropolisScalarUpdater.o ./source/scalar_updaters/AdjointMetropolisScalarUpdater.cpp
 
-FundamentalMetropolisScalarUpdater.o: ./source/scalar_updaters/FundamentalMetropolisScalarUpdater.h ./source/scalar_updaters/FundamentalMetropolisScalarUpdater.cpp
-	$(CPP) $(CPPFLAGS) -c -o FundamentalMetropolisScalarUpdater.o ./source/scalar_updaters/FundamentalMetropolisScalarUpdater.cpp
+./build/FundamentalMetropolisScalarUpdater.o: ./source/scalar_updaters/FundamentalMetropolisScalarUpdater.h ./source/scalar_updaters/FundamentalMetropolisScalarUpdater.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/FundamentalMetropolisScalarUpdater.o ./source/scalar_updaters/FundamentalMetropolisScalarUpdater.cpp
 
-NFlavorFermionAction.o: ./source/actions/NFlavorFermionAction.h ./source/actions/NFlavorFermionAction.cpp
-	$(CPP) $(CPPFLAGS) -c -o NFlavorFermionAction.o ./source/actions/NFlavorFermionAction.cpp
+./build/NFlavorFermionAction.o: ./source/actions/NFlavorFermionAction.h ./source/actions/NFlavorFermionAction.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/NFlavorFermionAction.o ./source/actions/NFlavorFermionAction.cpp
 
-NFlavorQCDAction.o: ./source/actions/NFlavorQCDAction.h ./source/actions/NFlavorQCDAction.cpp
-	$(CPP) $(CPPFLAGS) -c -o NFlavorQCDAction.o ./source/actions/NFlavorQCDAction.cpp
+./build/NFlavorQCDAction.o: ./source/actions/NFlavorQCDAction.h ./source/actions/NFlavorQCDAction.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/NFlavorQCDAction.o ./source/actions/NFlavorQCDAction.cpp
 
-HiggsGaugeHMCUpdater.o : ./source/hmc_updaters/HiggsGaugeHMCUpdater.h ./source/hmc_updaters/HiggsGaugeHMCUpdater.cpp
-	$(CPP) $(CPPFLAGS) -c -o HiggsGaugeHMCUpdater.o ./source/hmc_updaters/HiggsGaugeHMCUpdater.cpp
+./build/HiggsGaugeHMCUpdater.o : ./source/hmc_updaters/HiggsGaugeHMCUpdater.h ./source/hmc_updaters/HiggsGaugeHMCUpdater.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/HiggsGaugeHMCUpdater.o ./source/hmc_updaters/HiggsGaugeHMCUpdater.cpp
 
-MultiStepNFlavorQCDUpdater.o : ./source/hmc_updaters/MultiStepNFlavorQCDUpdater.h ./source/hmc_updaters/MultiStepNFlavorQCDUpdater.cpp
-	$(CPP) $(CPPFLAGS) -c -o MultiStepNFlavorQCDUpdater.o ./source/hmc_updaters/MultiStepNFlavorQCDUpdater.cpp
+./build/MultiStepNFlavorUpdater.o : ./source/hmc_updaters/MultiStepNFlavorUpdater.h ./source/hmc_updaters/MultiStepNFlavorUpdater.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/MultiStepNFlavorUpdater.o ./source/hmc_updaters/MultiStepNFlavorUpdater.cpp
 
-DiracEigenSolver.o: ./source/fermion_measurements/DiracEigenSolver.h ./source/fermion_measurements/DiracEigenSolver.cpp
-	$(CPP) $(CPPFLAGS) -c -o DiracEigenSolver.o ./source/fermion_measurements/DiracEigenSolver.cpp
+./build/DiracEigenSolver.o: ./source/fermion_measurements/DiracEigenSolver.h ./source/fermion_measurements/DiracEigenSolver.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/DiracEigenSolver.o ./source/fermion_measurements/DiracEigenSolver.cpp
 
-SingletOperators.o: ./source/fermion_measurements/SingletOperators.h ./source/fermion_measurements/SingletOperators.cpp
-	$(CPP) $(CPPFLAGS) -c -o SingletOperators.o ./source/fermion_measurements/SingletOperators.cpp
+./build/SingletOperators.o: ./source/fermion_measurements/SingletOperators.h ./source/fermion_measurements/SingletOperators.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/SingletOperators.o ./source/fermion_measurements/SingletOperators.cpp
 
-XSpaceCorrelators.o: ./source/fermion_measurements/XSpaceCorrelators.h ./source/fermion_measurements/XSpaceCorrelators.cpp
-	$(CPP) $(CPPFLAGS) -c -o XSpaceCorrelators.o ./source/fermion_measurements/XSpaceCorrelators.cpp
+./build/XSpaceCorrelators.o: ./source/fermion_measurements/XSpaceCorrelators.h ./source/fermion_measurements/XSpaceCorrelators.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/XSpaceCorrelators.o ./source/fermion_measurements/XSpaceCorrelators.cpp
 
-Eigenvalues.o: ./source/fermion_measurements/Eigenvalues.h ./source/fermion_measurements/Eigenvalues.cpp
-	$(CPP) $(CPPFLAGS) -c -o Eigenvalues.o ./source/fermion_measurements/Eigenvalues.cpp
+./build/Eigenvalues.o: ./source/fermion_measurements/Eigenvalues.h ./source/fermion_measurements/Eigenvalues.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/Eigenvalues.o ./source/fermion_measurements/Eigenvalues.cpp
 
-GlobalOutput.o: ./source/io/GlobalOutput.h ./source/io/GlobalOutput.cpp
-	$(CPP) $(CPPFLAGS) -c -o GlobalOutput.o ./source/io/GlobalOutput.cpp
+./build/GlobalOutput.o: ./source/io/GlobalOutput.h ./source/io/GlobalOutput.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/GlobalOutput.o ./source/io/GlobalOutput.cpp
 
-OutputSweep.o: ./source/io/OutputSweep.h ./source/io/OutputSweep.cpp
-	$(CPP) $(CPPFLAGS) -c -o OutputSweep.o ./source/io/OutputSweep.cpp
+./build/OutputSweep.o: ./source/io/OutputSweep.h ./source/io/OutputSweep.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/OutputSweep.o ./source/io/OutputSweep.cpp
 
-Glueball.o: ./source/correlators/Glueball.h ./source/correlators/Glueball.cpp
-	$(CPP) $(CPPFLAGS) -c -o Glueball.o ./source/correlators/Glueball.cpp
+./build/Glueball.o: ./source/correlators/Glueball.h ./source/correlators/Glueball.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/Glueball.o ./source/correlators/Glueball.cpp
 
-TestCommunication.o: ./source/tests/TestCommunication.h ./source/tests/TestCommunication.cpp
-	$(CPP) $(CPPFLAGS) -c -o TestCommunication.o ./source/tests/TestCommunication.cpp
+./build/TestCommunication.o: ./source/tests/TestCommunication.h ./source/tests/TestCommunication.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/TestCommunication.o ./source/tests/TestCommunication.cpp
 
-TestLinearAlgebra.o: ./source/tests/TestLinearAlgebra.h ./source/tests/TestLinearAlgebra.cpp
-	$(CPP) $(CPPFLAGS) -c -o TestLinearAlgebra.o ./source/tests/TestLinearAlgebra.cpp
+./build/TestLinearAlgebra.o: ./source/tests/TestLinearAlgebra.h ./source/tests/TestLinearAlgebra.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/TestLinearAlgebra.o ./source/tests/TestLinearAlgebra.cpp
 
-TestSpeedDiracOperators.o: ./source/tests/TestSpeedDiracOperators.h ./source/tests/TestSpeedDiracOperators.cpp
-	$(CPP) $(CPPFLAGS) -c -o TestSpeedDiracOperators.o ./source/tests/TestSpeedDiracOperators.cpp
+./build/TestSpeedDiracOperators.o: ./source/tests/TestSpeedDiracOperators.h ./source/tests/TestSpeedDiracOperators.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/TestSpeedDiracOperators.o ./source/tests/TestSpeedDiracOperators.cpp
 
-StorageParameters.o: ./source/io/StorageParameters.h ./source/io/StorageParameters.cpp
-	$(CPP) $(CPPFLAGS) -c -o StorageParameters.o ./source/io/StorageParameters.cpp
+./build/StorageParameters.o: ./source/io/StorageParameters.h ./source/io/StorageParameters.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/StorageParameters.o ./source/io/StorageParameters.cpp
 
-ReadGaugeConfiguration.o: ./source/io/ReadGaugeConfiguration.h ./source/io/ReadGaugeConfiguration.cpp
-	$(CPP) $(CPPFLAGS) -c -o ReadGaugeConfiguration.o ./source/io/ReadGaugeConfiguration.cpp
+./build/ReadGaugeConfiguration.o: ./source/io/ReadGaugeConfiguration.h ./source/io/ReadGaugeConfiguration.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/ReadGaugeConfiguration.o ./source/io/ReadGaugeConfiguration.cpp
 	
-WilsonFlow.o: ./source/wilson_flow/WilsonFlow.h ./source/wilson_flow/WilsonFlow.cpp
-	$(CPP) $(CPPFLAGS) -c -o WilsonFlow.o ./source/wilson_flow/WilsonFlow.cpp
+./build/WilsonFlow.o: ./source/wilson_flow/WilsonFlow.h ./source/wilson_flow/WilsonFlow.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/WilsonFlow.o ./source/wilson_flow/WilsonFlow.cpp
 
-GaugeEnergy.o: ./source/actions/GaugeEnergy.h ./source/actions/GaugeEnergy.cpp
-	$(CPP) $(CPPFLAGS) -c -o GaugeEnergy.o ./source/actions/GaugeEnergy.cpp
+./build/GaugeEnergy.o: ./source/actions/GaugeEnergy.h ./source/actions/GaugeEnergy.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/GaugeEnergy.o ./source/actions/GaugeEnergy.cpp
 
-MultiGridDiracOperator.o: ./source/multigrid_solver/MultiGridDiracOperator.h ./source/multigrid_solver/MultiGridDiracOperator.cpp
-	$(CPP) $(CPPFLAGS) -c -o MultiGridDiracOperator.o ./source/multigrid_solver/MultiGridDiracOperator.cpp
+./build/MultiGridDiracOperator.o: ./source/multigrid_solver/MultiGridDiracOperator.h ./source/multigrid_solver/MultiGridDiracOperator.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/MultiGridDiracOperator.o ./source/multigrid_solver/MultiGridDiracOperator.cpp
 
-SAPPreconditioner.o: ./source/dirac_operators/SAPPreconditioner.h ./source/dirac_operators/SAPPreconditioner.cpp
-	$(CPP) $(CPPFLAGS) -c -o SAPPreconditioner.o ./source/dirac_operators/SAPPreconditioner.cpp
+./build/SAPPreconditioner.o: ./source/dirac_operators/SAPPreconditioner.h ./source/dirac_operators/SAPPreconditioner.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/SAPPreconditioner.o ./source/dirac_operators/SAPPreconditioner.cpp
 	
-BlockBasis.o: ./source/multigrid/BlockBasis.cpp ./source/multigrid/BlockBasis.h
-	$(CPP) $(CPPFLAGS) -c -o BlockBasis.o ./source/multigrid/BlockBasis.cpp
+./build/BlockBasis.o: ./source/multigrid/BlockBasis.cpp ./source/multigrid/BlockBasis.h
+	$(CPP) $(CPPFLAGS) -c -o ./build/BlockBasis.o ./source/multigrid/BlockBasis.cpp
 
-MultiGridBiConjugateGradient.o: ./source/multigrid/MultiGridBiConjugateGradient.cpp ./source/multigrid/MultiGridBiConjugateGradient.h
-	$(CPP) $(CPPFLAGS) -c -o MultiGridBiConjugateGradient.o ./source/multigrid/MultiGridBiConjugateGradient.cpp
+./build/MultiGridBiConjugateGradient.o: ./source/multigrid/MultiGridBiConjugateGradient.cpp ./source/multigrid/MultiGridBiConjugateGradient.h
+	$(CPP) $(CPPFLAGS) -c -o ./build/MultiGridBiConjugateGradient.o ./source/multigrid/MultiGridBiConjugateGradient.cpp
 
-MultiGridConjugateGradient.o: ./source/multigrid/MultiGridConjugateGradient.cpp ./source/multigrid/MultiGridConjugateGradient.h
-	$(CPP) $(CPPFLAGS) -c -o MultiGridConjugateGradient.o ./source/multigrid/MultiGridConjugateGradient.cpp
+./build/MultiGridConjugateGradient.o: ./source/multigrid/MultiGridConjugateGradient.cpp ./source/multigrid/MultiGridConjugateGradient.h
+	$(CPP) $(CPPFLAGS) -c -o ./build/MultiGridConjugateGradient.o ./source/multigrid/MultiGridConjugateGradient.cpp
 
-MultiGridOperator.o: ./source/multigrid/MultiGridOperator.cpp ./source/multigrid/MultiGridOperator.h
-	$(CPP) $(CPPFLAGS) -c -o MultiGridOperator.o ./source/multigrid/MultiGridOperator.cpp
+./build/MultiGridOperator.o: ./source/multigrid/MultiGridOperator.cpp ./source/multigrid/MultiGridOperator.h
+	$(CPP) $(CPPFLAGS) -c -o ./build/MultiGridOperator.o ./source/multigrid/MultiGridOperator.cpp
 
-MultiGridProjector.o: ./source/multigrid/MultiGridProjector.cpp ./source/multigrid/MultiGridProjector.h
-	$(CPP) $(CPPFLAGS) -c -o MultiGridProjector.o ./source/multigrid/MultiGridProjector.cpp
+./build/MultiGridProjector.o: ./source/multigrid/MultiGridProjector.cpp ./source/multigrid/MultiGridProjector.h
+	$(CPP) $(CPPFLAGS) -c -o ./build/MultiGridProjector.o ./source/multigrid/MultiGridProjector.cpp
 
-MultiGridSolver.o: ./source/multigrid/MultiGridSolver.cpp ./source/multigrid/MultiGridSolver.h
-	$(CPP) $(CPPFLAGS) -c -o MultiGridSolver.o ./source/multigrid/MultiGridSolver.cpp
+./build/MultiGridSolver.o: ./source/multigrid/MultiGridSolver.cpp ./source/multigrid/MultiGridSolver.h
+	$(CPP) $(CPPFLAGS) -c -o ./build/MultiGridSolver.o ./source/multigrid/MultiGridSolver.cpp
 
-MultiGridVectorLayout.o: ./source/multigrid/MultiGridVectorLayout.cpp ./source/multigrid/MultiGridVectorLayout.h
-	$(CPP) $(CPPFLAGS) -c -o MultiGridVectorLayout.o ./source/multigrid/MultiGridVectorLayout.cpp
+./build/MultiGridVectorLayout.o: ./source/multigrid/MultiGridVectorLayout.cpp ./source/multigrid/MultiGridVectorLayout.h
+	$(CPP) $(CPPFLAGS) -c -o ./build/MultiGridVectorLayout.o ./source/multigrid/MultiGridVectorLayout.cpp
 
-MultiGridStochasticEstimator.o: ./source/multigrid/MultiGridStochasticEstimator.cpp ./source/multigrid/MultiGridStochasticEstimator.h
-	$(CPP) $(CPPFLAGS) -c -o MultiGridStochasticEstimator.o ./source/multigrid/MultiGridStochasticEstimator.cpp
+./build/MultiGridStochasticEstimator.o: ./source/multigrid/MultiGridStochasticEstimator.cpp ./source/multigrid/MultiGridStochasticEstimator.h
+	$(CPP) $(CPPFLAGS) -c -o ./build/MultiGridStochasticEstimator.o ./source/multigrid/MultiGridStochasticEstimator.cpp
 
 

@@ -1,10 +1,3 @@
-/*
- * SixthOrderLeapFrog.h
- *
- *  Created on: Mar 21, 2012
- *      Author: spiem_01
- */
-
 #ifndef SIXTHORDERLEAPFROG_H_
 #define SIXTHORDERLEAPFROG_H_
 

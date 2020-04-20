@@ -1,10 +1,3 @@
-/*
- * MultishiftSolver.h
- *
- *  Created on: May 11, 2012
- *      Author: spiem_01
- */
-
 #ifndef MULTISHIFTSOLVER_H_
 #define MULTISHIFTSOLVER_H_
 #include "dirac_operators/DiracOperator.h"

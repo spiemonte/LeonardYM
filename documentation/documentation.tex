@@ -1,0 +1,342 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\newcommand{\fdoi}[2]{\href{http://dx.doi.org/\detokenize{#1}}{#2}}
+\usepackage{listings}
+\usepackage{setspace}
+
+\textheight25.0cm
+\textwidth16.0cm
+\oddsidemargin0.0cm
+\evensidemargin0.0cm
+\marginparwidth 1.9cm
+\marginparsep 8pt \marginparpush 5pt
+\topmargin -1.5cm
+\headheight 12pt
+\headsep 30pt
+\footskip 24pt
+\newenvironment{updated}{\bgroup\color{blue}}{\egroup}
+%
+\setlength{\parindent}{1.66em}
+%
+\setstretch{1.2}    % improved baselinestretch, uses package setspace
+
+%opening
+\title{LeonardYM}
+\author{Stefano Piemonte}
+
+\begin{document}
+
+\maketitle
+
+\section{Overview}
+
+LeonardYM is a software developed in C++ for Monte-Carlo simulations of four-dimensional Yang-Mills theories, ranging from QCD to supersymmetric models. The code is designed to allow many different theories to be simulated within the same framework, rather than being focused and optimized for a single specific target theory. Parameters such as the number of colors of the gauge group SU($N$) or the representation of fermion fields can be freely chosen at compile time, allowing a large flexibility on the structure of the theories that can be simulated.
+
+The code has been developed mainly during the work for the PhD thesis of Ref.~\cite{PIE15}. The present documentation contains a brief overview of the main features and algorithms implemented in the code. Further details about the algorithms and the settings required for using the code can be found in Ref.~\cite{PIE15,MON97,SAJ19}.
+
+\section{Organization of the code}
+
+The code is organized around the class ``LatticeSweep'', which is meant to execute and implement by inheritance a specific measurement or a given update of the field configurations. Each sweep acts on an instance of the Environment class, which contains
+\begin{enumerate}
+ \item the gauge-link configuration in the fundamental representation,
+ \item the gauge-link configuration used in the definition of the fermion covariant derivatives,
+ \item the gauge-link configuration in the adjoint representation,
+ \item the scalar field configurations in the adjoint and fundamental representation,
+ \item an instance of the class StorageParameters, encapsulating parameters such as the fermion mass and the gauge coupling.
+\end{enumerate}
+Each LatticeSweep can register its own parameters to be read from the configuration file, the standard naming convention is ``LatticeSweepName::option\_name''.
+
+\section{Field variables}
+
+The code has implemented scalar, fermion and gauge fields in the fundamental and adjoint representation of the gauge group SU($N$). All fields are defined from templates of the class Lattice, which supports access to the field in given site and its lower and upper neighbor by a linear index and by the functions sup(site, mu) and sdn(site, mu). All field variables are based on the matrix library Eigen \cite{EIGEN}.
+
+The gauge field $U_\mu(x)$ are represented in terms of links, which are $N\times N$ or $(N^2-1)\times (N^2-1)$ matrices in the fundamental and adjoint representation, respectively. The scalar fields are complex vector lattice fields with $N$ or $(N^2-1)$ color indexes, while fermion fields have in addition a spin components.
+
+\section{Lattice actions}
+
+There are implementations for two possible lattice discretizations of the gauge action, namely the Wilson and the Symanzik action. The Wilson action is defined from the elementary plaquette, the trace of the product of the gauge links around a $1\times1$ square, while the Symanzik action includes also $2\times1$ rectangles. 
+
+The discretization of the fermion action is more involved, as the Nielsen-Ninomiya theorem forbids a local hermitian action preserving chiral symmetry and free of doublers on the lattice \cite{NIE81}. The Dirac operator is implemented in the code using Wilson fermions, clover-improved Wilson fermions and overlap fermions. Wilson fermions breaks chiral symmetry explicitly and the fermion mass requires additive renormalization and a tuning to the chiral limit, the clover-improved action depends on the clover coefficient $c_{sw}$ tuned to reduce the leading $O(a)$ discretization errors of the Wilson formulation \cite{JAN97}. Overlap fermions allow instead to preserve a modified chiral symmetry on the lattice \cite{GIS82}. For all fermions operators, it is possible to smear the link fields to reduce the ultraviolet fluctuations and to stabilize the integration of the HMC trajectory.
+
+The scalar action is discretized using simple forward derivative, defined in terms of the link fields, and it depends on the couplings of the quartic potentials.
+
+\section{Monte-Carlo algorithms implemented in the code}
+
+The main algorithms to generate gauge-field configurations implemented in the code differ depending on whether fermions are interacting with gauge bosons or not. In the first case, the most efficient Monte-Carlo algorithms are based on local updates of the link field, while global updates and Hybrid Monte-Carlo (HMC) are the best algorithms for simulations of gauge theories with dynamical fermions \cite{GOT87,DUA87}.
+
+\subsection{Pure-gauge updaters}
+
+The Cabibbo-Marinari algorithm together with local over-relaxation is the most efficient solution for Monte-Carlo simulations of a pure-gauge theory without fermions \cite{CAB82,CRE87}. There is also the possibility of performing improved measurements of Polyakov and Wilson loops by averaging their expectation value with respect to (part) of their links (L\"uscher-Creutz multilevel algorithm \cite{LUS01}). In this case, the only certain links are updated, while others are kept fixed.
+
+\subsection{Hybrid Monte Carlo}
+
+In relativistic quantum field theories, time is a dimension and not simply a parameter. In order to translate the action of a four-dimensional field theory to a standard Hamiltonian system, an additional time dependence $\tau$ is added to the usual four space-time dimensions, for example a link variable depends on five variables, $U_\mu(\vec{x},t,\tau) \equiv U_\mu(x,\tau)$. The fictitious time $\tau$ parametrizes the trajectory of the system in the phase space. The momenta are independent variables from the fields in the Hamiltonian formalism of classical mechanics, therefore the partition function can be multiplied by the quadratic Gaussian integral
+\begin{equation*}
+\int \prod_{x, \mu} d \pi_\mu(x,\tau) \exp(- \textrm{Tr}(\pi_\mu(x,\tau)^\dag \pi_\mu(x,\tau))
+\end{equation*}
+and the free field $\pi_\mu(x,\tau)$ is interpreted as the canonical variable conjugate to the link $U_\mu(x,t,\tau)$. The equation of motion for $U(x,\tau)$ simply reads
+\begin{equation}\label{field_eom}
+\frac{d}{d \tau} U_\mu(x,\tau) = \pi_\mu(x,\tau) U_\mu(x,\tau),
+\end{equation}
+preserving carefully the order of the matrix multiplications. The equation of motion of the momenta $\pi_\mu(x,\tau)$ are
+\begin{equation}\label{momenta_eom}
+\frac{d}{d \tau} \pi_\mu(x,\tau) = - \frac{\partial}{\partial U_\mu(x,\tau)} \left( S(U_\mu)(U_\mu) \right) = - F\,.
+\end{equation}
+being $S$ the action of the four-dimensional theory.
+
+The equation of motion (\ref{field_eom}) and (\ref{momenta_eom}) can be integrated numerically with a further discretization of the fictitious time $\tau$ in steps large $\epsilon$. An update $\mathcal{U}_\pi(\epsilon)$ of the momenta is simply
+\begin{equation*}
+\pi_\mu(x,\tau) \rightarrow \mathcal{U}_\pi(\epsilon) \pi_\mu(x,\tau) = \pi_\mu(x,\tau + \epsilon) = \pi_\mu(x,\tau) - \epsilon F,
+\end{equation*}
+keeping unchanged the links $U_\mu(x,\tau)$, while an update of the links $\mathcal{U}_U(\epsilon)$ is
+\begin{equation*}
+U_\mu(x,\tau) \rightarrow \mathcal{U}_U(\epsilon) U_\mu(x,\tau) = U_\mu(x,\tau + \epsilon) = \exp{(\epsilon \pi_\mu(x,\tau))} U_\mu(x,\tau),
+\end{equation*}
+keeping the momenta fixed. The symbol ``$\exp$'' denotes in this context the exponential map.
+
+The simplest reversible scheme to numerically integrate the equations of motion can be constructed by the following chain of link and momenta updates
+\begin{equation*}
+\mathcal{U}_\pi(\epsilon/2) \mathcal{U}_U(\epsilon) \mathcal{U}_\pi(\epsilon/2),
+\end{equation*}
+the specified final time $\tau_f = N \epsilon$ will be reached after $N$ repetitions of this scheme. This integrator is called Leap-Frog and it converges toward the exact solution as $O(\epsilon^4)$. Many other numerical integrators are possible with a smaller discretization error \cite{OME02,TAK06}. The code has implementation for integrators up to the sixth order and for Omelyan integrators up to the fourth order. 
+
+Once that the equations of motion can be integrated numerically, the Hybrid Monte Carlo algorithm is implemented in three simple steps. A link configuration is generated for example randomly and the following steps are iterated starting from $k = 0$
+\begin{enumerate}
+\item Generate randomly with a Gaussian distribution the momenta $\pi_\mu(x,0)$. Set the link to their initial configuration $U_\mu(x,0) \equiv U_\mu(x)$. Measure the energy $E_i = H(\pi_\mu(x,0), U_\mu(x,0))$.
+\item Integrate numerically the equations of motion for a time $\tau$ in $N$ steps of $\epsilon$ length ($\tau = N \epsilon$), to produce a new configuration of links $U_\mu(x,\tau)$ and momenta $\pi_\mu(x,\tau)$. Compute the energy $E_f = H(\pi_\mu(x,\tau), U_\mu(x,\tau))$.
+\item Accept or reject the new configuration $U_\mu(x,\tau)$ with probability 
+\begin{equation*}
+\min(1,\exp(E_i~-~E_f))\,.
+\end{equation*}
+Set the configuration $C_k = U_\mu(x,0)$ or $C_k = U_\mu(x,\tau)$ accordingly and proceed to the next iteration $k = k + 1$.
+\end{enumerate}
+
+\section{Available measurement and updater sweeps}
+
+\subsection{Pure gauge updaters}
+
+The following updaters are designed to simulate an SU($N$) gauge theory without matter interactions.
+
+\begin{itemize}
+\item The \textbf{PureGaugeCM} sweep performs an update of the gauge links using heat-bath Monte-Carlo local updates following the Cabibbo-Marinari algorithm \cite{CAB82}.
+\item The \textbf{PureGaugeWilsonLoops} sweep performs a measurements of the Wilson loops by averaging the part of the link variables, following the L\"uscher-Weisz multilevel algorithm \cite{LUS01}.
+\item The \textbf{PureGaugeHMCUpdater} sweep updates all gauge links using the Hybrid Monte Carlo algorithm.
+\item The \textbf{PureGaugeOverrelaxation} sweep performs an over-relaxation update of all gauge links \cite{CRE87}.
+\end{itemize}
+
+\subsection{Fermion updaters}
+
+The following updaters are designed to simulate an SU($N$) gauge theory interacting with fermion matter fields.
+
+\begin{itemize}
+\item The \textbf{TwoFlavorHMCUpdater} is the Hybrid Monte Carlo algorithm implementation of a theory interacting with two Dirac fermion fields.
+\item The \textbf{MultiStepNFlavor} is the main sweep to update the gauge links of a QCD-like theory interacting with an arbitrary number of fermions in any representation, using the Hybrid Monte Carlo algorithm.
+\end{itemize}
+
+\subsection{Scalar field updaters}
+
+The following updaters are designed to simulate an SU($N$) gauge theory interacting with scalar and/or fermion matter fields.
+
+\begin{itemize}
+\item The \textbf{HiggsGaugeHMC} sweep performs an update of the gauge links for a theory interaction with scalars.
+\item The \textbf{ScalarFermionHMC} sweep performs an update of the gauge links for a theory interaction with scalar and fermion fields.
+\item The \textbf{AdjointMCScalar} sweep performs a Metropolis update of all scalar fields in the adjoint representation of the gauge group.
+\item The \textbf{FundamentalMCScalar} sweep performs a Metropolis update of all scalar fields in the fundamental representation of the gauge group.
+\end{itemize}
+
+\subsection{Gauge action}
+\begin{itemize}
+\item The \textbf{Plaquette} sweep performs a measurement of the plaquette, i.e. the trace of a Wilson loop of size 1$\times$1. It can be used to monitor thermalization or unexpected deviations from equilibrium, as well as the latent heat of a first order phase transition.
+\item The \textbf{GaugeEnergy} measures the total gauge energy of a given configuration.
+\end{itemize}
+
+\subsection{Wilson and Polyakov loops}
+
+\begin{itemize}
+\item The \textbf{WilsonLoops} sweep is used to measure the rectangular $R\times T$ Wilson loops. 
+\item The \textbf{PolyakovLoop} sweep measures the Polyakov loop in all directions, i.e. a Wilson loop wrapping around the four compact dimensions. It is related to the free energy of a single isolated static charge and its non-zero expectation value is a signal for deconfinement.
+\item The \textbf{AdjointPolyakovLoop} sweep measures the Polyakov loop constructed from links in the adjoint representation.
+\item The \textbf{PolyakovLoopEigenvalues} sweep measures the distribution of the eigenvalues of Polyakov line.
+\end{itemize}
+
+\subsection{WilsonFlow}
+
+\begin{itemize}
+\item The \textbf{WilsonFlow} sweep integrates numerically the Wilson flow and measures the energy and the topological charge during the integration.
+\end{itemize}
+
+\subsection{Correlators}
+
+\begin{itemize}
+\item The \textbf{Glueball} sweep performs a measurement of the zero momentum projection of the $0^{++}$ and $2^{++}$ glueball operator on each timeslice, required for the computation of the connected correlators.
+\item The \textbf{PolyakovLoopCorrelator} is a measurement of the correlator of two Polyakov loops, that can be used to extract the static quark string tension.
+\item The \textbf{GluinoGlue} sweep performs a measurement of the gluino-glue correlator, corresponding to an exotic spin-1/2 particle which can exist if the fermions are interacting with the gluons in the adjoint representation of the gauge group. The gluino-glue is measured from a volume source placed at a single timeslice, multiple timeslices in a single configuration can be measured in sequence.
+\item The \textbf{MesonCorrelator} sweep measures the connected correlator of the scalar and pseudoscalar connected correlators, required to extract the pion mass and the bare PCAC fermion mass.
+\end{itemize}
+
+The stout-smearing $\rho$ and the number of stout-smearing iterations of the gauge links, together with the Jacobi smearing counterparts for the gluino-glue, are tunable parameters to improve the overlap with the ground state.
+
+\subsection{Gauge fixing and gauge fixed measurements}
+
+\begin{itemize}
+\item The \textbf{LandauGaugeFixing} sweep is used to impose the Landau gauge on a given link configuration. The minimization starts from parallel tempering and a series of random gauge transformations to try to search for the global minimum of the gauge-fixing functional, followed by a series of local over-relaxation sweeps to bring the configuration toward the local minimum.
+\item The \textbf{LandauGhostPropagator} sweep measures the ghost propagator in the Landau gauge, using conjugate gradient for computing the inverse of the ghost operator. The gauge-field configuration is assumed to be already gauge-fixed. 
+\item The \textbf{LandauGluonPropagator} sweep performs a measurement of the gluon propagator in the Landau gauge. The gauge-field configuration is assumed to be already gauge-fixed.
+\item The \textbf{NPRVertex} sweep measures the fermion propagator and the connected vertex function required for the non-perturbative renormalization of fermion bilinear operators.
+\end{itemize}
+
+\subsection{Fermion measurements}
+
+\begin{itemize}
+\item The \textbf{ChiralCondensate} sweep measures the chiral condensate, and the chiral susceptibility, including connected and disconnected parts.
+\item The \textbf{Eigenvalues} sweep performs a measurement of the eigenvalues of the Dirac operator using the implicitly restarted Arnoldi algorithm.
+\end{itemize}
+
+\subsection{Miscellaneous utilities}
+
+\begin{itemize}
+\item The \textbf{ReUnit} sweep ensures the correct unitary of the gauge links, which could be spoiled by accumulated numerical truncation errors during a Monte Carlo simulation. 
+\item The \textbf{RandomGaugeTransformation} sweep performs a random gauge transformation of the gauge link fields. Given that many lattice observables are gauge invariant, the sweep can be used to test the correct implementation of the code for a measurement, by just running the sweep in between two consecutive identical measurements.
+\item The \textbf{Output} sweeps is used to write and save the gauge-link field configuration.
+\item The \textbf{TestLinearAlgebra} can be employed to check the correct implementation of the Dirac operator and to spot possible compiler issues.
+\item The \textbf{TestSpeedDiracOperators} sweep measures the performance of the multiplication of the Dirac operator to a vector.
+\item The \textbf{TestCommunication} sweep is used to ensure that the MPI communications are working properly.
+\item The \textbf{ReadGaugeConfiguration} sweep is used to load a previously saved link-gauge configuration.
+\end{itemize}
+
+\section{Compiling the code}
+
+The code requires two libraries, namely boost \cite{BOOST} and Eigen \cite{EIGEN}. In addition, MPI libraries and compilers are required if MPI parallelism is enabled. The number of colors of the gauge group is specified by the compiler flag NUMCOLORS. The representation of the gauge group SU($N$) under which the fermion fields are transforming is by default the fundamental, the fermions can be switched to the adjoint representation by the compiler flag ADJOINT. MPI and OpenMP parallelism are enabled by the compiler flags ENABLE\_MPI and MULTITHREADING, respectively. 
+
+A few Makefile examples are included in the main distribution. For instance, execute
+\begin{lstlisting}
+make -f Makefile.mth nc=3 adjoint=true
+\end{lstlisting}
+to compile for Monte Carlo simulations with the gauge group SU(3) interacting with adjoint fermions using only multithreading, or 
+\begin{lstlisting}
+make -f Makefile.mpi nc=3 adjoint=true
+\end{lstlisting}
+to include also MPI parallelism.
+
+\section{Running the code and example scripts}
+
+Once the code is compiled, it can be executed by the command line
+\begin{lstlisting}
+leonardYM.exe --configfile=my_config_file.cfg
+\end{lstlisting}
+or by the corresponding MPI execution command. The configuration file contains the options and settings of the Monte Carlo simulation.
+
+A minimal configuration file must contain first the definition of the lattice geometry
+\begin{lstlisting}
+glob_x = 8
+glob_y = 8
+glob_z = 8
+glob_t = 16
+\end{lstlisting}
+and, if MPI parallelism is enabled, the MPI grid
+\begin{lstlisting}
+pgrid_x = 1
+pgrid_y = 1
+pgrid_z = 1
+pgrid_t = 2
+\end{lstlisting}
+to specify to the four dimensional lattice is divided among the MPI tasks. In the example above, the lattice size is $8^3\times 16$, divided in two MPI task along the time direction.
+
+The main global parameter $\beta$ is required to set the gauge coupling, in the example below, of the gauge action StandardWilson.
+\begin{lstlisting}
+beta = 5.6
+
+name_action = StandardWilson
+\end{lstlisting}
+
+The Monte Carlo simulation is divided in two parts, in the first the ``warm-up sweeps'' are executed, followed by the ``measurement sweeps''. The warm-up sweeps consist typically of some updates required for thermalization, while during the measurement phase new configurations are generated and some observable is measured.
+\begin{lstlisting}
+start = hotstart
+
+number_warm_up_sweeps = 300
+warm_up_sweeps = "{{PureGaugeCM,1,1},{PureGaugeOverrelaxation,1,5}}"
+number_measurement_sweeps = 2500
+measurement_sweeps = "{{PureGaugeCM,1,1},{PureGaugeOverrelaxation,1,5},
+	{Plaquette,1,1},{PolyakovLoop,5,1}}"
+\end{lstlisting}
+The start parameter specify how the gauge configuration is initialized at the beginning of the Monte Carlo simulations (hotstart corresponds to a random initialization of the link variables). In the example above, 2500 measurement iterations are executed after 300 warm-up iterations. In each iteration, the sweep PureGaugeCM is called once, while the PureGaugeOverrelaxation is called five times (third parameter in each curly bracket). The same happens during the measurement phase, but in addition the Plaquette sweep is called every iteration and the PolyakovLoop is measured every fifth iteration (second parameter in curly brackets).
+
+Next, we need to specify a directory, a name and a format for the output of the measurements.
+\begin{lstlisting}
+output_directory_measurements = /path/to/output/directory/
+output_name = pure_gauge_8c16
+measurement_output_format = xml
+\end{lstlisting}
+Finally, we need to specify the number of OpenMP threads.
+\begin{lstlisting}
+number_threads = 4
+\end{lstlisting}
+
+Further configuration script examples can be found in the directory configuration\_scripts.
+
+\section{Testing}
+
+The most important tests to check the correctness of the Hybrid Monte-Carlo algorithm can be enabled by the compiler flags REVERSIBILITY\_CHECK and DEBUGFORCE. The first compiler flag enables the integration of the equations of motion backward in time, and by construction at the end the difference of the action must be zero within numerical errors. The second compiler flag enables the check of the correct implementation of the force as a derivative of the action with respect to the a variation of the links.
+
+\begin{thebibliography}{100}
+
+\bibitem{PIE15}
+S. Piemonte, \href{https://www.uni-muenster.de/imperia/md/content/physik_tp/theses/muenster/piemonte_dr.pdf}{\emph{$\mathcal{N}=1$ supersymmetric Yang-Mills theory on the lattice}, PhD thesis (2014)}.
+
+\bibitem{MON97}
+I. Montvay: \emph{Majorana fermions on the lattice}, hep-lat/0108011.
+
+\bibitem{SAJ19}
+S. Ali, G. Bergner, H. Gerber, I. Montvay, G. M\"unster, S. Piemonte, P. Scior: \emph{Numerical results for the lightest bound states in $\mathcal{N}=1$ supersymmetric SU(3) Yang-Mills theory}, \fdoi{10.1103/PhysRevLett.122.221601}{Phys. Rev. Lett. 122, 221601 (2019)}.
+
+\bibitem{NIE81}
+H.B. Nielsen, M. Ninomiya, \emph{A no-go theorem for regularizing chiral fermions}, \fdoi{10.1016/0370-2693(81)91026-1}{Phys. Lett., B105: 219 (1981)}.
+
+\bibitem{GIS82}
+P. H. Ginsparg and K. G. Wilson, \emph{A remnant of chiral symmetry on the lattice},\fdoi{10.1103/PhysRevD.25.2649}{Phys. Rev. D25 (1982) 2649}.
+
+\bibitem{GOT87}
+S. Gottlieb, W. Liu, D. Toussaint, R. L. Renken, R. L. Sugar:
+\emph{Hybrid-molecular-dynamics algorithms for the numerical simulation of quantum chromodynamics},
+Phys.\ Rev.\ D {\bf 35} (1987) 2531.
+
+\bibitem{DUA87}
+S. Duane; A.D. Kennedy, B. J. Pendleton, R. Duncan: 
+\emph{Hybrid Monte Carlo}
+Phys.\ Lett.\ B {bf 195} (1987) 216.
+
+\bibitem{CAB82}
+N. Cabibbo, E. Marinari: \emph{A new method for updating SU(N) matrices in computer simulations of gauge theories}, \fdoi{10.1016/0370-2693(82)90696-7}{Phys. Lett. B119(1982) 387}.
+
+\bibitem{CRE87}
+M. Creutz: \emph{Overrelaxation and Monte Carlo simulation}, \fdoi{10.1103/PhysRevD.36.515}{Phys. Rev. D36(1987) 515}.
+
+\bibitem{LUS01}
+M. L\"uscher, P. Weisz: \emph{Locality and exponential error reduction in numerical lattice gauge theory}, \fdoi{10.1088/1126-6708/2001/09/010}{JHEP 0109:010,2001}.
+
+\bibitem{OME02}
+I.P. Omelyan, I.M. Mryglod and R. Folk:
+\emph{Optimized verlet-like algorithms for molecular dynamics simulations},
+Phys.\ Rev.\ E {\bf 65} (2002) 056706.
+
+\bibitem{TAK06}
+T. Takaishi, P. de Forcrand:
+\emph{Testing and tuning symplectic integrators for Hybrid Monte Carlo algorithm in lattice QCD},
+Phys.\ Rev.\ E {\bf 73} (2006) 036706.
+
+\bibitem{JAN97}
+K. Jansen, C. Liu:
+\emph{Implementation of Symanzik's Improvement Program for Simulations of Dynamical Wilson Fermions in Lattice QCD},
+Comput.\ Phys.\ Commun.\ {\bf 99} (1997) 221.
+
+\bibitem{BOOST}
+\href{https://www.boost.org/}{www.boost.org}.
+
+\bibitem{EIGEN}
+\href{http://eigen.tuxfamily.org/}{eigen.tuxfamily.org}.
+
+\end{thebibliography}
+
+\end{document}

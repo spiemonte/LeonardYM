@@ -1,10 +1,3 @@
-/*
- * Plaquette.cpp
- *
- *  Created on: Feb 29, 2012
- *      Author: spiem_01
- */
-
 #include "Plaquette.h"
 #include <iostream>
 #include "io/GlobalOutput.h"

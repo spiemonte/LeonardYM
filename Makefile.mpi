@@ -8,24 +8,24 @@ endif
 
 CC       = mpigcc.mpich
 CPP      = mpicxx.mpich
-OPTIMIZE = -O2 -pipe -march=native -fopenmp #-Wall -Wextra
+OPTIMIZE = -O2 -pipe -march=native -fopenmp
 INC	= -I./extra_libs/Eigen -I./extra_libs/ -I./source/
 CFLAGS   = $(OPTIMIZE) $(INC)
 CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/utils/MatrixBaseExtension.h\"" $(adj) -DENABLE_MPI -DNUMCOLORS=$(nc) -DMULTITHREADING -DEIGEN
 
 include Makefile.obj.mk
 
-all: leonardQCD
-	$(CPP) $(CPPFLAGS) $(OBJECTS) -o leonardQCD.exe -lboost_program_options
+all: leonardYM
+	$(CPP) $(CPPFLAGS) $(OBJECTS) -o ./build/leonardYM.exe -lboost_program_options
 	@echo "Compiled with NUMCOLORS: " $(nc)
 
-leonardQCD: $(OBJECTS)
+leonardYM: $(OBJECTS)
 	@echo "done!"
 
 include Makefile.list.mk
 
 clean:
-	-rm ./*.o
-	-rm ./*.exe
+	-rm ./build/*.o
+	-rm ./build/*.exe
 
 

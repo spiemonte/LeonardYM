@@ -1,10 +1,3 @@
-/*
- * TestCommunication.h
- *
- *  Created on: Feb 25, 2013
- *      Author: spiem_01
- */
-
 #ifndef TESTCOMMUNICATION_H_
 #define TESTCOMMUNICATION_H_
 #include "LatticeSweep.h"

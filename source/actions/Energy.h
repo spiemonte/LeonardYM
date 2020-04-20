@@ -1,10 +1,3 @@
-/*
- * Energy.h
- *
- *  Created on: Mar 26, 2012
- *      Author: spiem_01
- */
-
 #ifndef ENERGY_H_
 #define ENERGY_H_
 #include "Environment.h"

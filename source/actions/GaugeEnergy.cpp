@@ -1,10 +1,3 @@
-/*
- * GaugeEnergy.cpp
- *
- *  Created on: Nov 27, 2013
- *      Author: spiem_01
- */
-
 #include "GaugeEnergy.h"
 #include "GaugeAction.h"
 #include "io/GlobalOutput.h"

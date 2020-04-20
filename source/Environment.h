@@ -1,10 +1,3 @@
-/*
- * Enviroment.h
- *
- *  Created on: Feb 21, 2012
- *      Author: spiem_01
- */
-
 #ifndef ENVIRONMENT_H_
 #define ENVIRONMENT_H_
 

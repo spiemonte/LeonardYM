@@ -1,10 +1,3 @@
-/*
- * FermionicAction.cpp
- *
- *  Created on: Mar 28, 2012
- *      Author: spiem_01
- */
-
 #include "FermionicAction.h"
 
 namespace Update {

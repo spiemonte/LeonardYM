@@ -1,10 +1,3 @@
-/*
- * FermionForce.h
- *
- *  Created on: Apr 17, 2012
- *      Author: spiem_01
- */
-
 #ifndef FERMIONFORCE_H_
 #define FERMIONFORCE_H_
 #include "Environment.h"

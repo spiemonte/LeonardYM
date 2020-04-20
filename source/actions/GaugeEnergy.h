@@ -1,10 +1,3 @@
-/*
- * GaugeEnergy.h
- *
- *  Created on: Nov 27, 2013
- *      Author: spiem_01
- */
-
 #ifndef GAUGEENERGY_H_
 #define GAUGEENERGY_H_
 

@@ -1,10 +1,3 @@
-/*
- * FermionForce.cpp
- *
- *  Created on: Apr 17, 2012
- *      Author: spiem_01
- */
-
 #include "FermionForce.h"
 #include "utils/ConvertLattice.h"
 #include "utils/ToString.h"
@@ -45,7 +38,7 @@ GaugeGroup FermionForce::force(const environment_t& env, const FermionicForceMat
 	ConvertLattice<GaugeGroup,FermionicGroup>::toAdjoint(env.gaugeLinkConfiguration[site][mu],link);
 	//For every generator
 	for (unsigned int i = 0; i < fermionLieGenerator.numberGenerators(); ++i) {
-		result += -I*imag(trace(derivative*fermionLieGenerator.get(i)*link))*gaugeLieGenerator.get(i);
+		result += -II*imag(trace(derivative*fermionLieGenerator.get(i)*link))*gaugeLieGenerator.get(i);
 	}
 	return result;
 #endif
@@ -54,7 +47,7 @@ GaugeGroup FermionForce::force(const environment_t& env, const FermionicForceMat
 	set_to_zero(result);
 	//For every generator
 	for (unsigned int i = 0; i < fermionLieGenerator.numberGenerators(); ++i) {
-		result += -I*imag(trace(derivative*fermionLieGenerator.get(i)*env.gaugeLinkConfiguration[site][mu]))*gaugeLieGenerator.get(i);
+		result += -II*imag(trace(derivative*fermionLieGenerator.get(i)*env.gaugeLinkConfiguration[site][mu]))*gaugeLieGenerator.get(i);
 	}
 	return result;
 #endif

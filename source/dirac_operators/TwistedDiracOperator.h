@@ -1,10 +1,3 @@
-/*
- * DiracWilsonOperator.h
- *
- *  Created on: Apr 2, 2012
- *      Author: spiem_01
- */
-
 #ifndef TWISTEDDIRACOPERATOR_H_
 #define TWISTEDDIRACOPERATOR_H_
 

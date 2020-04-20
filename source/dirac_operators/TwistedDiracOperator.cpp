@@ -1,10 +1,3 @@
-/*
- * DiracWilsonOperator.cpp
- *
- *  Created on: Apr 2, 2012
- *      Author: spiem_01
- */
-
 #include "TwistedDiracOperator.h"
 
 namespace Update {

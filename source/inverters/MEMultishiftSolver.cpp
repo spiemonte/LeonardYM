@@ -1,10 +1,3 @@
-/*
- * MEMultishiftSolver.cpp
- *
- *  Created on: Oct 30, 2012
- *      Author: spiem_01
- */
-
 #include "MEMultishiftSolver.h"
 #include "algebra_utils/AlgebraUtils.h"
 

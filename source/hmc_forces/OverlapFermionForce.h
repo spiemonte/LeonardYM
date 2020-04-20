@@ -1,10 +1,3 @@
-/*
- * OverlapFermionForce.h
- *
- *  Created on: Apr 17, 2012
- *      Author: spiem_01
- */
-
 #ifndef OVERLAPFERMIONFORCE_H_
 #define OVERLAPFERMIONFORCE_H_
 

@@ -1,10 +1,3 @@
-/*
- * ImprovedDiracWilsonOperator.h
- *
- *  Created on: May 4, 2012
- *      Author: spiem_01
- */
-
 #ifndef IMPROVEDDIRACWILSONOPERATOR_H_
 #define IMPROVEDDIRACWILSONOPERATOR_H_
 
@@ -44,7 +37,6 @@ protected:
 	//The clover term
 	real_t csw;
 	//The field strength
-	//FermionicGroup (* F)[6];//TODO
 	reduced_field_strength_lattice_t F;
 
 	void updateFieldStrength(const extended_fermion_lattice_t& _lattice);

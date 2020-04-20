@@ -1,10 +1,3 @@
-/*
- * BlockDiracWilsonFermionForce.h
- *
- *  Created on: Apr 17, 2012
- *      Author: spiem_01
- */
-
 #ifndef BLOCKDIRACWILSONFERMIONFORCE_H_
 #define BLOCKDIRACWILSONFERMIONFORCE_H_
 

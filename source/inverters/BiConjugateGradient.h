@@ -1,10 +1,3 @@
-/*
- * BiConjugateGradient.h
- *
- *  Created on: Apr 3, 2012
- *      Author: spiem_01
- */
-
 #ifndef BICONJUGATEGRADIENT_H_
 #define BICONJUGATEGRADIENT_H_
 #include "dirac_operators/DiracOperator.h"

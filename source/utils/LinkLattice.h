@@ -1,10 +1,3 @@
-/*
- * LinkLattice.h
- *
- *  Created on: Jul 16, 2012
- *      Author: spiem_01
- */
-
 #ifndef LINKLATTICE_H_
 #define LINKLATTICE_H_
 #include <iostream>

@@ -1,10 +1,3 @@
-/*
- * ChiralCondensate.h
- *
- *  Created on: Jul 23, 2012
- *      Author: spiem_01
- */
-
 #ifndef CHIRALCONDENSATE_H_
 #define CHIRALCONDENSATE_H_
 

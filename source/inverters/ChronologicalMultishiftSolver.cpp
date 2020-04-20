@@ -1,10 +1,3 @@
-/*
- * ChronologicalMultishiftSolver.cpp
- *
- *  Created on: Jul 24, 2012
- *      Author: spiem_01
- */
-
 #include "ChronologicalMultishiftSolver.h"
 #include "algebra_utils/AlgebraUtils.h"
 #define FULLLOG

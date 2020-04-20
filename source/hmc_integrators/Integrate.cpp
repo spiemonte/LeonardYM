@@ -1,10 +1,3 @@
-/*
- * Integrate.cpp
- *
- *  Created on: Mar 21, 2012
- *      Author: spiem_01
- */
-
 #include "Integrate.h"
 #include "LeapFrog.h"
 #include "FourthOrderLeapFrog.h"

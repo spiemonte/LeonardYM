@@ -1,10 +1,3 @@
-/*
- * Checkerboard.cpp
- *
- *  Created on: Apr 11, 2012
- *      Author: spiem_01
- */
-
 #include "Checkerboard.h"
 #include <vector>
 #include <algorithm>

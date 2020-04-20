@@ -1,10 +1,3 @@
-/*
- * Simulation.h
- *
- *  Created on: Feb 21, 2012
- *      Author: spiem_01
- */
-
 #ifndef SIMULATION_H_
 #define SIMULATION_H_
 #include "Environment.h"

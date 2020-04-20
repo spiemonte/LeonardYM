@@ -1,10 +1,3 @@
-/*
- * TwoFlavorFermionAction.h
- *
- *  Created on: Aug 8, 2012
- *      Author: spiem_01
- */
-
 #ifndef TWOFLAVORFERMIONACTION_H_
 #define TWOFLAVORFERMIONACTION_H_
 

@@ -1,10 +1,3 @@
-/*
- * TestLinearAlgebra.h
- *
- *  Created on: Jul 3, 2012
- *      Author: spiem_01
- */
-
 #ifndef TESTSPEEDDIRACOPERATORS_H_
 #define TESTSPEEDDIRACOPERATORS_H_
 

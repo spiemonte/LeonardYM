@@ -1,10 +1,3 @@
-/*
- * LeapFrog.h
- *
- *  Created on: Mar 21, 2012
- *      Author: spiem_01
- */
-
 #ifndef LEAPFROG_H_
 #define LEAPFROG_H_
 

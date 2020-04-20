@@ -1,10 +1,3 @@
-/*
- * DiracOperator.h
- *
- *  Created on: Mar 28, 2012
- *      Author: spiem_01
- */
-
 #ifndef DIRACOPERATOR_H_
 #define DIRACOPERATOR_H_
 

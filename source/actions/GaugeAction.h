@@ -1,10 +1,3 @@
-/*
- * GaugeAction.h
- *
- *  Created on: Feb 28, 2012
- *      Author: spiem_01
- */
-
 #ifndef GAUGEACTION_H_
 #define GAUGEACTION_H_
 

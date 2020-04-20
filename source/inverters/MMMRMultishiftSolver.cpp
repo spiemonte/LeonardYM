@@ -1,10 +1,3 @@
-/*
- * MMMRMultishiftSolver.cpp
- *
- *  Created on: Oct 30, 2012
- *      Author: spiem_01
- */
-
 #include "MMMRMultishiftSolver.h"
 #include "algebra_utils/AlgebraUtils.h"
 #include "BiConjugateGradient.h"

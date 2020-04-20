@@ -1,10 +1,3 @@
-/*
- * ImprovedDiracWilsonOperator.cpp
- *
- *  Created on: May 4, 2012
- *      Author: spiem_01
- */
-
 #include "ImprovedDiracWilsonOperator.h"
 #include "hmc_forces/ImprovedFermionForce.h"
 
@@ -24,68 +17,6 @@ void ImprovedDiracWilsonOperator::multiply(reduced_dirac_vector_t & output, cons
 
 #pragma omp parallel for
 	for (int site = 0; site < lattice.localsize; ++site) {
-		/*//First we start the hopping parameter terms
-		//Temp for link multiplication
-		GaugeVector tmp[4][4];
-		//Temp for clover term multiplication
-		GaugeVector tmpc[6][4];
-		//First we put U(x,mu)*input(x+mu)
-		for (unsigned int mu = 0; mu < 4; ++mu) {
-			for (unsigned int nu = 0; nu < 4; ++nu) {
-				tmp[mu][nu] = lattice[site][mu]*input[DV::sup(site,mu)][nu];
-			}
-		}
-
-		//We store the result in a cache multiplied by gamma5(id-gamma[mu]) in dirac space
-		GaugeVector hopping[4];
-		for (int n = 0; n < diracVectorLength; ++n) {
-			hopping[0][n] = (tmp[0][0][n]+I*tmp[0][3][n]+tmp[1][0][n]+tmp[1][3][n]+tmp[2][0][n]+I*tmp[2][2][n]+tmp[3][0][n]-tmp[3][2][n]);
-			hopping[1][n] = (tmp[0][1][n]+I*tmp[0][2][n]+tmp[1][1][n]-tmp[1][2][n]+tmp[2][1][n]-I*tmp[2][3][n]+tmp[3][1][n]-tmp[3][3][n]);
-			hopping[2][n] = (I*tmp[0][1][n]-tmp[0][2][n]+tmp[1][1][n]-tmp[1][2][n]+I*tmp[2][0][n]-tmp[2][2][n]+tmp[3][0][n]-tmp[3][2][n]);
-			hopping[3][n] = (I*tmp[0][0][n]-tmp[0][3][n]-tmp[1][0][n]-tmp[1][3][n]-I*tmp[2][1][n]-tmp[2][3][n]+tmp[3][1][n]-tmp[3][3][n]);
-		}
-
-		//Then we put U(x-mu,mu)*input(x-mu)
-		for (unsigned int mu = 0; mu < 4; ++mu) {
-			for (unsigned int nu = 0; nu < 4; ++nu) {
-				tmp[mu][nu] = htrans(lattice[LT::sdn(site,mu)][mu])*input[DV::sdn(site,mu)][nu];
-			}
-		}
-
-		//We store the result in the same a cache multiplied by gamma5(id+gamma[mu]) in dirac space
-		for (int n = 0; n < diracVectorLength; ++n) {
-			hopping[0][n] += (tmp[0][0][n]-I*tmp[0][3][n]+tmp[1][0][n]-tmp[1][3][n]+tmp[2][0][n]-I*tmp[2][2][n]+tmp[3][0][n]+tmp[3][2][n]);
-			hopping[1][n] += (tmp[0][1][n]-I*tmp[0][2][n]+tmp[1][1][n]+tmp[1][2][n]+tmp[2][1][n]+I*tmp[2][3][n]+tmp[3][1][n]+tmp[3][3][n]);
-			hopping[2][n] += (-I*tmp[0][1][n]-tmp[0][2][n]-tmp[1][1][n]-tmp[1][2][n]-I*tmp[2][0][n]-tmp[2][2][n]-tmp[3][0][n]-tmp[3][2][n]);
-			hopping[3][n] += (-I*tmp[0][0][n]-tmp[0][3][n]+tmp[1][0][n]-tmp[1][3][n]+I*tmp[2][1][n]-tmp[2][3][n]-tmp[3][1][n]-tmp[3][3][n]);
-		}
-
-		//The clover term matrix vector multiplication
-		for (unsigned int i = 0; i < 6; ++i) {
-			for (unsigned int j = 0; j < 4; ++j) {
-				tmpc[i][j] = F[site][i]*input[site][j];
-			}
-		}
-
-		//We store the result of the clover term in an intermediate vector
-		GaugeVector clover[4];
-		for (int n = 0; n < diracVectorLength; ++n) {
-			clover[0][n] = -I*tmpc[0][0][n]+tmpc[1][1][n]+I*tmpc[2][1][n]-I*tmpc[3][1][n]+tmpc[4][1][n]+I*tmpc[5][0][n];
-			clover[1][n] = I*tmpc[0][1][n]-tmpc[1][0][n]+I*tmpc[2][0][n]-I*tmpc[3][0][n]-tmpc[4][0][n]-I*tmpc[5][1][n];
-			clover[2][n] = I*tmpc[0][2][n]-tmpc[1][3][n]+I*tmpc[2][3][n]+I*tmpc[3][3][n]+tmpc[4][3][n]+I*tmpc[5][2][n];
-			clover[3][n] = -I*tmpc[0][3][n]+tmpc[1][2][n]+I*tmpc[2][2][n]+I*tmpc[3][2][n]-tmpc[4][2][n]-I*tmpc[5][3][n];
-		}
-
-		//The final result is gamma5*input - kappa*hopping + kappa*csw*clover
-		for (int n = 0; n < diracVectorLength; ++n) {
-			output[site][0][n] = input[site][0][n] - kappa*hopping[0][n] + kappa*csw*clover[0][n];
-			output[site][1][n] = input[site][1][n] - kappa*hopping[1][n] + kappa*csw*clover[1][n];
-			output[site][2][n] = kappa*csw*clover[2][n] -(input[site][2][n] + kappa*hopping[2][n]);
-			output[site][3][n] = kappa*csw*clover[3][n] -(input[site][3][n] + kappa*hopping[3][n]);
-		}*/
-
-
-
 		//First we start the hopping parameter terms
 		GaugeVector tmp_plus[4][2];
 		GaugeVector tmp_minus[4][2];
@@ -205,76 +136,6 @@ void ImprovedDiracWilsonOperator::multiplyAdd(reduced_dirac_vector_t & output, c
 
 #pragma omp parallel for
 	for (int site = 0; site < lattice.localsize; ++site) {
-		/*//First we start the hopping parameter terms
-		//Temp for link multiplication
-		GaugeVector tmp[4][4];
-		//Temp for clover term multiplication
-		GaugeVector tmpc[6][4];
-		//First we put U(x,mu)*input(x+mu)
-		for (unsigned int mu = 0; mu < 4; ++mu) {
-			for (unsigned int nu = 0; nu < 4; ++nu) {
-				tmp[mu][nu] = lattice[site][mu]*vector1[DV::sup(site,mu)][nu];
-			}
-		}
-
-		//We store the result in a cache multiplied by gamma5(id-gamma[mu]) in dirac space
-		GaugeVector hopping[4];
-		for (int n = 0; n < diracVectorLength; ++n) {
-			hopping[0][n] = (tmp[0][0][n]+I*tmp[0][3][n]+tmp[1][0][n]+tmp[1][3][n]+tmp[2][0][n]+I*tmp[2][2][n]+tmp[3][0][n]-tmp[3][2][n]);
-			hopping[1][n] = (tmp[0][1][n]+I*tmp[0][2][n]+tmp[1][1][n]-tmp[1][2][n]+tmp[2][1][n]-I*tmp[2][3][n]+tmp[3][1][n]-tmp[3][3][n]);
-			hopping[2][n] = (I*tmp[0][1][n]-tmp[0][2][n]+tmp[1][1][n]-tmp[1][2][n]+I*tmp[2][0][n]-tmp[2][2][n]+tmp[3][0][n]-tmp[3][2][n]);
-			hopping[3][n] = (I*tmp[0][0][n]-tmp[0][3][n]-tmp[1][0][n]-tmp[1][3][n]-I*tmp[2][1][n]-tmp[2][3][n]+tmp[3][1][n]-tmp[3][3][n]);
-		}
-
-		//Then we put U(x-mu,mu)*input(x-mu)
-		for (unsigned int mu = 0; mu < 4; ++mu) {
-			for (unsigned int nu = 0; nu < 4; ++nu) {
-				tmp[mu][nu] = htrans(lattice[LT::sdn(site,mu)][mu])*vector1[DV::sdn(site,mu)][nu];
-			}
-		}
-
-		//We store the result in the same a cache multiplied by gamma5(id+gamma[mu]) in dirac space
-		for (int n = 0; n < diracVectorLength; ++n) {
-			hopping[0][n] += (tmp[0][0][n]-I*tmp[0][3][n]+tmp[1][0][n]-tmp[1][3][n]+tmp[2][0][n]-I*tmp[2][2][n]+tmp[3][0][n]+tmp[3][2][n]);
-			hopping[1][n] += (tmp[0][1][n]-I*tmp[0][2][n]+tmp[1][1][n]+tmp[1][2][n]+tmp[2][1][n]+I*tmp[2][3][n]+tmp[3][1][n]+tmp[3][3][n]);
-			hopping[2][n] += (-I*tmp[0][1][n]-tmp[0][2][n]-tmp[1][1][n]-tmp[1][2][n]-I*tmp[2][0][n]-tmp[2][2][n]-tmp[3][0][n]-tmp[3][2][n]);
-			hopping[3][n] += (-I*tmp[0][0][n]-tmp[0][3][n]+tmp[1][0][n]-tmp[1][3][n]+I*tmp[2][1][n]-tmp[2][3][n]-tmp[3][1][n]-tmp[3][3][n]);
-		}
-
-		//The clover term matrix vector multiplication
-		for (unsigned int i = 0; i < 6; ++i) {
-			for (unsigned int j = 0; j < 4; ++j) {
-				tmpc[i][j] = F[site][i]*vector1[site][j];
-			}
-		}
-
-		//We store the result of the clover term in an intermediate vector
-		GaugeVector clover[4];
-		for (int n = 0; n < diracVectorLength; ++n) {
-			clover[0][n] = -I*tmpc[0][0][n]+tmpc[1][1][n]+I*tmpc[2][1][n]-I*tmpc[3][1][n]+tmpc[4][1][n]+I*tmpc[5][0][n];
-			clover[1][n] = I*tmpc[0][1][n]-tmpc[1][0][n]+I*tmpc[2][0][n]-I*tmpc[3][0][n]-tmpc[4][0][n]-I*tmpc[5][1][n];
-			clover[2][n] = I*tmpc[0][2][n]-tmpc[1][3][n]+I*tmpc[2][3][n]+I*tmpc[3][3][n]+tmpc[4][3][n]+I*tmpc[5][2][n];
-			clover[3][n] = -I*tmpc[0][3][n]+tmpc[1][2][n]+I*tmpc[2][2][n]+I*tmpc[3][2][n]-tmpc[4][2][n]-I*tmpc[5][3][n];
-		}
-
-		//The final result is gamma5*input - kappa*hopping + kappa*csw*clover
-		for (int n = 0; n < diracVectorLength; ++n) {
-			output[site][0][n] = alpha*vector2[site][0][n] + vector1[site][0][n] - kappa*hopping[0][n] + kappa*csw*clover[0][n];
-			output[site][1][n] = alpha*vector2[site][1][n] + vector1[site][1][n] - kappa*hopping[1][n] + kappa*csw*clover[1][n];
-			output[site][2][n] = alpha*vector2[site][2][n] + kappa*csw*clover[2][n] -(vector1[site][2][n] + kappa*hopping[2][n]);
-			output[site][3][n] = alpha*vector2[site][3][n] + kappa*csw*clover[3][n] -(vector1[site][3][n] + kappa*hopping[3][n]);
-		}*/
-
-
-
-
-
-
-
-
-
-
-
 		//First we start the hopping parameter terms
 		GaugeVector tmp_plus[4][2];
 		GaugeVector tmp_minus[4][2];

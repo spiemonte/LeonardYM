@@ -1,10 +1,3 @@
-/*
- * HiggsGaugeHMCUpdater.h
- *
- *  Created on: Mar 21, 2012
- *      Author: spiem_01
- */
-
 #ifndef HIGGSGAUGEHMCUPDATER_H_
 #define HIGGSGAUGEHMCUPDATER_H_
 

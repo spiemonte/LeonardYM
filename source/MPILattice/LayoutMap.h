@@ -1,10 +1,3 @@
-/*
- * LayoutMap.h
- *
- *  Created on: Feb 27, 2014
- *      Author: spiem_01
- */
-
 #ifndef LAYOUTMAP_H_
 #define LAYOUTMAP_H_
 

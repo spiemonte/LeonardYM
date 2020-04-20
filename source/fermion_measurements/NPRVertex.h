@@ -1,10 +1,3 @@
-/*
- * MesonCorrelator.h
- *
- *  Created on: Jul 23, 2012
- *      Author: spiem_01
- */
-
 #ifndef NPRVERTEX_H_
 #define NPRVERTEX_H_
 

@@ -1,10 +1,3 @@
-/*
- * ConjugateGradient.cpp
- *
- *  Created on: Sep 27, 2012
- *      Author: spiem_01
- */
-
 #include "ConjugateGradient.h"
 #include "algebra_utils/AlgebraUtils.h"
 

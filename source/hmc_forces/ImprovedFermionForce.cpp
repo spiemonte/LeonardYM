@@ -1,10 +1,3 @@
-/*
- * ImprovedFermionForce.cpp
- *
- *  Created on: Jun 11, 2012
- *      Author: spiem_01
- */
-
 #include "ImprovedFermionForce.h"
 #include "utils/Gamma.h"
 
@@ -22,7 +15,7 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 	FermionicForceMatrix force;
 	set_to_zero(force);
 
-	std::complex<real_t> ikc = (I*kappa*csw);
+	std::complex<real_t> ikc = (II*kappa*csw);
 
 	GaugeVector projSpinorX[4][4];
 	GaugeVector projSpinorY[4][4];
@@ -46,7 +39,7 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 	//First Term
 	for (int nu = 0; nu < 4; ++nu) {
 		if (nu != mu) {
-			//FermionicForceMatrix linkMatrixLeft = (I*kappa*csw)*lattice[Lattice::sup(site,mu)][nu]*htrans(lattice[Lattice::sup(site,nu)][mu])*htrans(lattice[site][nu]);
+			//FermionicForceMatrix linkMatrixLeft = (II*kappa*csw)*lattice[Lattice::sup(site,mu)][nu]*htrans(lattice[Lattice::sup(site,nu)][mu])*htrans(lattice[site][nu]);
 			for (unsigned int alpha = 0; alpha < 4; ++alpha) {
 				force += tensor(X[site][alpha],latticeForcesLeft[0](site,mu,nu)*projSpinorY[nu][alpha]);
 				//Now we exchange x with y
@@ -55,22 +48,10 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 		}
 	}
 
-	/*for (int nu = 0; nu < 4; ++nu) {
-		if (nu != mu) {
-			//FermionicForceMatrix linkMatrixLeft = (I*kappa*csw)*htrans(lattice[site][mu]);
-			//FermionicGroup linkMatrixRigth = lattice[site][mu]*lattice[Lattice::sup(site,mu)][nu]*htrans(lattice[Lattice::sup(site,nu)][mu])*htrans(lattice[site][nu]);
-			for (unsigned int alpha = 0; alpha < 4; ++alpha) {
-				force += tensor(latticeForcesRight[1](site,mu,nu)*X[site][alpha],latticeForcesLeft[1](site,mu,nu)*projSpinorY[nu][alpha]);
-				//Now we exchange x with y
-				force += tensor(latticeForcesRight[1](site,mu,nu)*Y[site][alpha],latticeForcesLeft[1](site,mu,nu)*projSpinorX[nu][alpha]);
-			}
-		}
-	}*/
-
 	//Second term
 	for (int nu = 0; nu < 4; ++nu) {
 		if (nu != mu) {
-			//FermionicForceMatrix linkMatrixLeft = (I*kappa*csw)*htrans(lattice[site][mu]);
+			//FermionicForceMatrix linkMatrixLeft = (II*kappa*csw)*htrans(lattice[site][mu]);
 			//FermionicGroup linkMatrixRigth = lattice[site][mu]*htrans(lattice[Lattice::sdn(Lattice::sup(site,mu),nu)][nu])*htrans(lattice[Lattice::sdn(site,nu)][mu])*lattice[Lattice::sdn(site,nu)][nu];
 			for (unsigned int alpha = 0; alpha < 4; ++alpha) {
 				force -= tensor(latticeForcesRight[1](site,mu,nu)*X[site][alpha],latticeForcesLeft[1](site,mu,nu)*projSpinorY[nu][alpha]);
@@ -79,17 +60,6 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 			}
 		}
 	}
-
-	/*for (int nu = 0; nu < 4; ++nu) {
-		if (nu != mu) {
-			//FermionicForceMatrix linkMatrixLeft = (I*kappa*csw)*htrans(lattice[Lattice::sdn(Lattice::sup(site,mu),nu)][nu])*htrans(lattice[Lattice::sdn(site,nu)][mu])*lattice[Lattice::sdn(site,nu)][nu];
-			for (unsigned int alpha = 0; alpha < 4; ++alpha) {
-				force -= tensor(X[site][alpha],latticeForcesLeft[3](site,mu,nu)*projSpinorY[nu][alpha]);
-				//Now we exchange x with y
-				force -= tensor(Y[site][alpha],latticeForcesLeft[3](site,mu,nu)*projSpinorX[nu][alpha]);
-			}
-		}
-	}*/
 
 	//We project the spinors for the next term
 	for (int nu = 0; nu < 4; ++nu) {
@@ -110,7 +80,7 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 	//Third term
 	for (int nu = 0; nu < 4; ++nu) {
 		if (nu != mu) {
-			//FermionicForceMatrix linkMatrixLeft = (I*kappa*csw)*lattice[Lattice::sup(site,mu)][nu]*htrans(lattice[Lattice::sup(site,nu)][mu]);
+			//FermionicForceMatrix linkMatrixLeft = (II*kappa*csw)*lattice[Lattice::sup(site,mu)][nu]*htrans(lattice[Lattice::sup(site,nu)][mu]);
 			for (unsigned int alpha = 0; alpha < 4; ++alpha) {
 				force += tensor(latticeForcesRight[2](site,mu,nu)*X[Vector::sup(site,nu)][alpha],latticeForcesLeft[2](site,mu,nu)*projSpinorY[nu][alpha]);
 				//Now we exchange x with y
@@ -118,19 +88,6 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 			}
 		}
 	}
-
-	/*for (int nu = 0; nu < 4; ++nu) {
-		if (nu != mu) {
-			//FermionicForceMatrix linkMatrixLeft = (I*kappa*csw)*htrans(lattice[site][mu])*lattice[site][nu];
-			//FermionicGroup linkMatrixRigth = lattice[site][mu]*lattice[Lattice::sup(site,mu)][nu]*htrans(lattice[Lattice::sup(site,nu)][mu]);
-			for (unsigned int alpha = 0; alpha < 4; ++alpha) {
-				force += tensor(latticeForcesRight[5](site,mu,nu)*X[Vector::sup(site,nu)][alpha],latticeForcesLeft[5](site,mu,nu)*projSpinorY[nu][alpha]);
-				//Now we exchange x with y
-				force += tensor(latticeForcesRight[5](site,mu,nu)*Y[Vector::sup(site,nu)][alpha],latticeForcesLeft[5](site,mu,nu)*projSpinorX[nu][alpha]);
-			}
-		}
-	}*/
-
 
 	//We project the spinors for the next term
 	for (int nu = 0; nu < 4; ++nu) {
@@ -151,7 +108,7 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 	//Fourth term
 	for (int nu = 0; nu < 4; ++nu) {
 		if (nu != mu) {
-			//FermionicForceMatrix linkMatrixLeft = (I*kappa*csw)*htrans(lattice[site][mu])*htrans(lattice[Lattice::sdn(site,nu)][nu]);
+			//FermionicForceMatrix linkMatrixLeft = (II*kappa*csw)*htrans(lattice[site][mu])*htrans(lattice[Lattice::sdn(site,nu)][nu]);
 			//FermionicGroup linkMatrixRigth = lattice[site][mu]*htrans(lattice[Lattice::sdn(Lattice::sup(site,mu),nu)][nu])*htrans(lattice[Lattice::sdn(site,nu)][mu]);
 			for (unsigned int alpha = 0; alpha < 4; ++alpha) {
 				force -= tensor(latticeForcesRight[3](site,mu,nu)*X[Vector::sdn(site,nu)][alpha],latticeForcesLeft[3](site,mu,nu)*projSpinorY[nu][alpha]);
@@ -160,19 +117,6 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 			}
 		}
 	}
-
-	/*for (int nu = 0; nu < 4; ++nu) {
-		if (nu != mu) {
-			//FermionicForceMatrix linkMatrixLeft = (I*kappa*csw)*htrans(lattice[Lattice::sdn(Lattice::sup(site,mu),nu)][nu])*htrans(lattice[Lattice::sdn(site,nu)][mu]);
-			//FermionicGroup linkMatrixRigth = htrans(lattice[Lattice::sdn(site,nu)][nu]);
-			for (unsigned int alpha = 0; alpha < 4; ++alpha) {
-				force -= tensor(latticeForcesRight[7](site,mu,nu)*X[Vector::sdn(site,nu)][alpha],latticeForcesLeft[7](site,mu,nu)*projSpinorY[nu][alpha]);
-				//Now we exchange x with y
-				force -= tensor(latticeForcesRight[7](site,mu,nu)*Y[Vector::sdn(site,nu)][alpha],latticeForcesLeft[7](site,mu,nu)*projSpinorX[nu][alpha]);
-			}
-		}
-	}*/
-
 
 	//We project the spinors for the next two terms
 	for (int nu = 0; nu < 4; ++nu) {
@@ -202,21 +146,10 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 		}
 	}
 
-	/*for (int nu = 0; nu < 4; ++nu) {
-		if (nu != mu) {
-			//FermionicForceMatrix linkMatrixLeft = (I*kappa*csw)*htrans(lattice[site][mu])*lattice[site][nu]*lattice[Lattice::sup(site,nu)][mu]*htrans(lattice[Lattice::sup(site,mu)][nu]);
-			for (unsigned int alpha = 0; alpha < 4; ++alpha) {
-				force += tensor(latticeForcesRight[9](site,mu,nu)*X[Vector::sup(site,mu)][alpha],latticeForcesLeft[9](site,mu,nu)*projSpinorY[nu][alpha]);
-				//Now we exchange x with y
-				force += tensor(latticeForcesRight[9](site,mu,nu)*Y[Vector::sup(site,mu)][alpha],latticeForcesLeft[9](site,mu,nu)*projSpinorX[nu][alpha]);
-			}
-		}
-	}*/
-
 	//Sixth term
 	for (int nu = 0; nu < 4; ++nu) {
 		if (nu != mu) {
-			//FermionicForceMatrix linkMatrixLeft = (I*kappa*csw)*htrans(lattice[site][mu])*htrans(lattice[Lattice::sdn(site,nu)][nu])*lattice[Lattice::sdn(site,nu)][mu]*lattice[Lattice::sdn(Lattice::sup(site,mu),nu)][nu];
+			//FermionicForceMatrix linkMatrixLeft = (II*kappa*csw)*htrans(lattice[site][mu])*htrans(lattice[Lattice::sdn(site,nu)][nu])*lattice[Lattice::sdn(site,nu)][mu]*lattice[Lattice::sdn(Lattice::sup(site,mu),nu)][nu];
 			for (unsigned int alpha = 0; alpha < 4; ++alpha) {
 				force -= tensor(latticeForcesRight[5](site,mu,nu)*X[Vector::sup(site,mu)][alpha],latticeForcesLeft[5](site,mu,nu)*projSpinorY[nu][alpha]);
 				//Now we exchange x with y
@@ -224,18 +157,6 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 			}
 		}
 	}
-
-	/*for (int nu = 0; nu < 4; ++nu) {
-		if (nu != mu) {
-			FermionicGroup linkMatrixRigth = htrans(lattice[Lattice::sdn(site,nu)][nu])*lattice[Lattice::sdn(site,nu)][mu]*lattice[Lattice::sdn(Lattice::sup(site,mu),nu)][nu];
-			for (unsigned int alpha = 0; alpha < 4; ++alpha) {
-				force -= tensor(latticeForcesRight[11](site,mu,nu)*X[Vector::sup(site,mu)][alpha],projSpinorY[nu][alpha]);
-				//Now we exchange x with y
-				force -= tensor(latticeForcesRight[11](site,mu,nu)*Y[Vector::sup(site,mu)][alpha],projSpinorX[nu][alpha]);
-			}
-		}
-	}*/
-
 
 	//We project the spinors for the next term
 	for (int nu = 0; nu < 4; ++nu) {
@@ -256,7 +177,7 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 	//Seventh term
 	for (int nu = 0; nu < 4; ++nu) {
 		if (nu != mu) {
-			//FermionicForceMatrix linkMatrixLeft = (I*kappa*csw)*lattice[Lattice::sup(site,mu)][nu];
+			//FermionicForceMatrix linkMatrixLeft = (II*kappa*csw)*lattice[Lattice::sup(site,mu)][nu];
 			//FermionicGroup linkMatrixRigth = lattice[site][nu]*lattice[Lattice::sup(site,nu)][mu];
 			for (unsigned int alpha = 0; alpha < 4; ++alpha) {
 				force += tensor(latticeForcesRight[6](site,mu,nu)*X[Vector::sup(Vector::sup(site,mu),nu)][alpha],latticeForcesLeft[6](site,mu,nu)*projSpinorY[nu][alpha]);
@@ -265,18 +186,6 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 			}
 		}
 	}
-
-	/*for (int nu = 0; nu < 4; ++nu) {
-		if (nu != mu) {
-			//FermionicForceMatrix linkMatrixLeft = (I*kappa*csw)*htrans(lattice[site][mu])*lattice[site][nu]*lattice[Lattice::sup(site,nu)][mu];
-			//FermionicGroup linkMatrixRigth = lattice[site][mu]*lattice[Lattice::sup(site,mu)][nu];
-			for (unsigned int alpha = 0; alpha < 4; ++alpha) {
-				force += tensor(latticeForcesRight[13](site,mu,nu)*X[Vector::sup(Vector::sup(site,mu),nu)][alpha],latticeForcesLeft[13](site,mu,nu)*projSpinorY[nu][alpha]);
-				//Now we exchange x with y
-				force += tensor(latticeForcesRight[13](site,mu,nu)*Y[Vector::sup(Vector::sup(site,mu),nu)][alpha],latticeForcesLeft[13](site,mu,nu)*projSpinorX[nu][alpha]);
-			}
-		}
-	}*/
 
 	//We project the spinors for the next term
 	for (int nu = 0; nu < 4; ++nu) {
@@ -297,7 +206,7 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 	//Eighth term
 	for (int nu = 0; nu < 4; ++nu) {
 		if (nu != mu) {
-			//FermionicForceMatrix linkMatrixLeft = (I*kappa*csw)*htrans(lattice[site][mu])*htrans(lattice[Lattice::sdn(site,nu)][nu])*lattice[Lattice::sdn(site,nu)][mu];
+			//FermionicForceMatrix linkMatrixLeft = (II*kappa*csw)*htrans(lattice[site][mu])*htrans(lattice[Lattice::sdn(site,nu)][nu])*lattice[Lattice::sdn(site,nu)][mu];
 			//FermionicGroup linkMatrixRigth = lattice[site][mu]*htrans(lattice[Lattice::sdn(Vector::sup(site,mu),nu)][nu]);
 			for (unsigned int alpha = 0; alpha < 4; ++alpha) {
 				force -= tensor(latticeForcesRight[7](site,mu,nu)*X[Vector::sdn(Vector::sup(site,mu),nu)][alpha],latticeForcesLeft[7](site,mu,nu)*projSpinorY[nu][alpha]);
@@ -306,18 +215,6 @@ FermionicForceMatrix ImprovedFermionForce::derivative(const extended_fermion_lat
 			}
 		}
 	}
-
-	/*for (int nu = 0; nu < 4; ++nu) {
-		if (nu != mu) {
-			//FermionicForceMatrix linkMatrixLeft = (I*kappa*csw)*htrans(lattice[Lattice::sdn(Lattice::sup(site,mu),nu)][nu]);
-			//FermionicGroup linkMatrixRigth = htrans(lattice[Lattice::sdn(site,nu)][nu])*lattice[Lattice::sdn(site,nu)][mu];
-			for (unsigned int alpha = 0; alpha < 4; ++alpha) {
-				force -= tensor(latticeForcesRight[15](site,mu,nu)*X[Vector::sdn(Vector::sup(site,mu),nu)][alpha],latticeForcesLeft[15](site,mu,nu)*projSpinorY[nu][alpha]);
-				//Now we exchange x with y
-				force -= tensor(latticeForcesRight[15](site,mu,nu)*Y[Vector::sdn(Vector::sup(site,mu),nu)][alpha],latticeForcesLeft[15](site,mu,nu)*projSpinorX[nu][alpha]);
-			}
-		}
-	}*/
 
 	return (force/4.) + DiracWilsonFermionForce::derivative(lattice, X, Y, site, mu);
 }

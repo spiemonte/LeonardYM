@@ -1,10 +1,3 @@
-/*
- * PolyakovLoopCorrelator.cpp
- *
- *  Created on: Jul 23, 2012
- *      Author: spiem_01
- */
-
 #include "PolyakovLoopCorrelator.h"
 #include "io/GlobalOutput.h"
 #include "utils/StoutSmearing.h"

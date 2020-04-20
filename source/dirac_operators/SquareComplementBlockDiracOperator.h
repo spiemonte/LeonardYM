@@ -1,10 +1,3 @@
-/*
- * SquareComplementBlockDiracOperator.h
- *
- *  Created on: Mar 18, 2013
- *      Author: spiem_01
- */
-
 #ifndef SQUARECOMPLEMENTBLOCKDIRACOPERATOR_H_
 #define SQUARECOMPLEMENTBLOCKDIRACOPERATOR_H_
 #include "DiracWilsonOperator.h"

@@ -1,10 +1,3 @@
-/*
- * PureGaugeOverrelaxation.h
- *
- *  Created on: May 25, 2012
- *      Author: spiem_01
- */
-
 #ifndef PUREGAUGEOVERRELAXATION_H_
 #define PUREGAUGEOVERRELAXATION_H_
 

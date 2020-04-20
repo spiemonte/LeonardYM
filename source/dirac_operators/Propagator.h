@@ -1,10 +1,3 @@
-/*
- * Propagator.h
- *
- *  Created on: Jul 23, 2012
- *      Author: spiem_01
- */
-
 #ifndef PROPAGATOR_H_
 #define PROPAGATOR_H_
 

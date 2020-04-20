@@ -1,10 +1,3 @@
-/*
- * ComplementBlockDiracWilsonOperator.cpp
- *
- *  Created on: Mar 18, 2013
- *      Author: spiem_01
- */
-
 #include "SAPPreconditioner.h"
 #include "algebra_utils/AlgebraUtils.h"
 

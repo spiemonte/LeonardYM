@@ -1,10 +1,3 @@
-/*
- * ImprovedDiracWilsonOperator.h
- *
- *  Created on: May 4, 2012
- *      Author: spiem_01
- */
-
 #ifndef IMPROVEDDIRACWILSONOPERATOR_H_
 #define IMPROVEDDIRACWILSONOPERATOR_H_
 

@@ -1,10 +1,3 @@
-/*
- * DiracEigenSolver.cpp
- *
- *  Created on: Jun 26, 2012
- *      Author: spiem_01
- */
-
 #include "DiracEigenSolver.h"
 #include "algebra_utils/AlgebraUtils.h"
 #include "inverters/BiConjugateGradient.h"
@@ -24,7 +17,6 @@ bool maxcomparison(const std::complex<real_t>& i, const std::complex<real_t>& j)
 bool mincomparison(const std::complex<real_t>& i, const std::complex<real_t>& j) { return (abs(i)<abs(j)); }
 
 inline void rotateVector(reduced_dirac_vector_t& vector, EigevaluesMode mode) {
-	typedef reduced_dirac_vector_t::Layout Layout;
 	if (mode != LargestReal) {
 #pragma omp parallel for
 		for (int site = 0; site < vector.completesize; ++site) {
@@ -219,7 +211,7 @@ long_real_t DiracEigenSolver::finishArnoldi(DiracOperator* diracOperator, const 
 				real_t sum = 0.;
 				for (unsigned int mu = 0; mu < 4; ++mu) {
 					for (unsigned int c = 0; c < diracVectorLength; ++c) {
-						sum += std::fabs(tmp[site][mu][c] - eigenvalues[i]*eigenvectors[i][site][mu][c]);
+						sum += std::abs(tmp[site][mu][c] - eigenvalues[i]*eigenvectors[i][site][mu][c]);
 					}
 				}
 				diffnorm += sum;
@@ -256,7 +248,7 @@ long_real_t DiracEigenSolver::finishArnoldi(DiracOperator* diracOperator, const 
 
 	long_real_t diffnorm = AlgebraUtils::differenceNorm(tmp,tmpe);
 
-	if (isOutputProcess()) std::cout << "DiracEigenSolver::Convergence precision for the largest eigenvalue: " << abs(diffnorm) << std::endl;
+	if (isOutputProcess()) std::cout << "DiracEigenSolver::Convergence precision for the largest eigenvalue: " << std::abs(diffnorm) << std::endl;
 
 	//Now we check the convergence
 	diracOperator->multiply(tmp,eigenvectors[eigenvectors.size()-extra_steps]);
@@ -269,7 +261,7 @@ long_real_t DiracEigenSolver::finishArnoldi(DiracOperator* diracOperator, const 
 
 	diffnorm = AlgebraUtils::differenceNorm(tmp,tmpe);
 
-	if (isOutputProcess()) std::cout << "DiracEigenSolver::Convergence precision for the smallest eigenvalue: " << abs(diffnorm) << ", target: " << epsilon << std::endl;
+	if (isOutputProcess()) std::cout << "DiracEigenSolver::Convergence precision for the smallest eigenvalue: " << std::abs(diffnorm) << ", target: " << epsilon << std::endl;
 
 	std::reverse(eigenvectors.begin(),eigenvectors.end());
 	std::reverse(eigenvalues.begin(),eigenvalues.end());
@@ -391,7 +383,7 @@ void DiracEigenSolver::restartArnoldi(DiracOperator* diracOperator, std::vector<
 		for (unsigned int k = 0; k < V.size(); ++k) {
 			AlgebraUtils::setToZero(Vp[k]);// U(k,0)*V[0];
 			for (unsigned int l = 0; l < V.size(); ++l) {
-				if (fabs(Q(l,k)) > 10e-17) {
+				if (std::abs(Q(l,k)) > 10e-17) {
 #pragma omp parallel for
 					for (int site = 0; site < Vp[k].completesize; ++site) {
 						for (unsigned int mu = 0; mu < 4; ++mu) {

@@ -1,10 +1,3 @@
-/*
- * RandomStartGaugeConfiguration.cpp
- *
- *  Created on: Feb 28, 2012
- *      Author: spiem_01
- */
-
 #include "RandomGaugeTransformation.h"
 #include "MatrixTypedef.h"
 #include "utils/ReUnit.h"

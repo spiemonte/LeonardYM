@@ -1,10 +1,3 @@
-/*
- * PolyakovLoop.h
- *
- *  Created on: Jul 23, 2012
- *      Author: spiem_01
- */
-
 #ifndef POLYAKOVLOOP_H_
 #define POLYAKOVLOOP_H_
 

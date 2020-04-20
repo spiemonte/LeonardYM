@@ -1,10 +1,3 @@
-/*
- * GlobalOutput.h
- *
- *  Created on: Jul 23, 2012
- *      Author: spiem_01
- */
-
 #ifndef GLOBALOUTPUT_H_
 #define GLOBALOUTPUT_H_
 #include <fstream>

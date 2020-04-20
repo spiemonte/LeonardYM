@@ -1,10 +1,3 @@
-/*
- * TestLinearAlgebra.cpp
- *
- *  Created on: Jul 3, 2012
- *      Author: spiem_01
- */
-
 #include "TestSpeedDiracOperators.h"
 #include "algebra_utils/AlgebraUtils.h"
 #include "dirac_operators/SquareDiracWilsonOperator.h"

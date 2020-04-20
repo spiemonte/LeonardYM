@@ -1,10 +1,3 @@
-/*
- * BlockDiracOperator.cpp
- *
- *  Created on: Mar 18, 2013
- *      Author: spiem_01
- */
-
 #include "BlockDiracOperator.h"
 #include "BlockDiracWilsonOperator.h"
 #include "BlockImprovedDiracWilsonOperator.h"

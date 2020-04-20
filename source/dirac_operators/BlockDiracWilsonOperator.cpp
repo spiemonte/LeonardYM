@@ -1,10 +1,3 @@
-/*
- * BlockDiracWilsonOperator.cpp
- *
- *  Created on: Mar 18, 2013
- *      Author: spiem_01
- */
-
 #include "BlockDiracWilsonOperator.h"
 #include "hmc_forces/BlockDiracWilsonFermionForce.h"
 
@@ -25,61 +18,6 @@ void BlockDiracWilsonOperator::multiply(reduced_dirac_vector_t& output, const re
 #pragma omp parallel for
 	for (int site = 0; site < lattice.localsize; ++site) {
 		if (index_lattice[site] == 1) {
-			/*GaugeVector tmp[4][4];
-
-			//First we put U(x,mu)*input(x+mu)
-			for (unsigned int mu = 0; mu < 4; ++mu) {
-				for (unsigned int nu = 0; nu < 4; ++nu) {
-					if (index_lattice[DV::sup(site,mu)] == 1) tmp[mu][nu] = lattice[site][mu]*input[DV::sup(site,mu)][nu];
-					else set_to_zero(tmp[mu][nu]);
-		}
-		}
-
-		//We store the result in a cache multiplied by gamma5(id-gamma[mu]) in dirac space
-		GaugeVector hopping[4];
-		for (int n = 0; n < diracVectorLength; ++n) {
-			hopping[0][n] = (tmp[0][0][n]+I*tmp[0][3][n]+tmp[1][0][n]+tmp[1][3][n]+tmp[2][0][n]+I*tmp[2][2][n]+tmp[3][0][n]-tmp[3][2][n]);
-			hopping[1][n] = (tmp[0][1][n]+I*tmp[0][2][n]+tmp[1][1][n]-tmp[1][2][n]+tmp[2][1][n]-I*tmp[2][3][n]+tmp[3][1][n]-tmp[3][3][n]);
-			hopping[2][n] = (I*tmp[0][1][n]-tmp[0][2][n]+tmp[1][1][n]-tmp[1][2][n]+I*tmp[2][0][n]-tmp[2][2][n]+tmp[3][0][n]-tmp[3][2][n]);
-			hopping[3][n] = (I*tmp[0][0][n]-tmp[0][3][n]-tmp[1][0][n]-tmp[1][3][n]-I*tmp[2][1][n]-tmp[2][3][n]+tmp[3][1][n]-tmp[3][3][n]);
-		}
-
-		//Then we put U(x-mu,mu)*input(x-mu)
-		for (unsigned int mu = 0; mu < 4; ++mu) {
-			for (unsigned int nu = 0; nu < 4; ++nu) {
-				if (index_lattice[LT::sdn(site,mu)] == 1) tmp[mu][nu] = htrans(lattice[LT::sdn(site,mu)][mu])*input[DV::sdn(site,mu)][nu];
-				else set_to_zero(tmp[mu][nu]);
-		}
-		}
-
-		//We store the result in the same a cache multiplied by gamma5(id+gamma[mu]) in dirac space
-		for (int n = 0; n < diracVectorLength; ++n) {
-			hopping[0][n] += (tmp[0][0][n]-I*tmp[0][3][n]+tmp[1][0][n]-tmp[1][3][n]+tmp[2][0][n]-I*tmp[2][2][n]+tmp[3][0][n]+tmp[3][2][n]);
-			hopping[1][n] += (tmp[0][1][n]-I*tmp[0][2][n]+tmp[1][1][n]+tmp[1][2][n]+tmp[2][1][n]+I*tmp[2][3][n]+tmp[3][1][n]+tmp[3][3][n]);
-			hopping[2][n] += (-I*tmp[0][1][n]-tmp[0][2][n]-tmp[1][1][n]-tmp[1][2][n]-I*tmp[2][0][n]-tmp[2][2][n]-tmp[3][0][n]-tmp[3][2][n]);
-			hopping[3][n] += (-I*tmp[0][0][n]-tmp[0][3][n]+tmp[1][0][n]-tmp[1][3][n]+I*tmp[2][1][n]-tmp[2][3][n]-tmp[3][1][n]-tmp[3][3][n]);
-		}
-
-		if (gamma5) {
-			//The final result is gamma5*input - kappa*hopping
-			for (int n = 0; n < diracVectorLength; ++n) {
-				output[site][0][n] = + input[site][0][n] - kappa*hopping[0][n];
-				output[site][1][n] = + input[site][1][n] - kappa*hopping[1][n];
-				output[site][2][n] = - (input[site][2][n] + kappa*hopping[2][n]);
-				output[site][3][n] = - (input[site][3][n] + kappa*hopping[3][n]);
-		}
-		}
-		else {
-			//The final result is input - kappa*gamma5*hopping
-			for (int n = 0; n < diracVectorLength; ++n) {
-				output[site][0][n] = + input[site][0][n] - kappa*hopping[0][n];
-				output[site][1][n] = + input[site][1][n] - kappa*hopping[1][n];
-				output[site][2][n] = + input[site][2][n] + kappa*hopping[2][n];
-				output[site][3][n] = + input[site][3][n] + kappa*hopping[3][n];
-		}
-		}*/
-
-
 			//First we start the hopping parameter terms
 			GaugeVector tmp_plus[4][2];
 			GaugeVector tmp_minus[4][2];
@@ -180,7 +118,6 @@ void BlockDiracWilsonOperator::multiply(reduced_dirac_vector_t& output, const re
 			}
 		}
 	}
-	//output.updateHalo(); Update halo called in the outer steps!
 }
 
 void BlockDiracWilsonOperator::multiplyAdd(reduced_dirac_vector_t& output, const reduced_dirac_vector_t& vector1, const reduced_dirac_vector_t& vector2, const std::complex<real_t>& alpha) {
@@ -204,10 +141,10 @@ void BlockDiracWilsonOperator::multiplyAdd(reduced_dirac_vector_t& output, const
 			//We store the result in a cache multiplied by gamma5(id-gamma[mu]) in dirac space
 			GaugeVector hopping[4];
 			for (int n = 0; n < diracVectorLength; ++n) {
-				hopping[0][n] = (tmp[0][0][n]+I*tmp[0][3][n]+tmp[1][0][n]+tmp[1][3][n]+tmp[2][0][n]+I*tmp[2][2][n]+tmp[3][0][n]-tmp[3][2][n]);
-				hopping[1][n] = (tmp[0][1][n]+I*tmp[0][2][n]+tmp[1][1][n]-tmp[1][2][n]+tmp[2][1][n]-I*tmp[2][3][n]+tmp[3][1][n]-tmp[3][3][n]);
-				hopping[2][n] = (I*tmp[0][1][n]-tmp[0][2][n]+tmp[1][1][n]-tmp[1][2][n]+I*tmp[2][0][n]-tmp[2][2][n]+tmp[3][0][n]-tmp[3][2][n]);
-				hopping[3][n] = (I*tmp[0][0][n]-tmp[0][3][n]-tmp[1][0][n]-tmp[1][3][n]-I*tmp[2][1][n]-tmp[2][3][n]+tmp[3][1][n]-tmp[3][3][n]);
+				hopping[0][n] = (tmp[0][0][n]+II*tmp[0][3][n]+tmp[1][0][n]+tmp[1][3][n]+tmp[2][0][n]+II*tmp[2][2][n]+tmp[3][0][n]-tmp[3][2][n]);
+				hopping[1][n] = (tmp[0][1][n]+II*tmp[0][2][n]+tmp[1][1][n]-tmp[1][2][n]+tmp[2][1][n]-II*tmp[2][3][n]+tmp[3][1][n]-tmp[3][3][n]);
+				hopping[2][n] = (II*tmp[0][1][n]-tmp[0][2][n]+tmp[1][1][n]-tmp[1][2][n]+II*tmp[2][0][n]-tmp[2][2][n]+tmp[3][0][n]-tmp[3][2][n]);
+				hopping[3][n] = (II*tmp[0][0][n]-tmp[0][3][n]-tmp[1][0][n]-tmp[1][3][n]-II*tmp[2][1][n]-tmp[2][3][n]+tmp[3][1][n]-tmp[3][3][n]);
 			}
 
 			//Then we put U(x-mu,mu)*input(x-mu)
@@ -219,10 +156,10 @@ void BlockDiracWilsonOperator::multiplyAdd(reduced_dirac_vector_t& output, const
 
 			//We store the result in the same a cache multiplied by gamma5(id+gamma[mu]) in dirac space
 			for (int n = 0; n < diracVectorLength; ++n) {
-				hopping[0][n] += (tmp[0][0][n]-I*tmp[0][3][n]+tmp[1][0][n]-tmp[1][3][n]+tmp[2][0][n]-I*tmp[2][2][n]+tmp[3][0][n]+tmp[3][2][n]);
-				hopping[1][n] += (tmp[0][1][n]-I*tmp[0][2][n]+tmp[1][1][n]+tmp[1][2][n]+tmp[2][1][n]+I*tmp[2][3][n]+tmp[3][1][n]+tmp[3][3][n]);
-				hopping[2][n] += (-I*tmp[0][1][n]-tmp[0][2][n]-tmp[1][1][n]-tmp[1][2][n]-I*tmp[2][0][n]-tmp[2][2][n]-tmp[3][0][n]-tmp[3][2][n]);
-				hopping[3][n] += (-I*tmp[0][0][n]-tmp[0][3][n]+tmp[1][0][n]-tmp[1][3][n]+I*tmp[2][1][n]-tmp[2][3][n]-tmp[3][1][n]-tmp[3][3][n]);
+				hopping[0][n] += (tmp[0][0][n]-II*tmp[0][3][n]+tmp[1][0][n]-tmp[1][3][n]+tmp[2][0][n]-II*tmp[2][2][n]+tmp[3][0][n]+tmp[3][2][n]);
+				hopping[1][n] += (tmp[0][1][n]-II*tmp[0][2][n]+tmp[1][1][n]+tmp[1][2][n]+tmp[2][1][n]+II*tmp[2][3][n]+tmp[3][1][n]+tmp[3][3][n]);
+				hopping[2][n] += (-II*tmp[0][1][n]-tmp[0][2][n]-tmp[1][1][n]-tmp[1][2][n]-II*tmp[2][0][n]-tmp[2][2][n]-tmp[3][0][n]-tmp[3][2][n]);
+				hopping[3][n] += (-II*tmp[0][0][n]-tmp[0][3][n]+tmp[1][0][n]-tmp[1][3][n]+II*tmp[2][1][n]-tmp[2][3][n]-tmp[3][1][n]-tmp[3][3][n]);
 			}
 
 			if (gamma5) {
@@ -263,7 +200,7 @@ void BlockDiracWilsonOperator::multiplyAdd(reduced_dirac_vector_t& output, const
 			}
 		}
 	}
-	//output.updateHalo();//TODO is needed?
+	
 }
 
 FermionForce* BlockDiracWilsonOperator::getForce() const {

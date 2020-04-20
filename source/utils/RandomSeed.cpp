@@ -1,10 +1,3 @@
-/*
- * RandomSeed.cpp
- *
- *  Created on: Feb 28, 2012
- *      Author: spiem_01
- */
-
 #ifdef ENABLE_MPI
 #include <mpi.h>
 #endif

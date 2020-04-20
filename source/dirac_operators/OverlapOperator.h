@@ -1,10 +1,3 @@
-/*
- * OverlapOperator.h
- *
- *  Created on: Mar 28, 2012
- *      Author: spiem_01
- */
-
 #ifndef OVERLAPOPERATOR_H_
 #define OVERLAPOPERATOR_H_
 #include "DiracOperator.h"

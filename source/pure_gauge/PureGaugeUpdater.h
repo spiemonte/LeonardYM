@@ -1,10 +1,3 @@
-/*
- * PureGaugeUpdater.h
- *
- *  Created on: Feb 27, 2012
- *      Author: spiem_01
- */
-
 #ifndef PUREGAUGEUPDATER_H_
 #define PUREGAUGEUPDATER_H_
 

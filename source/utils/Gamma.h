@@ -1,10 +1,3 @@
-/*
- * Gamma.h
- *
- *  Created on: Nov 30, 2012
- *      Author: spiem_01
- */
-
 #ifndef GAMMA_H_
 #define GAMMA_H_
 #include "MatrixTypedef.h"

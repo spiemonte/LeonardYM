@@ -1,10 +1,3 @@
-/*
- * WilsonFlow.cpp
- *
- *  Created on: Oct 23, 2013
- *      Author: spiem_01
- */
-
 #include "WilsonFlow.h"
 #include "actions/ImprovedGaugeAction.h"
 #include "actions/WilsonGaugeAction.h"
@@ -202,7 +195,6 @@ std::pair<long_real_t,long_real_t> WilsonFlow::measureEnergyAndTopologicalCharge
 }
 
 void WilsonFlow::measureEnergy(const extended_gauge_lattice_t& _lattice) {
-	typedef extended_fermion_lattice_t LT;
 	typedef extended_fermion_lattice_t::Layout Layout;
 	MultiThreadSummator<long_real_t> energy;
 	MultiThreadSummator<long_real_t> topological;

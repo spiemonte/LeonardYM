@@ -1,10 +1,3 @@
-/*
- * MetropolisScalarUpdater.h
- *
- *  Created on: Apr 2, 2012
- *      Author: spiem_01
- */
-
 #ifndef FUNDAMENTALMETROPOLISSCALARUPDATER_H_
 #define FUNDAMENTALMETROPOLISSCALARUPDATER_H_
 #include "LatticeSweep.h"

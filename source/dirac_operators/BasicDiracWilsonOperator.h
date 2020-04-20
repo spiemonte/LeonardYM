@@ -1,10 +1,3 @@
-/*
- * BasicDiracWilsonOperator.h
- *
- *  Created on: Feb 25, 2013
- *      Author: spiem_01
- */
-
 #ifndef BASICDIRACWILSONOPERATOR_H_
 #define BASICDIRACWILSONOPERATOR_H_
 #include "DiracOperator.h"

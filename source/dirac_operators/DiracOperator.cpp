@@ -1,10 +1,3 @@
-/*
- * DiracOperator.cpp
- *
- *  Created on: Mar 28, 2012
- *      Author: spiem_01
- */
-
 #include "DiracOperator.h"
 #include "OverlapOperator.h"
 #include "ExactOverlapOperator.h"

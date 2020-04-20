@@ -1,10 +1,3 @@
-/*
- * BlockDiracOperator.h
- *
- *  Created on: Mar 18, 2013
- *      Author: spiem_01
- */
-
 #ifndef BLOCKDIRACOPERATOR_H_
 #define BLOCKDIRACOPERATOR_H_
 #include "DiracOperator.h"

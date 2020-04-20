@@ -1,10 +1,3 @@
-/*
- * ConverLattice.h
- *
- *  Created on: Jul 8, 2012
- *      Author: spiem_01
- */
-
 #ifndef CONVERTLATTICE_H_
 #define CONVERTLATTICE_H_
 #include "LieGenerators.h"

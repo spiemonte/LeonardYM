@@ -1,10 +1,3 @@
-/*
- * LatticeSweep.cpp
- *
- *  Created on: Feb 21, 2012
- *      Author: spiem_01
- */
-
 #include "LatticeSweep.h"
 #include "pure_gauge/PureGaugeUpdater.h"
 #include "wilson_loops/Plaquette.h"
@@ -42,7 +35,7 @@
 #include "polyakov_loops/AdjointPolyakovLoop.h"
 #include "polyakov_loops/PolyakovLoopCorrelator.h"
 #include "polyakov_loops/PolyakovLoopEigenvalues.h"
-#include "hmc_updaters/MultiStepNFlavorQCDUpdater.h"
+#include "hmc_updaters/MultiStepNFlavorUpdater.h"
 #include "scalar_updaters/RandomScalarUpdater.h"
 #include "scalar_updaters/AdjointMetropolisScalarUpdater.h"
 #include "scalar_updaters/FundamentalMetropolisScalarUpdater.h"
@@ -109,8 +102,8 @@ LatticeSweep* LatticeSweep::getInstance(const std::string& name) {
 		return new WilsonFlow();
 	} else if (name == "GaugeEnergy") {
 		return new GaugeEnergy();
-	} else if (name == "MultiStepNFlavorQCD") {
-		return new MultiStepNFlavorQCDUpdater();
+	} else if (name == "MultiStepNFlavor") {
+		return new MultiStepNFlavorUpdater();
 	} else if (name == "SingletOperators") {
 		return new SingletOperators();
 	} else if (name == "XSpaceCorrelators") {
@@ -243,7 +236,7 @@ void LatticeSweep::addParameters(po::options_description& desc) {
 	ReadGaugeConfiguration::registerParameters(desc);
 	WilsonFlow::registerParameters(desc);
 	GaugeEnergy::registerParameters(desc);
-	MultiStepNFlavorQCDUpdater::registerParameters(desc);
+	MultiStepNFlavorUpdater::registerParameters(desc);
 	SingletOperators::registerParameters(desc);
 	XSpaceCorrelators::registerParameters(desc);
 	NPRVertex::registerParameters(desc);
@@ -291,7 +284,7 @@ void LatticeSweep::printSweepsName() {
 		<<  "ReadGaugeConfiguration" << std::endl
 		<<  "WilsonFlow" << std::endl
 		<<  "GaugeEnergy" << std::endl
-		<<  "MultiStepNFlavorQCD" << std::endl
+		<<  "MultiStepNFlavor" << std::endl
 		<<  "SingletOperators" << std::endl
 		<<  "XSpaceCorrelators" << std::endl
 		<<  "NPRVertex" << std::endl
@@ -302,11 +295,11 @@ void LatticeSweep::printSweepsName() {
 		<<  "LandauGhostPropagator" << std::endl
 		<<  "ScalarFermionHMC" << std::endl
 		<<  "HiggsGaugeHMC" << std::endl
-                <<  "RandomScalarInitializer" << std::endl
+        <<  "RandomScalarInitializer" << std::endl
 		<<  "AdjointMCScalar" << std::endl
 		<<  "FundamentalMCScalar" << std::endl
 		<<  "RandomGaugeTransformation" << std::endl
-                <<  "MeanScalarField" << std::endl;
+        <<  "MeanScalarField" << std::endl;
 	}
 
 }

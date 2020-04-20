@@ -1,11 +1,3 @@
-/*
- * Gamma.cpp
- *
- *  Created on: Nov 30, 2012
- *      Author: spiem_01
- */
-
-
 #include "Gamma.h"
 #define I std::complex<real_t>(0.,1.)
 

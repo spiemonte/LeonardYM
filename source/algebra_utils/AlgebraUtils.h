@@ -1,10 +1,3 @@
-/*
- * AlgebraUtils.h
- *
- *  Created on: Apr 20, 2012
- *      Author: spiem_01
- */
-
 #ifndef ALGEBRAUTILS_H_
 #define ALGEBRAUTILS_H_
 #include "../Environment.h"

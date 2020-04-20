@@ -1,10 +1,3 @@
-/*
- * SquareImprovedDiracWilsonOperator.h
- *
- *  Created on: Jul 16, 2012
- *      Author: spiem_01
- */
-
 #ifndef SQUAREEVENODDIMPROVEDDIRACWILSONOPERATOR_H_
 #define SQUAREEVENODDIMPROVEDDIRACWILSONOPERATOR_H_
 #include "DiracOperator.h"

@@ -1,10 +1,3 @@
-/*
- * NFlavorQCDAction.cpp
- *
- *  Created on: May 10, 2012
- *      Author: spiem_01
- */
-
 #include "NFlavorQCDAction.h"
 #include "inverters/MultishiftSolver.h"
 #include "algebra_utils/AlgebraUtils.h"

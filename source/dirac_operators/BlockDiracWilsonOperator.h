@@ -1,10 +1,3 @@
-/*
- * BlockDiracWilsonOperator.h
- *
- *  Created on: Mar 18, 2013
- *      Author: spiem_01
- */
-
 #ifndef BLOCKDIRACWILSONOPERATOR_H_
 #define BLOCKDIRACWILSONOPERATOR_H_
 #include "BlockDiracOperator.h"
@@ -23,8 +16,6 @@ public:
 	virtual void multiplyAdd(reduced_dirac_vector_t& output, const reduced_dirac_vector_t& vector1, const reduced_dirac_vector_t& vector2, const std::complex<real_t>& alpha);
 
 	virtual FermionForce* getForce() const;
-
-	//virtual void setLattice(const extended_fermion_lattice_t& _lattice);
 private:
 	Color color;
 };

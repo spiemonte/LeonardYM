@@ -1,10 +1,3 @@
-/*
- * StartGaugeConfiguration.h
- *
- *  Created on: Feb 28, 2012
- *      Author: spiem_01
- */
-
 #ifndef STARTGAUGECONFIGURATION_H_
 #define STARTGAUGECONFIGURATION_H_
 

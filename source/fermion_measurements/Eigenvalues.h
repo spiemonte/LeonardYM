@@ -1,10 +1,3 @@
-/*
- * Eigenvalues.h
- *
- *  Created on: Jul 16, 2012
- *      Author: spiem_01
- */
-
 #ifndef EIGENVALUES_H_
 #define EIGENVALUES_H_
 

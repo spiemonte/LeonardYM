@@ -1,10 +1,3 @@
-/*
- * NFlavorFermionAction.cpp
- *
- *  Created on: Aug 8, 2012
- *      Author: spiem_01
- */
-
 #include "NFlavorFermionAction.h"
 #include "inverters/MultishiftSolver.h"
 #include "algebra_utils/AlgebraUtils.h"

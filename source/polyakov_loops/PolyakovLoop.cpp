@@ -1,10 +1,3 @@
-/*
- * PolyakovLoop.cpp
- *
- *  Created on: Jul 23, 2012
- *      Author: spiem_01
- */
-
 #include "PolyakovLoop.h"
 #include "io/GlobalOutput.h"
 #include <rpc/rpc.h>

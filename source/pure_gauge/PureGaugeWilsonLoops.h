@@ -1,10 +1,3 @@
-/*
- * PureGaugeWilsonLoops.h
- *
- *  Created on: Jan 21, 2013
- *      Author: spiem_01
- */
-
 #ifndef PUREGAUGEWILSONLOOPS_H_
 #define PUREGAUGEWILSONLOOPS_H_
 

@@ -1,13 +1,5 @@
-/*
- * EigenTraits.h
- *
- *  Created on: Mar 16, 2012
- *      Author: spiem_01
- */
-
 #ifndef EIGENTRAITS_H_
 #define EIGENTRAITS_H_
-//#include "../math/grouptraits.h"
 #include "MatrixTypedef.h"
 
 namespace Update {
@@ -20,7 +12,6 @@ public:
 	typedef Update::real_t Real;
 	typedef Update::GaugeGroup Matrix;
 	typedef Update::complex BasicElement;
-	//	typedef Update::GaugeGroup MatrixForm;
 	typedef Update::GaugeGroup BasicForm;
 	typedef Update::GaugeGroup& Adaptor;
 	typedef const Update::GaugeGroup& const_Adaptor;

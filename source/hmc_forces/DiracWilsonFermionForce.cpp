@@ -1,10 +1,3 @@
-/*
- * DiracWilsonFermionForce.cpp
- *
- *  Created on: Apr 17, 2012
- *      Author: spiem_01
- */
-
 #include "DiracWilsonFermionForce.h"
 #include "utils/Gamma.h"
 

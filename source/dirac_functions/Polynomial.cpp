@@ -1,10 +1,3 @@
-/*
- * Polynomial.cpp
- *
- *  Created on: Apr 30, 2012
- *      Author: spiem_01
- */
-
 #include "Polynomial.h"
 
 namespace Update {

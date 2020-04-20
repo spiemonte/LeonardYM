@@ -1,10 +1,3 @@
-/*
- * NFlavorQCDAction.h
- *
- *  Created on: May 10, 2012
- *      Author: spiem_01
- */
-
 #ifndef NFLAVORQCDACTION_H_
 #define NFLAVORQCDACTION_H_
 #include "hmc_forces/Force.h"

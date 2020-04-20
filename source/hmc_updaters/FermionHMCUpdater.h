@@ -1,10 +1,3 @@
-/*
- * FermionHCMUpdater.h
- *
- *  Created on: Apr 2, 2012
- *      Author: spiem_01
- */
-
 #ifndef FERMIONHCMUPDATER_H_
 #define FERMIONHCMUPDATER_H_
 

@@ -1,10 +1,3 @@
-/*
- * BlockImprovedDiracWilsonOperator.cpp
- *
- *  Created on: Mar 18, 2013
- *      Author: spiem_01
- */
-
 #include "BlockImprovedDiracWilsonOperator.h"
 #include "hmc_forces/BlockDiracWilsonFermionForce.h"
 
@@ -212,10 +205,10 @@ void BlockImprovedDiracWilsonOperator::multiplyAdd(reduced_dirac_vector_t& outpu
 			//We store the result in a cache multiplied by gamma5(id-gamma[mu]) in dirac space
 			GaugeVector hopping[4];
 			for (int n = 0; n < diracVectorLength; ++n) {
-				hopping[0][n] = (tmp[0][0][n]+I*tmp[0][3][n]+tmp[1][0][n]+tmp[1][3][n]+tmp[2][0][n]+I*tmp[2][2][n]+tmp[3][0][n]-tmp[3][2][n]);
-				hopping[1][n] = (tmp[0][1][n]+I*tmp[0][2][n]+tmp[1][1][n]-tmp[1][2][n]+tmp[2][1][n]-I*tmp[2][3][n]+tmp[3][1][n]-tmp[3][3][n]);
-				hopping[2][n] = (I*tmp[0][1][n]-tmp[0][2][n]+tmp[1][1][n]-tmp[1][2][n]+I*tmp[2][0][n]-tmp[2][2][n]+tmp[3][0][n]-tmp[3][2][n]);
-				hopping[3][n] = (I*tmp[0][0][n]-tmp[0][3][n]-tmp[1][0][n]-tmp[1][3][n]-I*tmp[2][1][n]-tmp[2][3][n]+tmp[3][1][n]-tmp[3][3][n]);
+				hopping[0][n] = (tmp[0][0][n]+II*tmp[0][3][n]+tmp[1][0][n]+tmp[1][3][n]+tmp[2][0][n]+II*tmp[2][2][n]+tmp[3][0][n]-tmp[3][2][n]);
+				hopping[1][n] = (tmp[0][1][n]+II*tmp[0][2][n]+tmp[1][1][n]-tmp[1][2][n]+tmp[2][1][n]-II*tmp[2][3][n]+tmp[3][1][n]-tmp[3][3][n]);
+				hopping[2][n] = (II*tmp[0][1][n]-tmp[0][2][n]+tmp[1][1][n]-tmp[1][2][n]+II*tmp[2][0][n]-tmp[2][2][n]+tmp[3][0][n]-tmp[3][2][n]);
+				hopping[3][n] = (II*tmp[0][0][n]-tmp[0][3][n]-tmp[1][0][n]-tmp[1][3][n]-II*tmp[2][1][n]-tmp[2][3][n]+tmp[3][1][n]-tmp[3][3][n]);
 			}
 
 			//Then we put U(x-mu,mu)*input(x-mu)
@@ -227,10 +220,10 @@ void BlockImprovedDiracWilsonOperator::multiplyAdd(reduced_dirac_vector_t& outpu
 
 			//We store the result in the same a cache multiplied by gamma5(id+gamma[mu]) in dirac space
 			for (int n = 0; n < diracVectorLength; ++n) {
-				hopping[0][n] += (tmp[0][0][n]-I*tmp[0][3][n]+tmp[1][0][n]-tmp[1][3][n]+tmp[2][0][n]-I*tmp[2][2][n]+tmp[3][0][n]+tmp[3][2][n]);
-				hopping[1][n] += (tmp[0][1][n]-I*tmp[0][2][n]+tmp[1][1][n]+tmp[1][2][n]+tmp[2][1][n]+I*tmp[2][3][n]+tmp[3][1][n]+tmp[3][3][n]);
-				hopping[2][n] += (-I*tmp[0][1][n]-tmp[0][2][n]-tmp[1][1][n]-tmp[1][2][n]-I*tmp[2][0][n]-tmp[2][2][n]-tmp[3][0][n]-tmp[3][2][n]);
-				hopping[3][n] += (-I*tmp[0][0][n]-tmp[0][3][n]+tmp[1][0][n]-tmp[1][3][n]+I*tmp[2][1][n]-tmp[2][3][n]-tmp[3][1][n]-tmp[3][3][n]);
+				hopping[0][n] += (tmp[0][0][n]-II*tmp[0][3][n]+tmp[1][0][n]-tmp[1][3][n]+tmp[2][0][n]-II*tmp[2][2][n]+tmp[3][0][n]+tmp[3][2][n]);
+				hopping[1][n] += (tmp[0][1][n]-II*tmp[0][2][n]+tmp[1][1][n]+tmp[1][2][n]+tmp[2][1][n]+II*tmp[2][3][n]+tmp[3][1][n]+tmp[3][3][n]);
+				hopping[2][n] += (-II*tmp[0][1][n]-tmp[0][2][n]-tmp[1][1][n]-tmp[1][2][n]-II*tmp[2][0][n]-tmp[2][2][n]-tmp[3][0][n]-tmp[3][2][n]);
+				hopping[3][n] += (-II*tmp[0][0][n]-tmp[0][3][n]+tmp[1][0][n]-tmp[1][3][n]+II*tmp[2][1][n]-tmp[2][3][n]-tmp[3][1][n]-tmp[3][3][n]);
 			}
 
 			if (gamma5) {

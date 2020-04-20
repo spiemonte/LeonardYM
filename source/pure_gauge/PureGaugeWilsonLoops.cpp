@@ -1,10 +1,3 @@
-/*
- * PureGaugeWilsonLoops.cpp
- *
- *  Created on: Jan 21, 2013
- *      Author: spiem_01
- */
-
 #include "PureGaugeWilsonLoops.h"
 #include "io/GlobalOutput.h"
 #include "Checkerboard.h"

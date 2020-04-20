@@ -1,10 +1,3 @@
-/*
- * RandomStartGaugeConfiguration.h
- *
- *  Created on: Feb 28, 2012
- *      Author: spiem_01
- */
-
 #ifndef COLDSTARTGAUGECONFIGURATION_H_
 #define COLDSTARTGAUGECONFIGURATION_H_
 

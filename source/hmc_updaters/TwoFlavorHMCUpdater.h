@@ -1,10 +1,3 @@
-/*
- * TwoFlavorHMCUpdater.h
- *
- *  Created on: Apr 2, 2012
- *      Author: spiem_01
- */
-
 #ifndef TWOFLAVORHMCUPDATER_H_
 #define TWOFLAVORHMCUPDATER_H_
 

@@ -1,10 +1,3 @@
-/*
- * FermionicAction.h
- *
- *  Created on: Mar 28, 2012
- *      Author: spiem_01
- */
-
 #ifndef FERMIONICACTION_H_
 #define FERMIONICACTION_H_
 

@@ -1,13 +1,5 @@
-/*
- * OutputSweep.cpp
- *
- *  Created on: May 25, 2012
- *      Author: spiem_01
- */
-
 #include "OutputSweep.h"
 #include "Environment.h"
-//#include "../fieldio/fieldreadwriter.h"
 #include "wilson_loops/Plaquette.h"
 #include "utils/ToString.h"
 #include <fstream>

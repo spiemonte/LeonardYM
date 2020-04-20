@@ -1,10 +1,3 @@
-/*
- * MesonCorrelator.h
- *
- *  Created on: Jul 23, 2012
- *      Author: spiem_01
- */
-
 #ifndef OVERLAPCHIRALROTATION_H_
 #define OVERLAPCHIRALROTATION_H_
 

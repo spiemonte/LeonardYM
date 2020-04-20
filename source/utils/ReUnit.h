@@ -1,10 +1,3 @@
-/*
- * ReUnit.h
- *
- *  Created on: Jan 10, 2013
- *      Author: spiem_01
- */
-
 #ifndef REUNIT_H_
 #define REUNIT_H_
 

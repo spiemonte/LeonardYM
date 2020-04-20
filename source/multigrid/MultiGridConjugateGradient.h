@@ -1,4 +1,4 @@
-#ifndef MULTiGRIDCONJUGATEGRADIENT_H
+#ifndef MULTIGRIDCONJUGATEGRADIENT_H
 #define MULTIGRIDCONJUGATEGRADIENT_H
 #include "MultiGridVector.h"
 #include "MultiGridOperator.h"

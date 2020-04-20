@@ -1,10 +1,3 @@
-/*
- * Polynomial.h
- *
- *  Created on: Apr 30, 2012
- *      Author: spiem_01
- */
-
 #ifndef CHEBYSHEVRECURSION_H_
 #define CHEBYSHEVRECURSION_H_
 #include "Environment.h"

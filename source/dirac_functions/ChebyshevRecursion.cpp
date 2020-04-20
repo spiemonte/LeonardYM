@@ -1,10 +1,3 @@
-/*
- * ChebyshevRecursion.cpp
- *
- *  Created on: Apr 30, 2012
- *      Author: spiem_01
- */
-
 #include "ChebyshevRecursion.h"
 
 namespace Update {

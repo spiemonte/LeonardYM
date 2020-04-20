@@ -1,10 +1,3 @@
-/*
- * TestCommunication.cpp
- *
- *  Created on: Feb 25, 2013
- *      Author: spiem_01
- */
-
 #include "TestCommunication.h"
 #include "algebra_utils/AlgebraUtils.h"
 

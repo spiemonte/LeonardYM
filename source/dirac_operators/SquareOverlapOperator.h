@@ -1,10 +1,3 @@
-/*
- * SquareOverlapOperator.h
- *
- *  Created on: Apr 2, 2012
- *      Author: spiem_01
- */
-
 #ifndef SQUAREOVERLAPOPERATOR_H_
 #define SQUAREOVERLAPOPERATOR_H_
 

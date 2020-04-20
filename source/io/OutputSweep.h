@@ -1,10 +1,3 @@
-/*
- * OutputSweep.h
- *
- *  Created on: May 25, 2012
- *      Author: spiem_01
- */
-
 #ifndef OUTPUTSWEEP_H_
 #define OUTPUTSWEEP_H_
 

@@ -1,10 +1,3 @@
-/*
- * ScalarUpdater.h
- *
- *  Created on: Apr 2, 2012
- *      Author: spiem_01
- */
-
 #ifndef RANDOMSCALARUPDATER_H_
 #define RANDOMSCALARUPDATER_H_
 #include "LatticeSweep.h"

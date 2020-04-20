@@ -1,10 +1,3 @@
-/*
- * ImprovedFermionForce.h
- *
- *  Created on: Jun 11, 2012
- *      Author: spiem_01
- */
-
 #ifndef IMPROVEDFERMIONFORCE_H_
 #define IMPROVEDFERMIONFORCE_H_
 

@@ -1,10 +1,3 @@
-/*
- * StorageParameters.h
- *
- *  Created on: Feb 21, 2012
- *      Author: spiem_01
- */
-
 #ifndef STORAGEPARAMETERS_H_
 #define STORAGEPARAMETERS_H_
 #include <string>

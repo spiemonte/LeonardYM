@@ -1,10 +1,3 @@
-/*
- * PureGaugeOverrelaxation.cpp
- *
- *  Created on: May 25, 2012
- *      Author: spiem_01
- */
-
 #include "PureGaugeOverrelaxation.h"
 #include "Checkerboard.h"
 

@@ -1,10 +1,3 @@
-/*
- * TwoFlavorFermionAction.cpp
- *
- *  Created on: Aug 8, 2012
- *      Author: spiem_01
- */
-
 #include "TwoFlavorFermionAction.h"
 #include "inverters/BiConjugateGradient.h"
 #include "inverters/ConjugateGradient.h"

@@ -1,10 +1,3 @@
-/*
- * NFlavorFermionAction.h
- *
- *  Created on: Aug 8, 2012
- *      Author: spiem_01
- */
-
 #ifndef NFLAVORFERMIONACTION_H_
 #define NFLAVORFERMIONACTION_H_
 

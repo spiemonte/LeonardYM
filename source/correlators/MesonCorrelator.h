@@ -1,10 +1,3 @@
-/*
- * MesonCorrelator.h
- *
- *  Created on: Jul 23, 2012
- *      Author: spiem_01
- */
-
 #ifndef MESONCORRELATOR_H_
 #define MESONCORRELATOR_H_
 

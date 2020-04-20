@@ -1,10 +1,3 @@
-/*
- * StartGaugeConfiguration.cpp
- *
- *  Created on: Feb 28, 2012
- *      Author: spiem_01
- */
-
 #include "StartGaugeConfiguration.h"
 #include "HotStartGaugeConfiguration.h"
 #include "ColdStartGaugeConfiguration.h"

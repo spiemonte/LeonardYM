@@ -1,10 +1,3 @@
-/*
- * Glueball.cpp
- *
- *  Created on: Oct 9, 2012
- *      Author: spiem_01
- */
-
 #include "Glueball.h"
 #include "io/GlobalOutput.h"
 #include "utils/ToString.h"

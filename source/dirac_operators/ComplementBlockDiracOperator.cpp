@@ -1,10 +1,3 @@
-/*
- * ComplementBlockDiracWilsonOperator.cpp
- *
- *  Created on: Mar 18, 2013
- *      Author: spiem_01
- */
-
 #include "ComplementBlockDiracOperator.h"
 #include "hmc_forces/DiracWilsonFermionForce.h"
 #include "algebra_utils/AlgebraUtils.h"

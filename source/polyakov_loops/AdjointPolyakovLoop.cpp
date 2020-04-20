@@ -1,10 +1,3 @@
-/*
- * AdjointPolyakovLoop.cpp
- *
- *  Created on: Nov 27, 2013
- *      Author: spiem_01
- */
-
 #include "AdjointPolyakovLoop.h"
 #include "utils/ConvertLattice.h"
 #include "io/GlobalOutput.h"

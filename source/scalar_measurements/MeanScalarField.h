@@ -1,10 +1,3 @@
-/*
- * MeanScalarField.h
- *
- *  Created on: Feb 29, 2012
- *      Author: spiem_01
- */
-
 #ifndef MEANSCALARFIELD_H_
 #define MEANSCALARFIELD_H_
 

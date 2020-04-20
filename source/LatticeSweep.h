@@ -1,10 +1,3 @@
-/*
- * LatticeSweep.h
- *
- *  Created on: Feb 21, 2012
- *      Author: spiem_01
- */
-
 #ifndef LATTICESWEEP_H_
 #define LATTICESWEEP_H_
 #include "Environment.h"

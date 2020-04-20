@@ -1,10 +1,3 @@
-/*
- * ScalarFermionHMCUpdater.cpp
- *
- *  Created on: May 2, 2012
- *      Author: spiem_01
- */
-
 #include "ScalarFermionHMCUpdater.h"
 #include "actions/NFlavorQCDAction.h"
 #include "algebra_utils/AlgebraUtils.h"

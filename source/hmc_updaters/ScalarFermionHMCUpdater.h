@@ -1,10 +1,3 @@
-/*
- * ScalarFermionHMCUpdater.h
- *
- *  Created on: May 2, 2012
- *      Author: spiem_01
- */
-
 #ifndef SCALARFERMIONHMCUPDATER_H_
 #define SCALARFERMIONHMCUPDATER_H_
 

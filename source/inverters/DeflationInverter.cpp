@@ -1,16 +1,7 @@
-/*
- * DeflationInverter.cpp
- *
- *  Created on: Mar 18, 2013
- *      Author: spiem_01
- */
-
 #include "DeflationInverter.h"
 #include "inverters/BiConjugateGradient.h"
 #include "algebra_utils/AlgebraUtils.h"
 #include "inverters/ConjugateGradient.h"
-//#include "./vectorclass/vectorclass.h"
-//#include "./vectorclass/complexvec.h"
 
 const int spin_deflation_size = 1;
 

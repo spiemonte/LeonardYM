@@ -1,10 +1,3 @@
-/*
- * PureGaugeUpdater.cpp
- *
- *  Created on: Feb 27, 2012
- *      Author: spiem_01
- */
-
 #include "PureGaugeUpdater.h"
 #include "MatrixTypedef.h"
 #include "Checkerboard.h"

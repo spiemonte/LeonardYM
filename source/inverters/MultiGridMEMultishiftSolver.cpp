@@ -1,10 +1,3 @@
-/*
- * MEMultishiftSolver.cpp
- *
- *  Created on: Oct 30, 2012
- *      Author: spiem_01
- */
-
 #include "MultiGridMEMultishiftSolver.h"
 #include "algebra_utils/AlgebraUtils.h"
 #include "dirac_operators/TwistedDiracOperator.h"

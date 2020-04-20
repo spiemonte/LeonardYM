@@ -1,10 +1,3 @@
-/*
- * ExactOverlapOperator.h
- *
- *  Created on: Mar 28, 2012
- *      Author: spiem_01
- */
-
 #ifndef EXACTOVERLAPOPERATOR_H_
 #define EXACTOVERLAPOPERATOR_H_
 #include "OverlapOperator.h"

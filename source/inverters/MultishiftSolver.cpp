@@ -1,10 +1,3 @@
-/*
- * MultishiftSolver.cpp
- *
- *  Created on: May 11, 2012
- *      Author: spiem_01
- */
-
 #include "MultishiftSolver.h"
 #include "MEMultishiftSolver.h"
 #include "MMMRMultishiftSolver.h"

@@ -1,10 +1,3 @@
-/*
- * AdjointPolyakovLoop.h
- *
- *  Created on: Nov 27, 2013
- *      Author: spiem_01
- */
-
 #ifndef ADJOINTPOLYAKOVLOOP_H_
 #define ADJOINTPOLYAKOVLOOP_H_
 #include "LatticeSweep.h"

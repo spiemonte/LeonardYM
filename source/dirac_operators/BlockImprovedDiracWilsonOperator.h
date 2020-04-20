@@ -1,10 +1,3 @@
-/*
- * BlockDiracWilsonOperator.h
- *
- *  Created on: Mar 18, 2013
- *      Author: spiem_01
- */
-
 #ifndef BLOCKIMPROVEDDIRACWILSONOPERATOR_H_
 #define BLOCKIMPROVEDDIRACWILSONOPERATOR_H_
 #include "BlockDiracOperator.h"

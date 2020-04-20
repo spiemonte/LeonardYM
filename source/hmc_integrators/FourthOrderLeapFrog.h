@@ -1,10 +1,3 @@
-/*
- * FourthOrderLeapFrog.h
- *
- *  Created on: Mar 21, 2012
- *      Author: spiem_01
- */
-
 #ifndef FOURTHORDERLEAPFROG_H_
 #define FOURTHORDERLEAPFROG_H_
 

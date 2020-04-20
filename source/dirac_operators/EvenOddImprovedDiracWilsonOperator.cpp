@@ -1,10 +1,3 @@
-/*
- * ImprovedDiracWilsonOperator.cpp
- *
- *  Created on: May 4, 2012
- *      Author: spiem_01
- */
-
 #include "EvenOddImprovedDiracWilsonOperator.h"
 #include "utils/Gamma.h"
 
@@ -295,23 +288,6 @@ void EvenOddImprovedDiracWilsonOperator::calculateInverseEvenEven() {
 
 #pragma omp parallel for
 	for (int site = 0; site < Layout::completesize; ++site) {
-		/*for (unsigned int alpha = 0; alpha < 4; ++alpha) {
-			for (unsigned int beta = 0; beta < 4; ++beta) {
-				for (int a = 0; a < diracVectorLength; ++a) {
-					for (size_t b = 0; b < diracVectorLength; ++b) {
-						if (3*alpha + a == 3*beta +b)  cloverMatrixInverse[site].at(3*alpha + a, 3*beta +b) = std::complex<real_t>(1.,0.);
-						else cloverMatrixInverse[site].at(3*alpha + a, 3*beta +b) = std::complex<real_t>(0.,0.);
-						for (unsigned int mu = 0; mu < 4; ++mu) {
-							for (unsigned int nu = mu + 1; nu < 4; ++nu) {
-								//sigma_{\mu\nu} F^{\mu\nu} In
-								cloverMatrixInverse[site].at(3*alpha + a, 3*beta +b) += std::complex<real_t>(0.,kappa*csw) * Sigma::sigma(mu, nu, alpha, beta)  * F[site][fieldIndex[mu][nu]].at(a,b);
-				    			}
-						}
-					}
-				}
-			}
-		}*/
-
 		cloverMatrixInverse[site] = clover_matrix_t::Identity();
 
 		for (int i = 0; i < diracVectorLength; ++i) {

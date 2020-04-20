@@ -1,10 +1,3 @@
-/*
- * TestForce.h
- *
- *  Created on: Jun 4, 2012
- *      Author: spiem_01
- */
-
 #ifndef TESTFORCE_H_
 #define TESTFORCE_H_
 #include "Environment.h"

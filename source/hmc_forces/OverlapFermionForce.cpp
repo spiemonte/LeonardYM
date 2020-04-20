@@ -1,10 +1,3 @@
-/*
- * OverlapFermionForce.cpp
- *
- *  Created on: Apr 17, 2012
- *      Author: spiem_01
- */
-
 #include "OverlapFermionForce.h"
 #include "utils/Gamma.h"
 #include "algebra_utils/AlgebraUtils.h"

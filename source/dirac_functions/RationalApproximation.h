@@ -1,10 +1,3 @@
-/*
- * RationalApproximation.h
- *
- *  Created on: May 10, 2012
- *      Author: spiem_01
- */
-
 #ifndef RATIONALAPPROXIMATION_H_
 #define RATIONALAPPROXIMATION_H_
 #include "Environment.h"

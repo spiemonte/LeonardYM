@@ -1,10 +1,3 @@
-/*
- * ComplementBlockDiracOperator.h
- *
- *  Created on: Mar 18, 2013
- *      Author: spiem_01
- */
-
 #ifndef COMPLEMENTBLOCKDIRACOPERATOR_H_
 #define COMPLEMENTBLOCKDIRACOPERATOR_H_
 #include "BlockDiracWilsonOperator.h"

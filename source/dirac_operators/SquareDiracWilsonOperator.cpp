@@ -1,10 +1,3 @@
-/*
- * SquareDiracWilsonOperator.cpp
- *
- *  Created on: Apr 2, 2012
- *      Author: spiem_01
- */
-
 #include "SquareDiracWilsonOperator.h"
 #include "hmc_forces/DiracWilsonFermionForce.h"
 

@@ -1,10 +1,3 @@
-/*
- * ChiralCondensate.cpp
- *
- *  Created on: Jul 23, 2012
- *      Author: spiem_01
- */
-
 #include "ChiralCondensate.h"
 #include "algebra_utils/AlgebraUtils.h"
 #include "inverters/PreconditionedBiCGStab.h"

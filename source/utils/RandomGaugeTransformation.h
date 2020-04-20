@@ -1,10 +1,3 @@
-/*
- * RandomGaugeTransformation.h
- *
- *  Created on: Feb 28, 2012
- *      Author: spiem_01
- */
-
 #ifndef RANDOMGAUGETRANSFORMATION_H_
 #define RANDOMGAUGETRANSFORMATION_H_
 

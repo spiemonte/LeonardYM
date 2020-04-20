@@ -1,10 +1,3 @@
-/*
- * Plaquette.h
- *
- *  Created on: Feb 29, 2012
- *      Author: spiem_01
- */
-
 #ifndef PLAQUETTE_H_
 #define PLAQUETTE_H_
 

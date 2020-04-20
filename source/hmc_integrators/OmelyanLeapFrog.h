@@ -1,10 +1,3 @@
-/*
- * OmelyanLeapFrog.h
- *
- *  Created on: Mar 21, 2012
- *      Author: spiem_01
- */
-
 #ifndef OMELYANLEAPFROG_H_
 #define OMELYANLEAPFROG_H_
 

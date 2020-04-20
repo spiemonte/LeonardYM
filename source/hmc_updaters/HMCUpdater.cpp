@@ -1,10 +1,3 @@
-/*
- * HMCUpdater.cpp
- *
- *  Created on: Mar 21, 2012
- *      Author: spiem_01
- */
-
 #include "HMCUpdater.h"
 #include <omp.h>
 

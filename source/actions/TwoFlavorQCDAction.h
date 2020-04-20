@@ -1,10 +1,3 @@
-/*
- * TwoFlavorAction.h
- *
- *  Created on: Apr 17, 2012
- *      Author: spiem_01
- */
-
 #ifndef TWOFLAVORACTION_H_
 #define TWOFLAVORACTION_H_
 

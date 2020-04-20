@@ -1,10 +1,3 @@
-/*
- * ImprovedGaugeAction.cpp
- *
- *  Created on: May 16, 2012
- *      Author: spiem_01
- */
-
 #include "ImprovedGaugeAction.h"
 
 namespace Update {

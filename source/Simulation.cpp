@@ -1,10 +1,3 @@
-/*
- * Simulation.cpp
- *
- *  Created on: Feb 21, 2012
- *      Author: spiem_01
- */
-
 #include "Simulation.h"
 #include "starters/StartGaugeConfiguration.h"
 #include "io/GlobalOutput.h"

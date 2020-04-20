@@ -1,10 +1,3 @@
-/*
- * WilsonGaugeAction.cpp
- *
- *  Created on: Feb 28, 2012
- *      Author: spiem_01
- */
-
 #include "WilsonGaugeAction.h"
 
 namespace Update {

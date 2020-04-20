@@ -1,10 +1,3 @@
-/*
- * DiracWilsonFermionForce.h
- *
- *  Created on: Apr 17, 2012
- *      Author: spiem_01
- */
-
 #ifndef DIRACWILSONFERMIONFORCE_H_
 #define DIRACWILSONFERMIONFORCE_H_
 

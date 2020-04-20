@@ -1,10 +1,3 @@
-/*
- * RationalApproximation.cpp
- *
- *  Created on: May 10, 2012
- *      Author: spiem_01
- */
-
 #include "RationalApproximation.h"
 #include "inverters/MEMultishiftSolver.h"
 #include "inverters/MMMRMultishiftSolver.h"
@@ -13,8 +6,6 @@
 namespace Update {
 
 std::vector< extended_dirac_vector_t > RationalApproximation::tmp;
-//extended_dirac_vector_t RationalApproximation::tmp1;
-//extended_dirac_vector_t RationalApproximation::tmp2;
 
 RationalApproximation::RationalApproximation(MultishiftSolver* _multishiftSolver) : precision(0.000000000001), maximumSteps(3000), multishiftSolver(_multishiftSolver) { }
 
@@ -33,16 +24,7 @@ void RationalApproximation::evaluate(DiracOperator* diracOperator, extended_dira
 	tmp1 = input;
 	//Solve the dirac equations
 	multishiftSolver->solve(diracOperator, tmp1, tmp, betas);
-	//Test of multishift
-	/*std::vector<real_t>::iterator beta;
-	std::vector<dirac_vector_t>::iterator vv;
-	dirac_vector_t ll;
-	for (beta = betas.begin(), vv = tmp.begin(); beta != betas.end(); ++beta, ++vv) {
-		diracOperator->multiplyAdd(ll,*vv,*vv,*beta);
-		if (isOutputProcess()) std::cout << "Test for beta" << *beta << std::endl;
-		if (isOutputProcess()) std::cout << ll[5][3] << std::endl;
-		if (isOutputProcess()) std::cout << input[5][3] << std::endl;
-	}*/
+	
 	//Compute the result
 	std::vector<real_t>::iterator alpha;
 	std::vector<extended_dirac_vector_t>::iterator vector;

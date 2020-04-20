@@ -1,10 +1,3 @@
-/*
- * WilsonFlow.h
- *
- *  Created on: Oct 23, 2013
- *      Author: spiem_01
- */
-
 #ifndef WILSONFLOW_H_
 #define WILSONFLOW_H_
 #include "LatticeSweep.h"

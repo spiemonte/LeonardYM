@@ -1,10 +1,3 @@
-/*
- * MEMultishiftSolver.h
- *
- *  Created on: Oct 30, 2012
- *      Author: spiem_01
- */
-
 #ifndef MULTIGRIDMEMULTISHIFTSOLVER_H_
 #define MULTIGRIDMEMULTISHIFTSOLVER_H_
 #include "MultishiftSolver.h"

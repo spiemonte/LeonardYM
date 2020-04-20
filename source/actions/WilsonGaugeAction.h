@@ -1,10 +1,3 @@
-/*
- * WilsonGaugeAction.h
- *
- *  Created on: Feb 28, 2012
- *      Author: spiem_01
- */
-
 #ifndef WILSONGAUGEACTION_H_
 #define WILSONGAUGEACTION_H_
 

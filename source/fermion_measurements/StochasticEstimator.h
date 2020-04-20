@@ -1,10 +1,3 @@
-/*
- * StochasticEstimator.h
- *
- *  Created on: Jul 23, 2012
- *      Author: spiem_01
- */
-
 #ifndef STOCHASTICESTIMATOR_H_
 #define STOCHASTICESTIMATOR_H_
 #include "Environment.h"

@@ -1,10 +1,3 @@
-/*
- * ReUnit.cpp
- *
- *  Created on: Jan 10, 2013
- *      Author: spiem_01
- */
-
 #include "ReUnit.h"
 
 namespace Update {

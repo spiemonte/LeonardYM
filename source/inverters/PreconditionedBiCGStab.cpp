@@ -1,10 +1,3 @@
-/*
- * BiConjugateGradient.cpp
- *
- *  Created on: Apr 3, 2012
- *      Author: spiem_01
- */
-
 #include "PreconditionedBiCGStab.h"
 #include "algebra_utils/AlgebraUtils.h"
 #include "dirac_operators/SquareEvenOddImprovedDiracWilsonOperator.h"

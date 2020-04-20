@@ -1,10 +1,3 @@
-/*
- * StoutSmearing.h
- *
- *  Created on: Oct 30, 2012
- *      Author: spiem_01
- */
-
 #ifndef STOUTSMEARING_H_
 #define STOUTSMEARING_H_
 #include "Environment.h"

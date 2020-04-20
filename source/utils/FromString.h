@@ -1,10 +1,3 @@
-/*
- * FromString.h
- *
- *  Created on: Feb 29, 2012
- *      Author: spiem_01
- */
-
 #ifndef FROMSTRING_H_
 #define FROMSTRING_H_
 #include <sstream>

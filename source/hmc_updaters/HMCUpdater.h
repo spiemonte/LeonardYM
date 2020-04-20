@@ -1,10 +1,3 @@
-/*
- * HMCUpdater.h
- *
- *  Created on: Mar 21, 2012
- *      Author: spiem_01
- */
-
 #ifndef HMCUPDATER_H_
 #define HMCUPDATER_H_
 #include "Environment.h"
