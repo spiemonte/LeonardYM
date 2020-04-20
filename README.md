@@ -4,7 +4,7 @@ LeonardYM is a software developed in C++ for Monte-Carlo simulations of four-dim
 
 ## Getting started
 
-Details and instructions on how to run the code can be found in the folder [documentation/](documentation/documentation.pdf). Example configuration scripts are available in the folder [configuration_scripts/](configuration_scripts/).
+Details and instructions on how to run and compile the code can be found in the folder [documentation/](documentation/documentation.pdf). Example configuration scripts are available in the folder [configuration_scripts/](configuration_scripts/).
 
 ### Prerequisites
 
@@ -24,5 +24,5 @@ This project is licensed under the GNU GPLv3 License - see the [LICENSE.md](LICE
 
 ## Acknowledgments
 
-* The development of the code has been started during the work for the PhD thesis [N=1 supersymmetric Yang-Mills theory on the lattice](https://www.uni-muenster.de/imperia/md/content/physik_tp/theses/muenster/piemonte_dr.pdf). The software has been used mainly to perform Monte-Carlo simulations of supersymmetric Yang-Mills theories by the DESY-Muenster collaboration, whose support and help during the development of the code has been crucial. 
+* The development of the code has started during the work for the PhD thesis [N=1 supersymmetric Yang-Mills theory on the lattice](https://www.uni-muenster.de/imperia/md/content/physik_tp/theses/muenster/piemonte_dr.pdf). The software has been used mainly to perform Monte-Carlo simulations of supersymmetric Yang-Mills theories by the DESY-Muenster collaboration, whose support and help during the development of the code has been crucial. 
 
