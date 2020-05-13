@@ -191,9 +191,8 @@ void PolyakovLoop::write_polyakov_loop_config(const extended_gauge_lattice_t& po
 				}
 
 				if (x < Layout::glob_x) {
-						rank = Layout::rankTable(x,y,z,0);
-						count = 0;
-					}
+					rank = Layout::rankTable(x,y,z,0);
+					count = 0;
 				}
 			}
 #endif
