@@ -21,6 +21,7 @@ GluinoGlue::~GluinoGlue() {
 }
 
 void GluinoGlue::execute(environment_t& environment) {
+#ifdef ADJOINT
 	typedef extended_dirac_vector_t::Layout Layout;
 	LieGenerator<GaugeGroup> tau;
 
@@ -36,12 +37,7 @@ void GluinoGlue::execute(environment_t& environment) {
 		double smearingRho = environment.configurations.get<double>("GluinoGlue::stout_smearing_rho");
 		StoutSmearing stoutSmearing;
 		stoutSmearing.spatialSmearing(environment.gaugeLinkConfiguration, lattice, numberLevelSmearing, smearingRho);
-#ifdef ADJOINT
 		ConvertLattice<extended_fermion_lattice_t,extended_gauge_lattice_t>::convert(smearedFermionLattice, lattice);
-#endif
-#ifndef ADJOINT
-		fermionicLinkConfiguration = lattice;
-#endif
 	} catch (NotFoundOption& ex) {
 		if (isOutputProcess()) std::cout << "GluinoGlue::No smearing options found, proceeding without!" << std::endl;
 		lattice = environment.gaugeLinkConfiguration;
@@ -157,7 +153,12 @@ void GluinoGlue::execute(environment_t& environment) {
 
 		delete[] gluinoGlueCorrelator;
 	}
-	
+#endif
+#ifndef ADJOINT
+	if (isOutputProcess()) {
+		std::cout << "GluinoGlue::Gluino-glue operator defined only in the adjoint representation!" << std::endl;
+	}	
+#endif	
 }
 
 GaugeGroup GluinoGlue::cloverPlaquette(const extended_gauge_lattice_t& lattice, int site, int mu, int nu) {
