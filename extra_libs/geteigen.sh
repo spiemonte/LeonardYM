@@ -1,3 +1,3 @@
-wget http://bitbucket.org/eigen/eigen/get/3.3.7.tar.bz2
-tar -xvjf 3.3.7.tar.bz2
-mv eigen-* Eigen
+wget https://gitlab.com/libeigen/eigen/-/archive/3.3.9/eigen-3.3.9.tar.bz2
+tar -xvjf eigen-3.3.9.tar.bz2
+mv -f ./eigen-3.3.9/* ./Eigen/
