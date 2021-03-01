@@ -18,7 +18,7 @@ public:
 	 */
 	virtual void execute(environment_t& environment);
 	
-	long_real_t meanValueSquared(const extended_adjoint_color_vector_t& field) const;
+	long_real_t meanValueSquared(const extended_adjoint_real_color_vector_t& field) const;
 };
 
 } /* namespace Update */

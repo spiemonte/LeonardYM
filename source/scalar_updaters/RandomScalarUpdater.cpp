@@ -68,19 +68,17 @@ void RandomScalarUpdater::execute(environment_t& environment) {
         }
 }
 
-void RandomScalarUpdater::generateGaussianAdjointScalar(extended_adjoint_color_vector_t& vector) {
+void RandomScalarUpdater::generateGaussianAdjointScalar(extended_adjoint_real_color_vector_t& vector) {
 #pragma omp parallel for
 	for (int site = 0; site < vector.localsize; ++site) {
 		for (unsigned int i = 0; i < numberColors*numberColors - 1; ++i) {
 #ifndef MULTITHREADING
 			real_t realPart = randomNormal();
-			real_t imagPart = randomNormal();
 #endif
 #ifdef MULTITHREADING
 			real_t realPart = (*randomNormal[omp_get_thread_num()])();
-			real_t imagPart = (*randomNormal[omp_get_thread_num()])();
 #endif
-			vector[site](i) = std::complex<real_t>(realPart,imagPart);
+			vector[site](i) = realPart;
 		}
 	}
 	vector.updateHalo();

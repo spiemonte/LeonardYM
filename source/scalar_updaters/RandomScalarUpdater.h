@@ -14,7 +14,7 @@ public:
 	
 	virtual void execute(environment_t& environment);
 protected:
-	void generateGaussianAdjointScalar(extended_adjoint_color_vector_t& vector);
+	void generateGaussianAdjointScalar(extended_adjoint_real_color_vector_t& vector);
 	void generateGaussianFundamentalScalar(extended_color_vector_t& vector);
 
 private:

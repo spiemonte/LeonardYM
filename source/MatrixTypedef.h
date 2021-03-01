@@ -62,7 +62,8 @@ typedef Eigen::Matrix< complex, numberColors, numberColors > FundamentalGroup;
 typedef Eigen::Matrix< real_t, numberColors*numberColors - 1, numberColors*numberColors - 1 > AdjointGroup;
 
 typedef Eigen::Matrix< complex, numberColors, 1 > FundamentalVector;
-typedef Eigen::Matrix< complex, numberColors*numberColors - 1, 1 > AdjointVector;
+typedef Eigen::Matrix< complex, numberColors*numberColors - 1, 1 > AdjointComplexVector;
+typedef Eigen::Matrix< real_t, numberColors*numberColors - 1, 1 > AdjointRealVector;
 
 typedef Eigen::Matrix< single_complex, numberColors, 1 > single_FundamentalVector;
 typedef Eigen::Matrix< single_complex, numberColors*numberColors - 1, 1 > single_AdjointVector;

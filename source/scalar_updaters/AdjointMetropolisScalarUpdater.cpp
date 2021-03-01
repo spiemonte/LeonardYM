@@ -69,11 +69,11 @@ void AdjointMetropolisScalarUpdater::execute(environment_t& environment) {
 
 	unsigned int trials = environment.configurations.get<unsigned int>("AdjointMetropolisScalarUpdater::number_of_hits");
 
-	typedef extended_adjoint_color_vector_t::Layout Layout;
+	typedef extended_adjoint_real_color_vector_t::Layout Layout;
 
 	int acceptance = 0;
 
-	std::vector<extended_adjoint_color_vector_t>::iterator scalar_field;
+	std::vector<extended_adjoint_real_color_vector_t>::iterator scalar_field;
 
 	/*{
 		AdjointVector oldphi = environment.adjoint_scalar_fields[0][5];
@@ -94,15 +94,15 @@ void AdjointMetropolisScalarUpdater::execute(environment_t& environment) {
 			for (int site = 0; site < scalar_field->localsize; ++site) {
 				//White/Black partitioning
 				if ((Layout::globalIndexX(site) + Layout::globalIndexY(site) + Layout::globalIndexZ(site) + Layout::globalIndexT(site)) % 2 == block) {
-					AdjointVector kinetic_coupling = action->getKineticCoupling(environment.getAdjointLattice(), *scalar_field, site);
+					AdjointRealVector kinetic_coupling = action->getKineticCoupling(environment.getAdjointLattice(), *scalar_field, site);
 					for (unsigned int trial = 0; trial < trials; ++trial) {
-						AdjointVector proposal = (*scalar_field)[site];
+						AdjointRealVector proposal = (*scalar_field)[site];
 						for (unsigned int c = 0; c < numberColors*numberColors - 1; ++c) {
 #ifndef MULTITHREADING
-							proposal[c] += epsilon*std::complex<real_t>(randomNormal(), randomNormal());
+							proposal[c] += epsilon*randomNormal();
 #endif
 #ifdef MULTITHREADING
-							proposal[c] += epsilon*std::complex<real_t>((*randomNormal[omp_get_thread_num()])(), (*randomNormal[omp_get_thread_num()])());
+							proposal[c] += epsilon*(*randomNormal[omp_get_thread_num()])();
 #endif
 						}
 						real_t delta = action->deltaEnergy(kinetic_coupling, (*scalar_field)[site], proposal);

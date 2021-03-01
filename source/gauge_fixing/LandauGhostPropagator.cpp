@@ -11,8 +11,8 @@ LandauGhostPropagator::LandauGhostPropagator(const LandauGhostPropagator& toCopy
 
 LandauGhostPropagator::~LandauGhostPropagator() { }
 
-void LandauGhostPropagator::ghostMatrix(extended_adjoint_color_vector_t& output, const extended_adjoint_color_vector_t& input, const extended_adjoint_lattice_t& A, const extended_adjoint_lattice_t& B, const extended_adjoint_lattice_t& C) const {
-	typedef extended_adjoint_color_vector_t LT;
+void LandauGhostPropagator::ghostMatrix(extended_adjoint_complex_color_vector_t& output, const extended_adjoint_complex_color_vector_t& input, const extended_adjoint_lattice_t& A, const extended_adjoint_lattice_t& B, const extended_adjoint_lattice_t& C) const {
+	typedef extended_adjoint_complex_color_vector_t LT;
 
 #pragma omp parallel for
 	for (int site = 0; site < input.localsize; ++site) {
@@ -27,8 +27,8 @@ void LandauGhostPropagator::ghostMatrix(extended_adjoint_color_vector_t& output,
 
 bool LandauGhostPropagator::ghostPropagatorCG(std::complex<real_t>& result, const extended_gauge_lattice_t& lattice, const std::vector<real_t>& momentum, int c, real_t epsilon, unsigned int max_steps) const {
 	extended_adjoint_lattice_t A, B, C;
-	typedef extended_adjoint_color_vector_t LT;
-	typedef extended_adjoint_color_vector_t::Layout Layout;
+	typedef extended_adjoint_complex_color_vector_t LT;
+	typedef extended_adjoint_complex_color_vector_t::Layout Layout;
 
 	LieGenerator<GaugeGroup> lieGenerators;
 	
@@ -48,8 +48,8 @@ bool LandauGhostPropagator::ghostPropagatorCG(std::complex<real_t>& result, cons
 	B.updateHalo();
 	C.updateHalo();
 
-	extended_adjoint_color_vector_t ghost;
-	extended_adjoint_color_vector_t source, tmp, r, p;
+	extended_adjoint_complex_color_vector_t ghost;
+	extended_adjoint_complex_color_vector_t source, tmp, r, p;
 #pragma omp parallel for
 	for (int site = 0; site < source.localsize; ++site) {
 		real_t phase = 	   Layout::globalIndexX(site)*momentum[0]
@@ -180,8 +180,8 @@ bool LandauGhostPropagator::ghostPropagatorCG(std::complex<real_t>& result, cons
 
 bool LandauGhostPropagator::ghostPropagatorBiCGStab(std::complex<real_t>& result, const extended_gauge_lattice_t& lattice, const std::vector<real_t>& momentum, int c, real_t epsilon, unsigned int max_steps) const {
 	extended_adjoint_lattice_t A, B, C;
-	typedef extended_adjoint_color_vector_t LT;
-	typedef extended_adjoint_color_vector_t::Layout Layout;
+	typedef extended_adjoint_complex_color_vector_t LT;
+	typedef extended_adjoint_complex_color_vector_t::Layout Layout;
 
 	LieGenerator<GaugeGroup> lieGenerators;
 	
@@ -201,8 +201,8 @@ bool LandauGhostPropagator::ghostPropagatorBiCGStab(std::complex<real_t>& result
 	B.updateHalo();
 	C.updateHalo();
 
-	extended_adjoint_color_vector_t ghost;
-	extended_adjoint_color_vector_t source, tmp, residual, p, s, t, nu, residual_hat;
+	extended_adjoint_complex_color_vector_t ghost;
+	extended_adjoint_complex_color_vector_t source, tmp, residual, p, s, t, nu, residual_hat;
 #pragma omp parallel for
 	for (int site = 0; site < source.localsize; ++site) {
 		real_t phase = 	   Layout::globalIndexX(site)*momentum[0]

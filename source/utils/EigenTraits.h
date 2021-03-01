@@ -133,7 +133,7 @@ public:
 	typedef Update::complex ComplexVectorElement;
 };
 
-template<> class Group_Traits<Update::AdjointVector> {
+template<> class Group_Traits<Update::AdjointComplexVector> {
 public:
 	typedef Update::real_t Real;
 	typedef Update::GaugeVector Matrix;
@@ -147,7 +147,7 @@ public:
 	static const size_t vectorsize = Update::numberColors*Update::numberColors - 1;
 	static const size_t matrixsize = Update::numberColors*Update::numberColors - 1;
 	static const size_t datalength = Update::numberColors*Update::numberColors - 1;//TODO
-	static const size_t bytesize = sizeof(Update::AdjointVector);//datalength * sizeof(BasicElement);
+	static const size_t bytesize = sizeof(Update::AdjointComplexVector);//datalength * sizeof(BasicElement);
 	static void setToZero(Matrix& m) {
 		m = m.Zero();
 	}

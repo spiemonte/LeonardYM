@@ -331,7 +331,7 @@ void DiracEigenSolver::forceHermitianPairing(std::vector<reduced_dirac_vector_t>
 	}
 }
 
-void DiracEigenSolver::restartArnoldi(DiracOperator* diracOperator, std::vector<reduced_dirac_vector_t>& V, reduced_dirac_vector_t& f,  matrix_t& H, unsigned int extra_steps) {
+void DiracEigenSolver::restartArnoldi(std::vector<reduced_dirac_vector_t>& V, reduced_dirac_vector_t& f,  matrix_t& H, unsigned int extra_steps) {
 	unsigned int steps = H.rows();
 
 	//std::cout << "H: " << toString< std::complex<real_t> >(H) << std::endl;
@@ -429,9 +429,9 @@ void DiracEigenSolver::maximumEigenvalues(DiracOperator* diracOperator, std::vec
 	this->extendArnoldi(diracOperator, V, f, H, 0, steps, mode);
 
 	for (unsigned int m = 0; m < maximalNumberOfRestarts; ++m) {
-		this->restartArnoldi(diracOperator, V, f, H, extra_steps);
+		this->restartArnoldi(V, f, H, extra_steps);
 		this->extendArnoldi(diracOperator, V, f, H, n-1, steps, mode);
-		this->restartArnoldi(diracOperator, V, f, H, extra_steps);
+		this->restartArnoldi(V, f, H, extra_steps);
 		this->extendArnoldi(diracOperator, V, f, H, n-1, steps, mode);
 		long_real_t convergence = this->finishArnoldi(diracOperator, V, H, eigenvalues, eigenvectors, steps, mode);
 		if (convergence < epsilon) return;

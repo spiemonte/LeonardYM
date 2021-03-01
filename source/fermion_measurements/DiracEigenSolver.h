@@ -51,7 +51,7 @@ protected:
 	void extendArnoldi(DiracOperator* diracOperator, std::vector<reduced_dirac_vector_t>& V, reduced_dirac_vector_t& f,  matrix_t& H, unsigned int m, unsigned int k, EigevaluesMode mode);
 	void startArnoldi(DiracOperator* diracOperator, std::vector<reduced_dirac_vector_t>& V, reduced_dirac_vector_t& f,  matrix_t& H, EigevaluesMode mode);
 	long_real_t finishArnoldi(DiracOperator* diracOperator, const std::vector<reduced_dirac_vector_t>& V, const matrix_t& H, std::vector< std::complex<real_t> >& eigenvalues, std::vector<reduced_dirac_vector_t>& eigenvectors, unsigned int steps, EigevaluesMode mode);
-	void restartArnoldi(DiracOperator* diracOperator, std::vector<reduced_dirac_vector_t>& V, reduced_dirac_vector_t& f,  matrix_t& H, unsigned int extra_steps);	
+	void restartArnoldi(std::vector<reduced_dirac_vector_t>& V, reduced_dirac_vector_t& f,  matrix_t& H, unsigned int extra_steps);	
 };
 
 } /* namespace Update */

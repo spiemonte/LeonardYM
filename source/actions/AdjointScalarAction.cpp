@@ -6,10 +6,10 @@ AdjointScalarAction::AdjointScalarAction(real_t _mu, real_t _lambda, real_t _lam
 
 AdjointScalarAction::~AdjointScalarAction() { }
 
-AdjointVector AdjointScalarAction::getKineticCoupling(const extended_adjoint_lattice_t& adjointLinkConfiguration, const extended_adjoint_color_vector_t& scalar_field, int site) const {
-	AdjointVector kinetic_coupling;
+AdjointRealVector AdjointScalarAction::getKineticCoupling(const extended_adjoint_lattice_t& adjointLinkConfiguration, const extended_adjoint_real_color_vector_t& scalar_field, int site) const {
+	AdjointRealVector kinetic_coupling;
 	set_to_zero(kinetic_coupling);
-	typedef extended_adjoint_color_vector_t LT;
+	typedef extended_adjoint_real_color_vector_t LT;
 
 	for (unsigned int mu = 0; mu < 4; ++mu) {
 		//kinetic_coupling += - adjointLinkConfiguration[site][mu]*adjointLinkConfiguration[LT::sup(site,mu)][mu]*scalar_field[LT::sup(LT::sup(site,mu),mu)] - htrans(adjointLinkConfiguration[LT::sdn(site,mu)][mu])*htrans(adjointLinkConfiguration[LT::sdn(LT::sdn(site,mu),mu)][mu])*scalar_field[LT::sdn(LT::sdn(site,mu),mu)];
@@ -19,8 +19,8 @@ AdjointVector AdjointScalarAction::getKineticCoupling(const extended_adjoint_lat
 	return kinetic_coupling;
 }
 
-real_t AdjointScalarAction::deltaEnergy(const AdjointVector& kineticCoupling, const AdjointVector& old_field, const AdjointVector& new_field) const {
-	real_t old_square = real(vector_dot(old_field,old_field));
+real_t AdjointScalarAction::deltaEnergy(const AdjointRealVector& kineticCoupling, const AdjointRealVector& old_field, const AdjointRealVector& new_field) const {
+	real_t old_square = vector_dot(old_field,old_field);
 	real_t old_potential = (-m-8.)*old_square/2. - (lambda/24.)*old_square*old_square;
 	real_t old_adjoint_potential = 0.;
 	//For every generator
@@ -28,9 +28,9 @@ real_t AdjointScalarAction::deltaEnergy(const AdjointVector& kineticCoupling, co
 		old_square = real(vector_dot(old_field,adjointLieGenerator.get(i)*old_field));
 		old_adjoint_potential -= (lambda_8/24.)*old_square*old_square;
 	}
-	real_t old_kinetic = -real(vector_dot(kineticCoupling,old_field));
+	real_t old_kinetic = -vector_dot(kineticCoupling,old_field);
 
-	real_t new_square = real(vector_dot(new_field,new_field));
+	real_t new_square = vector_dot(new_field,new_field);
         real_t new_potential = (-m-8.)*new_square/2. - (lambda/24.)*new_square*new_square;
 	real_t new_adjoint_potential = 0.;
 	//For every generator
@@ -38,7 +38,7 @@ real_t AdjointScalarAction::deltaEnergy(const AdjointVector& kineticCoupling, co
 		new_square = real(vector_dot(new_field,adjointLieGenerator.get(i)*new_field));
 		new_adjoint_potential -= (lambda_8/24.)*new_square*new_square;
 	}
-        real_t new_kinetic = -real(vector_dot(kineticCoupling,new_field));
+        real_t new_kinetic = -vector_dot(kineticCoupling,new_field);
 
 	return -(new_kinetic + new_potential + new_adjoint_potential - old_kinetic - old_potential -  old_adjoint_potential);
 }
@@ -46,18 +46,18 @@ real_t AdjointScalarAction::deltaEnergy(const AdjointVector& kineticCoupling, co
 long_real_t AdjointScalarAction::energy(const environment_t& env) {
 	long_real_t energy = 0.;
 
-	typedef extended_adjoint_color_vector_t LT;
-	std::vector<extended_adjoint_color_vector_t>::const_iterator scalar_field;
+	typedef extended_adjoint_real_color_vector_t LT;
+	std::vector<extended_adjoint_real_color_vector_t>::const_iterator scalar_field;
 
 	for (scalar_field = env.adjoint_scalar_fields.begin(); scalar_field < env.adjoint_scalar_fields.end(); ++scalar_field) {
 		for (unsigned int mu = 0; mu < 4; ++mu) {
 #pragma omp parallel for reduction(+:energy)
 			for (int site = 0; site < scalar_field->localsize; ++site) {
 				//AdjointVector dmu = (env.getAdjointLattice()[site][mu]*(*scalar_field)[LT::sup(site,mu)] - htrans(env.getAdjointLattice()[LT::sdn(site,mu)][mu])*(*scalar_field)[LT::sdn(site,mu)]);
-				AdjointVector dmu = (env.getAdjointLattice()[site][mu]*(*scalar_field)[LT::sup(site,mu)] - (*scalar_field)[site]);
+				AdjointRealVector dmu = (env.getAdjointLattice()[site][mu]*(*scalar_field)[LT::sup(site,mu)] - (*scalar_field)[site]);
 
 				for (int c = 0; c < numberColors*numberColors - 1; ++c) {
-					energy += 0.5*real(conj(dmu[c])*(dmu[c]));
+					energy += 0.5*(dmu[c]*dmu[c]);
 				}
 			}
 
@@ -67,7 +67,7 @@ long_real_t AdjointScalarAction::energy(const environment_t& env) {
 		for (int site = 0; site < scalar_field->localsize; ++site) {
 			real_t square = 0;
 			for (int c = 0; c < numberColors*numberColors - 1; ++c) {
-				real_t sq = real(conj((*scalar_field)[site][c])*((*scalar_field)[site][c]));
+				real_t sq = ((*scalar_field)[site][c]*(*scalar_field)[site][c]);
 				square += sq;
 				energy += m*sq/2.;
 			}
@@ -87,11 +87,11 @@ long_real_t AdjointScalarAction::energy(const environment_t& env) {
 }
 
 void AdjointScalarAction::updateForce(extended_gauge_lattice_t& forceLattice, const environment_t& env) {
-	typedef extended_adjoint_color_vector_t LT;
+	typedef extended_adjoint_real_color_vector_t LT;
 
 	LieGenerator<GaugeGroup> gaugeLieGenerator;
 
-	std::vector<extended_adjoint_color_vector_t>::const_iterator scalar_field;
+	std::vector<extended_adjoint_real_color_vector_t>::const_iterator scalar_field;
 
 #pragma omp parallel for
 	for (int site = 0; site < forceLattice.localsize; ++site) {
@@ -122,7 +122,7 @@ void AdjointScalarAction::updateForce(extended_gauge_lattice_t& forceLattice, co
 }
 
 GaugeGroup AdjointScalarAction::force(const environment_t& env, int site, int mu) const {
-	typedef extended_adjoint_color_vector_t LT;
+	typedef extended_adjoint_real_color_vector_t LT;
 
         LieGenerator<AdjointGroup> adjointLieGenerator;
         LieGenerator<GaugeGroup> gaugeLieGenerator;			
@@ -130,7 +130,7 @@ GaugeGroup AdjointScalarAction::force(const environment_t& env, int site, int mu
 	GaugeGroup result;
 	set_to_zero(result);
 
-	std::vector<extended_adjoint_color_vector_t>::const_iterator scalar_field;
+	std::vector<extended_adjoint_real_color_vector_t>::const_iterator scalar_field;
 	for (scalar_field = env.adjoint_scalar_fields.begin(); scalar_field < env.adjoint_scalar_fields.end(); ++scalar_field) {
 		//For every generator
 		for (unsigned int i = 0; i < adjointLieGenerator.numberGenerators(); ++i) {
@@ -146,13 +146,13 @@ GaugeGroup AdjointScalarAction::force(const environment_t& env, int site, int mu
 	return result;
 }
 
-/*void AdjointScalarAction::updateForce(extended_adjoint_color_vector_t& force, const environment_t& env) const {
+/*void AdjointScalarAction::updateForce(extended_adjoint_real_color_vector_t& force, const environment_t& env) const {
 	typedef extended_adjoint_color_vector_t LT;
 
-	std::vector<extended_adjoint_color_vector_t>::const_iterator scalar_field;
+	std::vector<extended_adjoint_real_color_vector_t>::const_iterator scalar_field;
 	for (scalar_field = env.adjoint_scalar_fields.begin(); scalar_field < env.adjoint_scalar_fields.end(); ++scalar_field) {
 		for (unsigned int mu = 0; mu < 4; ++mu) {
-			extended_adjoint_color_vector_t dmu;
+			extended_adjoint_real_color_vector_t dmu;
 
 #pragma omp parallel for
 			for (int site = 0; site < dmu.localsize; ++site) {

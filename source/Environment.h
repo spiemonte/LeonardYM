@@ -95,7 +95,8 @@ public:
 	//Gauge link configuration in the adjoint representation
 	extended_adjoint_lattice_t adjointLinkConfiguration;
 
-	std::vector<extended_adjoint_color_vector_t> adjoint_scalar_fields;
+	//Scalar fields, real for adjoint, complex for fundamental
+	std::vector<extended_adjoint_real_color_vector_t> adjoint_scalar_fields;
 	std::vector<extended_color_vector_t> fundamental_scalar_fields;
 
 	//The configurations of the main program

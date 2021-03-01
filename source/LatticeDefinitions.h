@@ -66,9 +66,14 @@ typedef Lattice::Lattice<Update::FundamentalVector, Lattice::MpiLayout<Lattice::
 typedef Lattice::Lattice<Update::FundamentalVector, Lattice::MpiLayout<Lattice::ReducedStencil> > reduced_color_vector_t;
 
 //Scalar field in the adjoint representation of the gauge group for different MPI layouts
-typedef Lattice::Lattice<Update::AdjointVector, Lattice::MpiLayout<Lattice::ExtendedStencil> > extended_adjoint_color_vector_t;
-typedef Lattice::Lattice<Update::AdjointVector, Lattice::MpiLayout<Lattice::StandardStencil> > standard_adjoint_color_vector_t;
-typedef Lattice::Lattice<Update::AdjointVector, Lattice::MpiLayout<Lattice::ReducedStencil> > reduced_adjoint_color_vector_t;
+typedef Lattice::Lattice<Update::AdjointComplexVector, Lattice::MpiLayout<Lattice::ExtendedStencil> > extended_adjoint_complex_color_vector_t;
+typedef Lattice::Lattice<Update::AdjointComplexVector, Lattice::MpiLayout<Lattice::StandardStencil> > standard_adjoint_complex_color_vector_t;
+typedef Lattice::Lattice<Update::AdjointComplexVector, Lattice::MpiLayout<Lattice::ReducedStencil> > reduced_adjoint_complex_color_vector_t;
+
+//Scalar field in the adjoint representation of the gauge group for different MPI layouts
+typedef Lattice::Lattice<Update::AdjointRealVector, Lattice::MpiLayout<Lattice::ExtendedStencil> > extended_adjoint_real_color_vector_t;
+typedef Lattice::Lattice<Update::AdjointRealVector, Lattice::MpiLayout<Lattice::StandardStencil> > standard_adjoint_real_color_vector_t;
+typedef Lattice::Lattice<Update::AdjointRealVector, Lattice::MpiLayout<Lattice::ReducedStencil> > reduced_adjoint_real_color_vector_t;
 
 //Lattice of indeces to store positions and similar variables
 typedef Lattice::Lattice<int[4], Lattice::MpiLayout<Lattice::ExtendedStencil> > extended_index_lattice_t;
@@ -132,9 +137,13 @@ typedef Lattice::Lattice<Update::FundamentalVector, Lattice::LocalLayout > stand
 typedef Lattice::Lattice<Update::FundamentalVector, Lattice::LocalLayout > reduced_color_vector_t;
 
 //Scalar field in the adjoint representation of the gauge group equal for all layouts
-typedef Lattice::Lattice<Update::AdjointVector, Lattice::LocalLayout > extended_adjoint_color_vector_t;
-typedef Lattice::Lattice<Update::AdjointVector, Lattice::LocalLayout > standard_adjoint_color_vector_t;
-typedef Lattice::Lattice<Update::AdjointVector, Lattice::LocalLayout > reduced_adjoint_color_vector_t;
+typedef Lattice::Lattice<Update::AdjointComplexVector, Lattice::LocalLayout > extended_adjoint_complex_color_vector_t;
+typedef Lattice::Lattice<Update::AdjointComplexVector, Lattice::LocalLayout > standard_adjoint_complex_color_vector_t;
+typedef Lattice::Lattice<Update::AdjointComplexVector, Lattice::LocalLayout > reduced_adjoint_complex_color_vector_t;
+
+typedef Lattice::Lattice<Update::AdjointRealVector, Lattice::LocalLayout > extended_adjoint_real_color_vector_t;
+typedef Lattice::Lattice<Update::AdjointRealVector, Lattice::LocalLayout > standard_adjoint_real_color_vector_t;
+typedef Lattice::Lattice<Update::AdjointRealVector, Lattice::LocalLayout > reduced_adjoint_real_color_vector_t;
 
 typedef Lattice::Lattice<int[4], Lattice::LocalLayout > extended_index_lattice_t;
 

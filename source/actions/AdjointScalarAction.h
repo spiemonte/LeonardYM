@@ -13,8 +13,8 @@ public:
 #ifndef __IBMCPP__
         using Force::force;
 #endif
-	AdjointVector getKineticCoupling(const extended_adjoint_lattice_t& adjointLinkConfiguration, const extended_adjoint_color_vector_t& scalar_field, int site) const;
-	real_t deltaEnergy(const AdjointVector& kineticCoupling, const AdjointVector& old_field, const AdjointVector& new_field) const;
+	AdjointRealVector getKineticCoupling(const extended_adjoint_lattice_t& adjointLinkConfiguration, const extended_adjoint_real_color_vector_t& scalar_field, int site) const;
+	real_t deltaEnergy(const AdjointRealVector& kineticCoupling, const AdjointRealVector& old_field, const AdjointRealVector& new_field) const;
 
 	virtual GaugeGroup force(const environment_t& env, int site, int mu) const;
         virtual void updateForce(extended_gauge_lattice_t& forceLattice, const environment_t& env);
