@@ -24,5 +24,5 @@ This project is licensed under the GNU GPLv3 License - see the [LICENSE.md](LICE
 
 ## Acknowledgments
 
-* The development of the code has started during the work for the PhD thesis [N=1 supersymmetric Yang-Mills theory on the lattice](https://www.uni-muenster.de/imperia/md/content/physik_tp/theses/muenster/piemonte_dr.pdf). The software has been used mainly to perform Monte-Carlo simulations of supersymmetric Yang-Mills theories by the DESY-Muenster collaboration, whose support and help during the development of the code has been crucial. 
+* The development of the code has started during the work for the PhD thesis [N=1 supersymmetric Yang-Mills theory on the lattice](https://www.uni-muenster.de/imperia/md/content/physik_tp/theses/muenster/piemonte_dr.pdf). The software has been used mainly to perform Monte-Carlo simulations of supersymmetric Yang-Mills theories by the [DESY-Muenster collaboration](https://www.uni-muenster.de/Physik.TP/~munsteg/susy.html), whose support and help during the development of the code has been crucial. 
 

@@ -149,8 +149,8 @@ void PolyakovLoop::write_polyakov_loop_config(const extended_gauge_lattice_t& po
 			int count = 0;
 			int rank = Layout::rankTable(0,y,z,0);
 			for (int x = 0; x < Layout::glob_x; ) {
-				while (x < Layout::glob_x && rank == Layout::rankTable(x,y,z,t)) {
-					int globsite = Layout::getGlobalCoordinate(x,y,z,t);
+				while (x < Layout::glob_x && rank == Layout::rankTable(x,y,z,0)) {
+					int globsite = Layout::getGlobalCoordinate(x,y,z,0);
 					int localsite = Layout::localIndex[globsite];
 							
 					if (localsite != -1 && localsite < Layout::localsize) {
@@ -191,9 +191,8 @@ void PolyakovLoop::write_polyakov_loop_config(const extended_gauge_lattice_t& po
 				}
 
 				if (x < Layout::glob_x) {
-						rank = Layout::rankTable(x,y,z,0);
-						count = 0;
-					}
+					rank = Layout::rankTable(x,y,z,0);
+					count = 0;
 				}
 			}
 #endif
