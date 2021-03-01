@@ -9,11 +9,11 @@ void Propagator::constructPropagator(DiracOperator* diracOperator, const extende
                 OverlapOperator* overlap = dynamic_cast<OverlapOperator*>(diracOperator);
 
                 real_t mass = overlap->getMass();
-                overlap->setMass(0);
+                overlap->setMass(0.);
 
                 extended_dirac_vector_t tmp;
 
-                diracOperator->multiply(tmp,solution);
+                diracOperator->multiply(tmp,source);
 
 #pragma omp parallel for
                 for (int site = 0; site < tmp.completesize; ++site) {
