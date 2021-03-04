@@ -18,7 +18,7 @@ void Propagator::constructPropagator(DiracOperator* diracOperator, const extende
 #pragma omp parallel for
                 for (int site = 0; site < tmp.completesize; ++site) {
                         for (unsigned int mu = 0; mu< 4; ++mu) {
-                                solution[site][mu] = solution[site][mu] - tmp[site][mu];
+                                solution[site][mu] = source[site][mu] - tmp[site][mu];
                         }
                 }
 
