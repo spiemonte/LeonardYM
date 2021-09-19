@@ -277,16 +277,11 @@ void WilsonFlow::threeDimensionalEnergyTopologicalPlot(const extended_gauge_latt
 	}
 }
 
-void WilsonFlow::registerParameters(po::options_description& desc) {
-	static bool single = true;
-	if (single)
-	desc.add_options()
-		("WilsonFlow::flow_type", po::value<std::string>()->default_value("Wilson"), "The type of flow equations (Wilson/Symanzik)")
-		("WilsonFlow::flow_step", po::value<Update::real_t>()->default_value(0.2), "The integration step of the flow")
-		("WilsonFlow::flow_integration_intervals", po::value<unsigned int>()->default_value(20), "The number of intervals for each flow integration step")
-		("WilsonFlow::flow_time", po::value<Update::real_t>()->default_value(5.0), "The total time of the flow")
-	;
-	single = false;
+void WilsonFlow::registerParameters(std::map<std::string, Option>& desc) {
+	desc["WilsonFlow::flow_type"] = Option("WilsonFlow::flow_type", "Wilson", "The type of flow equations (Wilson/Symanzik)");
+	desc["WilsonFlow::flow_step"] = Option("WilsonFlow::flow_step", 0.1, "The integration step of the flow");
+	desc["WilsonFlow::flow_integration_intervals"] = Option("WilsonFlow::flow_integration_intervals", 20, "The number of intervals for each flow integration step");
+	desc["WilsonFlow::flow_time"] = Option("WilsonFlow::flow_time", 7.0, "The total time of the flow");
 }
 
 } /* namespace Update */

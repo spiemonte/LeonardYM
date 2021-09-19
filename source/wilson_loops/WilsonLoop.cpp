@@ -27,15 +27,15 @@ void WilsonLoop::execute(environment_t& environment) {
 	//We work with reduced halos
 	reduced_gauge_lattice_t originalLattice = environment.gaugeLinkConfiguration;
 
-	try {
-		unsigned int numberLevelSmearing = environment.configurations.get<unsigned int>("WilsonLoop::level_stout_smearing");
+	unsigned int numberLevelSmearing = environment.configurations.get<unsigned int>("WilsonLoop::level_stout_smearing");
+	if (numberLevelSmearing > 0) {
 		double smearingRho = environment.configurations.get<double>("WilsonLoop::rho_stout_smearing");
 		extended_gauge_lattice_t smearedConfiguration;
 		StoutSmearing stoutSmearing;
 		stoutSmearing.spatialSmearing(environment.gaugeLinkConfiguration, smearedConfiguration, numberLevelSmearing, smearingRho);
 		originalLattice = smearedConfiguration;
-	} catch (NotFoundOption& ex) {
-		if (isOutputProcess()) std::cout << "WilsonLoop::No smearing options found, proceeding without!" << std::endl;
+	} else {
+		if (isOutputProcess()) std::cout << "WilsonLoop::No smearing!" << std::endl;
 	}
 
 	RMax = environment.configurations.get<unsigned int>("WilsonLoop::max_r");
@@ -146,13 +146,12 @@ void WilsonLoop::execute(environment_t& environment) {
 	}
 }
 
-void WilsonLoop::registerParameters(po::options_description& desc) {
-	desc.add_options()
-		("WilsonLoop::max_t", po::value<unsigned int>()->default_value(6), "The maximum dimension of the Wilson loop in the R direction")
-		("WilsonLoop::max_r", po::value<unsigned int>()->default_value(6), "The maximum dimension of the Wilson loop in the R direction")
-		("WilsonLoop::t_dir", po::value<unsigned int>()->default_value(3), "The time direction of the loops")
-		("WilsonLoop::level_stout_smearing", po::value<unsigned int>()->default_value(10), "Number of levels of the stout smearing")
-		("WilsonLoop::rho_stout_smearing", po::value<double>()->default_value(0.05), "Rho stout smearing");
+void WilsonLoop::registerParameters(std::map<std::string, Option>& desc) {
+	desc["WilsonLoop::max_t"] = Option("WilsonLoop::max_t", 6, "The maximum dimension of the Wilson loop in the R direction");
+	desc["WilsonLoop::max_r"] = Option("WilsonLoop::max_r", 6, "The maximum dimension of the Wilson loop in the R direction");
+	desc["WilsonLoop::t_dir"] = Option("WilsonLoop::t_dir", 3, "The time direction of the loops");
+	desc["WilsonLoop::level_stout_smearing"] = Option("WilsonLoop::level_stout_smearing", 10, "Number of levels of the stout smearing");
+	desc["WilsonLoop::rho_stout_smearing"] = Option("WilsonLoop::rho_stout_smearing", 0.05, "Rho stout smearing");
 }
 
 } /* namespace Update */

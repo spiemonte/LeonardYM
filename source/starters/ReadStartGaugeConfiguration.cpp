@@ -2,14 +2,16 @@
 #include "wilson_loops/Plaquette.h"
 #include <string>
 #include <fstream>
+#ifndef ENABLE_MPI
 #ifdef __APPLE__
 typedef bool bool_t;
 typedef int enum_t;
 typedef long long quad_t;
 typedef unsigned long long u_quad_t;
-//typedef int caddr_t;
+typedef int caddr_t;
 #define TRUE (true)
 #define FALSE (false)
+#endif
 #endif
 #include <rpc/xdr.h>
 #include "utils/ToString.h"

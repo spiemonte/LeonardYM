@@ -1,20 +1,20 @@
-#ifndef FUNDAMENTALMETROPOLISSCALARUPDATER_H_
-#define FUNDAMENTALMETROPOLISSCALARUPDATER_H_
+#ifndef METROPOLISSCALARUPDATER_H_
+#define METROPOLISSCALARUPDATER_H_
 #include "LatticeSweep.h"
 #include "Environment.h"
 #include "utils/RandomSeed.h"
 
 namespace Update {
 
-class FundamentalMetropolisScalarUpdater : public Update::LatticeSweep {
+class MetropolisScalarUpdater : public Update::LatticeSweep {
 public:
-	FundamentalMetropolisScalarUpdater();
-	FundamentalMetropolisScalarUpdater(const FundamentalMetropolisScalarUpdater& toCopy);
-	~FundamentalMetropolisScalarUpdater();
+	MetropolisScalarUpdater();
+	MetropolisScalarUpdater(const MetropolisScalarUpdater& toCopy);
+	~MetropolisScalarUpdater();
 	
 	virtual void execute(environment_t& environment);
 
-	static void registerParameters(po::options_description& desc);
+	static void registerParameters(std::map<std::string, Option>& desc);
 
 private:
 #ifndef MULTITHREADING

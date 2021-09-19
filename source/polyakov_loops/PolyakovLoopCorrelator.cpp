@@ -114,10 +114,9 @@ void PolyakovLoopCorrelator::execute(environment_t& environment) {
 	}
 }
 
-void PolyakovLoopCorrelator::registerParameters(po::options_description& desc) {
-	desc.add_options()
-		("PolyakovCorrelator::level_stout_smearing", po::value<unsigned int>()->default_value(10), "Number of levels of the stout smearing")
-		("PolyakovCorrelator::rho_stout_smearing", po::value<double>()->default_value(0.05), "Rho stout smearing");
+void PolyakovLoopCorrelator::registerParameters(std::map<std::string, Option>& desc) {
+	desc["PolyakovCorrelator::level_stout_smearing"] = Option("PolyakovCorrelator::level_stout_smearing", 10, "Number of levels of the stout smearing");
+	desc["PolyakovCorrelator::rho_stout_smearing"] = Option("PolyakovCorrelator::rho_stout_smearing", 0.05, "Rho stout smearing");
 }
 
 } /* namespace Update */

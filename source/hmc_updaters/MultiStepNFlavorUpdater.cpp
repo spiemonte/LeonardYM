@@ -118,15 +118,8 @@ void MultiStepNFlavorUpdater::initializeApproximations(environment_t& environmen
 	//We allow the usage of different precision for different level
 	int numberLevels = environment.configurations.get< unsigned int >("number_force_levels");
 	real_t level_precisions[numberLevels];
-	try {
-		for (int i = 1; i <= numberLevels; ++i) {
-			level_precisions[i-1] = environment.configurations.get<double>(std::string("force_inverter_precision_level_")+toString(i));
-		}
-	} catch (NotFoundOption& ex) {
-		for (int i = 1; i <= numberLevels; ++i) {
-			level_precisions[i-1] = environment.configurations.get<double>("force_inverter_precision");
-		}
-		if (isOutputProcess()) std::cout << "MultiStepNFlavorUpdater::Warning, a single precision is provided for all the level of the force!" << std::endl;
+	for (int i = 1; i <= numberLevels; ++i) {
+		level_precisions[i-1] = environment.configurations.get<double>(std::string("force_inverter_precision_level_")+toString(i));
 	}
 
 	//Then take the rational function approximation for the force step
@@ -226,32 +219,27 @@ void MultiStepNFlavorUpdater::execute(environment_t& environment) {
 
 
 		if (i == pseudofermions.begin()) {
-			try {
-				std::string flag = environment.configurations.get<std::string>("check_rational_approximations");
+			std::string flag = environment.configurations.get<std::string>("check_rational_approximations");
 
-				if (environment.sweep == 0 && environment.iteration == 0 && flag == "true") {
-					//Now we test the correctness of rational/heatbath
-					long_real_t test = 0.;
+			if (environment.sweep == 0 && environment.iteration == 0 && flag == "true") {
+				//Now we test the correctness of rational/heatbath
+				long_real_t test = 0.;
 
-					//Now we use the better approximation for the metropolis step
-					std::vector<RationalApproximation>::iterator rational = rationalApproximationsMetropolis.begin();
-					//Now we evaluate it with the rational approximation of the inverse
-					rational->evaluate(squareDiracOperatorMetropolis,tmp_pseudofermion,*i);
-					test += real(AlgebraUtils::dot(*i,tmp_pseudofermion));
-					if (isOutputProcess()) std::cout << "NFlavoUpdater::Consistency check for the metropolis: " << test - oldPseudoFermionEnergy << std::endl;
+				//Now we use the better approximation for the metropolis step
+				std::vector<RationalApproximation>::iterator rational = rationalApproximationsMetropolis.begin();
+				//Now we evaluate it with the rational approximation of the inverse
+				rational->evaluate(squareDiracOperatorMetropolis,tmp_pseudofermion,*i);
+				test += real(AlgebraUtils::dot(*i,tmp_pseudofermion));
+				if (isOutputProcess()) std::cout << "NFlavoUpdater::Consistency check for the metropolis: " << test - oldPseudoFermionEnergy << std::endl;
 
-					//Now we use the approximation for the force step
-					rational = rationalApproximationsForce[0].begin();
-					test = 0.;
-					//Now we evaluate it with the rational approximation of the inverse
-					rational->evaluate(squareDiracOperatorForce,tmp_pseudofermion,*i);
-					test += real(AlgebraUtils::dot(*i,tmp_pseudofermion));
+				//Now we use the approximation for the force step
+				rational = rationalApproximationsForce[0].begin();
+				test = 0.;
+				//Now we evaluate it with the rational approximation of the inverse
+				rational->evaluate(squareDiracOperatorForce,tmp_pseudofermion,*i);
+				test += real(AlgebraUtils::dot(*i,tmp_pseudofermion));
 
-					if (isOutputProcess()) std::cout << "NFlavoUpdater::Consistency check for the first level of the force: " << test - oldPseudoFermionEnergy << std::endl;
-				}
-
-			} catch (NotFoundOption& ex) {
-				if (isOutputProcess() && environment.sweep == 0 && environment.iteration == 0 && environment.measurement) std::cout << "NFlavorUpdater::No consistency check of metropolis/force approximations!" << std::endl;
+				if (isOutputProcess()) std::cout << "NFlavoUpdater::Consistency check for the first level of the force: " << test - oldPseudoFermionEnergy << std::endl;
 			}
 		}
 
@@ -398,29 +386,23 @@ void MultiStepNFlavorUpdater::execute(environment_t& environment) {
 	delete integrate;
 }
 
-void MultiStepNFlavorUpdater::registerParameters(po::options_description& desc) {
-	static bool single = true;
-	if (single) desc.add_options()
-		("MultiStepNFlavorUpdater::twist", po::value<double>()->default_value(0.0), "set the value of the twist applied to fermions")
-		("MultiStepNFlavorUpdater::inverter_precision", po::value<double>()->default_value(0.0000000001), "set the precision used by the inverter")
-		("MultiStepNFlavorUpdater::inverter_max_steps", po::value<unsigned int>()->default_value(5000), "set the maximum steps used by the inverter")
+void MultiStepNFlavorUpdater::registerParameters(std::map<std::string, Option>& desc) {
+	desc["MultiStepNFlavorUpdater::twist"] = Option("MultiStepNFlavorUpdater::twist", 0.0, "set the value of the twist applied to fermions");
+	desc["MultiStepNFlavorUpdater::inverter_precision"] = Option("MultiStepNFlavorUpdater::inverter_precision", 1e-11, "set the precision used by the inverter");
+	desc["MultiStepNFlavorUpdater::inverter_max_steps"] = Option("MultiStepNFlavorUpdater::inverter_max_steps", 5000, "set the maximum steps used by the inverter");
 		
-		("MultiStepNFlavorUpdater::multigrid", po::value<std::string>()->default_value("false"), "Should we use the multigrid inverter? true/false")
-		("MultiStepNFlavorUpdater::multigrid_basis_dimension", po::value<unsigned int>()->default_value(20), "The dimension of the basis for multigrid")
-		("MultiStepNFlavorUpdater::multigrid_block_size", po::value<std::string>()->default_value("{4,4,4,4}"), "Block size for Multigrid (syntax: {bx,by,bz,bt})")
+	desc["MultiStepNFlavorUpdater::multigrid"] = Option("MultiStepNFlavorUpdater::multigrid", "false", "Should we use the multigrid inverter? true/false");
+	desc["MultiStepNFlavorUpdater::multigrid_basis_dimension"] = Option("MultiStepNFlavorUpdater::multigrid_basis_dimension", 20, "The dimension of the basis for multigrid");
+	desc["MultiStepNFlavorUpdater::multigrid_block_size"] = Option("MultiStepNFlavorUpdater::multigrid_block_size", "{4,4,4,4}", "Block size for Multigrid (syntax: {bx,by,bz,bt})");
 
-		("MultiStepNFlavorUpdater::sap_block_size", po::value<std::string>()->default_value("{4,4,4,4}"), "Block size for SAP (syntax: {bx,by,bz,bt})")
-		("MultiStepNFlavorUpdater::sap_iterations", po::value<unsigned int>()->default_value(5), "The number of sap iterations")
-		("MultiStepNFlavorUpdater::sap_inverter_precision", po::value<double>()->default_value(0.00000000001), "The precision of the inner SAP inverter")
-		("MultiStepNFlavorUpdater::sap_inverter_max_steps", po::value<unsigned int>()->default_value(50), "The maximum number of steps for the inner SAP inverter")
-		("MultiStepNFlavorUpdater::gmres_inverter_precision", po::value<double>()->default_value(0.00000000001), "The precision of the GMRES inverter used to initialize the multigrid basis")
-		("MultiStepNFlavorUpdater::gmres_inverter_max_steps", po::value<unsigned int>()->default_value(100), "The maximum number of steps for the GMRES inverter used to initialize the multigrid basis")
-		;
-	if (single) {
-		DiracOperator::registerParameters(desc, "MultiStepNFlavorUpdater::dirac_operator_metropolis::");
-		DiracOperator::registerParameters(desc, "MultiStepNFlavorUpdater::dirac_operator_force::");
-	}
-	single = false;
+	desc["MultiStepNFlavorUpdater::sap_block_size"] = Option("MultiStepNFlavorUpdater::sap_block_size", "{4,4,4,4}", "Block size for SAP (syntax: {bx,by,bz,bt})");
+	desc["MultiStepNFlavorUpdater::sap_iterations"] = Option("MultiStepNFlavorUpdater::sap_iterations", 5, "The number of sap iterations");
+	desc["MultiStepNFlavorUpdater::sap_inverter_precision"] = Option("MultiStepNFlavorUpdater::sap_inverter_precision", 0.00000000001, "The precision of the inner SAP inverter");
+	desc["MultiStepNFlavorUpdater::sap_inverter_max_steps"] = Option("MultiStepNFlavorUpdater::sap_inverter_max_steps", 50, "The maximum number of steps for the inner SAP inverter");
+	desc["MultiStepNFlavorUpdater::gmres_inverter_precision"] = Option("MultiStepNFlavorUpdater::gmres_inverter_precision", 0.00000000001, "The precision of the GMRES inverter used to initialize the multigrid basis");
+	desc["MultiStepNFlavorUpdater::gmres_inverter_max_steps"] = Option("MultiStepNFlavorUpdater::gmres_inverter_max_steps", 100, "The maximum number of steps for the GMRES inverter used to initialize the multigrid basis");
+	DiracOperator::registerParameters(desc, "MultiStepNFlavorUpdater::dirac_operator_metropolis::");
+	DiracOperator::registerParameters(desc, "MultiStepNFlavorUpdater::dirac_operator_force::");
 }
 
 } /* namespace Update */

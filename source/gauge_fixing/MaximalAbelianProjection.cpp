@@ -26,7 +26,4 @@ void MaximalAbelianProjection::execute(environment_t& environment) {
 	environment.synchronize();
 }
 
-void MaximalAbelianProjection::registerParameters(po::options_description&) { }
-
 }
-

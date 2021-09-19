@@ -161,7 +161,7 @@ class LocalLayout {
 			int t = modulus(site.t,glob_t);
 			return glob_t*(glob_z*(glob_y*x + y) + z) + t;
 		}
-	private:
+		
 		static int modulus(int value, int mod) {
 			int ris = value;
 			if (ris >= mod) return ris - mod;

@@ -5,7 +5,7 @@
 #include "LatticeBoundaryConditions.h"
 #include "MPILattice/MPIUtils.h"
 
-#include "io/StorageParameters.h"
+#include "program_options/StorageParameters.h"
 #include "utils/ConvertLattice.h"
 
 namespace Update {
@@ -15,7 +15,7 @@ namespace Update {
 class Environment {
 public:
 	Environment() : gaugeLinkConfiguration(), fermionicLinkConfiguration(), adjointLinkConfiguration(), sweep(0), iteration(0), measurement(false) { }
-	Environment(const boost::program_options::variables_map& vm) : gaugeLinkConfiguration(), fermionicLinkConfiguration(), adjointLinkConfiguration(), configurations(vm), sweep(0), iteration(0), measurement(false) { }
+	Environment(const std::map<std::string, Option>& vm) : gaugeLinkConfiguration(), fermionicLinkConfiguration(), adjointLinkConfiguration(), configurations(vm), sweep(0), iteration(0), measurement(false) { }
 	Environment(const Environment& toCopy);
 	Environment& operator=(const Environment& toCopy);
 	~Environment() { }

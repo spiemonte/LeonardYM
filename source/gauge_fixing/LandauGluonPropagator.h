@@ -14,7 +14,7 @@ public:
 
 	void execute(environment_t& environment);
 
-	static void registerParameters(po::options_description&);
+	static void registerParameters(std::map<std::string, Option>&);
 };
 
 }

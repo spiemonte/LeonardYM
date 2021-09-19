@@ -134,13 +134,18 @@ void NFlavorFermionAction::updateForce(extended_gauge_lattice_t& forceLattice, c
 		
 	fermionForceLattice.updateHalo();
 	
-	try {
+	int smearing_levels = env.configurations.get<unsigned int>("stout_smearing_levels");
+	if (smearing_levels == 1) {
 		real_t rho = env.configurations.get<real_t>("stout_smearing_rho");
 		SmearingForce smearingForce;
 		
 		smearingForce.force(fermionForceLattice, env.gaugeLinkConfiguration, forceLattice, rho);
 	}
-	catch (NotFoundOption& ex) {
+	else if (smearing_levels > 1) {
+		std::cout << "Smearing levels larger than one not supported!" << std::endl;
+		exit(47);
+	}
+	else {
 		//Calculate the force directly
 #pragma omp parallel for
 		for (int site = 0; site < forceLattice.localsize; ++site) {

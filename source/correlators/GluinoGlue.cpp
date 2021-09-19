@@ -8,6 +8,7 @@
 #include "dirac_operators/Propagator.h"
 #include "utils/RandomGaugeTransformation.h"
 #include "wilson_loops/Plaquette.h"
+#include "program_options/Option.h"
 
 namespace Update {
 
@@ -32,14 +33,14 @@ void GluinoGlue::execute(environment_t& environment) {
 	extended_gauge_lattice_t lattice;
 	extended_fermion_lattice_t smearedFermionLattice = environment.getFermionLattice();
 
-	try {
-		unsigned int numberLevelSmearing = environment.configurations.get<unsigned int>("GluinoGlue::stout_smearing_levels");
+	unsigned int numberLevelSmearing = environment.configurations.get<unsigned int>("GluinoGlue::stout_smearing_levels");
+	if (numberLevelSmearing > 0) {
 		double smearingRho = environment.configurations.get<double>("GluinoGlue::stout_smearing_rho");
 		StoutSmearing stoutSmearing;
 		stoutSmearing.spatialSmearing(environment.gaugeLinkConfiguration, lattice, numberLevelSmearing, smearingRho);
 		ConvertLattice<extended_fermion_lattice_t,extended_gauge_lattice_t>::convert(smearedFermionLattice, lattice);
-	} catch (NotFoundOption& ex) {
-		if (isOutputProcess()) std::cout << "GluinoGlue::No smearing options found, proceeding without!" << std::endl;
+	} else {
+		if (isOutputProcess()) std::cout << "GluinoGlue::No smearing!" << std::endl;
 		lattice = environment.gaugeLinkConfiguration;
 	}
 
@@ -50,11 +51,9 @@ void GluinoGlue::execute(environment_t& environment) {
 
 	int delta_t = Layout::glob_t;
 
-	try {
-		unsigned int number_of_sources = environment.configurations.get<unsigned int>("GluinoGlue::number_of_timeslice_sources");
+	unsigned int number_of_sources = environment.configurations.get<unsigned int>("GluinoGlue::number_of_timeslice_sources");
+	if (number_of_sources > 0) {
 		delta_t = Layout::glob_t/number_of_sources;
-	} catch (NotFoundOption& ex) {
-		
 	}
 
 	if (biConjugateGradient == 0) biConjugateGradient = new BiConjugateGradient();
@@ -177,18 +176,14 @@ GaugeGroup GluinoGlue::cloverPlaquette(const extended_gauge_lattice_t& lattice, 
 	return cplaq;
 }
 
-void GluinoGlue::registerParameters(po::options_description& desc) {
-	static bool single = true;
-	if (single) desc.add_options()
-		("GluinoGlue::inverter_precision", po::value<real_t>()->default_value(0.00000000001), "set the inverter precision")
-		("GluinoGlue::inverter_max_steps", po::value<unsigned int>()->default_value(10000), "maximum number of inverter steps")
-		("GluinoGlue::number_of_timeslice_sources", po::value<unsigned int>()->default_value(1), "Number of wall-time sources to use")
-		("GluinoGlue::stout_smearing_rho", po::value<real_t>()->default_value(0.15), "set the stout smearing parameter")
-		("GluinoGlue::stout_smearing_levels", po::value<unsigned int>()->default_value(15), "levels of stout smearing")
-		("GluinoGlue::fermion_smearing_rho", po::value<real_t>()->default_value(0.15), "set the Jacoby smearing rho for the source/sink")
-		("GluinoGlue::fermion_smearing_levels", po::value<unsigned int>()->default_value(5), "set the Jacoby smearing levels for the source/sink")
-		;
-	single = false;
+void GluinoGlue::registerParameters(std::map<std::string, Option>& desc) {
+	desc["GluinoGlue::inverter_precision"] = Option("GluinoGlue::inverter_precision", 0.00000000001, "set the inverter precision");
+	desc["GluinoGlue::inverter_max_steps"] = Option("GluinoGlue::inverter_max_steps", 10000, "maximum number of inverter steps");
+	desc["GluinoGlue::number_of_timeslice_sources"] = Option("GluinoGlue::number_of_timeslice_sources", 1, "Number of wall-time sources to use");
+	desc["GluinoGlue::stout_smearing_rho"] = Option("GluinoGlue::stout_smearing_rho", 0.15, "set the stout smearing parameter");
+	desc["GluinoGlue::stout_smearing_levels"] = Option("GluinoGlue::stout_smearing_levels", 15, "levels of stout smearing");
+	desc["GluinoGlue::fermion_smearing_rho"] = Option("GluinoGlue::fermion_smearing_rho", 0.15, "set the Jacoby smearing rho for the source/sink");
+	desc["GluinoGlue::fermion_smearing_levels"] = Option("GluinoGlue::fermion_smearing_levels", 5, "set the Jacoby smearing levels for the source/sink");
 }
 
 }

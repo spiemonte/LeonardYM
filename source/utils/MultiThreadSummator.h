@@ -103,7 +103,7 @@ template<typename T> class MultiThreadSummator {
 
 		void reduceAllSum(std::complex<float>& value) const {
 			float valueRe = value.real(), resultRe = value.real();
-                        float valueIm = value.imag(), resultIm = value.imag();
+            float valueIm = value.imag(), resultIm = value.imag();
 			MPI_Allreduce(&valueRe, &resultRe, 1, MPI_FLOAT, MPI_SUM, MPI_COMM_WORLD);
 			MPI_Allreduce(&valueIm, &resultIm, 1, MPI_FLOAT, MPI_SUM, MPI_COMM_WORLD);
 			value = std::complex<float>(resultRe,resultIm);
@@ -122,8 +122,14 @@ template<typename T> class MultiThreadSummator {
 		}
 	
 		void reduceAllSum(float& value) const {
-			double result = value;
+			float result = value;
 			MPI_Allreduce(&value, &result, 1, MPI_FLOAT, MPI_SUM, MPI_COMM_WORLD);
+			value = result;
+		}
+
+		void reduceAllSum(int& value) const {
+			int result = value;
+			MPI_Allreduce(&value, &result, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
 			value = result;
 		}
 		

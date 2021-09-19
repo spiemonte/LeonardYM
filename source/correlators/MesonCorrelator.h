@@ -1,10 +1,10 @@
 #ifndef MESONCORRELATOR_H_
 #define MESONCORRELATOR_H_
-
 #include "LatticeSweep.h"
 #include "fermion_measurements/StochasticEstimator.h"
 #include "dirac_operators/DiracOperator.h"
 #include "inverters/Solver.h"
+#include <map>
 
 namespace Update {
 
@@ -16,7 +16,7 @@ public:
 
 	virtual void execute(environment_t& environment);
 
-	static void registerParameters(po::options_description& desc);
+	static void registerParameters(std::map<std::string, Option>& desc);
 
 private:
 	reduced_dirac_vector_t randomNoise;

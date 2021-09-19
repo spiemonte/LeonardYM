@@ -164,23 +164,21 @@ DiracOperator* DiracOperator::getInstance(const std::string& name, unsigned int 
 	}
 }
 
-void DiracOperator::registerParameters(po::options_description& desc, const std::string& basename) {
-	desc.add_options()
-		((basename+"dirac_operator").c_str(), po::value<std::string>()->default_value("DiracWilson"), "The name of the Dirac operator")
-		((basename+"kappa").c_str(), po::value<double>()->default_value(0.0), "set the value of the kappa for the Dirac Wilson operator")
-		((basename+"csw").c_str(), po::value<double>()->default_value(0.0), "set the value of the clover term for the Dirac Wilson operator")
-		((basename+"mass").c_str(), po::value<double>()->default_value(0.0), "set the value of the mass for the Overlap operator")
-		((basename+"OverlapOperator::squareRootApproximation").c_str(), po::value<std::string>()->default_value(""), "Approximation of x^(1/2) used for the Overlap fermion sign function (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})")
-		((basename+"ExactOverlapOperator::squareRootApproximation").c_str(), po::value<std::string>()->default_value(""), "Approximation of x^(1/2) used for the Overlap fermion sign function (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})")
-		((basename+"ExactOverlapOperator::eigensolver::use_chebyshev").c_str(), po::value<std::string>()->default_value("false"), "Use Chebyshev acceleration? (true/false)")
-		((basename+"ExactOverlapOperator::eigensolver::chebyshev_left").c_str(), po::value<double>()->default_value(0.2), "Left interval of the Chebyshev polynomial.")
-		((basename+"ExactOverlapOperator::eigensolver::chebyshev_right").c_str(), po::value<double>()->default_value(7.), "Right interval of the Chebyshev polynomial.")
-		((basename+"ExactOverlapOperator::eigensolver::chebyshev_order").c_str(), po::value<unsigned int>()->default_value(15), "Order of the Chebyshev acceleration. It must be an odd number")
-		((basename+"ExactOverlapOperator::eigensolver::eigensolver_precision").c_str(), po::value<double>()->default_value(0.000000001), "set the precision used by the eigensolver")
-		((basename+"ExactOverlapOperator::eigensolver::number_extra_vectors").c_str(), po::value<unsigned int>(), "Number of extra vectors for the Arnoldi algorithm used in the computation of the eigenvectors, increase this number to increase precision")
-		((basename+"ExactOverlapOperator::eigensolver::maximal_number_restarts_eigensolver").c_str(), po::value<unsigned int>()->default_value(50), "Number of restarts for the implicitly restarted Arnoldi algorithm")
-		((basename+"ExactOverlapOperator::eigensolver::number_eigenvalues").c_str(), po::value<unsigned int>(), "Number of eigenvalues of the dirac wilson operator to be computed")
-		;
+void DiracOperator::registerParameters(std::map<std::string, Option>& desc, const std::string& basename) {
+	desc[basename+"dirac_operator"] = Option(basename+"dirac_operator", "DiracWilson", "The name of the Dirac operator");
+	desc[basename+"kappa"] = Option(basename+"kappa", 0.125, "set the value of the kappa for the Dirac Wilson operator");
+	desc[basename+"csw"] = Option(basename+"csw", 1.0, "set the value of the clover term for the Dirac Wilson operator");
+	desc[basename+"mass"] = Option(basename+"mass", 0.0, "set the value of the mass for the Overlap operator");
+	desc[basename+"OverlapOperator::squareRootApproximation"] = Option(basename+"OverlapOperator::squareRootApproximation", "", "Approximation of x^(1/2) used for the Overlap fermion sign function (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})");
+	desc[basename+"ExactOverlapOperator::squareRootApproximation"] = Option(basename+"ExactOverlapOperator::squareRootApproximation", "", "Approximation of x^(1/2) used for the Overlap fermion sign function (syntax: {(scalingre,scalingim),(r1re,r1im), ..., (rnre,rnim)})");
+	desc[basename+"ExactOverlapOperator::eigensolver::use_chebyshev"] = Option(basename+"ExactOverlapOperator::eigensolver::use_chebyshev", false, "Use Chebyshev acceleration? (true/false)");
+	desc[basename+"ExactOverlapOperator::eigensolver::chebyshev_left"] = Option(basename+"ExactOverlapOperator::eigensolver::chebyshev_left", 0.2, "Left interval of the Chebyshev polynomial.");
+	desc[basename+"ExactOverlapOperator::eigensolver::chebyshev_right"] = Option(basename+"ExactOverlapOperator::eigensolver::chebyshev_right", 7.0, "Right interval of the Chebyshev polynomial.");
+	desc[basename+"ExactOverlapOperator::eigensolver::chebyshev_order"] = Option(basename+"ExactOverlapOperator::eigensolver::chebyshev_order", 15, "Order of the Chebyshev acceleration. It must be an odd number");
+	desc[basename+"ExactOverlapOperator::eigensolver::eigensolver_precision"] = Option(basename+"ExactOverlapOperator::eigensolver::eigensolver_precision", 1e-9, "set the precision used by the eigensolver");
+	desc[basename+"ExactOverlapOperator::eigensolver::number_extra_vectors"] = Option(basename+"ExactOverlapOperator::eigensolver::number_extra_vectors", 30, "Number of extra vectors for the Arnoldi algorithm used in the computation of the eigenvectors, increase this number to increase precision");
+	desc[basename+"ExactOverlapOperator::eigensolver::maximal_number_restarts_eigensolver"] = Option(basename+"ExactOverlapOperator::eigensolver::maximal_number_restarts_eigensolver", 50, "Number of restarts for the implicitly restarted Arnoldi algorithm");
+	desc[basename+"ExactOverlapOperator::eigensolver::number_eigenvalues"] = Option(basename+"ExactOverlapOperator::eigensolver::number_eigenvalues", 30, "Number of eigenvalues of the dirac wilson operator to be computed");
 }
 
 DiracOperator* DiracOperator::getSquareRoot(DiracOperator* dirac) {

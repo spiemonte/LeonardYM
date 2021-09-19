@@ -145,4 +145,20 @@ void StochasticEstimator::smearSource(extended_dirac_vector_t& vector, const ext
 	}
 }
 
+#ifdef ENABLE_MPI
+void StochasticEstimator::generateSource(reduced_dirac_vector_t& vector, int alpha, int c) {
+	typedef reduced_dirac_vector_t::Layout Layout;
+
+#pragma omp parallel for
+	for (int site = 0; site < vector.localsize; ++site) {
+		for (unsigned int mu = 0; mu < 4; ++mu) set_to_zero(vector[site][mu]);
+		if (Layout::globalIndexX(site) == 0 && Layout::globalIndexY(site) == 0 && Layout::globalIndexZ(site) == 0 && Layout::globalIndexT(site) == 0) {
+			vector[site][alpha][c] = 1;
+		}
+	}
+
+	vector.updateHalo();
+}
+#endif
+
 } /* namespace Update */

@@ -3,11 +3,7 @@
 #include "algebra_utils/AlgebraUtils.h"
 #include "utils/StoutSmearing.h"
 #include "utils/Gamma.h"
-#include "dirac_operators/BlockDiracWilsonOperator.h"
-#include "dirac_operators/ComplementBlockDiracOperator.h"
 #include "dirac_operators/TwistedDiracOperator.h"
-#include "dirac_operators/SAPPreconditioner.h"
-#include "multigrid/MultiGridSolver.h"
 #include "inverters/GMRESR.h"
 #include "dirac_operators/GammaOperators.h"
 #include "dirac_operators/HoppingOperator.h"
@@ -37,41 +33,8 @@ void SingletOperators::execute(environment_t& environment) {
 	diracOperator->setGamma5(false);
 	squareDiracOperator->setLattice(environment.getFermionLattice());
 
-	//Here we construct the SAP preconditioner
-	BlockDiracOperator* blackBlockDiracOperator = 0;
-	BlockDiracOperator* redBlockDiracOperator = 0;
 	
-	if (environment.configurations.get<std::string>("SingletOperators::multigrid") == "true") {
-		blackBlockDiracOperator = BlockDiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations, Black);
-		blackBlockDiracOperator->setLattice(environment.getFermionLattice());
-		blackBlockDiracOperator->setGamma5(false);
-		blackBlockDiracOperator->setBlockSize(environment.configurations.get< std::vector<unsigned int> >("SingletOperators::sap_block_size"));
-		
-		redBlockDiracOperator = BlockDiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations, Red);
-		redBlockDiracOperator->setLattice(environment.getFermionLattice());
-		redBlockDiracOperator->setGamma5(false);
-		redBlockDiracOperator->setBlockSize(environment.configurations.get< std::vector<unsigned int> >("SingletOperators::sap_block_size"));
-
-		MultiGridSolver* multiGridSolver = new MultiGridSolver(environment.configurations.get< unsigned int >("SingletOperators::multigrid_basis_dimension"), environment.configurations.get< std::vector<unsigned int> >("SingletOperators::multigrid_block_size"), blackBlockDiracOperator, redBlockDiracOperator);
-		multiGridSolver->setSAPIterations(environment.configurations.get<unsigned int>("SingletOperators::sap_iterations"));
-		multiGridSolver->setSAPMaxSteps(environment.configurations.get<unsigned int>("SingletOperators::sap_inverter_max_steps"));
-		multiGridSolver->setSAPPrecision(environment.configurations.get<real_t>("SingletOperators::sap_inverter_precision"));
-		multiGridSolver->setGMRESIterations(environment.configurations.get<unsigned int>("SingletOperators::gmres_inverter_max_steps"));
-		multiGridSolver->setGMRESPrecision(environment.configurations.get<real_t>("SingletOperators::gmres_inverter_precision"));
-
-		multiGridSolver->initializeBasis(diracOperator);
-
-		inverter = multiGridSolver;
-
-		if (isOutputProcess()) std::cout << "SingletOperators::Using multigrid inverter and SAP preconditioning ..." << std::endl;
-	}
-	else {
-		GMRESR* gmresr = new GMRESR();
-		inverter = gmresr;
-		
-
-		if (isOutputProcess()) std::cout << "SingletOperators::Without using multigrid ..." << std::endl;
-	}
+	GMRESR* inverter = new GMRESR();
 
 	inverter->setPrecision(environment.configurations.get<double>("SingletOperators::inverter_precision"));
 	inverter->setMaximumSteps(environment.configurations.get<unsigned int>("SingletOperators::inverter_max_steps"));
@@ -83,29 +46,15 @@ void SingletOperators::execute(environment_t& environment) {
 	extended_dirac_vector_t* randomSources = new extended_dirac_vector_t[numberRandomSources];
 	extended_dirac_vector_t* inverseRandomSources = new extended_dirac_vector_t[numberRandomSources];
 
-	MultiGridSolver* mgs = dynamic_cast<MultiGridSolver*>(inverter);
-	if (mgs && environment.configurations.get<std::string>("SingletOperators::use_multigrid_diluition") == "true") {
-		this->setBlockBasis(mgs->getBasis());
-		for (unsigned int i = 0; i < numberRandomSources; ++i) {
-			if (i % 3 != 0) {
-				this->getMultigridVectors(diracOperator, randomSources[i], inverseRandomSources[i]);
-			}
-			else {
-				this->getResidualVectors(inverter, diracOperator, randomSources[i], inverseRandomSources[i]);
-			}
-		}
-	} else {
-		extended_dirac_vector_t tmp;
-		if (isOutputProcess()) std::cout << "SingletOperators::Disconnected contributions measured without multigrid" << std::endl;
-		for (unsigned int i = 0; i < numberRandomSources; ++i) {
-			this->generateRandomNoise(randomSources[i]);
-			inverter->solve(diracOperator, randomSources[i], inverseRandomSources[i]);
-		}
+	extended_dirac_vector_t tmp;
+
+	for (unsigned int i = 0; i < numberRandomSources; ++i) {
+		this->generateRandomNoise(randomSources[i]);
+		inverter->solve(diracOperator, randomSources[i], inverseRandomSources[i]);
 	}
 
 	HoppingOperator H(diracOperator);
 	GammaOperators gammaOperators;
-	extended_dirac_vector_t tmp;
 
 	for (int hopping = 0; hopping < 9; ++hopping) {
 		std::complex<long_real_t> disconnectedResults[numberRandomSources][16];
@@ -260,31 +209,16 @@ void SingletOperators::execute(environment_t& environment) {
 
 	if (isOutputProcess()) std::cout << "SingletOperators::Measure of hopping parameter expansion done in: " << (elapsed) << " s."<< std::endl;
 	
-	if (redBlockDiracOperator) delete redBlockDiracOperator;
-	if (blackBlockDiracOperator) delete blackBlockDiracOperator;
 	if (inverter) delete inverter;
 }
 
-void SingletOperators::registerParameters(po::options_description& desc) {
-	desc.add_options()
-		("SingletOperators::inverter_precision", po::value<double>()->default_value(0.0000000001), "set the precision used by the inverter")
-		("SingletOperators::inverter_max_steps", po::value<unsigned int>()->default_value(5000), "set the maximum steps used by the inverter")
-		
-		("SingletOperators::multigrid", po::value<std::string>()->default_value("true"), "Should we use the multigrid inverter? true/false")
-		("SingletOperators::multigrid_basis_dimension", po::value<unsigned int>()->default_value(20), "The dimension of the basis for multigrid")
-		("SingletOperators::multigrid_block_size", po::value<std::string>()->default_value("{4,4,4,4}"), "Block size for Multigrid (syntax: {bx,by,bz,bt})")
-
-		("SingletOperators::sap_block_size", po::value<std::string>()->default_value("{4,4,4,4}"), "Block size for SAP (syntax: {bx,by,bz,bt})")
-		("SingletOperators::sap_iterations", po::value<unsigned int>()->default_value(5), "The number of sap iterations")
-		("SingletOperators::sap_inverter_precision", po::value<double>()->default_value(0.00000000001), "The precision of the inner SAP inverter")
-		("SingletOperators::sap_inverter_max_steps", po::value<unsigned int>()->default_value(100), "The maximum number of steps for the inner SAP inverter")
-		("SingletOperators::gmres_inverter_precision", po::value<double>()->default_value(0.00000000001), "The precision of the GMRES inverter used to initialize the multigrid basis")
-		("SingletOperators::gmres_inverter_max_steps", po::value<unsigned int>()->default_value(100), "The maximum number of steps for the GMRES inverter used to initialize the multigrid basis")
-		
-		("SingletOperators::number_stochastic_estimators", po::value<unsigned int>()->default_value(13), "Number of stochastic estimators for the disconnected part")
-		("SingletOperators::number_stochastic_estimators_hopping_terms", po::value<unsigned int>()->default_value(2500), "Number of stochastic estimators for the disconnected part in the hopping parameter expansion")
-		("SingletOperators::use_multigrid_diluition", po::value<std::string>()->default_value("true"), "Should we use the multigrid diluition for the measure of disconnected contribution? true/false")
-		;
+void SingletOperators::registerParameters(std::map<std::string, Option>& desc) {
+	desc["SingletOperators::inverter_precision"] = Option("SingletOperators::inverter_precision", 1e-11, "set the precision used by the inverter");
+	desc["SingletOperators::inverter_max_steps"] = Option("SingletOperators::inverter_max_steps", 5000, "set the maximum steps used by the inverter");
+				
+	desc["SingletOperators::number_stochastic_estimators"] = Option("SingletOperators::number_stochastic_estimators", 20, "Number of stochastic estimators for the disconnected part");
+	desc["SingletOperators::number_stochastic_estimators_hopping_terms"] = Option("SingletOperators::number_stochastic_estimators_hopping_terms", 2500, "Number of stochastic estimators for the disconnected part in the hopping parameter expansion");
+	desc["SingletOperators::use_multigrid_diluition"] = Option("SingletOperators::use_multigrid_diluition", "true", "Should we use the multigrid diluition for the measure of disconnected contribution? true/false");
 }
 
 } /* namespace Update */

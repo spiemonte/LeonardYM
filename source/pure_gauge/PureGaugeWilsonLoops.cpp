@@ -2,9 +2,6 @@
 #include "io/GlobalOutput.h"
 #include "Checkerboard.h"
 
-#include <boost/multi_array.hpp>
-#include <boost/array.hpp>
-
 namespace Update {
 
 //Two link operator to be contracted for computing Wilson loops
@@ -157,7 +154,7 @@ void PureGaugeWilsonLoops::execute(environment_t& environment) {
 	//Get the gauge action
 	GaugeAction* action = GaugeAction::getInstance(environment.configurations.get<std::string>("name_action"), environment.configurations.get<double>("beta"));
 
-	boost::multi_array<GaugeGroup,5> wilsonLineT(boost::extents[numberSubSweeps][LT::glob_x][LT::glob_y][LT::glob_t][LT::glob_y/sliceSize]);
+	GaugeGroup wilsonLineT[numberSubSweeps][LT::glob_x][LT::glob_y][LT::glob_t][LT::glob_y/sliceSize];
 
 	for (int numSweep = 0; numSweep < numberSubSweeps; ++numSweep) {
 #pragma omp parallel for
@@ -273,13 +270,11 @@ void PureGaugeWilsonLoops::updateSlices(environment_t& environment, GaugeAction*
 #endif
 }
 
-void PureGaugeWilsonLoops::registerParameters(po::options_description& desc) {
-	desc.add_options()
-		("PureGaugeWilsonLoops::max_r", po::value<unsigned int>(), "The maximal R to be measured")
-		("PureGaugeWilsonLoops::max_r", po::value<unsigned int>(), "The maximal T to be measured")
-		("PureGaugeWilsonLoops::number_subsweeps_luescher", po::value<unsigned int>(), "Number of subsweeps of the luescher algorithm")
-		("PureGaugeWilsonLoops::size_slice_luescher", po::value<unsigned int>(), "The size of a slice of the luescher algorithm")
-		;
+void PureGaugeWilsonLoops::registerParameters(std::map<std::string, Option>& desc) {
+	desc["PureGaugeWilsonLoops::max_r"] = Option("PureGaugeWilsonLoops::max_r", 8, "The maximal R to be measured");
+	desc["PureGaugeWilsonLoops::max_t"] = Option("PureGaugeWilsonLoops::max_t", 8, "The maximal T to be measured");
+	desc["PureGaugeWilsonLoops::number_subsweeps_luescher"] = Option("PureGaugeWilsonLoops::number_subsweeps_luescher", 10, "Number of subsweeps of the Luescher algorithm");
+	desc["PureGaugeWilsonLoops::size_slice_luescher"] = Option("PureGaugeWilsonLoops::size_slice_luescher", 4, "The size of a slice of the luescher algorithm");
 }
 
 } /* namespace Update */

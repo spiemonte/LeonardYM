@@ -3,6 +3,7 @@
 #include "utils/ToString.h"
 #include "utils/StoutSmearing.h"
 #include "utils/MultiThreadSummator.h"
+#include "program_options/Option.h"
 
 namespace Update {
 
@@ -15,15 +16,15 @@ void Glueball::execute(environment_t& environment) {
 	typedef extended_gauge_lattice_t LT;
 
 	extended_gauge_lattice_t lattice;
-	try {
-		unsigned int numberLevelSmearing = environment.configurations.get<unsigned int>("Glueball::stout_smearing_levels");
+	unsigned int numberLevelSmearing = environment.configurations.get<unsigned int>("Glueball::stout_smearing_levels");
+	if (numberLevelSmearing > 0) {
 		double smearingRho = environment.configurations.get<double>("Glueball::stout_smearing_rho");
 		extended_gauge_lattice_t smearedConfiguration;
 		StoutSmearing stoutSmearing;
 		stoutSmearing.spatialSmearing(environment.gaugeLinkConfiguration, lattice, numberLevelSmearing, smearingRho);
-	} catch (NotFoundOption& ex) {
+	} else {
 		lattice =  environment.gaugeLinkConfiguration;
-		if (isOutputProcess()) std::cout << "Glueball::No smearing options found, proceeding without!" << std::endl;
+		if (isOutputProcess()) std::cout << "Glueball::No smearing!" << std::endl;
 	}
 
 	//We measure the zero momentum projection
@@ -75,11 +76,9 @@ void Glueball::execute(environment_t& environment) {
 	delete[] two_glueball;
 }
 
-void Glueball::registerParameters(po::options_description& desc) {
-	desc.add_options()
-		("Glueball::stout_smearing_rho", po::value<real_t>()->default_value(0.15), "set the stout smearing parameter")
-		("Glueball::stout_smearing_levels", po::value<unsigned int>()->default_value(10), "levels of stout smearing")
-	;
+void Glueball::registerParameters(std::map<std::string, Option>& desc) {
+	desc["Glueball::stout_smearing_rho"] = Option("Glueball::stout_smearing_rho", 0.15, "set the stout smearing parameter");
+	desc["Glueball::stout_smearing_levels"]	= Option("Glueball::stout_smearing_levels", 10, "levels of stout smearing");
 }
 
 } /* namespace Update */

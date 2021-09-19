@@ -6,6 +6,7 @@
 #include "inverters/PreconditionedBiCGStab.h"
 #include "dirac_operators/Propagator.h"
 #include "utils/MultiThreadSummator.h"
+#include "program_options/Option.h"
 
 namespace Update {
 
@@ -19,7 +20,7 @@ MesonCorrelator::~MesonCorrelator() {
 }
 
 void MesonCorrelator::execute(environment_t& environment) {
-	typedef extended_dirac_vector_t::Layout Layout;
+	typedef reduced_dirac_vector_t::Layout Layout;
 
 	if (diracOperator == 0) {
 		diracOperator = DiracOperator::getInstance(environment.configurations.get<std::string>("dirac_operator"), 1, environment.configurations);
@@ -27,8 +28,8 @@ void MesonCorrelator::execute(environment_t& environment) {
 
 	extended_fermion_lattice_t lattice;
 
-	try {
-		unsigned int numberLevelSmearing = environment.configurations.get<unsigned int>("MesonCorrelator::stout_smearing_levels");
+	unsigned int numberLevelSmearing = environment.configurations.get<unsigned int>("MesonCorrelator::stout_smearing_levels");
+	if (numberLevelSmearing > 0) {
 		double smearingRho = environment.configurations.get<double>("MesonCorrelator::stout_smearing_rho");
 		StoutSmearing stoutSmearing;
 #ifdef ADJOINT
@@ -40,31 +41,27 @@ void MesonCorrelator::execute(environment_t& environment) {
 		stoutSmearing.spatialSmearing(environment.gaugeLinkConfiguration, lattice, numberLevelSmearing, smearingRho);
 #endif
 		environment.setFermionBc(lattice);
-	} catch (NotFoundOption& ex) {
+	} else {
 		lattice =  environment.getFermionLattice();
-		if (isOutputProcess()) std::cout << "MesonCorrelator::No smearing options found, proceeding without!" << std::endl;
+		if (isOutputProcess()) std::cout << "MesonCorrelator::No smearing!" << std::endl;
 	}
 
-	try {
-		unsigned int t = environment.configurations.get<unsigned int>("MesonCorrelator::t_source_origin");
+	unsigned int t = environment.configurations.get<unsigned int>("MesonCorrelator::t_source_origin");
+	if (t != 0) {
 		extended_fermion_lattice_t swaplinkconfig;
 		typedef extended_fermion_lattice_t LT;
-		if (t != 0) {
-			for (unsigned int n = 0; n < t; ++n) {
-				//We do a swap
-				for(int site = 0; site < (lattice.localsize); ++site){
-					for (unsigned int mu = 0; mu < 4; ++mu) swaplinkconfig[site][mu] = lattice[site][mu];
-				}
-				swaplinkconfig.updateHalo();
-				//We wrap
-				for(int site = 0; site < (lattice.localsize); ++site){
-					for (unsigned int mu = 0; mu < 4; ++mu) lattice[site][mu] = swaplinkconfig[LT::sup(site,3)][mu];
-				}
-				lattice.updateHalo();
+		for (unsigned int n = 0; n < t; ++n) {
+			//We do a swap
+			for(int site = 0; site < lattice.localsize; ++site){
+				for (unsigned int mu = 0; mu < 4; ++mu) swaplinkconfig[site][mu] = lattice[site][mu];
 			}
+			swaplinkconfig.updateHalo();
+			//We wrap
+			for(int site = 0; site < lattice.localsize; ++site) {
+				for (unsigned int mu = 0; mu < 4; ++mu) lattice[site][mu] = swaplinkconfig[LT::sup(site,3)][mu];
+			}
+			lattice.updateHalo();
 		}
-	} catch (NotFoundOption& ex) {
-
 	}
 
 	diracOperator->setLattice(lattice);
@@ -76,7 +73,7 @@ void MesonCorrelator::execute(environment_t& environment) {
 
 	std::vector< long_real_t > pionNorm;
 
-	extended_dirac_vector_t source;
+	reduced_dirac_vector_t source, tmp1;
 
 	MultiThreadSummator<long_real_t>* pionOperator = new MultiThreadSummator<long_real_t>[Layout::glob_t];
 	MultiThreadSummator<long_real_t>* scalarOperator = new MultiThreadSummator<long_real_t>[Layout::glob_t];
@@ -87,6 +84,9 @@ void MesonCorrelator::execute(environment_t& environment) {
 		PSOperator[t].reset();
 	}
 
+	MultiThreadSummator<int> test[Layout::glob_t];
+	for (int t = 0; t < Layout::glob_t; ++t) test[t].reset();
+
 	int inversionSteps = 0;
 	
 	for (unsigned int alpha = 0; alpha < 4; ++alpha) {
@@ -94,7 +94,6 @@ void MesonCorrelator::execute(environment_t& environment) {
 			this->generateSource(source, alpha, c);
 			inverter->solve(diracOperator, source, tmp);
 			Propagator::constructPropagator(diracOperator, tmp, propagator[c*4 + alpha]);
-
 			inversionSteps += inverter->getLastSteps();
 		}
 	}
@@ -117,7 +116,7 @@ void MesonCorrelator::execute(environment_t& environment) {
 			}
 		}
 	}
-	
+
 	//Scalar connected correlator then
 	for (unsigned int alpha = 0; alpha < 4; ++alpha) {
 		for (unsigned int beta = 0; beta < 4; ++beta) {
@@ -139,11 +138,11 @@ void MesonCorrelator::execute(environment_t& environment) {
 	
 	//PseudoScalar-PseudoVector connected correlator then
 	for (unsigned int alpha = 0; alpha < 4; ++alpha) {
-	for (unsigned int beta = 0; beta < 4; ++beta) {
-		for (int c = 0; c < diracVectorLength; ++c) {
+		for (unsigned int beta = 0; beta < 4; ++beta) {
+			for (int c = 0; c < diracVectorLength; ++c) {
 #pragma omp parallel for
-			for (int site = 0; site < Layout::localsize; ++site) {
-				for (unsigned int mu = 0; mu < 4; ++mu) {
+				for (int site = 0; site < Layout::localsize; ++site) {
+					for (unsigned int mu = 0; mu < 4; ++mu) {
 					
 						for (int d = 0; d < diracVectorLength; ++d) {
 							std::complex<real_t> dottmp(0.,0.);
@@ -172,7 +171,7 @@ void MesonCorrelator::execute(environment_t& environment) {
 		GlobalOutput* output = GlobalOutput::getInstance();
 
 		output->push("pion_exact");
-		for (int t = 0; t < Layout::pgrid_t*Layout::loc_t; ++t) {
+		for (int t = 0; t < Layout::glob_t; ++t) {
 			std::cout << "MesonCorrelator::Pion Exact Correlator at t " << t << " is " << factor*pionOperator[t].getResult() << std::endl;
 
 			output->write("pion_exact", factor*pionOperator[t].getResult());
@@ -180,7 +179,7 @@ void MesonCorrelator::execute(environment_t& environment) {
 		output->pop("pion_exact");
 
 		output->push("scalar_exact");
-		for (int t = 0; t < Layout::pgrid_t*Layout::loc_t; ++t) {
+		for (int t = 0; t < Layout::glob_t; ++t) {
 			std::cout << "MesonCorrelator::Scalar Exact Correlator at t " << t << " is " << factor*scalarOperator[t].getResult() << std::endl;
 
 			output->write("scalar_exact", factor*scalarOperator[t].getResult());
@@ -188,7 +187,7 @@ void MesonCorrelator::execute(environment_t& environment) {
 		output->pop("scalar_exact");
 		
 		output->push("ps_exact");
-		for (int t = 0; t < Layout::pgrid_t*Layout::loc_t; ++t) {
+		for (int t = 0; t < Layout::glob_t; ++t) {
 			std::cout << "MesonCorrelator::PS Exact Correlator at t " << t << " is " << factor*PSOperator[t].getResult() << std::endl;
 
 			output->write("ps_exact", factor*PSOperator[t].getResult());
@@ -206,12 +205,7 @@ void MesonCorrelator::execute(environment_t& environment) {
 		output->pop("pcac_mass");
 	}	
 	
-	bool compute_disconnected;
-	try {
-		compute_disconnected = environment.configurations.get<bool>("MesonCorrelator::compute_disconnected_contributions");
-	} catch (NotFoundOption& ex) {
-		compute_disconnected = false;
-	}
+	bool compute_disconnected = environment.configurations.get<bool>("MesonCorrelator::compute_disconnected_contributions");
 
 	if (compute_disconnected) {
 		MultiThreadSummator< std::complex<long_real_t> >* etaDisconnectedOperator = new MultiThreadSummator< std::complex<long_real_t> >[Layout::glob_t];
@@ -220,7 +214,7 @@ void MesonCorrelator::execute(environment_t& environment) {
 
 		unsigned int numberStochasticEstimators = environment.configurations.get<unsigned int>("MesonCorrelator::number_stochastic_estimators");
 
-		extended_dirac_vector_t randomNoise[4], inverse[4];
+		reduced_dirac_vector_t randomNoise[4], inverse[4];
 
 		for (unsigned int step = 0; step < numberStochasticEstimators; ++step) {
 			for (int t = 0; t < Layout::glob_t; ++t) {
@@ -284,18 +278,14 @@ void MesonCorrelator::execute(environment_t& environment) {
 	delete[] PSOperator;
 }
 
-void MesonCorrelator::registerParameters(po::options_description& desc) {
-	static bool single = true;
-	if (single) desc.add_options()
-		("MesonCorrelator::inverter_precision", po::value<real_t>()->default_value(0.00000000001), "set the inverter precision")
-		("MesonCorrelator::inverter_max_steps", po::value<unsigned int>()->default_value(10000), "maximum number of inverter steps")
-		("MesonCorrelator::t_source_origin", po::value<unsigned int>()->default_value(0), "T origin for the wall source")
-		("MesonCorrelator::stout_smearing_rho", po::value<real_t>(), "set the stout smearing parameter")
-		("MesonCorrelator::stout_smearing_levels", po::value<unsigned int>(), "levels of stout smearing")
-		("MesonCorrelator::number_stochastic_estimators", po::value<unsigned int>()->default_value(50), "number of stochastic estimators")
-		("MesonCorrelator::compute_disconnected_contributions", po::value<bool>()->default_value(false), "Compute the disconnected contributions of the eta'?")
-		;
-	single = false;
+void MesonCorrelator::registerParameters(std::map<std::string, Option>& desc) {
+	desc["MesonCorrelator::inverter_precision"] = Option("MesonCorrelator::inverter_precision", 0.00000000001, "set the inverter precision");
+	desc["MesonCorrelator::inverter_max_steps"] = Option("MesonCorrelator::inverter_max_steps", 10000, "maximum number of inverter steps");
+	desc["MesonCorrelator::t_source_origin"] = Option("MesonCorrelator::t_source_origin", 0, "T origin for the wall source");
+	desc["MesonCorrelator::stout_smearing_rho"] = Option("MesonCorrelator::stout_smearing_rho", 0.15, "set the stout smearing parameter");
+	desc["MesonCorrelator::stout_smearing_levels"] = Option("MesonCorrelator::stout_smearing_levels", 0, "levels of stout smearing");
+	desc["MesonCorrelator::number_stochastic_estimators"] = Option("MesonCorrelator::number_stochastic_estimators", 50, "number of stochastic estimators");
+	desc["MesonCorrelator::compute_disconnected_contributions"] = Option("MesonCorrelator::compute_disconnected_contributions", false, "Compute the disconnected contributions of the eta'?");
 }
 
 } /* namespace Update */

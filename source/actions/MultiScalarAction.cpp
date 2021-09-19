@@ -2,7 +2,7 @@
 
 namespace Update {
 
-MultiScalarAction::MultiScalarAction() : ScalarAction(0.,0.,0.) { }
+MultiScalarAction::MultiScalarAction() : ScalarAction() { }
 
 MultiScalarAction::~MultiScalarAction() {
 	for (unsigned int i = 0; i < flavorActions.size(); ++i) {

@@ -523,13 +523,11 @@ void LandauGhostPropagator::execute(environment_t& environment) {
 
 }
 
-void LandauGhostPropagator::registerParameters(po::options_description& desc) {
-	desc.add_options()
-		("LandauGhostPropagator::epsilon", po::value<real_t>()->default_value(0.00000000001), "Convergence for the computation of the ghost propagator")
-		("LandauGhostPropagator::anisotropy_cut", po::value<real_t>()->default_value(0.25), "Cut for the off-diagonal momenta")
-		("LandauGhostPropagator::max_steps", po::value<int>()->default_value(5000), "Maximum inversion steps for the computation of the ghost propagator")
-		("LandauGhostPropagator::maximal_momentum", po::value<std::string>()->default_value("{2,2,2,2}"), "Momentum for the measure of the vertex function (syntax: {px,py,pz,pt})")
-		;
+void LandauGhostPropagator::registerParameters(std::map<std::string, Option>& desc) {
+	desc["LandauGhostPropagator::epsilon"] = Option("LandauGhostPropagator::epsilon", 1e-11, "Convergence for the computation of the ghost propagator");
+	desc["LandauGhostPropagator::anisotropy_cut"] = Option("LandauGhostPropagator::anisotropy_cut", 0.25, "Cut for the off-diagonal momenta");
+	desc["LandauGhostPropagator::max_steps"] = Option("LandauGhostPropagator::max_steps", 10000, "Maximum inversion steps for the computation of the ghost propagator");
+	desc["LandauGhostPropagator::maximal_momentum"] = Option("LandauGhostPropagator::maximal_momentum", "{2,2,2,2}", "Momentum for the measure of the vertex function (syntax: {px,py,pz,pt})");
 }
 
 }

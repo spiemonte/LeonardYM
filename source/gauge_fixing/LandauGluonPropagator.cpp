@@ -233,11 +233,9 @@ void LandauGluonPropagator::execute(environment_t& environment) {
 
 }
 
-void LandauGluonPropagator::registerParameters(po::options_description& desc) {
-	desc.add_options()
-		("LandauGluonPropagator::anisotropy_cut", po::value<real_t>()->default_value(0.25), "Cut for the off-diagonal momenta")
-		("LandauGluonPropagator::maximal_momentum", po::value<std::string>()->default_value("{2,2,2,2}"), "Momentum for the measure of the vertex function (syntax: {px,py,pz,pt})")
-		;
+void LandauGluonPropagator::registerParameters(std::map<std::string, Option>& desc) {
+	desc["LandauGluonPropagator::anisotropy_cut"] = Option("LandauGluonPropagator::anisotropy_cut", 0.25, "Cut for the off-diagonal momenta");
+	desc["LandauGluonPropagator::maximal_momentum"] = Option("LandauGluonPropagator::maximal_momentum", "{2,2,2,2}", "Momentum for the measure of the vertex function (syntax: {px,py,pz,pt})");
 }
 
 }

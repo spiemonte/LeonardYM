@@ -15,7 +15,7 @@ public:
 
 	void execute(environment_t& environment);
 
-	static void registerParameters(po::options_description&);
+	static void registerParameters(std::map<std::string, Option>&);
 protected:
 	long_real_t functional(const extended_gauge_lattice_t& lattice);
 };

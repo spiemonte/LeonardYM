@@ -163,6 +163,111 @@ void TestCommunication::execute(environment_t& environment) {
 	long_real_t after2 = AlgebraUtils::squaredNorm(test3);
 
 	if (isOutputProcess()) std::cout << "TestCommunication::Test communication dirac vector: " << before - after1 << " " << before - after2 << std::endl;
+
+#pragma omp parallel for
+	for (int site = 0; site < test1.localsize; ++site) {
+		test1[site][0][0] = (double)reduced_dirac_vector_t::Layout::globalIndexX(site);
+		test1[site][1][0] = (double)reduced_dirac_vector_t::Layout::globalIndexY(site);
+		test1[site][2][0] = (double)reduced_dirac_vector_t::Layout::globalIndexZ(site);
+		test1[site][3][0] = (double)reduced_dirac_vector_t::Layout::globalIndexT(site);
+	}
+	test1.updateHalo();
+
+
+	for (int site = 0; site < test1.localsize; ++site) {
+		if (reduced_dirac_vector_t::Layout::modulus((int)real(test1[site][0][0] - 1.), reduced_dirac_vector_t::Layout::glob_x) != (int)real(test1[reduced_dirac_vector_t::sdn(site,0)][0][0])) {
+			std::cout << "Invalid down x coordinate: " << test1[site][0][0] - 1. << " vs " << test1[reduced_dirac_vector_t::sdn(site,0)][0][0] << std::endl;
+		}
+		if (reduced_dirac_vector_t::Layout::modulus((int)real(test1[site][0][0] + 1.), reduced_dirac_vector_t::Layout::glob_x) != (int)real(test1[reduced_dirac_vector_t::sup(site,0)][0][0])) {
+			std::cout << "Invalid sup x coordinate: " << test1[site][0][0] + 1. << " vs " << test1[reduced_dirac_vector_t::sup(site,0)][0][0] << std::endl;
+		}
+		if (reduced_dirac_vector_t::Layout::modulus((int)real(test1[site][1][0] - 1.), reduced_dirac_vector_t::Layout::glob_y) != (int)real(test1[reduced_dirac_vector_t::sdn(site,1)][1][0])) {
+			std::cout << "Invalid down y coordinate: " << test1[site][1][0] - 1. << " vs " << test1[reduced_dirac_vector_t::sdn(site,1)][1][0] << std::endl;
+		}
+		if (reduced_dirac_vector_t::Layout::modulus((int)real(test1[site][1][0] + 1.), reduced_dirac_vector_t::Layout::glob_y) != (int)real(test1[reduced_dirac_vector_t::sup(site,1)][1][0])) {
+			std::cout << "Invalid sup y coordinate: " << test1[site][1][0] + 1. << " vs " << test1[reduced_dirac_vector_t::sup(site,1)][1][0] << std::endl;
+		}
+		if (reduced_dirac_vector_t::Layout::modulus((int)real(test1[site][2][0] - 1.), reduced_dirac_vector_t::Layout::glob_z) != (int)real(test1[reduced_dirac_vector_t::sdn(site,2)][2][0])) {
+			std::cout << "Invalid down z coordinate: " << test1[site][2][0] - 1. << " vs " << test1[reduced_dirac_vector_t::sdn(site,2)][2][0] << std::endl;
+		}
+		if (reduced_dirac_vector_t::Layout::modulus((int)real(test1[site][2][0] + 1.), reduced_dirac_vector_t::Layout::glob_z) != (int)real(test1[reduced_dirac_vector_t::sup(site,2)][2][0])) {
+			std::cout << "Invalid sup z coordinate: " << test1[site][2][0] + 1. << " vs " << test1[reduced_dirac_vector_t::sup(site,2)][2][0] << std::endl;
+		}
+		if (reduced_dirac_vector_t::Layout::modulus((int)real(test1[site][3][0] - 1.), reduced_dirac_vector_t::Layout::glob_t) != (int)real(test1[reduced_dirac_vector_t::sdn(site,3)][3][0])) {
+			std::cout << "Invalid down t coordinate: " << test1[site][3][0] - 1. << " vs " << test1[reduced_dirac_vector_t::sdn(site,3)][3][0] << std::endl;
+		}
+		if (reduced_dirac_vector_t::Layout::modulus((int)real(test1[site][3][0] + 1.), reduced_dirac_vector_t::Layout::glob_t) != (int)real(test1[reduced_dirac_vector_t::sup(site,3)][3][0])) {
+			std::cout << "Invalid sup t coordinate: " << test1[site][3][0] + 1. << " vs " << test1[reduced_dirac_vector_t::sup(site,3)][3][0] << std::endl;
+		}
+	}
+
+	extended_dirac_vector_t test_extended;
+
+	#pragma omp parallel for
+	for (int site = 0; site < test_extended.localsize; ++site) {
+		test_extended[site][0][0] = (double)extended_dirac_vector_t::Layout::globalIndexX(site);
+		test_extended[site][1][0] = (double)extended_dirac_vector_t::Layout::globalIndexY(site);
+		test_extended[site][2][0] = (double)extended_dirac_vector_t::Layout::globalIndexZ(site);
+		test_extended[site][3][0] = (double)extended_dirac_vector_t::Layout::globalIndexT(site);
+	}
+	test_extended.updateHalo();
+
+
+	for (int site = 0; site < test_extended.localsize; ++site) {
+		if (extended_dirac_vector_t::Layout::modulus((int)real(test_extended[site][0][0] - 1.), extended_dirac_vector_t::Layout::glob_x) != (int)real(test_extended[extended_dirac_vector_t::sdn(site,0)][0][0])) {
+			std::cout << "Invalid down x coordinate: " << test_extended[site][0][0] - 1. << " vs " << test_extended[extended_dirac_vector_t::sdn(site,0)][0][0] << std::endl;
+		}
+		if (extended_dirac_vector_t::Layout::modulus((int)real(test_extended[site][0][0] + 1.), extended_dirac_vector_t::Layout::glob_x) != (int)real(test_extended[extended_dirac_vector_t::sup(site,0)][0][0])) {
+			std::cout << "Invalid sup x coordinate: " << test_extended[site][0][0] + 1. << " vs " << test_extended[extended_dirac_vector_t::sup(site,0)][0][0] << std::endl;
+		}
+		if (extended_dirac_vector_t::Layout::modulus((int)real(test_extended[site][1][0] - 1.), extended_dirac_vector_t::Layout::glob_y) != (int)real(test_extended[extended_dirac_vector_t::sdn(site,1)][1][0])) {
+			std::cout << "Invalid down y coordinate: " << test_extended[site][1][0] - 1. << " vs " << test_extended[extended_dirac_vector_t::sdn(site,1)][1][0] << std::endl;
+		}
+		if (extended_dirac_vector_t::Layout::modulus((int)real(test_extended[site][1][0] + 1.), extended_dirac_vector_t::Layout::glob_y) != (int)real(test_extended[extended_dirac_vector_t::sup(site,1)][1][0])) {
+			std::cout << "Invalid sup y coordinate: " << test_extended[site][1][0] + 1. << " vs " << test_extended[extended_dirac_vector_t::sup(site,1)][1][0] << std::endl;
+		}
+		if (extended_dirac_vector_t::Layout::modulus((int)real(test_extended[site][2][0] - 1.), extended_dirac_vector_t::Layout::glob_z) != (int)real(test_extended[extended_dirac_vector_t::sdn(site,2)][2][0])) {
+			std::cout << "Invalid down z coordinate: " << test_extended[site][2][0] - 1. << " vs " << test_extended[extended_dirac_vector_t::sdn(site,2)][2][0] << std::endl;
+		}
+		if (extended_dirac_vector_t::Layout::modulus((int)real(test_extended[site][2][0] + 1.), extended_dirac_vector_t::Layout::glob_z) != (int)real(test_extended[extended_dirac_vector_t::sup(site,2)][2][0])) {
+			std::cout << "Invalid sup z coordinate: " << test_extended[site][2][0] + 1. << " vs " << test_extended[extended_dirac_vector_t::sup(site,2)][2][0] << std::endl;
+		}
+		if (extended_dirac_vector_t::Layout::modulus((int)real(test_extended[site][3][0] - 1.), extended_dirac_vector_t::Layout::glob_t) != (int)real(test_extended[extended_dirac_vector_t::sdn(site,3)][3][0])) {
+			std::cout << "Invalid down t coordinate: " << test_extended[site][3][0] - 1. << " vs " << test_extended[extended_dirac_vector_t::sdn(site,3)][3][0] << std::endl;
+		}
+		if (extended_dirac_vector_t::Layout::modulus((int)real(test_extended[site][3][0] + 1.), extended_dirac_vector_t::Layout::glob_t) != (int)real(test_extended[extended_dirac_vector_t::sup(site,3)][3][0])) {
+			std::cout << "Invalid sup t coordinate: " << test_extended[site][3][0] + 1. << " vs " << test_extended[extended_dirac_vector_t::sup(site,3)][3][0] << std::endl;
+		}
+	}
+
+	test_extended = test1;
+
+	for (int site = 0; site < test_extended.localsize; ++site) {
+		if (extended_dirac_vector_t::Layout::modulus((int)real(test_extended[site][0][0] - 1.), extended_dirac_vector_t::Layout::glob_x) != (int)real(test_extended[extended_dirac_vector_t::sdn(site,0)][0][0])) {
+			std::cout << "Invalid down x coordinate: " << test_extended[site][0][0] - 1. << " vs " << test_extended[extended_dirac_vector_t::sdn(site,0)][0][0] << std::endl;
+		}
+		if (extended_dirac_vector_t::Layout::modulus((int)real(test_extended[site][0][0] + 1.), extended_dirac_vector_t::Layout::glob_x) != (int)real(test_extended[extended_dirac_vector_t::sup(site,0)][0][0])) {
+			std::cout << "Invalid sup x coordinate: " << test_extended[site][0][0] + 1. << " vs " << test_extended[extended_dirac_vector_t::sup(site,0)][0][0] << std::endl;
+		}
+		if (extended_dirac_vector_t::Layout::modulus((int)real(test_extended[site][1][0] - 1.), extended_dirac_vector_t::Layout::glob_y) != (int)real(test_extended[extended_dirac_vector_t::sdn(site,1)][1][0])) {
+			std::cout << "Invalid down y coordinate: " << test_extended[site][1][0] - 1. << " vs " << test_extended[extended_dirac_vector_t::sdn(site,1)][1][0] << std::endl;
+		}
+		if (extended_dirac_vector_t::Layout::modulus((int)real(test_extended[site][1][0] + 1.), extended_dirac_vector_t::Layout::glob_y) != (int)real(test_extended[extended_dirac_vector_t::sup(site,1)][1][0])) {
+			std::cout << "Invalid sup y coordinate: " << test_extended[site][1][0] + 1. << " vs " << test_extended[extended_dirac_vector_t::sup(site,1)][1][0] << std::endl;
+		}
+		if (extended_dirac_vector_t::Layout::modulus((int)real(test_extended[site][2][0] - 1.), extended_dirac_vector_t::Layout::glob_z) != (int)real(test_extended[extended_dirac_vector_t::sdn(site,2)][2][0])) {
+			std::cout << "Invalid down z coordinate: " << test_extended[site][2][0] - 1. << " vs " << test_extended[extended_dirac_vector_t::sdn(site,2)][2][0] << std::endl;
+		}
+		if (extended_dirac_vector_t::Layout::modulus((int)real(test_extended[site][2][0] + 1.), extended_dirac_vector_t::Layout::glob_z) != (int)real(test_extended[extended_dirac_vector_t::sup(site,2)][2][0])) {
+			std::cout << "Invalid sup z coordinate: " << test_extended[site][2][0] + 1. << " vs " << test_extended[extended_dirac_vector_t::sup(site,2)][2][0] << std::endl;
+		}
+		if (extended_dirac_vector_t::Layout::modulus((int)real(test_extended[site][3][0] - 1.), extended_dirac_vector_t::Layout::glob_t) != (int)real(test_extended[extended_dirac_vector_t::sdn(site,3)][3][0])) {
+			std::cout << "Invalid down t coordinate: " << test_extended[site][3][0] - 1. << " vs " << test_extended[extended_dirac_vector_t::sdn(site,3)][3][0] << std::endl;
+		}
+		if (extended_dirac_vector_t::Layout::modulus((int)real(test_extended[site][3][0] + 1.), extended_dirac_vector_t::Layout::glob_t) != (int)real(test_extended[extended_dirac_vector_t::sup(site,3)][3][0])) {
+			std::cout << "Invalid sup t coordinate: " << test_extended[site][3][0] + 1. << " vs " << test_extended[extended_dirac_vector_t::sup(site,3)][3][0] << std::endl;
+		}
+	}
 }
 
 } /* namespace Update */

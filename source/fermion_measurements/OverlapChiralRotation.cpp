@@ -172,15 +172,13 @@ void OverlapChiralRotation::execute(environment_t& environment) {
 	}
 }
 
-void OverlapChiralRotation::registerParameters(po::options_description& desc) {
-	desc.add_options()
-		("OverlapChiralRotation::number_stochastic_estimators", po::value<unsigned int>()->default_value(20), "The number of stochastic estimators to be used")
-		("OverlapChiralRotation::exponential_product_number_steps", po::value<unsigned int>()->default_value(200), "The number of steps to be used to approximate the chiral rotation")
-		("OverlapChiralRotation::inverter_precision", po::value<real_t>()->default_value(0.0000000001), "set the inverter precision")
-		("OverlapChiralRotation::inverter_max_steps", po::value<unsigned int>()->default_value(10000), "maximum number of inverter steps")
-		("OverlapChiralRotation::rho_stout_smearing", po::value<real_t>(), "set the stout smearing parameter")
-		("OverlapChiralRotation::levels_stout_smearing", po::value<unsigned int>(), "levels of stout smearing")
-		;
+void OverlapChiralRotation::registerParameters(std::map<std::string, Option>& desc) {
+	desc["OverlapChiralRotation::number_stochastic_estimators"] = Option("OverlapChiralRotation::number_stochastic_estimators", 20, "The number of stochastic estimators to be used");
+	desc["OverlapChiralRotation::exponential_product_number_steps"] = Option("OverlapChiralRotation::exponential_product_number_steps", 200, "The number of steps to be used to approximate the chiral rotation");
+	desc["OverlapChiralRotation::inverter_precision"] = Option("OverlapChiralRotation::inverter_precision", 1e-11, "set the inverter precision");
+	desc["OverlapChiralRotation::inverter_max_steps"] = Option("OverlapChiralRotation::inverter_max_steps", 10000, "maximum number of inverter steps");
+	desc["OverlapChiralRotation::rho_stout_smearing"] = Option("OverlapChiralRotation::rho_stout_smearing", 0.15, "set the stout smearing parameter");
+	desc["OverlapChiralRotation::levels_stout_smearing"] = Option("OverlapChiralRotation::levels_stout_smearing", 0, "levels of stout smearing");
 }
 
 } /* namespace Update */

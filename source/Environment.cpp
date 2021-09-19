@@ -19,8 +19,8 @@ Environment& Environment::operator=(const Environment& toCopy) {
 }
 
 void Environment::synchronize() {
-	try {
-		int levels = configurations.get<int>("stout_smearing_levels");
+	int levels = configurations.get<int>("stout_smearing_levels");
+	if (levels > 0) {
 		real_t rho = configurations.get<real_t>("stout_smearing_rho");
 		if (levels > 1) {
 			static int count = 0;
@@ -29,11 +29,7 @@ void Environment::synchronize() {
 				count = 1;
 			}
 		}
-		else if (levels == 0 || rho < 0.00000000001) {
-			if (isOutputProcess()) std::cout << "Warning, comment smearing options if you don't use it!" << std::endl;
-		}
 		
-	
 		extended_gauge_lattice_t tmp = gaugeLinkConfiguration, smeared;
 		StoutSmearing stoutSmearing;
 	
@@ -48,8 +44,7 @@ void Environment::synchronize() {
 #ifndef ADJOINT
 		fermionicLinkConfiguration = smeared;
 #endif
-	}
-	catch (NotFoundOption& ex) {
+	} else {
 #ifdef ADJOINT
 		ConvertLattice<extended_fermion_lattice_t,extended_gauge_lattice_t>::convert(fermionicLinkConfiguration, gaugeLinkConfiguration);
 #endif
@@ -60,30 +55,20 @@ void Environment::synchronize() {
 
 	ConvertLattice<extended_adjoint_lattice_t,extended_gauge_lattice_t>::convert(adjointLinkConfiguration, gaugeLinkConfiguration);
 
-	try {
-		std::string bc = configurations.get<std::string>("boundary_conditions");
-		if (bc == "fermion_antiperiodic") {
-			switchAntiperiodicBc(fermionicLinkConfiguration);
-		}
-		else if (bc == "fermion_spatial_antiperiodic") {
-			switchSpatialAntiperiodicBc(fermionicLinkConfiguration);
-		}
-		else if (bc == "fermion_periodic") {
-		}
-		else if (bc == "open") {
-			switchOpenBc(fermionicLinkConfiguration);
-			switchOpenBc(gaugeLinkConfiguration);
-		}
-		else {
-			static int count = 0;
-			if (count == 0 && isOutputProcess()) {
-				std::cout << "Warning, boundary conditions not or badly set, using antiperiodic!" << std::endl;
-				count = count + 1;
-			}
-			switchAntiperiodicBc(fermionicLinkConfiguration);
-		}
+	std::string bc = configurations.get<std::string>("boundary_conditions");
+	if (bc == "fermion_antiperiodic") {
+		switchAntiperiodicBc(fermionicLinkConfiguration);
 	}
-	catch (NotFoundOption& ex) {
+	else if (bc == "fermion_spatial_antiperiodic") {
+		switchSpatialAntiperiodicBc(fermionicLinkConfiguration);
+	}
+	else if (bc == "fermion_periodic") {
+	}
+	else if (bc == "open") {
+		switchOpenBc(fermionicLinkConfiguration);
+		switchOpenBc(gaugeLinkConfiguration);
+	}
+	else {
 		static int count = 0;
 		if (count == 0 && isOutputProcess()) {
 			std::cout << "Warning, boundary conditions not or badly set, using antiperiodic!" << std::endl;

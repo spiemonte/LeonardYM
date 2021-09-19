@@ -18,7 +18,7 @@ public:
 
 	virtual void execute(environment_t& environment);
 
-	static void registerParameters(po::options_description&);
+	static void registerParameters(std::map<std::string, Option>&);
 
 private:
 	extended_dirac_vector_t randomNoise;

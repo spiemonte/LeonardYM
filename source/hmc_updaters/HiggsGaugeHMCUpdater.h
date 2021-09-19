@@ -4,9 +4,7 @@
 #include "LatticeSweep.h"
 #include "hmc_integrators/Integrate.h"
 #include "HMCUpdater.h"
-#include "actions/AdjointScalarAction.h"
-#include "actions/FundamentalScalarAction.h"
-#include "actions/MultiScalarAction.h"
+#include "actions/ScalarAction.h"
 
 namespace Update {
 
@@ -18,7 +16,7 @@ public:
 
 	virtual void execute(environment_t& environment);
 
-	static void registerParameters(po::options_description& desc);
+	static void registerParameters(std::map<std::string, Option>& desc);
 protected:
         void initializeScalarAction(environment_t& environment);
 
@@ -29,7 +27,7 @@ private:
 	extended_gauge_lattice_t momenta;
 
 	//The scalar action of the theory
-        MultiScalarAction* scalarAction;
+    ScalarAction* scalarAction;
 };
 
 } /* namespace Update */

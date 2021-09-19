@@ -227,21 +227,19 @@ void Eigenvalues::execute(environment_t& environment) {
 
 }
 
-void Eigenvalues::registerParameters(po::options_description& desc) {
-		desc.add_options()
-					("Eigenvalues::mode", po::value<std::string>()->default_value("LR"), "Eigenvalues computed from LargestReal (LR) or SmallestReal (SR)?")
-					("Eigenvalues::use_chebyshev", po::value<std::string>()->default_value("false"), "Use Chebyshev acceleration? Option valid only in the LR mode. (true/false)")
-					("Eigenvalues::chebyshev_left", po::value<double>()->default_value(0.2), "Left interval of the Chebyshev polynomial.")
-					("Eigenvalues::chebyshev_right", po::value<double>()->default_value(7.), "Right interval of the Chebyshev polynomial.")
-					("Eigenvalues::chebyshev_order", po::value<unsigned int>()->default_value(15), "Order of the Chebyshev acceleration. It must be an odd number")
-					("Eigenvalues::hermitian", po::value<std::string>()->default_value("true"), "Eigenvalues of the Hermitian or Non-Hermitian Dirac operator? (true/false)")
-					("Eigenvalues::inverter_precision", po::value<double>()->default_value(0.0000000001), "set the precision used by the inverter")
-					("Eigenvalues::eigensolver_precision", po::value<double>()->default_value(0.0000001), "set the precision used by the eigensolver")
-					("Eigenvalues::number_extra_vectors", po::value<unsigned int>(), "Number of extra vectors for the Arnoldi algorithm used in the computation of the eigenvectors, increase this number to increase precision")
-					("Eigenvalues::maximal_number_restarts_eigensolver", po::value<unsigned int>()->default_value(50), "Maximal number of restarts for the implicitly restarted Arnoldi algorithm")
-					("Eigenvalues::number_eigenvalues", po::value<unsigned int>(), "Number of eigenvalues of the dirac wilson operator to be computed")
-					("Eigenvalues::use_inverse_power_method", po::value<std::string>()->default_value("true"), "Should we use the inverse power method to compute the minimal eigenvalues")
-					;
+void Eigenvalues::registerParameters(std::map<std::string, Option>& desc) {
+	desc["Eigenvalues::mode"] = Option("Eigenvalues::mode", "LR", "Eigenvalues computed from LargestReal (LR) or SmallestReal (SR)?");
+	desc["Eigenvalues::use_chebyshev"] = Option("Eigenvalues::use_chebyshev", "false", "Use Chebyshev acceleration? Option valid only in the LR mode. (true/false)");
+	desc["Eigenvalues::chebyshev_left"] = Option("Eigenvalues::chebyshev_left", 0.2, "Left interval of the Chebyshev polynomial.");
+	desc["Eigenvalues::chebyshev_right"] = Option("Eigenvalues::chebyshev_right", 7.0, "Right interval of the Chebyshev polynomial.");
+	desc["Eigenvalues::chebyshev_order"] = Option("Eigenvalues::chebyshev_order", 15, "Order of the Chebyshev acceleration. It must be an odd number");
+	desc["Eigenvalues::hermitian"] = Option("Eigenvalues::hermitian", "true", "Eigenvalues of the Hermitian or Non-Hermitian Dirac operator? (true/false)");
+	desc["Eigenvalues::inverter_precision"] = Option("Eigenvalues::inverter_precision", 1e-10, "set the precision used by the inverter");
+	desc["Eigenvalues::eigensolver_precision"] = Option("Eigenvalues::eigensolver_precision", 1e-7, "set the precision used by the eigensolver");
+	desc["Eigenvalues::number_extra_vectors"] = Option("Eigenvalues::number_extra_vectors", 30, "Number of extra vectors for the Arnoldi algorithm used in the computation of the eigenvectors, increase this number to increase precision");
+	desc["Eigenvalues::maximal_number_restarts_eigensolver"] = Option("Eigenvalues::maximal_number_restarts_eigensolver", 50, "Maximal number of restarts for the implicitly restarted Arnoldi algorithm");
+	desc["Eigenvalues::number_eigenvalues"] = Option("Eigenvalues::number_eigenvalues", 20, "Number of eigenvalues of the dirac wilson operator to be computed");
+	desc["Eigenvalues::use_inverse_power_method"] = Option("Eigenvalues::use_inverse_power_method", "true", "Should we use the inverse power method to compute the minimal eigenvalues");
 }
 
 } /* namespace Update */

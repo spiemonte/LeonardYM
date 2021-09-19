@@ -168,10 +168,8 @@ void TestSpeedDiracOperators::execute(environment_t& environment) {
 	environment.synchronize();
 }
 
-void TestSpeedDiracOperators::registerParameters(po::options_description& desc) {
-	desc.add_options()
-		("TestSpeedDiracOperators::number_multiplication_test_speed", po::value<unsigned int>(), "How many multiplications should I use in the tests?")
-		;
+void TestSpeedDiracOperators::registerParameters(std::map<std::string, Option>& desc) {
+	desc["TestSpeedDiracOperators::number_multiplication_test_speed"] = Option("TestSpeedDiracOperators::number_multiplication_test_speed", 10, "How many multiplications should I use in the tests?");
 }
 
 } /* namespace Update */

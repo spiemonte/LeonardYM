@@ -321,22 +321,22 @@ long_real_t MaximalAbelianGaugeFixing::functional(const extended_gauge_lattice_t
 	reduceAllSum(result);
 	return result;
 #endif
+	std::cout << "MaximalAbelianGaugeFixing not implemented for NUMCOLORS=" << NUMCOLORS << std::endl;
+	exit(63);
 }
 
-void MaximalAbelianGaugeFixing::registerParameters(po::options_description& desc) {
-	desc.add_options()
-		("MaximalAbelianGaugeFixing::epsilon1", po::value<real_t>()->default_value(0.01), "set the epsilon for the random transformation used by the first PT run")
-		("MaximalAbelianGaugeFixing::epsilon2", po::value<real_t>()->default_value(0.001), "set the epsilon for the random transformation used by the second PT run")
-		("MaximalAbelianGaugeFixing::epsilon3", po::value<real_t>()->default_value(0.0001), "set the epsilon for the random transformation used by the third PT run")
+void MaximalAbelianGaugeFixing::registerParameters(std::map<std::string, Option>& desc) {
+	desc["MaximalAbelianGaugeFixing::epsilon3"] = Option("MaximalAbelianGaugeFixing::epsilon1", 1e-2, "set the epsilon for the random transformation used by the first PT run");
+	desc["MaximalAbelianGaugeFixing::epsilon3"] = Option("MaximalAbelianGaugeFixing::epsilon2", 1e-3, "set the epsilon for the random transformation used by the second PT run");
+	desc["MaximalAbelianGaugeFixing::epsilon3"] = Option("MaximalAbelianGaugeFixing::epsilon3", 1e-4, "set the epsilon for the random transformation used by the third PT run");
 
-		("MaximalAbelianGaugeFixing::beta1", po::value<real_t>()->default_value(5.), "set the beta for the random transformation used by the first PT run")
-		("MaximalAbelianGaugeFixing::beta2", po::value<real_t>()->default_value(1.), "set the beta for the random transformation used by the second PT run")
-		("MaximalAbelianGaugeFixing::beta3", po::value<real_t>()->default_value(0.2), "set the beta for the random transformation used by the third PT run")
+	desc["MaximalAbelianGaugeFixing::beta1"] = Option("MaximalAbelianGaugeFixing::beta1", 5.0, "set the beta for the random transformation used by the first PT run");
+	desc["MaximalAbelianGaugeFixing::beta2"] = Option("MaximalAbelianGaugeFixing::beta2", 1.0, "set the beta for the random transformation used by the second PT run");
+	desc["MaximalAbelianGaugeFixing::beta3"] = Option("MaximalAbelianGaugeFixing::beta3", 0.2, "set the beta for the random transformation used by the third PT run");
 
-		("MaximalAbelianGaugeFixing::steps", po::value<unsigned int>()->default_value(500), "set the number of MC trials")
-		("MaximalAbelianGaugeFixing::local_steps", po::value<unsigned int>()->default_value(4000), "set the number of local MC trials")
-		("MaximalAbelianGaugeFixing::local_steps_phase2", po::value<unsigned int>()->default_value(1000), "set the number of local MC trials")
-		;
+	desc["MaximalAbelianGaugeFixing::steps"] = Option("MaximalAbelianGaugeFixing::steps", 500, "set the number of MC trials");
+	desc["MaximalAbelianGaugeFixing::local_steps"] = Option("MaximalAbelianGaugeFixing::local_steps", 4000, "set the number of local MC trials");
+	desc["MaximalAbelianGaugeFixing::local_steps_phase2"] = Option("MaximalAbelianGaugeFixing::local_steps_phase2", 1000, "set the number of local MC trials");
 }
 
 }

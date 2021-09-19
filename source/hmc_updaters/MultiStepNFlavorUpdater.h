@@ -20,7 +20,7 @@ public:
 
 	virtual void execute(environment_t& environment);
 
-	static void registerParameters(po::options_description& desc);
+	static void registerParameters(std::map<std::string, Option>& desc);
 
 protected:
 	void initializeApproximations(environment_t& environment);

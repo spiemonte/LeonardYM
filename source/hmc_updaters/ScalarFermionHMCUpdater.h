@@ -6,9 +6,7 @@
 #include "scalar_updaters/RandomScalarUpdater.h"
 #include "dirac_functions/RationalApproximation.h"
 #include "actions/NFlavorQCDAction.h"
-#include "actions/AdjointScalarAction.h"
-#include "actions/FundamentalScalarAction.h"
-#include "actions/MultiScalarAction.h"
+#include "actions/ScalarAction.h"
 #include "actions/GaugeAction.h"
 
 #include <vector>
@@ -23,7 +21,7 @@ public:
 
 	virtual void execute(environment_t& environment);
 
-	static void registerParameters(po::options_description& desc);
+	static void registerParameters(std::map<std::string, Option>& desc);
 
 protected:
 	void initializeApproximations(environment_t& environment);
@@ -52,7 +50,7 @@ protected:
 	//The fermion action of the theory
 	NFlavorFermionAction** fermionAction;
 	//The scalar action of the theory
-	MultiScalarAction* scalarAction;
+	ScalarAction* scalarAction;
 	//The dirac operators for the theory
 	DiracOperator* squareDiracOperator;
 	DiracOperator* diracOperator;

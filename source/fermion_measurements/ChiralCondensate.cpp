@@ -20,8 +20,8 @@ void ChiralCondensate::execute(environment_t& environment) {
 	extended_fermion_lattice_t lattice;
 
 	//Smear the configuration if so required
-	try {
-		unsigned int numberLevelSmearing = environment.configurations.get<unsigned int>("ChiralCondensate::levels_stout_smearing");
+	unsigned int numberLevelSmearing = environment.configurations.get<unsigned int>("ChiralCondensate::levels_stout_smearing");
+	if (numberLevelSmearing > 0) {
 		double smearingRho = environment.configurations.get<double>("ChiralCondensate::rho_stout_smearing");
 		StoutSmearing stoutSmearing;
 #ifdef ADJOINT
@@ -33,9 +33,9 @@ void ChiralCondensate::execute(environment_t& environment) {
 		stoutSmearing.spatialSmearing(environment.gaugeLinkConfiguration, lattice, numberLevelSmearing, smearingRho);
 #endif
 		environment.setFermionBc(lattice);
-	} catch (NotFoundOption& ex) {
+	} else {
 		lattice =  environment.getFermionLattice();
-		if (isOutputProcess()) std::cout << "ChiralCondensate::No smearing options found, proceeding without!" << std::endl;
+		if (isOutputProcess()) std::cout << "ChiralCondensate::No smearing!" << std::endl;
 	}
 	
 	//Take the Dirac operator
@@ -50,8 +50,8 @@ void ChiralCondensate::execute(environment_t& environment) {
 	if (inverter == 0) {
 		PreconditionedBiCGStab* p_inverter = new PreconditionedBiCGStab();
 		if (environment.configurations.get<std::string>("ChiralCondensate::use_even_odd_preconditioning") != "true") {
-                        p_inverter->setUseEvenOddPreconditioning(false);
-                }
+            p_inverter->setUseEvenOddPreconditioning(false);
+        }
 		inverter = p_inverter;
 		inverter->setMaximumSteps(environment.configurations.get<unsigned int>("ChiralCondensate::inverter_max_steps"));
 		inverter->setPrecision(environment.configurations.get<real_t>("ChiralCondensate::inverter_precision"));
@@ -160,16 +160,14 @@ void ChiralCondensate::execute(environment_t& environment) {
 	
 }
 
-void ChiralCondensate::registerParameters(po::options_description& desc) {
-	desc.add_options()
-		("ChiralCondensate::number_stochastic_estimators", po::value<unsigned int>()->default_value(20), "The number of stochastic estimators to be used")
-		("ChiralCondensate::inverter_precision", po::value<double>()->default_value(0.0000000001), "set the precision used by the inverter")
-		("ChiralCondensate::inverter_max_steps", po::value<unsigned int>()->default_value(5000), "set the maximum steps used by the inverter")
-		("ChiralCondensate::measure_condensate_connected", po::value<std::string>()->default_value("false"), "Should we measure the connected part of the condensate?")
-		("ChiralCondensate::rho_stout_smearing", po::value<real_t>(), "set the stout smearing parameter")
-		("ChiralCondensate::use_even_odd_preconditioning", po::value<std::string>()->default_value("true"), "use the even odd preconditioning?")
-		("ChiralCondensate::levels_stout_smearing", po::value<unsigned int>(), "levels of stout smearing")
-	;
+void ChiralCondensate::registerParameters(std::map<std::string, Option>& desc) {
+	desc["ChiralCondensate::number_stochastic_estimators"] = Option("ChiralCondensate::number_stochastic_estimators", 20, "The number of stochastic estimators to be used");
+	desc["ChiralCondensate::inverter_precision"] = Option("ChiralCondensate::inverter_precision", 1e-11, "set the precision used by the inverter");
+	desc["ChiralCondensate::inverter_max_steps"] = Option("ChiralCondensate::inverter_max_steps", 5000, "set the maximum steps used by the inverter");
+	desc["ChiralCondensate::measure_condensate_connected"] = Option("ChiralCondensate::measure_condensate_connected", "false", "Should we measure the connected part of the condensate?");
+	desc["ChiralCondensate::rho_stout_smearing"] = Option("ChiralCondensate::rho_stout_smearing", 0.15, "set the stout smearing parameter");
+	desc["ChiralCondensate::use_even_odd_preconditioning"] = Option("ChiralCondensate::use_even_odd_preconditioning", "true", "use the even odd preconditioning?");
+	desc["ChiralCondensate::levels_stout_smearing"] = Option("ChiralCondensate::levels_stout_smearing", 0, "levels of stout smearing");
 }
 
 } /* namespace Update */

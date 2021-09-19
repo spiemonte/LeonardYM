@@ -1,9 +1,6 @@
 #ifndef RANDOMSEED_H_
 #define RANDOMSEED_H_
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/variate_generator.hpp>
-#include <boost/random/uniform_int.hpp>
-#include <boost/random/normal_distribution.hpp>
+#include <random>
 
 
 namespace Update {
@@ -54,6 +51,19 @@ const int mpiseed[] = {
 		499118, 260998, 168212, 194020, 8764, 265167, 200200, 183213, 222851, 186959, 265552, 205540, 186924, 481940, 116130, 128354
 };
 
+template<typename G, typename D> class variate_generator {
+public:
+	variate_generator(G _gen, D _dist) : gen(_gen), dist(_dist) { }
+
+	typename D::result_type operator()() {
+		return dist(gen);
+	}
+
+private:
+	G gen;
+	D dist;
+};
+
 
 class RandomSeed {
 public:
@@ -61,19 +71,19 @@ public:
 	~RandomSeed();
 
 	static int randomSeed();
-	static boost::variate_generator<boost::mt19937&, boost::normal_distribution<> > getNormalNumberGenerator(boost::mt19937& gen, double sd = 1.);
-	static boost::variate_generator<boost::mt19937&, boost::uniform_01<> > getRandomNumberGenerator(boost::mt19937& gen);
-	static boost::variate_generator<boost::mt19937&, boost::uniform_int<> > getRandomIntegerGenerator(boost::mt19937& gen);
+	static variate_generator<std::mt19937&, std::normal_distribution<> > getNormalNumberGenerator(std::mt19937& gen, double sd = 1.);
+	static variate_generator<std::mt19937&, std::uniform_real_distribution<> > getRandomNumberGenerator(std::mt19937& gen);
+	static variate_generator<std::mt19937&, std::uniform_int_distribution<> > getRandomIntegerGenerator(std::mt19937& gen);
 private:
 	static int counter;
-	static boost::mt19937 rng;
-	static boost::uniform_int<> dist;
+	static std::mt19937 rng;
+	static std::uniform_int_distribution<> dist;
 };
 
-typedef boost::mt19937 random_generator_t;
-typedef boost::variate_generator<boost::mt19937&, boost::uniform_01<> > random_uniform_generator_t;
-typedef boost::variate_generator<boost::mt19937&, boost::normal_distribution<> > random_normal_generator_t;
-typedef boost::variate_generator<boost::mt19937&, boost::uniform_int<> > random_integer_generator_t;
+typedef std::mt19937 random_generator_t;
+typedef variate_generator<std::mt19937&, std::uniform_real_distribution<> > random_uniform_generator_t;
+typedef variate_generator<std::mt19937&, std::normal_distribution<> > random_normal_generator_t;
+typedef variate_generator<std::mt19937&, std::uniform_int_distribution<> > random_integer_generator_t;
 
 } /* namespace Update */
 #endif /* RANDOMSEED_H_ */

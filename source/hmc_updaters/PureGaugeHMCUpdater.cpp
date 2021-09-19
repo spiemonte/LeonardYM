@@ -90,7 +90,7 @@ void PureGaugeHMCUpdater::execute(environment_t& environment) {
 #endif
 
 	delete integrate;
-        delete gaugeAction;
+    delete gaugeAction;
 }
 
 } /* namespace Update */

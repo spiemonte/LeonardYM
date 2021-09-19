@@ -1,6 +1,6 @@
 #ifndef GLUINOGLUE_H
 #define GLUINOGLUE_H
-
+#include <map>
 #include "LatticeSweep.h"
 #include "dirac_operators/DiracOperator.h"
 #include "inverters/BiConjugateGradient.h"
@@ -16,7 +16,7 @@ public:
 
 	virtual void execute(environment_t& environment);
 
-	static void registerParameters(po::options_description& desc);
+	static void registerParameters(std::map<std::string, Option>& desc);
 
 private:
 	extended_dirac_vector_t source;

@@ -1,14 +1,16 @@
 #ifndef STORAGEPARAMETERS_H_
 #define STORAGEPARAMETERS_H_
 #include <string>
-#include <boost/program_options.hpp>
+#include <any>
 #include <iostream>
 #include <vector>
 #include <complex>
 #include <sstream>
 #include <exception>
 #include <stdexcept>
+#include <map>
 #include "utils/FromString.h"
+#include "program_options/Option.h"
 
 namespace Update {
 
@@ -20,18 +22,14 @@ public:
 
 namespace implement {
 
-template<typename T> T get(const boost::program_options::variables_map& vm, const std::string& nameOption) {
+template<typename T> T get(const std::map<std::string, Option>& vm, const std::string& nameOption) {
 	if (vm.count(nameOption)) {
 		try {
-			return vm[nameOption].as<T>();
+			return vm.at(nameOption).as<T>();
 		}
-		catch (const boost::bad_any_cast& e) {
+		catch (...) {
 			std::cout << "Error, option " << nameOption << " wrongly specified! (bad type?)" << std::endl;
 			exit(133);
-		}
-		catch (const Update::NotFoundOption& e) {
-			std::cout << "Error, option " << nameOption << " not found!" << std::endl;
-			exit(113);
 		}
 	}
 	else {
@@ -39,20 +37,20 @@ template<typename T> T get(const boost::program_options::variables_map& vm, cons
 	}
 }
 
-template<> std::vector< std::complex<double> > get< std::vector< std::complex<double> > >(const boost::program_options::variables_map& vm, const std::string& nameOption);
+template<> std::vector< std::complex<double> > get< std::vector< std::complex<double> > >(const std::map<std::string, Option>& vm, const std::string& nameOption);
 
-template<> std::vector< double > get< std::vector< double > >(const boost::program_options::variables_map& vm, const std::string& nameOption);
+template<> std::vector< double > get< std::vector< double > >(const std::map<std::string, Option>& vm, const std::string& nameOption);
 
-template<> std::vector< unsigned int > get< std::vector< unsigned int > >(const boost::program_options::variables_map& vm, const std::string& nameOption);
+template<> std::vector< unsigned int > get< std::vector< unsigned int > >(const std::map<std::string, Option>& vm, const std::string& nameOption);
 
-template<> std::vector<std::string> get< std::vector<std::string> >(const boost::program_options::variables_map& vm, const std::string& nameOption);
+template<> std::vector<std::string> get< std::vector<std::string> >(const std::map<std::string, Option>& vm, const std::string& nameOption);
 
 }
 
 class StorageParameters {
 public:
 	StorageParameters();
-	StorageParameters(const boost::program_options::variables_map& _vm);
+	StorageParameters(const std::map<std::string, Option>& _vm);
 	~StorageParameters();
 
 	/**
@@ -69,7 +67,7 @@ public:
 	}
 
 private:
-	boost::program_options::variables_map vm;
+	std::map<std::string, Option> vm;
 };
 
 } /* namespace Update */

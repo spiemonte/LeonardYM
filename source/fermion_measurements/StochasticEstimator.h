@@ -37,6 +37,10 @@ protected:
 
 	void generateSource(extended_dirac_vector_t& vector, int alpha, int c);
 
+#ifdef ENABLE_MPI
+	void generateSource(reduced_dirac_vector_t& vector, int alpha, int c);
+#endif
+
 	void generateMomentumSource(extended_dirac_vector_t& vector, std::vector<real_t> p, int alpha, int c);
 
 	void smearSource(extended_dirac_vector_t& vector, const extended_fermion_lattice_t& lattice, unsigned int levels, const real_t& alpha, int no_smear_dir = 3, const real_t& K = 0.9);

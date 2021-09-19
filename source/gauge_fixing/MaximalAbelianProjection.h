@@ -12,8 +12,6 @@ public:
 	~MaximalAbelianProjection();
 
 	void execute(environment_t& environment);
-
-	static void registerParameters(po::options_description&);
 };
 
 }

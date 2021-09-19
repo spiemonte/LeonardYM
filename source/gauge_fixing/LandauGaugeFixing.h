@@ -17,7 +17,7 @@ public:
 
 	void generateOverrelaxationTransformation(extended_matrix_lattice_t& gauge_transformation, const extended_gauge_lattice_t& lattice, int d);
 
-	static void registerParameters(po::options_description&);
+	static void registerParameters(std::map<std::string, Option>&);
 protected:
 	long_real_t functional(const extended_gauge_lattice_t& lattice);
 

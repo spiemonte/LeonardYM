@@ -247,23 +247,21 @@ void NPRVertex::execute(environment_t& environment) {
 	if (inverter) delete inverter;
 }
 
-void NPRVertex::registerParameters(po::options_description& desc) {
-	desc.add_options()
-		("NPRVertex::inverter_precision", po::value<double>()->default_value(0.000000000001), "set the precision used by the inverter")
-		("NPRVertex::inverter_max_steps", po::value<unsigned int>()->default_value(5000), "set the maximum steps used by the inverter")
-		("NPRVertex::momentum", po::value<std::string>()->default_value("{2,2,2,2}"), "Momentum for the measure of the vertex function (syntax: {px,py,pz,pt})")
+void NPRVertex::registerParameters(std::map<std::string, Option>& desc) {
+	desc["NPRVertex::inverter_precision"] = Option("NPRVertex::inverter_precision", 1e-11, "set the precision used by the inverter");
+	desc["NPRVertex::inverter_max_steps"] = Option("NPRVertex::inverter_max_steps", 10000, "set the maximum steps used by the inverter");
+	desc["NPRVertex::momentum"] = Option("NPRVertex::momentum", "{2,2,2,2}", "Momentum for the measure of the vertex function (syntax: {px,py,pz,pt})");
 		
-		("NPRVertex::multigrid", po::value<std::string>()->default_value("false"), "Should we use the multigrid inverter? true/false")
-		("NPRVertex::multigrid_basis_dimension", po::value<unsigned int>()->default_value(20), "The dimension of the basis for multigrid")
-		("NPRVertex::multigrid_block_size", po::value<std::string>()->default_value("{4,4,4,4}"), "Block size for Multigrid (syntax: {bx,by,bz,bt})")
+	desc["NPRVertex::multigrid"] = Option("NPRVertex::multigrid", "false", "Should we use the multigrid inverter? true/false");
+	desc["NPRVertex::multigrid_basis_dimension"] = Option("NPRVertex::multigrid_basis_dimension", 20, "The dimension of the basis for multigrid");
+	desc["NPRVertex::multigrid_block_size"] = Option("NPRVertex::multigrid_block_size", "{4,4,4,4}", "Block size for Multigrid (syntax: {bx,by,bz,bt})");
 
-		("NPRVertex::sap_block_size", po::value<std::string>()->default_value("{4,4,4,4}"), "Block size for SAP (syntax: {bx,by,bz,bt})")
-		("NPRVertex::sap_iterations", po::value<unsigned int>()->default_value(5), "The number of sap iterations")
-		("NPRVertex::sap_inverter_precision", po::value<double>()->default_value(0.00000000001), "The precision of the inner SAP inverter")
-		("NPRVertex::sap_inverter_max_steps", po::value<unsigned int>()->default_value(100), "The maximum number of steps for the inner SAP inverter")
-		("NPRVertex::gmres_inverter_precision", po::value<double>()->default_value(0.00000000001), "The precision of the GMRES inverter used to initialize the multigrid basis")
-		("NPRVertex::gmres_inverter_max_steps", po::value<unsigned int>()->default_value(100), "The maximum number of steps for the GMRES inverter used to initialize the multigrid basis")
-		;
+	desc["NPRVertex::sap_block_size"] = Option("NPRVertex::sap_block_size", "{4,4,4,4}", "Block size for SAP (syntax: {bx,by,bz,bt})");
+	desc["NPRVertex::sap_iterations"] = Option("NPRVertex::sap_iterations", 5, "The number of sap iterations");
+	desc["NPRVertex::sap_inverter_precision"] = Option("NPRVertex::sap_inverter_precision", 0.00000000001, "The precision of the inner SAP inverter");
+	desc["NPRVertex::sap_inverter_max_steps"] = Option("NPRVertex::sap_inverter_max_steps", 100, "The maximum number of steps for the inner SAP inverter");
+	desc["NPRVertex::gmres_inverter_precision"] = Option("NPRVertex::gmres_inverter_precision", 0.00000000001, "The precision of the GMRES inverter used to initialize the multigrid basis");
+	desc["NPRVertex::gmres_inverter_max_steps"] = Option("NPRVertex::gmres_inverter_max_steps", 100, "The maximum number of steps for the GMRES inverter used to initialize the multigrid basis");
 }
 
 } /* namespace Update */

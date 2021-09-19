@@ -16,7 +16,7 @@ public:
 
 	virtual void execute(environment_t& environment);
 
-	static void registerParameters(po::options_description& desc);
+	static void registerParameters(std::map<std::string, Option>& desc);
 
 	void chiral_rotation_psibar(DiracOperator* dirac, const reduced_dirac_vector_t& input, reduced_dirac_vector_t& output, unsigned int steps, const std::complex<real_t>& theta) const;
 	void chiral_rotation_psi(DiracOperator* dirac, const reduced_dirac_vector_t& input, reduced_dirac_vector_t& output, unsigned int steps, const std::complex<real_t>& theta) const;

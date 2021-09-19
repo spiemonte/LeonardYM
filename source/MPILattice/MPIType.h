@@ -74,17 +74,29 @@ template<> class MpiType<Update::FundamentalVector> {
                 static MPI_Datatype type;
 };
 
-template<> class MpiType<Update::AdjointVector> {
-        public:
-                static const int size = 8;
-                static MPI_Datatype type;
-};
-
-template<> class MpiType<Update::AdjointVector[4]> {
+template<> class MpiType<Update::AdjointRealVector> {
 	public:
 		static const int size = 8;
 		static MPI_Datatype type;
 };
+
+template<> class MpiType<Update::AdjointRealVector[4]> {
+	public:
+		static const int size = 8;
+		static MPI_Datatype type;
+};
+
+template<> class MpiType<Update::AdjointComplexVector> {
+	public:
+		static const int size = 8;
+		static MPI_Datatype type;
+};
+
+template<> class MpiType<Update::AdjointComplexVector[4]> {
+	public:
+		static const int size = 8;
+		static MPI_Datatype type;
+}; 
 
 template<> class MpiType<Update::single_FundamentalVector[4]> {
 	public:

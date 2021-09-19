@@ -277,23 +277,21 @@ long_real_t LandauGaugeFixing::deviation(const extended_gauge_lattice_t& lattice
 	return convergence/static_cast<real_t>(Layout::globalVolume);
 }
 
-void LandauGaugeFixing::registerParameters(po::options_description& desc) {
-	desc.add_options()
-		("LandauGaugeFixing::epsilon1", po::value<real_t>()->default_value(0.000001), "set the epsilon for the random transformation used by the first PT run")
-		("LandauGaugeFixing::epsilon2", po::value<real_t>()->default_value(0.00000001), "set the epsilon for the random transformation used by the second PT run")
-		("LandauGaugeFixing::epsilon3", po::value<real_t>()->default_value(0.00000000001), "set the epsilon for the random transformation used by the third PT run")
+void LandauGaugeFixing::registerParameters(std::map<std::string, Option>& desc) {
+	desc["LandauGaugeFixing::epsilon1"] = Option("LandauGaugeFixing::epsilon1", 1e-5, "set the epsilon for the random transformation used by the first PT run");
+	desc["LandauGaugeFixing::epsilon2"] = Option("LandauGaugeFixing::epsilon2", 1e-7, "set the epsilon for the random transformation used by the second PT run");
+	desc["LandauGaugeFixing::epsilon2"] = Option("LandauGaugeFixing::epsilon3", 1e-9, "set the epsilon for the random transformation used by the third PT run");
 
-		("LandauGaugeFixing::beta1", po::value<real_t>()->default_value(5.), "set the beta for the random transformation used by the first PT run")
-		("LandauGaugeFixing::beta2", po::value<real_t>()->default_value(1.), "set the beta for the random transformation used by the second PT run")
-		("LandauGaugeFixing::beta3", po::value<real_t>()->default_value(0.2), "set the beta for the random transformation used by the third PT run")
+	desc["LandauGaugeFixing::beta1"] = Option("LandauGaugeFixing::beta1", 5.0, "set the beta for the random transformation used by the first PT run");
+	desc["LandauGaugeFixing::beta2"] = Option("LandauGaugeFixing::beta2", 1.0, "set the beta for the random transformation used by the second PT run");
+	desc["LandauGaugeFixing::beta3"] = Option("LandauGaugeFixing::beta3", 0.2, "set the beta for the random transformation used by the third PT run");
 
-		("LandauGaugeFixing::steps", po::value<unsigned int>()->default_value(500), "set the number of MC trials")
-		("LandauGaugeFixing::local_steps", po::value<unsigned int>()->default_value(3000), "set the number of local over-relaxation trials")
-		("LandauGaugeFixing::final_steps", po::value<unsigned int>()->default_value(3000), "set the number of final local over-relaxation trials")
-		("LandauGaugeFixing::precision", po::value<real_t>()->default_value(0.000000000001), "Set the covergence precision")
-		("LandauGaugeFixing::output_steps", po::value<unsigned int>()->default_value(100), "Set the step to monitor the output")
-		("LandauGaugeFixing::number_copies", po::value<unsigned int>()->default_value(5), "Set the of copies of maxima to use to search the global maximum")
-		;
+	desc["LandauGaugeFixing::steps"] = Option("LandauGaugeFixing::steps", 500, "set the number of MC trials");
+	desc["LandauGaugeFixing::local_steps"] = Option("LandauGaugeFixing::local_steps", 3000, "set the number of local over-relaxation trials");
+	desc["LandauGaugeFixing::final_steps"] = Option("LandauGaugeFixing::final_steps", 3000, "set the number of final local over-relaxation trials");
+	desc["LandauGaugeFixing::precision"] = Option("LandauGaugeFixing::precision", 1e-12, "Set the covergence precision");
+	desc["LandauGaugeFixing::output_steps"] = Option("LandauGaugeFixing::output_steps", 100, "Set the step to monitor the output");
+	desc["LandauGaugeFixing::number_copies"] = Option("LandauGaugeFixing::number_copies", 5, "Set the of copies of maxima to use to search the global maximum");
 }
 
 }

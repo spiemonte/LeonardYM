@@ -24,113 +24,102 @@
 
 namespace Update {
 
-ScalarFermionHMCUpdater::ScalarFermionHMCUpdater() : LatticeSweep(), nFlavorQCDAction(0), gaugeAction(0), fermionAction(0), scalarAction(0), squareDiracOperator(0), diracOperator(0), multishiftSolver(0) { }
+	ScalarFermionHMCUpdater::ScalarFermionHMCUpdater() : LatticeSweep(), nFlavorQCDAction(0), gaugeAction(0), fermionAction(0), scalarAction(0), squareDiracOperator(0), diracOperator(0), multishiftSolver(0) { }
 
-ScalarFermionHMCUpdater::ScalarFermionHMCUpdater(const ScalarFermionHMCUpdater& toCopy) : LatticeSweep(toCopy), nFlavorQCDAction(0), gaugeAction(0), fermionAction(0), scalarAction(0), squareDiracOperator(0), diracOperator(0), multishiftSolver(0) { }
+	ScalarFermionHMCUpdater::ScalarFermionHMCUpdater(const ScalarFermionHMCUpdater& toCopy) : LatticeSweep(toCopy), nFlavorQCDAction(0), gaugeAction(0), fermionAction(0), scalarAction(0), squareDiracOperator(0), diracOperator(0), multishiftSolver(0) { }
 
-ScalarFermionHMCUpdater::~ScalarFermionHMCUpdater() {
-	if (scalarAction != 0) delete scalarAction;
-	if (nFlavorQCDAction != 0) delete nFlavorQCDAction;
-	if (multishiftSolver != 0) delete multishiftSolver;
-}
+	ScalarFermionHMCUpdater::~ScalarFermionHMCUpdater() {
+		if (scalarAction != 0) delete scalarAction;
+		if (nFlavorQCDAction != 0) delete nFlavorQCDAction;
+		if (multishiftSolver != 0) delete multishiftSolver;
+	}
 
-void ScalarFermionHMCUpdater::initializeApproximations(environment_t& environment) {
-	double twist = 0;
-	try {
-		twist = environment.configurations.get<double>("ScalarFermionHMCUpdater::twist");
-	} catch(NotFoundOption) {
+	void ScalarFermionHMCUpdater::initializeApproximations(environment_t& environment) {
+		double twist = environment.configurations.get<double>("ScalarFermionHMCUpdater::twist");
 		
-	}
-	if (isOutputProcess()) std::cout << "ScalarFermionHMCUpdater::Using twist " << twist << std::endl;	
+		if (isOutputProcess()) std::cout << "ScalarFermionHMCUpdater::Using twist " << twist << std::endl;	
 
-	if (multishiftSolver == 0) {
-		multishiftSolver = MultishiftSolver::getInstance("minimal_residual");
-	}
+		if (multishiftSolver == 0) {
+			multishiftSolver = MultishiftSolver::getInstance("minimal_residual");
+		}
 
 	//First take the rational function approximation for the heatbath step
-	if (rationalApproximationsHeatBath.empty()) {
-		int numberPseudofermions = environment.configurations.get< unsigned int >("number_pseudofermions");
-		for (int i = 1; i <= numberPseudofermions; ++i) {
-			std::vector<real_t> rat = environment.configurations.get< std::vector<real_t> >(std::string("heatbath_rational_fraction_")+toString(i));
-			RationalApproximation rational(multishiftSolver);
-			rational.setAlphas(std::vector<real_t>(rat.begin(), rat.begin() + rat.size()/2));
-			rational.setBetas(std::vector<real_t>(rat.begin() + rat.size()/2, rat.end()));
-			//We apply the twist
-			for (unsigned int k = 0; k < rational.getBetas().size(); ++k) {
-				rational.getBetas()[k] += twist;
-			}
-			rational.setPrecision(environment.configurations.get<double>("metropolis_inverter_precision"));
-			rational.setMaximumRecursion(environment.configurations.get<unsigned int>("metropolis_inverter_max_steps"));
-			rationalApproximationsHeatBath.push_back(rational);
-		}
-		pseudofermions.resize(numberPseudofermions);
-	}
-
-	//Then take the rational function approximation for the metropolis step
-	if (rationalApproximationsMetropolis.empty()) {
-		int numberPseudofermions = environment.configurations.get< unsigned int >("number_pseudofermions");
-		for (int i = 1; i <= numberPseudofermions; ++i) {
-			std::vector<real_t> rat = environment.configurations.get< std::vector<real_t> >(std::string("metropolis_rational_fraction_")+toString(i));
-			RationalApproximation rational(multishiftSolver);
-			rational.setAlphas(std::vector<real_t>(rat.begin(), rat.begin() + rat.size()/2));
-			rational.setBetas(std::vector<real_t>(rat.begin() + rat.size()/2, rat.end()));
-			//We apply the twist
-			for (unsigned int k = 0; k < rational.getBetas().size(); ++k) {
-				rational.getBetas()[k] += twist;
-			}
-			rational.setPrecision(environment.configurations.get<double>("metropolis_inverter_precision"));
-			rational.setMaximumRecursion(environment.configurations.get<unsigned int>("metropolis_inverter_max_steps"));
-			rationalApproximationsMetropolis.push_back(rational);
-		}
-	}
-
-	//We allow the usage of different precision for different level
-	int numberLevels = environment.configurations.get< unsigned int >("number_force_levels");
-	real_t level_precisions[numberLevels];
-	try {
-		for (int i = 1; i <= numberLevels; ++i) {
-			level_precisions[i-1] = environment.configurations.get<double>(std::string("force_inverter_precision_level_")+toString(i));
-		}
-	} catch (NotFoundOption& ex) {
-		for (int i = 1; i <= numberLevels; ++i) {
-			level_precisions[i-1] = environment.configurations.get<double>("force_inverter_precision");
-		}
-		if (isOutputProcess()) std::cout << "ScalarFermionHMCUpdater::Warning, a single precision is provided for all the level of the force!" << std::endl;
-	}
-
-	//Then take the rational function approximation for the force step
-	if (rationalApproximationsForce.empty()) {
-
-		for (int i = 1; i <= numberLevels; ++i) {
+		if (rationalApproximationsHeatBath.empty()) {
 			int numberPseudofermions = environment.configurations.get< unsigned int >("number_pseudofermions");
-			std::vector<RationalApproximation> levelRationaApproximationForce;
-			for (int j = 1; j <= numberPseudofermions; ++j) {
-				std::vector<real_t> rat = environment.configurations.get< std::vector<real_t> >(std::string("force_rational_fraction_")+toString(j)+"_level_"+toString(i));
+			for (int i = 1; i <= numberPseudofermions; ++i) {
+				std::vector<real_t> rat = environment.configurations.get< std::vector<real_t> >(std::string("heatbath_rational_fraction_")+toString(i));
 				RationalApproximation rational(multishiftSolver);
 				rational.setAlphas(std::vector<real_t>(rat.begin(), rat.begin() + rat.size()/2));
 				rational.setBetas(std::vector<real_t>(rat.begin() + rat.size()/2, rat.end()));
-				//We apply the twist
+			//We apply the twist
 				for (unsigned int k = 0; k < rational.getBetas().size(); ++k) {
 					rational.getBetas()[k] += twist;
 				}
-				rational.setPrecision(level_precisions[i - 1]);
-				rational.setMaximumRecursion(environment.configurations.get<unsigned int>("force_inverter_max_steps"));
-				levelRationaApproximationForce.push_back(rational);
+				rational.setPrecision(environment.configurations.get<double>("metropolis_inverter_precision"));
+				rational.setMaximumRecursion(environment.configurations.get<unsigned int>("metropolis_inverter_max_steps"));
+				rationalApproximationsHeatBath.push_back(rational);
 			}
-			rationalApproximationsForce.push_back(levelRationaApproximationForce);
+			pseudofermions.resize(numberPseudofermions);
+		}
+
+	//Then take the rational function approximation for the metropolis step
+		if (rationalApproximationsMetropolis.empty()) {
+			int numberPseudofermions = environment.configurations.get< unsigned int >("number_pseudofermions");
+			for (int i = 1; i <= numberPseudofermions; ++i) {
+				std::vector<real_t> rat = environment.configurations.get< std::vector<real_t> >(std::string("metropolis_rational_fraction_")+toString(i));
+				RationalApproximation rational(multishiftSolver);
+				rational.setAlphas(std::vector<real_t>(rat.begin(), rat.begin() + rat.size()/2));
+				rational.setBetas(std::vector<real_t>(rat.begin() + rat.size()/2, rat.end()));
+			//We apply the twist
+				for (unsigned int k = 0; k < rational.getBetas().size(); ++k) {
+					rational.getBetas()[k] += twist;
+				}
+				rational.setPrecision(environment.configurations.get<double>("metropolis_inverter_precision"));
+				rational.setMaximumRecursion(environment.configurations.get<unsigned int>("metropolis_inverter_max_steps"));
+				rationalApproximationsMetropolis.push_back(rational);
+			}
+		}
+
+	//We allow the usage of different precision for different level
+		int numberLevels = environment.configurations.get< unsigned int >("number_force_levels");
+		real_t level_precisions[numberLevels];
+		for (int i = 1; i <= numberLevels; ++i) {
+			level_precisions[i-1] = environment.configurations.get<double>(std::string("force_inverter_precision_level_")+toString(i));
+		}
+
+	//Then take the rational function approximation for the force step
+		if (rationalApproximationsForce.empty()) {
+
+			for (int i = 1; i <= numberLevels; ++i) {
+				int numberPseudofermions = environment.configurations.get< unsigned int >("number_pseudofermions");
+				std::vector<RationalApproximation> levelRationaApproximationForce;
+				for (int j = 1; j <= numberPseudofermions; ++j) {
+					std::vector<real_t> rat = environment.configurations.get< std::vector<real_t> >(std::string("force_rational_fraction_")+toString(j)+"_level_"+toString(i));
+					RationalApproximation rational(multishiftSolver);
+					rational.setAlphas(std::vector<real_t>(rat.begin(), rat.begin() + rat.size()/2));
+					rational.setBetas(std::vector<real_t>(rat.begin() + rat.size()/2, rat.end()));
+				//We apply the twist
+					for (unsigned int k = 0; k < rational.getBetas().size(); ++k) {
+						rational.getBetas()[k] += twist;
+					}
+					rational.setPrecision(level_precisions[i - 1]);
+					rational.setMaximumRecursion(environment.configurations.get<unsigned int>("force_inverter_max_steps"));
+					levelRationaApproximationForce.push_back(rational);
+				}
+				rationalApproximationsForce.push_back(levelRationaApproximationForce);
+			}
 		}
 	}
-}
 
-void ScalarFermionHMCUpdater::checkTheory(const environment_t& environment) const {
-	double testerForce = 1., testerMetropolis = 1., testerHeatBath = 1.;
-	double epsilon = 0.0001;
-	int numberPseudofermions = environment.configurations.get< unsigned int >("number_pseudofermions");
-	for (int i = 0; i < numberPseudofermions; ++i) {
-		testerForce *= rationalApproximationsForce[0][i].evaluate(2.).real();
-		testerMetropolis *= rationalApproximationsMetropolis[i].evaluate(2.).real();
-		testerHeatBath *= rationalApproximationsHeatBath[i].evaluate(2.).real();
-	}
+	void ScalarFermionHMCUpdater::checkTheory(const environment_t& environment) const {
+		double testerForce = 1., testerMetropolis = 1., testerHeatBath = 1.;
+		double epsilon = 0.0001;
+		int numberPseudofermions = environment.configurations.get< unsigned int >("number_pseudofermions");
+		for (int i = 0; i < numberPseudofermions; ++i) {
+			testerForce *= rationalApproximationsForce[0][i].evaluate(2.).real();
+			testerMetropolis *= rationalApproximationsMetropolis[i].evaluate(2.).real();
+			testerHeatBath *= rationalApproximationsHeatBath[i].evaluate(2.).real();
+		}
 	double numberFermions = -2*log(testerMetropolis)/log(2.);//We are using the square of the dirac operator, hence we have a factor 2
 	if (isOutputProcess()) std::cout << "ScalarFermionHCMUpdater::The theory has " <<  numberFermions << " fermions." << std::endl;
 #ifdef ADJOINT
@@ -153,35 +142,24 @@ void ScalarFermionHMCUpdater::initializeScalarAction(environment_t& environment)
 	unsigned int nf = environment.configurations.get<unsigned int>("fundamental_nf_scalars");
 
 	if (scalarAction == 0 ) {
-		scalarAction = new MultiScalarAction();
-		if (aNf != 0) {
-                	double mu = environment.configurations.get<double>("ScalarFermionHMCUpdater::adjoint_scalar_mass");
-                	double lambda = environment.configurations.get<double>("ScalarFermionHMCUpdater::adjoint_quartic_coupling");
-			double lambda_8 = environment.configurations.get<double>("ScalarFermionHMCUpdater::adjoint_adjoint_quartic_coupling");
+		double adjoint_scalar_mass = environment.configurations.get<double>("ScalarFermionHMCUpdater::adjoint_scalar_mass");
+		double fundamental_scalar_mass = environment.configurations.get<double>("ScalarFermionHMCUpdater::fundamental_scalar_mass");
+		double lambda_adjoint = environment.configurations.get<double>("ScalarFermionHMCUpdater::adjoint_quartic_coupling");
+		double lambda_fundamental = environment.configurations.get<double>("ScalarFermionHMCUpdater::fundamental_quartic_coupling");
+		double lambda_8 = environment.configurations.get<double>("ScalarFermionHMCUpdater::lambda_8");
+		double lambda_mixed = environment.configurations.get<double>("ScalarFermionHMCUpdater::lambda_mixed");
 
-                	AdjointScalarAction* adjointScalarAction = new AdjointScalarAction(mu, lambda, lambda_8);
+		scalarAction = new ScalarAction(adjoint_scalar_mass, fundamental_scalar_mass, lambda_fundamental, lambda_adjoint, lambda_mixed, lambda_8);
+	}
 
-			scalarAction->addAction(adjointScalarAction);
-		}
-		if (nf != 0) {
-			double mu = environment.configurations.get<double>("ScalarFermionHMCUpdater::fundamental_scalar_mass");
-                        double lambda = environment.configurations.get<double>("ScalarFermionHMCUpdater::fundamental_quartic_coupling");
-			double lambda_8 = environment.configurations.get<double>("ScalarFermionHMCUpdater::fundamental_adjoint_quartic_coupling");
-
-                        FundamentalScalarAction* fundamentalScalarAction = new FundamentalScalarAction(mu, lambda, lambda_8);
-
-                        scalarAction->addAction(fundamentalScalarAction);
-		}
-        }
-
-        if (environment.adjoint_scalar_fields.size() != aNf) {
-                if (isOutputProcess()) std::cout << "ScalarFermionHMCUpdater::Error, adjoint scalar fields not initialized, set " << aNf << ", but now " << environment.adjoint_scalar_fields.size() << std::endl;
+	if (environment.adjoint_scalar_fields.size() != aNf) {
+		if (isOutputProcess()) std::cout << "ScalarFermionHMCUpdater::Error, adjoint scalar fields not initialized, set " << aNf << ", but now " << environment.adjoint_scalar_fields.size() << std::endl;
 		exit(97);
-        }
+	}
 	if (environment.fundamental_scalar_fields.size() != nf) {
-                if (isOutputProcess()) std::cout << "ScalarFermionHMCUpdater::Error, fundamental scalar fields not initialized, set " << nf << ", but now " << environment.fundamental_scalar_fields.size() << std::endl;
-                exit(97);
-        }
+		if (isOutputProcess()) std::cout << "ScalarFermionHMCUpdater::Error, fundamental scalar fields not initialized, set " << nf << ", but now " << environment.fundamental_scalar_fields.size() << std::endl;
+		exit(97);
+	}
 }
 
 void ScalarFermionHMCUpdater::execute(environment_t& environment) {
@@ -226,32 +204,27 @@ void ScalarFermionHMCUpdater::execute(environment_t& environment) {
 
 
 		if (i == pseudofermions.begin()) {
-			try {
-				std::string flag = environment.configurations.get<std::string>("check_rational_approximations");
+			std::string flag = environment.configurations.get<std::string>("check_rational_approximations");
 
-				if (environment.sweep == 0 && environment.iteration == 0 && flag == "true") {
-					//Now we test the correctness of rational/heatbath
-					long_real_t test = 0.;
+			if (environment.sweep == 0 && environment.iteration == 0 && flag == "true") {
+				//Now we test the correctness of rational/heatbath
+				long_real_t test = 0.;
 
-					//Now we use the better approximation for the metropolis step
-					std::vector<RationalApproximation>::iterator rational = rationalApproximationsMetropolis.begin();
-					//Now we evaluate it with the rational approximation of the inverse
-					rational->evaluate(squareDiracOperator,tmp_pseudofermion,*i);
-					test += real(AlgebraUtils::dot(*i,tmp_pseudofermion));
-					if (isOutputProcess()) std::cout << "NFlavoQCDUpdater::Consistency check for the metropolis: " << test - oldPseudoFermionEnergy << std::endl;
+				//Now we use the better approximation for the metropolis step
+				std::vector<RationalApproximation>::iterator rational = rationalApproximationsMetropolis.begin();
+				//Now we evaluate it with the rational approximation of the inverse
+				rational->evaluate(squareDiracOperator,tmp_pseudofermion,*i);
+				test += real(AlgebraUtils::dot(*i,tmp_pseudofermion));
+				if (isOutputProcess()) std::cout << "NFlavoQCDUpdater::Consistency check for the metropolis: " << test - oldPseudoFermionEnergy << std::endl;
 
-					//Now we use the approximation for the force step
-					rational = rationalApproximationsForce[0].begin();
-					test = 0.;
-					//Now we evaluate it with the rational approximation of the inverse
-					rational->evaluate(squareDiracOperator,tmp_pseudofermion,*i);
-					test += real(AlgebraUtils::dot(*i,tmp_pseudofermion));
+				//Now we use the approximation for the force step
+				rational = rationalApproximationsForce[0].begin();
+				test = 0.;
+				//Now we evaluate it with the rational approximation of the inverse
+				rational->evaluate(squareDiracOperator,tmp_pseudofermion,*i);
+				test += real(AlgebraUtils::dot(*i,tmp_pseudofermion));
 
-					if (isOutputProcess()) std::cout << "NFlavoQCDUpdater::Consistency check for the first level of the force: " << test - oldPseudoFermionEnergy << std::endl;
-				}
-
-			} catch (NotFoundOption& ex) {
-				if (isOutputProcess() && environment.sweep == 0 && environment.iteration == 0 && environment.measurement) std::cout << "NFlavorQCDUpdater::No consistency check of metropolis/force approximations!" << std::endl;
+				if (isOutputProcess()) std::cout << "NFlavoQCDUpdater::Consistency check for the first level of the force: " << test - oldPseudoFermionEnergy << std::endl;
 			}
 		}
 
@@ -314,14 +287,14 @@ void ScalarFermionHMCUpdater::execute(environment_t& environment) {
 		forces.push_back(scalarAction);
 		forces.push_back(gaugeAction);
 	} else if (numbers_steps.size() == 5) {
-                int numberLevels = environment.configurations.get< unsigned int >("number_force_levels");
-                if (isOutputProcess() && numberLevels != 3) std::cout << "MultiStepNFlavorHMCUpdater::Warning, with only four time integration only the first two levels of the force is used!" << std::endl;
+		int numberLevels = environment.configurations.get< unsigned int >("number_force_levels");
+		if (isOutputProcess() && numberLevels != 3) std::cout << "MultiStepNFlavorHMCUpdater::Warning, with only four time integration only the first two levels of the force is used!" << std::endl;
 		forces.push_back(fermionAction[2]);
-                forces.push_back(fermionAction[1]);
-                forces.push_back(fermionAction[0]);
-                forces.push_back(scalarAction);
-                forces.push_back(gaugeAction);
-        }
+		forces.push_back(fermionAction[1]);
+		forces.push_back(fermionAction[0]);
+		forces.push_back(scalarAction);
+		forces.push_back(gaugeAction);
+	}
 	else {
 		if (isOutputProcess()) std::cout << "FermionScalarUpdater::Warning, NFlavor does not support more than four time or only one integration step!" << std::endl;
 		numbers_steps.resize(1);
@@ -397,20 +370,17 @@ void ScalarFermionHMCUpdater::execute(environment_t& environment) {
 	delete integrate;
 }
 
-void ScalarFermionHMCUpdater::registerParameters(po::options_description& desc) {
-	static bool single = true;
-	if (single) desc.add_options()
-		("ScalarFermionHMCUpdater::adjoint_scalar_mass", po::value<double>()->default_value(0.0), "set the value of the adjoint scalar mass m*m")
-		("ScalarFermionHMCUpdater::adjoint_quartic_coupling", po::value<double>()->default_value(0.0), "set the value of the adjoint quartic coupling lambda")
-		("ScalarFermionHMCUpdater::adjoint_adjoint_quartic_coupling", po::value<double>()->default_value(0.0), "set the value of the adjoint quartic coupling lambda")
-		("ScalarFermionHMCUpdater::fundamental_scalar_mass", po::value<double>()->default_value(0.0), "set the value of the adjoint scalar mass m*m")
-                ("ScalarFermionHMCUpdater::fundamental_quartic_coupling", po::value<double>()->default_value(0.0), "set the value of the adjoint quartic coupling lambda")
-		("ScalarFermionHMCUpdater::fundamental_adjoint_quartic_coupling", po::value<double>()->default_value(0.0), "set the value of the adjoint quartic coupling lambda")
-		("ScalarFermionHMCUpdater::twist", po::value<double>()->default_value(0.0), "set the value of the twist applied to fermions")
-		("ScalarFermionHMCUpdater::inverter_precision", po::value<double>()->default_value(0.0000000001), "set the precision used by the inverter")
-		("ScalarFermionHMCUpdater::inverter_max_steps", po::value<unsigned int>()->default_value(5000), "set the maximum steps used by the inverter")
-		;
-	single = false;
+void ScalarFermionHMCUpdater::registerParameters(std::map<std::string, Option>& desc) {
+	desc["ScalarFermionHMCUpdater::adjoint_scalar_mass"] = Option("ScalarFermionHMCUpdater::adjoint_scalar_mass", 0.0, "set the value of the adjoint scalar mass m*m");
+	desc["ScalarFermionHMCUpdater::fundamental_scalar_mass"] = Option("ScalarFermionHMCUpdater::fundamental_scalar_mass", 0.0, "set the value of the fundamental scalar mass m*m");
+
+	desc["ScalarFermionHMCUpdater::adjoint_quartic_coupling"] = Option("ScalarFermionHMCUpdater::adjoint_quartic_coupling", 0.0, "set the value of the adjoint quartic coupling lambda");
+	desc["ScalarFermionHMCUpdater::fundamental_quartic_coupling"] = Option("ScalarFermionHMCUpdater::fundamental_quartic_coupling", 0.0, "set the value of the fundamental quartic coupling lambda");
+
+	desc["ScalarFermionHMCUpdater::lambda_8"] = Option("ScalarFermionHMCUpdater::lambda_8", 0.0, "set the value of the adjoint quartic coupling lambda");
+	desc["ScalarFermionHMCUpdater::lambda_mixed"] = Option("ScalarFermionHMCUpdater::lambda_mixed", 0.0, "set the value of the mixed quartic coupling lambda");	desc["ScalarFermionHMCUpdater::twist"] = Option("ScalarFermionHMCUpdater::twist", 0.0, "set the value of the twist applied to fermions");
+	desc["ScalarFermionHMCUpdater::inverter_precision"] = Option("ScalarFermionHMCUpdater::inverter_precision", 1e-11, "set the precision used by the inverter");
+	desc["ScalarFermionHMCUpdater::inverter_max_steps"]	= Option("ScalarFermionHMCUpdater::inverter_max_steps", 10000, "set the maximum steps used by the inverter");
 }
 
 } /* namespace Update */

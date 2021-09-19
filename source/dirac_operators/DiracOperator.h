@@ -6,8 +6,6 @@
 
 #include <string>
 
-namespace po = boost::program_options;
-
 namespace Update {
 
 class DiracOperator {
@@ -19,7 +17,7 @@ public:
 	static DiracOperator* getSquareRoot(DiracOperator* dirac);
 	static DiracOperator* getSquare(DiracOperator* dirac);
 
-	static void registerParameters(po::options_description& desc, const std::string& basename);
+	static void registerParameters(std::map<std::string, Option>& desc, const std::string& basename);
 	
 #ifdef ENABLE_MPI
 	void multiply(standard_dirac_vector_t& output, const standard_dirac_vector_t& input) {

@@ -4,15 +4,15 @@ namespace Update {
 
 StorageParameters::StorageParameters() { }
 
-StorageParameters::StorageParameters(const boost::program_options::variables_map& _vm) : vm(_vm) { }
+StorageParameters::StorageParameters(const std::map<std::string, Option>& _vm) : vm(_vm) { }
 
 StorageParameters::~StorageParameters() { }
 
 namespace implement {
 
-template<> std::vector<std::string> get< std::vector<std::string> >(const boost::program_options::variables_map& vm, const std::string& nameOption) {
+template<> std::vector<std::string> get< std::vector<std::string> >(const std::map<std::string, Option>& vm, const std::string& nameOption) {
 	if (vm.count(nameOption)) {
-		std::string toRead = vm[nameOption].as<std::string>();
+		std::string toRead = vm.at(nameOption).as<std::string>();
 		std::vector<std::string> ris;
 		std::string::const_iterator index = toRead.begin();
 		while (index != toRead.end() && *index != '{') { ++index; }
@@ -81,7 +81,7 @@ template<> std::vector<std::string> get< std::vector<std::string> >(const boost:
 	}
 }
 
-template<> std::vector< std::complex<double> > get< std::vector< std::complex<double> > >(const boost::program_options::variables_map& vm, const std::string& nameOption) {
+template<> std::vector< std::complex<double> > get< std::vector< std::complex<double> > >(const std::map<std::string, Option>& vm, const std::string& nameOption) {
 	std::vector<std::string> tmp = get< std::vector<std::string> >(vm, nameOption);
 	std::vector< std::complex<double> > ris;
 	std::vector<std::string>::iterator i;
@@ -91,7 +91,7 @@ template<> std::vector< std::complex<double> > get< std::vector< std::complex<do
 	return ris;
 }
 
-template<> std::vector< double > get< std::vector< double > >(const boost::program_options::variables_map& vm, const std::string& nameOption) {
+template<> std::vector< double > get< std::vector< double > >(const std::map<std::string, Option>& vm, const std::string& nameOption) {
 	std::vector<std::string> tmp = get< std::vector<std::string> >(vm, nameOption);
 	std::vector< double > ris;
 	std::vector<std::string>::iterator i;
@@ -101,7 +101,7 @@ template<> std::vector< double > get< std::vector< double > >(const boost::progr
 	return ris;
 }
 
-template<> std::vector< unsigned int > get< std::vector< unsigned int > >(const boost::program_options::variables_map& vm, const std::string& nameOption) {
+template<> std::vector< unsigned int > get< std::vector< unsigned int > >(const std::map<std::string, Option>& vm, const std::string& nameOption) {
 	std::vector<std::string> tmp = get< std::vector<std::string> >(vm, nameOption);
 	std::vector< unsigned int > ris;
 	std::vector<std::string>::iterator i;

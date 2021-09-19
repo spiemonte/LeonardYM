@@ -6,8 +6,8 @@ else
 	adj = -DADJOINT
 endif
 
-CC       = gcc
-CPP      = g++
+CC       = gcc-11
+CPP      = g++-11
 OPTIMIZE = -O2 -Wno-unused-local-typedefs -Wall -Wextra -std=c++11 -fopenmp
 INC	= -I./extra_libs/Eigen -I./extra_libs/ -I./source/
 CFLAGS   = $(OPTIMIZE) $(INC)
@@ -16,7 +16,7 @@ CPPFLAGS = $(OPTIMIZE) $(INC) -DMBE="\"$(PWD)/source/utils/MatrixBaseExtension.h
 include Makefile.obj.mk
 
 all: leonardYM
-	$(CPP) $(CPPFLAGS) $(OBJECTS) -o ./build/leonardYM.exe -lboost_program_options 
+	$(CPP) $(CPPFLAGS) $(OBJECTS) -o ./build/leonardYM.exe 
 	@echo "Compiled with NUMCOLORS: " $(nc)
 
 leonardYM: $(OBJECTS)

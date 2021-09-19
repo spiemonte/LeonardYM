@@ -18,11 +18,11 @@ public:
 	
 	virtual long_real_t energy(const environment_t& env);
 	virtual GaugeGroup force(const environment_t& env, int site, int mu) const;
-        virtual void updateForce(extended_gauge_lattice_t& forceLattice, const environment_t& env);
+    virtual void updateForce(extended_gauge_lattice_t& forceLattice, const environment_t& env);
 private:
-        std::vector<ScalarAction*> flavorActions;
+    std::vector<ScalarAction*> flavorActions;
 
-	MultiScalarAction(const MultiScalarAction&) : ScalarAction(0.,0.,0.) { }
+	MultiScalarAction(const MultiScalarAction&) : ScalarAction() { }
 };
 
 } /* namespace Update */

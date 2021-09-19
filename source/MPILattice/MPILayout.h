@@ -10,6 +10,15 @@
 #include <fstream>
 #include <string>
 #include <utility>
+#ifdef __APPLE__
+typedef bool bool_t;
+typedef int enum_t;
+typedef long long quad_t;
+typedef unsigned long long u_quad_t;
+typedef int caddr_t;
+#define TRUE (true)
+#define FALSE (false)
+#endif
 #include <rpc/xdr.h>
 #include "utils/ToString.h"
 #include "LatticeChunk.h"
@@ -376,6 +385,18 @@ template<typename Stencil> class MpiLayout {
 				for (int site = 0; site < globalVolume; ++site)	{
 					if (localIndex[site] != -1 && localIndex[site] < localsize) {
 						result[localIndex[site]] = layout.localIndex[site];
+						if (globalIndexX(localIndex[site]) != layout.globalIndexX(result[localIndex[site]])) {
+							std::cout << "Fatal error in x coordinate map table!" << std::endl;
+						}
+						if (globalIndexY(localIndex[site]) != layout.globalIndexY(result[localIndex[site]])) {
+							std::cout << "Fatal error in y coordinate map table!" << std::endl;
+						}
+						if (globalIndexZ(localIndex[site]) != layout.globalIndexZ(result[localIndex[site]])) {
+							std::cout << "Fatal error in z coordinate map table!" << std::endl;
+						}
+						if (globalIndexT(localIndex[site]) != layout.globalIndexT(result[localIndex[site]])) {
+							std::cout << "Fatal error in t coordinate map table!" << std::endl;
+						}
 					}
 				}
 #pragma omp parallel for
@@ -777,7 +798,6 @@ template<typename Stencil> class MpiLayout {
 #endif
 		}
 		
-	private:
 		static int modulus(int value, int mod) {
 			int ris = value;
 			if (ris >= mod) return modulus(ris - mod, mod);

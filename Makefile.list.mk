@@ -304,12 +304,6 @@
 ./build/MultiScalarAction.o: ./source/actions/MultiScalarAction.h ./source/actions/MultiScalarAction.cpp
 	$(CPP) $(CPPFLAGS) -c -o ./build/MultiScalarAction.o ./source/actions/MultiScalarAction.cpp
 
-./build/FundamentalScalarAction.o: ./source/actions/FundamentalScalarAction.h ./source/actions/FundamentalScalarAction.cpp
-	$(CPP) $(CPPFLAGS) -c -o ./build/FundamentalScalarAction.o ./source/actions/FundamentalScalarAction.cpp
-
-./build/AdjointScalarAction.o: ./source/actions/AdjointScalarAction.h ./source/actions/AdjointScalarAction.cpp
-	$(CPP) $(CPPFLAGS) -c -o ./build/AdjointScalarAction.o ./source/actions/AdjointScalarAction.cpp
-
 ./build/TwoFlavorFermionAction.o: ./source/actions/TwoFlavorFermionAction.h ./source/actions/TwoFlavorFermionAction.cpp
 	$(CPP) $(CPPFLAGS) -c -o ./build/TwoFlavorFermionAction.o ./source/actions/TwoFlavorFermionAction.cpp
 
@@ -328,11 +322,8 @@
 ./build/MeanScalarField.o: ./source/scalar_measurements/MeanScalarField.cpp ./source/scalar_measurements/MeanScalarField.h
 	$(CPP) $(CPPFLAGS) -c -o ./build/MeanScalarField.o ./source/scalar_measurements/MeanScalarField.cpp
 
-./build/AdjointMetropolisScalarUpdater.o: ./source/scalar_updaters/AdjointMetropolisScalarUpdater.h ./source/scalar_updaters/AdjointMetropolisScalarUpdater.cpp
-	$(CPP) $(CPPFLAGS) -c -o ./build/AdjointMetropolisScalarUpdater.o ./source/scalar_updaters/AdjointMetropolisScalarUpdater.cpp
-
-./build/FundamentalMetropolisScalarUpdater.o: ./source/scalar_updaters/FundamentalMetropolisScalarUpdater.h ./source/scalar_updaters/FundamentalMetropolisScalarUpdater.cpp
-	$(CPP) $(CPPFLAGS) -c -o ./build/FundamentalMetropolisScalarUpdater.o ./source/scalar_updaters/FundamentalMetropolisScalarUpdater.cpp
+./build/MetropolisScalarUpdater.o: ./source/scalar_updaters/MetropolisScalarUpdater.h ./source/scalar_updaters/MetropolisScalarUpdater.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/MetropolisScalarUpdater.o ./source/scalar_updaters/MetropolisScalarUpdater.cpp
 
 ./build/NFlavorFermionAction.o: ./source/actions/NFlavorFermionAction.h ./source/actions/NFlavorFermionAction.cpp
 	$(CPP) $(CPPFLAGS) -c -o ./build/NFlavorFermionAction.o ./source/actions/NFlavorFermionAction.cpp
@@ -376,8 +367,8 @@
 ./build/TestSpeedDiracOperators.o: ./source/tests/TestSpeedDiracOperators.h ./source/tests/TestSpeedDiracOperators.cpp
 	$(CPP) $(CPPFLAGS) -c -o ./build/TestSpeedDiracOperators.o ./source/tests/TestSpeedDiracOperators.cpp
 
-./build/StorageParameters.o: ./source/io/StorageParameters.h ./source/io/StorageParameters.cpp
-	$(CPP) $(CPPFLAGS) -c -o ./build/StorageParameters.o ./source/io/StorageParameters.cpp
+./build/StorageParameters.o: ./source/program_options/StorageParameters.h ./source/program_options/StorageParameters.cpp
+	$(CPP) $(CPPFLAGS) -c -o ./build/StorageParameters.o ./source/program_options/StorageParameters.cpp
 
 ./build/ReadGaugeConfiguration.o: ./source/io/ReadGaugeConfiguration.h ./source/io/ReadGaugeConfiguration.cpp
 	$(CPP) $(CPPFLAGS) -c -o ./build/ReadGaugeConfiguration.o ./source/io/ReadGaugeConfiguration.cpp

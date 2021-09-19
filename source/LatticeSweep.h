@@ -1,8 +1,8 @@
 #ifndef LATTICESWEEP_H_
 #define LATTICESWEEP_H_
 #include "Environment.h"
-
-namespace po = boost::program_options;
+#include <map>
+#include "program_options/Option.h"
 
 namespace Update {
 
@@ -31,10 +31,10 @@ public:
 	static void printSweepsName();
 
 	//Register all parameters of all sweeps
-	static void addParameters(po::options_description& desc);
+	static void addParameters(std::map<std::string, Option>& desc);
 
 	//Static function to be overridden by the sweep implementation
-	static void registerParameters(po::options_description& desc);
+	static void registerParameters(std::map<std::string, Option>& desc);
 private:
 	unsigned int numberTimes;
 	unsigned int sweepToJump;
