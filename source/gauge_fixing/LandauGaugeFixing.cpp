@@ -40,6 +40,9 @@ void LandauGaugeFixing::generateOverrelaxationTransformation(extended_matrix_lat
 					}
 					GaugeGroup m = es.eigenvectors();
 					GaugeGroup omega = Q * m * inverse_square_root * htrans(m);
+					if (fabs(trace(htrans(omega)*omega) - (double)numberColors) > 1e-10) {
+						continue;
+					}
 					gauge_transformation[site] = htrans(omega)*gauge_transformation[site];
 					staple = htrans(omega)*staple;
 				}
@@ -280,7 +283,7 @@ long_real_t LandauGaugeFixing::deviation(const extended_gauge_lattice_t& lattice
 void LandauGaugeFixing::registerParameters(std::map<std::string, Option>& desc) {
 	desc["LandauGaugeFixing::epsilon1"] = Option("LandauGaugeFixing::epsilon1", 1e-5, "set the epsilon for the random transformation used by the first PT run");
 	desc["LandauGaugeFixing::epsilon2"] = Option("LandauGaugeFixing::epsilon2", 1e-7, "set the epsilon for the random transformation used by the second PT run");
-	desc["LandauGaugeFixing::epsilon2"] = Option("LandauGaugeFixing::epsilon3", 1e-9, "set the epsilon for the random transformation used by the third PT run");
+	desc["LandauGaugeFixing::epsilon3"] = Option("LandauGaugeFixing::epsilon3", 1e-9, "set the epsilon for the random transformation used by the third PT run");
 
 	desc["LandauGaugeFixing::beta1"] = Option("LandauGaugeFixing::beta1", 5.0, "set the beta for the random transformation used by the first PT run");
 	desc["LandauGaugeFixing::beta2"] = Option("LandauGaugeFixing::beta2", 1.0, "set the beta for the random transformation used by the second PT run");
