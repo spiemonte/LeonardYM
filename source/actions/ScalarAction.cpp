@@ -71,7 +71,7 @@ real_t ScalarAction::potentialEnergy(const std::vector<AdjointRealVector const*>
 		quartic_traced_adjoint += (lambda_8/24.)*square_traced_adjoint*square_traced_adjoint;
 	}
 
-	real_t mass_term = (mass_adjoint-8.)*square_adjoint/2. + (mass_fundamental-8.)*square_fundamental/2;
+	real_t mass_term = (mass_adjoint/2.-8.)*square_adjoint + (mass_fundamental/2.-8.)*square_fundamental;
 
 	return mass_term + quartic_traced_adjoint + (lambda_fundamental/24.)*square_fundamental*square_fundamental  + (lambda_adjoint/24.)*square_adjoint*square_adjoint + (lambda_mixed/24.)*square_adjoint*square_fundamental;
 }
@@ -113,7 +113,7 @@ real_t ScalarAction::potentialEnergy(const std::vector<AdjointRealVector*>& adjo
 		quartic_traced_adjoint += (lambda_8/24.)*square_traced_adjoint*square_traced_adjoint;
 	}
 
-	real_t mass_term = (mass_adjoint-8.)*square_adjoint/2. + (mass_fundamental-8.)*square_fundamental/2;
+	real_t mass_term = (mass_adjoint/2.-8.)*square_adjoint + (mass_fundamental/2.-8.)*square_fundamental;
 
 	return mass_term + quartic_traced_adjoint + (lambda_fundamental/24.)*square_fundamental*square_fundamental  + (lambda_adjoint/24.)*square_adjoint*square_adjoint + (lambda_mixed/24.)*square_adjoint*square_fundamental;
 }
